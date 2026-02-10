@@ -16,6 +16,7 @@ const UI = (() => {
   let idleTimer = null;
   /** @type {(() => void) | null} */
   let idleCallback = null;
+  let idleCount = 0;
 
   // Focus state — UI-only, not saved or replayed
   let timeFocus = 0.5;
@@ -178,21 +179,27 @@ const UI = (() => {
 
   // --- Idle behavior ---
 
-  function resetIdleTimer() {
-    if (idleTimer) clearTimeout(idleTimer);
+  function scheduleNextIdle() {
+    // Escalating silence: first few come relatively quickly, then stretch out, then stop
+    // 0: 25s, 1: 40s, 2: 60s, 3: 90s, 4+: done
+    const delays = [IDLE_DELAY, 40000, 60000, 90000];
+    if (idleCount >= delays.length) return; // gone quiet
     idleTimer = setTimeout(() => {
       if (idleCallback) idleCallback();
-      // Set up recurring idle with longer interval
-      idleTimer = setInterval(() => {
-        if (idleCallback) idleCallback();
-      }, 40000);
-    }, IDLE_DELAY);
+      idleCount++;
+      scheduleNextIdle();
+    }, delays[idleCount]);
+  }
+
+  function resetIdleTimer() {
+    if (idleTimer) clearTimeout(idleTimer);
+    idleCount = 0;
+    scheduleNextIdle();
   }
 
   function stopIdleTimer() {
     if (idleTimer) {
       clearTimeout(idleTimer);
-      clearInterval(idleTimer);
       idleTimer = null;
     }
   }

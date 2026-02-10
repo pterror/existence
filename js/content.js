@@ -1524,10 +1524,10 @@ const Content = (() => {
     const pool = fresh.length > 0 ? fresh : thoughts;
     const picked = Timeline.pick(pool);
 
-    // Track recency — keep buffer under half typical pool size
+    // Track recency — avoid repeats across consecutive idle periods
     if (picked) {
       recentIdle.push(picked);
-      while (recentIdle.length > 6) recentIdle.shift();
+      while (recentIdle.length > 4) recentIdle.shift();
     }
 
     return picked;
