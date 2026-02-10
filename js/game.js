@@ -29,9 +29,13 @@ const Game = (() => {
         onAction: handleAction,
         onMove: handleMove,
         onIdle: handleIdle,
+        onFocusTime: handleFocusTime,
+        onFocusMoney: handleFocusMoney,
       });
 
       UI.render();
+      UI.showAwareness();
+      UI.updateAwareness();
     } else {
       // Fresh start — character creation first
       Timeline.init();
@@ -41,10 +45,13 @@ const Game = (() => {
         onAction: handleAction,
         onMove: handleMove,
         onIdle: handleIdle,
+        onFocusTime: handleFocusTime,
+        onFocusMoney: handleFocusMoney,
       });
 
-      // Pause idle timer during chargen
+      // Pause idle timer during chargen, hide awareness
       UI.stopIdleTimer();
+      UI.hideAwareness();
 
       Chargen.startCreation().then(character => {
         // Character is set and saved by chargen.
@@ -64,6 +71,8 @@ const Game = (() => {
         }
 
         UI.render();
+        UI.showAwareness();
+        UI.updateAwareness();
 
         if (eventTexts.length > 0) {
           const firstText = eventTexts[0];
@@ -134,6 +143,57 @@ const Game = (() => {
     return null;
   }
 
+  // --- Focus handlers (clicking awareness display) ---
+
+  function handleFocusTime() {
+    UI.boostTimeFocus();
+    const source = Content.getTimeSource();
+    if (source) {
+      State.observeTime();
+      UI.appendEventText(source);
+    }
+    UI.updateAwareness();
+  }
+
+  function handleFocusMoney() {
+    UI.boostMoneyFocus();
+    const source = Content.getMoneySource();
+    if (source) {
+      State.observeMoney();
+      UI.appendEventText(source);
+    }
+    UI.updateAwareness();
+  }
+
+  // --- Focus triggers from events ---
+
+  function applyFocusTriggers(events, interaction) {
+    for (const eventId of events) {
+      if (eventId === 'alarm' || eventId === 'late_anxiety') {
+        UI.boostTimeFocus();
+      }
+      if (eventId === 'phone_bill_notification') {
+        UI.boostMoneyFocus();
+      }
+    }
+    // Purchase interactions boost money focus
+    if (interaction) {
+      const id = interaction.id;
+      if (id === 'buy_groceries' || id === 'buy_cheap_meal') {
+        UI.boostMoneyFocus();
+      }
+    }
+  }
+
+  function applyMoveFocusTriggers(destId) {
+    if (destId === 'corner_store') {
+      UI.boostMoneyFocus();
+    }
+    if (destId === 'apartment_kitchen') {
+      UI.boostTimeFocus();
+    }
+  }
+
   // --- Action handling ---
 
   function handleAction(interaction) {
@@ -158,6 +218,10 @@ const Game = (() => {
         if (text && text.trim()) eventTexts.push(text);
       }
     }
+
+    // Apply focus triggers
+    applyFocusTriggers(events, interaction);
+    UI.updateAwareness();
 
     if (eventTexts.length > 0) {
       let delay = 1500;
@@ -206,12 +270,18 @@ const Game = (() => {
       }
     }
 
+    // Apply focus triggers
+    applyMoveFocusTriggers(travel.to);
+    applyFocusTriggers(events, null);
+    UI.updateAwareness();
+
     if (transText && transText.trim()) {
       // Show transition, then location
       UI.showPassage(transText);
 
       setTimeout(() => {
         UI.render();
+        UI.updateAwareness();
 
         if (eventTexts.length > 0) {
           let delay = 1000;
@@ -225,6 +295,7 @@ const Game = (() => {
     } else {
       // No transition text — go straight to location
       UI.render();
+      UI.updateAwareness();
 
       if (eventTexts.length > 0) {
         let delay = 800;
@@ -261,6 +332,10 @@ const Game = (() => {
           if (text && text.trim()) eventTexts.push(text);
         }
       }
+
+      // Apply focus triggers from idle events
+      applyFocusTriggers(events, null);
+
       let delay = 2000;
       for (const text of eventTexts) {
         const t = text;
@@ -268,6 +343,8 @@ const Game = (() => {
         delay += 1200;
       }
     }
+
+    UI.updateAwareness();
   }
 
   // --- Start ---

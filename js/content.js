@@ -431,14 +431,6 @@ const Content = (() => {
         desc += ' You\'re still in ' + Character.get('sleepwear') + '.';
       }
 
-      // Time awareness — only at degraded fidelity
-      const tf = State.timeFidelity();
-      if (tf === 'sensory') {
-        desc += ' ' + State.perceivedTimeString();
-      } else if (tf === 'vague') {
-        desc += ' It feels like ' + State.perceivedTimeString() + '.';
-      }
-
       return desc;
     },
 
@@ -565,14 +557,6 @@ const Content = (() => {
       // Energy
       if (energy === 'depleted' || energy === 'exhausted') {
         desc += ' The sidewalk feels longer than it is.';
-      }
-
-      // Time awareness — only at degraded fidelity
-      const tf = State.timeFidelity();
-      if (tf === 'sensory') {
-        desc += ' ' + State.perceivedTimeString();
-      } else if (tf === 'vague') {
-        desc += ' It feels like ' + State.perceivedTimeString() + '.';
       }
 
       desc += ' Your apartment building is behind you. The bus stop is down the block. There\'s a corner store across the way.';
@@ -1060,18 +1044,17 @@ const Content = (() => {
 
         State.set('fridge_food', Math.min(6, State.get('fridge_food') + 3));
         State.advanceTime(10);
-        State.observeMoney();
+        State.glanceMoney();
 
-        const moneyStr = State.perceivedMoneyString();
         const money = State.moneyTier();
 
         if (money === 'scraping' || money === 'tight') {
-          return 'Bread. Rice. A can of beans. You count it out at the register. ' + moneyStr + ' left.';
+          return 'Bread. Rice. A can of beans. You count it out at the register.';
         }
         if (money === 'broke') {
-          return 'The basics. Just the basics. The receipt is a small piece of bad news. ' + moneyStr + ' left.';
+          return 'The basics. Just the basics. The receipt is a small piece of bad news.';
         }
-        return 'You pick up what you need. Bread, some produce, a couple of cans. The cashier rings it up. ' + moneyStr + ' left.';
+        return 'You pick up what you need. Bread, some produce, a couple of cans. The cashier rings it up.';
       },
     },
 
@@ -1092,7 +1075,7 @@ const Content = (() => {
         State.set('ate_today', true);
         State.set('consecutive_meals_skipped', 0);
         State.advanceTime(5);
-        State.observeMoney();
+        State.glanceMoney();
 
         const mood = State.moodTone();
 
@@ -1133,12 +1116,7 @@ const Content = (() => {
     State.set('phone_battery', Math.max(0, State.get('phone_battery') - 2));
     State.advanceTime(3);
 
-    // You see the time on the screen
-    State.observeTime();
-    const timeStr = State.getTimeString();
-
     const results = [];
-    results.push(timeStr + '.');
 
     const supervisor = Character.get('supervisor');
 
@@ -1149,9 +1127,9 @@ const Content = (() => {
       }
     }
 
-    // Bank notification — occasionally observe money
+    // Bank notification — glance at money
     if (Timeline.chance(0.25)) {
-      State.observeMoney();
+      State.glanceMoney();
       const moneyStr = State.perceivedMoneyString();
       results.push('A bank notification. Balance: ' + moneyStr + '.');
     }
@@ -1183,13 +1161,13 @@ const Content = (() => {
       results.push('The battery is getting low.');
     }
 
-    if (results.length === 1) {
-      // Only the time — nothing else happened
+    if (results.length === 0) {
+      // Nothing happened
       const mood = State.moodTone();
       if (mood === 'hollow' || mood === 'quiet') {
-        return timeStr + '. Nothing else. The screen looks at you back.';
+        return 'Nothing new. The screen looks at you back.';
       }
-      return timeStr + '. Nothing new. You put it away.';
+      return 'Nothing new. You put it away.';
     }
 
     return results.join(' ');
@@ -1223,7 +1201,7 @@ const Content = (() => {
 
   const eventText = {
     alarm: () => {
-      State.observeTime();
+      State.glanceTime();
       const timeStr = State.getTimeString();
       const energy = State.energyTier();
       if (energy === 'depleted' || energy === 'exhausted') {
@@ -1500,9 +1478,9 @@ const Content = (() => {
     const mood = State.moodTone();
     const energy = State.energyTier();
 
-    // Kitchen has a visible clock — observe time on arrival
+    // Kitchen has a visible clock — glance on arrival
     if (to === 'apartment_kitchen') {
-      State.observeTime();
+      State.glanceTime();
     }
 
     // Within apartment
@@ -1603,6 +1581,29 @@ const Content = (() => {
     return null;
   }
 
+  // --- Awareness source functions ---
+
+  const timeSources = {
+    apartment_bedroom: () => 'The alarm clock on the nightstand. ' + State.getTimeString() + '.',
+    apartment_kitchen: () => 'The microwave clock. ' + State.getTimeString() + '.',
+    workplace: () => 'The clock on your screen. ' + State.getTimeString() + '.',
+    corner_store: () => 'The clock behind the register. ' + State.getTimeString() + '.',
+  };
+
+  function getTimeSource() {
+    const loc = World.getLocationId();
+    if (timeSources[loc]) return timeSources[loc]();
+    if (State.get('has_phone') && State.get('phone_battery') > 0)
+      return 'You check your phone. ' + State.getTimeString() + '.';
+    return null;
+  }
+
+  function getMoneySource() {
+    if (State.get('has_phone') && State.get('phone_battery') > 0)
+      return 'You open the banking app. $' + Math.round(State.get('money')) + '.';
+    return null;
+  }
+
   return {
     locationDescriptions,
     interactions,
@@ -1612,5 +1613,7 @@ const Content = (() => {
     getAvailableInteractions,
     getInteraction,
     checkPhoneContent,
+    getTimeSource,
+    getMoneySource,
   };
 })();

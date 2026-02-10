@@ -35,6 +35,24 @@ body {
   flex-direction: column;
 }
 
+#awareness {
+  text-align: right;
+  font-size: 0.8rem;
+  min-height: 1.4em;
+  display: flex;
+  justify-content: flex-end;
+  gap: 1.5em;
+}
+
+#awareness span {
+  transition: opacity 0.3s ease, color 0.3s ease;
+  cursor: pointer;
+}
+
+#awareness.hidden {
+  display: none;
+}
+
 #text-area {
   flex: 1;
   margin-bottom: 2rem;

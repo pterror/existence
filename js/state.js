@@ -323,6 +323,16 @@ const State = (() => {
     s.last_observed_money = s.money;
   }
 
+  function glanceTime() {
+    s.last_observed_time = s.time - 20;
+  }
+
+  function glanceMoney() {
+    // Offset by ~$5 in the direction of last known
+    const offset = s.last_observed_money > s.money ? 5 : -5;
+    s.last_observed_money = s.money + offset;
+  }
+
   function timeFidelity() {
     const elapsed = Math.abs(s.time - s.last_observed_time);
     if (elapsed < 15) return 'exact';
@@ -449,6 +459,8 @@ const State = (() => {
     spendMoney,
     observeTime,
     observeMoney,
+    glanceTime,
+    glanceMoney,
     timeFidelity,
     moneyFidelity,
     perceivedTimeString,

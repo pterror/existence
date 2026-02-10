@@ -44,22 +44,24 @@ const Character = (() => {
     if (!current) return;
 
     // Age stage affects starting money
+    // last_observed_money offset by ~$5 → starts at approximate fidelity
     switch (current.age_stage) {
       case 'twenties':
         State.set('money', 35);
-        State.set('last_observed_money', 35);
+        State.set('last_observed_money', 30);
         break;
       case 'thirties':
         State.set('money', 47.50);
-        State.set('last_observed_money', 47.50);
+        State.set('last_observed_money', 42.50);
         break;
       case 'forties':
         State.set('money', 55);
-        State.set('last_observed_money', 55);
+        State.set('last_observed_money', 50);
         break;
     }
 
     // Job type affects shift times, alarm, and task expectations
+    // last_observed_time offset by -20 from alarm → starts at rounded fidelity
     switch (current.job_type) {
       case 'office':
         State.set('work_shift_start', 9 * 60);    // 9:00 AM
@@ -67,7 +69,7 @@ const Character = (() => {
         State.set('work_tasks_expected', 4);
         State.set('alarm_time', 7 * 60 + 30);      // 7:30 AM
         State.set('time', 7 * 60 + 30);
-        State.set('last_observed_time', 7 * 60 + 30);
+        State.set('last_observed_time', 7 * 60 + 10);
         break;
       case 'retail':
         State.set('work_shift_start', 10 * 60);   // 10:00 AM
@@ -75,7 +77,7 @@ const Character = (() => {
         State.set('work_tasks_expected', 5);
         State.set('alarm_time', 8 * 60 + 30);      // 8:30 AM
         State.set('time', 8 * 60 + 30);
-        State.set('last_observed_time', 8 * 60 + 30);
+        State.set('last_observed_time', 8 * 60 + 10);
         break;
       case 'food_service':
         State.set('work_shift_start', 7 * 60);    // 7:00 AM
@@ -83,7 +85,7 @@ const Character = (() => {
         State.set('work_tasks_expected', 6);
         State.set('alarm_time', 5 * 60 + 30);      // 5:30 AM
         State.set('time', 5 * 60 + 30);
-        State.set('last_observed_time', 5 * 60 + 30);
+        State.set('last_observed_time', 5 * 60 + 10);
         break;
     }
   }

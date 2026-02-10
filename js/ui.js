@@ -2,21 +2,47 @@
 
 const UI = (() => {
   let passageEl, eventTextEl, actionsEl, movementEl;
+  let awarenessEl, awarenessTimeEl, awarenessMoneyEl;
   let onAction = null; // callback set by game.js
   let onMove = null;
   let idleTimer = null;
   let idleCallback = null;
 
+  // Focus state — UI-only, not saved or replayed
+  let timeFocus = 0.5;
+  let moneyFocus = 0.5;
+
   const IDLE_DELAY = 25000; // 25 seconds before idle thoughts
+
+  // Color interpolation between unfocused and focused
+  const FOCUSED_COLOR = { r: 0xc8, g: 0xc0, b: 0xb8 };
+  const UNFOCUSED_COLOR = { r: 0x50, g: 0x48, b: 0x40 };
+
+  function lerpColor(t) {
+    const r = Math.round(UNFOCUSED_COLOR.r + (FOCUSED_COLOR.r - UNFOCUSED_COLOR.r) * t);
+    const g = Math.round(UNFOCUSED_COLOR.g + (FOCUSED_COLOR.g - UNFOCUSED_COLOR.g) * t);
+    const b = Math.round(UNFOCUSED_COLOR.b + (FOCUSED_COLOR.b - UNFOCUSED_COLOR.b) * t);
+    return `rgb(${r},${g},${b})`;
+  }
 
   function init(callbacks) {
     passageEl = document.getElementById('passage');
     eventTextEl = document.getElementById('event-text');
     actionsEl = document.getElementById('actions');
     movementEl = document.getElementById('movement');
+    awarenessEl = document.getElementById('awareness');
+    awarenessTimeEl = document.getElementById('awareness-time');
+    awarenessMoneyEl = document.getElementById('awareness-money');
     onAction = callbacks.onAction;
     onMove = callbacks.onMove;
     idleCallback = callbacks.onIdle;
+
+    awarenessTimeEl.addEventListener('click', () => {
+      if (callbacks.onFocusTime) callbacks.onFocusTime();
+    });
+    awarenessMoneyEl.addEventListener('click', () => {
+      if (callbacks.onFocusMoney) callbacks.onFocusMoney();
+    });
   }
 
   // --- Text rendering ---
@@ -170,6 +196,40 @@ const UI = (() => {
     showMovement(connections);
   }
 
+  // --- Awareness display ---
+
+  function updateAwareness() {
+    // Decay focus each update
+    timeFocus = Math.max(0.1, timeFocus - 0.08);
+    moneyFocus = Math.max(0.1, moneyFocus - 0.08);
+
+    // Read perceived strings from state
+    awarenessTimeEl.textContent = State.perceivedTimeString();
+    awarenessMoneyEl.textContent = State.perceivedMoneyString();
+
+    // Apply focus-driven opacity and color
+    awarenessTimeEl.style.opacity = timeFocus;
+    awarenessTimeEl.style.color = lerpColor(timeFocus);
+    awarenessMoneyEl.style.opacity = moneyFocus;
+    awarenessMoneyEl.style.color = lerpColor(moneyFocus);
+  }
+
+  function boostTimeFocus() {
+    timeFocus = 1.0;
+  }
+
+  function boostMoneyFocus() {
+    moneyFocus = 1.0;
+  }
+
+  function showAwareness() {
+    awarenessEl.classList.remove('hidden');
+  }
+
+  function hideAwareness() {
+    awarenessEl.classList.add('hidden');
+  }
+
   return {
     init,
     showPassage,
@@ -181,5 +241,10 @@ const UI = (() => {
     resetIdleTimer,
     stopIdleTimer,
     render,
+    updateAwareness,
+    boostTimeFocus,
+    boostMoneyFocus,
+    showAwareness,
+    hideAwareness,
   };
 })();
