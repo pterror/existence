@@ -47,12 +47,15 @@ const Character = (() => {
     switch (current.age_stage) {
       case 'twenties':
         State.set('money', 35);
+        State.set('last_observed_money', 35);
         break;
       case 'thirties':
         State.set('money', 47.50);
+        State.set('last_observed_money', 47.50);
         break;
       case 'forties':
         State.set('money', 55);
+        State.set('last_observed_money', 55);
         break;
     }
 

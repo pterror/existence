@@ -48,6 +48,10 @@ const State = (() => {
       times_late_this_week: 0,
       consecutive_meals_skipped: 0,
       last_social_interaction: 0, // action count at last interaction
+
+      // Observation tracking — fidelity degrades with distance from last observation
+      last_observed_time: 6 * 60 + 30,   // alarm time
+      last_observed_money: 47.50,         // matches default starting money
     };
   }
 
@@ -293,6 +297,114 @@ const State = (() => {
     return false;
   }
 
+  // --- Observation / fidelity ---
+  // The player's awareness of time and money degrades with distance
+  // from when they last directly observed the value.
+
+  function observeTime() {
+    s.last_observed_time = s.time;
+  }
+
+  function observeMoney() {
+    s.last_observed_money = s.money;
+  }
+
+  function timeFidelity() {
+    const elapsed = Math.abs(s.time - s.last_observed_time);
+    if (elapsed < 15) return 'exact';
+    if (elapsed < 45) return 'rounded';
+    if (elapsed < 120) return 'vague';
+    return 'sensory';
+  }
+
+  function moneyFidelity() {
+    const change = Math.abs(s.money - s.last_observed_money);
+    if (change < 2) return 'exact';
+    if (change < 10) return 'approximate';
+    if (change < 25) return 'rough';
+    return 'qualitative';
+  }
+
+  // --- Perceived strings ---
+  // Prose representations at each fidelity tier.
+
+  function perceivedTimeString() {
+    const fidelity = timeFidelity();
+    if (fidelity === 'exact') return getTimeString();
+    if (fidelity === 'rounded') return roundedTimeString();
+    if (fidelity === 'vague') return vagueTimeString();
+    return sensoryTimeString();
+  }
+
+  function perceivedMoneyString() {
+    const fidelity = moneyFidelity();
+    if (fidelity === 'exact') return '$' + Math.round(s.money);
+    if (fidelity === 'approximate') return approximateMoneyString();
+    if (fidelity === 'rough') return roughMoneyString();
+    return qualitativeMoneyString();
+  }
+
+  function roundedTimeString() {
+    // Round to nearest 15 minutes
+    const rounded = Math.round(s.time / 15) * 15;
+    const h = Math.floor(rounded / 60);
+    const m = rounded % 60;
+    const period = h >= 12 ? 'PM' : 'AM';
+    const displayH = h === 0 ? 12 : h > 12 ? h - 12 : h;
+    return 'around ' + displayH + ':' + m.toString().padStart(2, '0') + ' ' + period;
+  }
+
+  function vagueTimeString() {
+    const h = getHour();
+    if (h < 5) return 'the middle of the night';
+    if (h < 7) return 'early morning';
+    if (h < 9) return 'sometime in the morning';
+    if (h < 11) return 'mid-morning';
+    if (h < 13) return 'around midday';
+    if (h < 15) return 'early afternoon';
+    if (h < 17) return 'late afternoon';
+    if (h < 19) return 'early evening';
+    if (h < 21) return 'evening';
+    if (h < 23) return 'late';
+    return 'the middle of the night';
+  }
+
+  function sensoryTimeString() {
+    const h = getHour();
+    if (h < 5) return 'It feels late. Or early. Hard to tell.';
+    if (h < 7) return 'The light is thin. Morning, but barely.';
+    if (h < 9) return 'Morning light. You\'re not sure when exactly.';
+    if (h < 12) return 'The light has shifted. Morning still, probably.';
+    if (h < 15) return 'The light says afternoon.';
+    if (h < 18) return 'The light has changed. Later than you thought.';
+    if (h < 21) return 'It\'s getting dark. You lost track of when.';
+    return 'It\'s dark. Has been for a while.';
+  }
+
+  function approximateMoneyString() {
+    // Round to nearest $5
+    const rounded = Math.round(s.money / 5) * 5;
+    return 'around $' + rounded;
+  }
+
+  function roughMoneyString() {
+    const m = s.money;
+    if (m < 10) return 'not much — under ten dollars, maybe';
+    if (m < 20) return 'maybe ten, fifteen dollars';
+    const tens = Math.floor(m / 10) * 10;
+    return 'maybe $' + tens + '-something';
+  }
+
+  function qualitativeMoneyString() {
+    const mt = moneyTier();
+    if (mt === 'broke') return 'almost nothing';
+    if (mt === 'scraping') return 'barely anything';
+    if (mt === 'tight') return 'not much';
+    if (mt === 'careful') return 'some, but not a lot';
+    if (mt === 'okay') return 'enough for now';
+    return 'enough';
+  }
+
   return {
     init,
     get,
@@ -320,6 +432,12 @@ const State = (() => {
     adjustSocial,
     adjustMoney,
     adjustJobStanding,
-    spendMoney
+    spendMoney,
+    observeTime,
+    observeMoney,
+    timeFidelity,
+    moneyFidelity,
+    perceivedTimeString,
+    perceivedMoneyString,
   };
 })();

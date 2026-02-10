@@ -430,6 +430,14 @@ const Content = (() => {
         desc += ' You\'re still in ' + Character.get('sleepwear') + '.';
       }
 
+      // Time awareness — only at degraded fidelity
+      const tf = State.timeFidelity();
+      if (tf === 'sensory') {
+        desc += ' ' + State.perceivedTimeString();
+      } else if (tf === 'vague') {
+        desc += ' It feels like ' + State.perceivedTimeString() + '.';
+      }
+
       return desc;
     },
 
@@ -476,6 +484,9 @@ const Content = (() => {
       if (mess > 60) {
         desc += ' Dishes in the sink. They\'ve been there.';
       }
+
+      // Microwave clock — the kitchen always tells you the time
+      desc += ' The microwave clock reads ' + State.getTimeString() + '.';
 
       // Time of day flavor
       if (time === 'morning' || time === 'early_morning') {
@@ -553,6 +564,14 @@ const Content = (() => {
       // Energy
       if (energy === 'depleted' || energy === 'exhausted') {
         desc += ' The sidewalk feels longer than it is.';
+      }
+
+      // Time awareness — only at degraded fidelity
+      const tf = State.timeFidelity();
+      if (tf === 'sensory') {
+        desc += ' ' + State.perceivedTimeString();
+      } else if (tf === 'vague') {
+        desc += ' It feels like ' + State.perceivedTimeString() + '.';
       }
 
       desc += ' Your apartment building is behind you. The bus stop is down the block. There\'s a corner store across the way.';
@@ -995,16 +1014,18 @@ const Content = (() => {
 
         State.set('fridge_food', Math.min(6, State.get('fridge_food') + 3));
         State.advanceTime(10);
+        State.observeMoney();
 
+        const moneyStr = State.perceivedMoneyString();
         const money = State.moneyTier();
 
         if (money === 'scraping' || money === 'tight') {
-          return 'Bread. Rice. A can of beans. You count it out at the register and try not to think about what\'s left.';
+          return 'Bread. Rice. A can of beans. You count it out at the register. ' + moneyStr + ' left.';
         }
         if (money === 'broke') {
-          return 'The basics. Just the basics. The receipt is a small piece of bad news you fold and put in your pocket.';
+          return 'The basics. Just the basics. The receipt is a small piece of bad news. ' + moneyStr + ' left.';
         }
-        return 'You pick up what you need. Bread, some produce, a couple of cans. The cashier rings it up without comment.';
+        return 'You pick up what you need. Bread, some produce, a couple of cans. The cashier rings it up. ' + moneyStr + ' left.';
       },
     },
 
@@ -1025,6 +1046,7 @@ const Content = (() => {
         State.set('ate_today', true);
         State.set('consecutive_meals_skipped', 0);
         State.advanceTime(5);
+        State.observeMoney();
 
         const mood = State.moodTone();
 
@@ -1065,7 +1087,13 @@ const Content = (() => {
     State.set('phone_battery', Math.max(0, State.get('phone_battery') - 2));
     State.advanceTime(3);
 
+    // You see the time on the screen
+    State.observeTime();
+    const timeStr = State.getTimeString();
+
     const results = [];
+    results.push(timeStr + '.');
+
     const supervisor = Character.get('supervisor');
 
     // Work message if late
@@ -1073,6 +1101,13 @@ const Content = (() => {
       if (Timeline.chance(0.5)) {
         results.push(`A message from your supervisor, ${supervisor.name}. "Everything okay?" Which means: where are you.`);
       }
+    }
+
+    // Bank notification — occasionally observe money
+    if (Timeline.chance(0.25)) {
+      State.observeMoney();
+      const moneyStr = State.perceivedMoneyString();
+      results.push('A bank notification. Balance: ' + moneyStr + '.');
     }
 
     // Bill notification
@@ -1102,12 +1137,13 @@ const Content = (() => {
       results.push('The battery is getting low.');
     }
 
-    if (results.length === 0) {
+    if (results.length === 1) {
+      // Only the time — nothing else happened
       const mood = State.moodTone();
       if (mood === 'hollow' || mood === 'quiet') {
-        return 'You look at your phone. Nothing new. The screen looks at you back.';
+        return timeStr + '. Nothing else. The screen looks at you back.';
       }
-      return 'Nothing new. You put it away.';
+      return timeStr + '. Nothing new. You put it away.';
     }
 
     return results.join(' ');
@@ -1141,9 +1177,10 @@ const Content = (() => {
 
   const eventText = {
     alarm: () => {
+      State.observeTime();
       const energy = State.energyTier();
       if (energy === 'depleted' || energy === 'exhausted') {
-        return 'The alarm. That sound. It exists only to tell you that lying here isn\'t an option. Except it is. The snooze button is right there.';
+        return 'The alarm. 6:30. That sound. It exists only to tell you that lying here isn\'t an option. Except it is. The snooze button is right there.';
       }
       return 'The alarm goes off. 6:30. That sound you picked because you thought you wouldn\'t hate it. You were wrong.';
     },
@@ -1374,6 +1411,11 @@ const Content = (() => {
   const transitionText = (from, to) => {
     const mood = State.moodTone();
     const energy = State.energyTier();
+
+    // Kitchen has a visible clock — observe time on arrival
+    if (to === 'apartment_kitchen') {
+      State.observeTime();
+    }
 
     // Within apartment
     if (World.getLocation(from)?.area === 'apartment' && World.getLocation(to)?.area === 'apartment') {

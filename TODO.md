@@ -8,3 +8,4 @@
 - [ ] Chargen sandbox: sleepwear is randomly assigned during wardrobe screen. Could offer as separate choice.
 - [ ] Legacy defaults in character.js still use original names (Dana/Marcus/etc.) as fallback. Only used if somehow no character is set.
 - [ ] fflate is a dev dependency only (used by download script). Could pin or document.
+- [ ] Phone check bank notification added a new `Timeline.chance(0.25)` RNG call, changing RNG consumption order. Existing saves with phone check actions will replay differently. Not a concern yet (dev only) but will matter once there are real players.
