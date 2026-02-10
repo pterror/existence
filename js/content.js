@@ -1178,11 +1178,12 @@ const Content = (() => {
   const eventText = {
     alarm: () => {
       State.observeTime();
+      const timeStr = State.getTimeString();
       const energy = State.energyTier();
       if (energy === 'depleted' || energy === 'exhausted') {
-        return 'The alarm. 6:30. That sound. It exists only to tell you that lying here isn\'t an option. Except it is. The snooze button is right there.';
+        return 'The alarm. ' + timeStr + '. That sound. It exists only to tell you that lying here isn\'t an option. Except it is. The snooze button is right there.';
       }
-      return 'The alarm goes off. 6:30. That sound you picked because you thought you wouldn\'t hate it. You were wrong.';
+      return 'The alarm goes off. ' + timeStr + '. That sound you picked because you thought you wouldn\'t hate it. You were wrong.';
     },
 
     phone_work_where_are_you: () => {

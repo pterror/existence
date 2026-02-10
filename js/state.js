@@ -110,6 +110,7 @@ const State = (() => {
     // Day rollover
     if (s.time >= 24 * 60) {
       s.time -= 24 * 60;
+      s.last_observed_time -= 24 * 60;
       s.day++;
       s.at_work_today = false;
       s.called_in = false;
