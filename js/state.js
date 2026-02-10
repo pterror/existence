@@ -1,9 +1,12 @@
 // state.js — hidden state engine
 // The player never sees these numbers. Ever.
 
+/** @typedef {ReturnType<typeof State.getAll>} GameState */
+
 const State = (() => {
   // --- Internal state ---
-  let s = {};
+  /** @type {ReturnType<typeof defaults>} */
+  let s = /** @type {any} */ ({});
 
   function defaults() {
     return {
@@ -33,7 +36,7 @@ const State = (() => {
 
       // Location
       location: 'apartment_bedroom',
-      previous_location: null,
+      previous_location: /** @type {string | null} */ (null),
 
       // Work specifics
       work_shift_start: 9 * 60,   // 9:00 AM
@@ -67,10 +70,12 @@ const State = (() => {
     s = defaults();
   }
 
+  /** @template {keyof ReturnType<typeof defaults>} K @param {K} key @returns {ReturnType<typeof defaults>[K]} */
   function get(key) {
     return s[key];
   }
 
+  /** @template {keyof ReturnType<typeof defaults>} K @param {K} key @param {ReturnType<typeof defaults>[K]} value */
   function set(key, value) {
     s[key] = value;
   }
@@ -79,12 +84,14 @@ const State = (() => {
     return { ...s };
   }
 
+  /** @param {Partial<ReturnType<typeof defaults>>} saved */
   function loadState(saved) {
     s = { ...defaults(), ...saved };
   }
 
   // --- Time ---
 
+  /** @param {number} minutes */
   function advanceTime(minutes) {
     s.time += minutes;
 
@@ -165,12 +172,13 @@ const State = (() => {
   // These translate numbers into qualitative states the content system uses.
   // The player never sees "energy: 23" — they see prose that reflects the tier.
 
+  /** @param {number} value @param {[number, string][]} thresholds */
   function tier(value, thresholds) {
     // thresholds = [[max, label], ...] sorted ascending
     for (const [max, label] of thresholds) {
       if (value <= max) return label;
     }
-    return thresholds[thresholds.length - 1][1];
+    return /** @type {[number, string]} */ (thresholds[thresholds.length - 1])[1];
   }
 
   function energyTier() {
@@ -272,22 +280,26 @@ const State = (() => {
 
   // --- State modification helpers ---
 
+  /** @param {number} amount */
   function adjustEnergy(amount) {
     s.energy = Math.max(0, Math.min(100, s.energy + amount));
     // Resting resets exhaustion surfacing
     if (amount >= 10) s.surfaced_exhaustion = 0;
   }
 
+  /** @param {number} amount */
   function adjustStress(amount) {
     s.stress = Math.max(0, Math.min(100, s.stress + amount));
   }
 
+  /** @param {number} amount */
   function adjustHunger(amount) {
     s.hunger = Math.max(0, Math.min(100, s.hunger + amount));
     // Eating resets hunger surfacing — next time hunger builds, it's noticed fresh
     if (amount < 0) s.surfaced_hunger = 0;
   }
 
+  /** @param {number} amount */
   function adjustSocial(amount) {
     s.social = Math.max(0, Math.min(100, s.social + amount));
     if (amount > 0) {
@@ -295,14 +307,17 @@ const State = (() => {
     }
   }
 
+  /** @param {number} amount */
   function adjustMoney(amount) {
     s.money = Math.round((s.money + amount) * 100) / 100;
   }
 
+  /** @param {number} amount */
   function adjustJobStanding(amount) {
     s.job_standing = Math.max(0, Math.min(100, s.job_standing + amount));
   }
 
+  /** @param {number} amount */
   function spendMoney(amount) {
     if (s.money >= amount) {
       adjustMoney(-amount);

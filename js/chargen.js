@@ -4,6 +4,7 @@ const Chargen = (() => {
 
   // --- Name generation ---
 
+  /** @param {Set<string>} exclude */
   function generateName(exclude) {
     let first, last, attempts = 0;
     do {
@@ -16,6 +17,7 @@ const Chargen = (() => {
     return { first, last };
   }
 
+  /** @param {Set<string>} exclude */
   function generateFirstName(exclude) {
     let name, attempts = 0;
     do {
@@ -106,7 +108,7 @@ const Chargen = (() => {
     const outfit = Timeline.charPick(outfitSets);
     const sleepwear = Timeline.charPick(sleepwearOptions);
 
-    return {
+    return /** @type {GameCharacter} */ ({
       first_name: playerName.first,
       last_name: playerName.last,
       sleepwear,
@@ -118,15 +120,18 @@ const Chargen = (() => {
       supervisor: { name: supervisorName },
       job_type: jobType,
       age_stage: ageStage,
-    };
+    });
   }
 
   // --- Sandbox UI flow ---
   // Uses the same #passage / #actions DOM as the game.
   // Forward-only screens, one choice per screen.
 
+  /** @type {Partial<GameCharacter>} */
   let sandboxState = {};
+  /** @type {Set<string>} */
   let usedNames = new Set();
+  /** @type {((char: GameCharacter) => void) | null} */
   let resolveCreation = null;
 
   function startCreation() {
@@ -136,11 +141,12 @@ const Chargen = (() => {
     });
   }
 
+  /** @param {string} text @param {ScreenChoice[]} choices */
   function showScreen(text, choices) {
-    const passageEl = document.getElementById('passage');
-    const actionsEl = document.getElementById('actions');
-    const movementEl = document.getElementById('movement');
-    const eventTextEl = document.getElementById('event-text');
+    const passageEl = /** @type {HTMLElement} */ (document.getElementById('passage'));
+    const actionsEl = /** @type {HTMLElement} */ (document.getElementById('actions'));
+    const movementEl = /** @type {HTMLElement} */ (document.getElementById('movement'));
+    const eventTextEl = /** @type {HTMLElement} */ (document.getElementById('event-text'));
 
     // Clear
     passageEl.classList.remove('visible');
@@ -152,7 +158,7 @@ const Chargen = (() => {
     eventTextEl.classList.remove('visible');
 
     setTimeout(() => {
-      passageEl.innerHTML = text.split(/\n\n+/).filter(p => p.trim()).map(p => `<p>${p.trim()}</p>`).join('');
+      passageEl.innerHTML = text.split(/\n\n+/).filter(/** @param {string} p */ p => p.trim()).map(/** @param {string} p */ p => `<p>${p.trim()}</p>`).join('');
       passageEl.classList.add('visible');
 
       setTimeout(() => {
@@ -239,7 +245,7 @@ const Chargen = (() => {
     // Fisher-Yates using charRng
     for (let i = shuffled.length - 1; i > 0; i--) {
       const j = Timeline.charRandomInt(0, i);
-      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+      [shuffled[i], shuffled[j]] = [/** @type {OutfitSet} */ (shuffled[j]), /** @type {OutfitSet} */ (shuffled[i])];
     }
     const options = shuffled.slice(0, 3);
 
@@ -251,7 +257,7 @@ const Chargen = (() => {
           sandboxState.outfit_default = outfit.outfit_default;
           sandboxState.outfit_low_mood = outfit.outfit_low_mood;
           sandboxState.outfit_messy = outfit.outfit_messy;
-          sandboxState.sleepwear = Timeline.charPick(sleepwearOptions);
+          sandboxState.sleepwear = /** @type {string} */ (Timeline.charPick(sleepwearOptions));
           showFriendNamesScreen();
         }
       }))
@@ -271,9 +277,9 @@ const Chargen = (() => {
     showNamePairScreen(
       'Two people who still text you. Not every day. But enough.',
       name1, name2,
-      (finalName1, finalName2) => {
-        sandboxState.friend1 = { name: finalName1, flavor: f1flavor };
-        sandboxState.friend2 = { name: finalName2, flavor: f2flavor };
+      (/** @type {string} */ finalName1, /** @type {string} */ finalName2) => {
+        sandboxState.friend1 = { name: finalName1, flavor: /** @type {string} */ (f1flavor) };
+        sandboxState.friend2 = { name: finalName2, flavor: /** @type {string} */ (f2flavor) };
         showWorkNamesScreen();
       }
     );
@@ -292,9 +298,9 @@ const Chargen = (() => {
     showNameTripleScreen(
       'The people at work. You didn\'t choose them. They didn\'t choose you.',
       name1, name2, name3,
-      (coName1, coName2, supName) => {
-        sandboxState.coworker1 = { name: coName1, flavor: c1flavor };
-        sandboxState.coworker2 = { name: coName2, flavor: c2flavor };
+      (/** @type {string} */ coName1, /** @type {string} */ coName2, /** @type {string} */ supName) => {
+        sandboxState.coworker1 = { name: coName1, flavor: /** @type {string} */ (c1flavor) };
+        sandboxState.coworker2 = { name: coName2, flavor: /** @type {string} */ (c2flavor) };
         sandboxState.supervisor = { name: supName };
 
         // Generate player name
@@ -302,18 +308,19 @@ const Chargen = (() => {
         sandboxState.first_name = playerName.first;
         sandboxState.last_name = playerName.last;
 
-        finishCreation(sandboxState);
+        finishCreation(/** @type {GameCharacter} */ (sandboxState));
       }
     );
   }
 
   // --- Name input screens ---
 
+  /** @param {string} text @param {string} defaultName1 @param {string} defaultName2 @param {(n1: string, n2: string) => void} callback */
   function showNamePairScreen(text, defaultName1, defaultName2, callback) {
-    const passageEl = document.getElementById('passage');
-    const actionsEl = document.getElementById('actions');
-    const movementEl = document.getElementById('movement');
-    const eventTextEl = document.getElementById('event-text');
+    const passageEl = /** @type {HTMLElement} */ (document.getElementById('passage'));
+    const actionsEl = /** @type {HTMLElement} */ (document.getElementById('actions'));
+    const movementEl = /** @type {HTMLElement} */ (document.getElementById('movement'));
+    const eventTextEl = /** @type {HTMLElement} */ (document.getElementById('event-text'));
 
     passageEl.classList.remove('visible');
     actionsEl.innerHTML = '';
@@ -324,7 +331,7 @@ const Chargen = (() => {
     eventTextEl.classList.remove('visible');
 
     setTimeout(() => {
-      passageEl.innerHTML = text.split(/\n\n+/).filter(p => p.trim()).map(p => `<p>${p.trim()}</p>`).join('');
+      passageEl.innerHTML = text.split(/\n\n+/).filter(/** @param {string} p */ p => p.trim()).map(/** @param {string} p */ p => `<p>${p.trim()}</p>`).join('');
       passageEl.classList.add('visible');
 
       setTimeout(() => {
@@ -338,8 +345,8 @@ const Chargen = (() => {
         btn.className = 'action';
         btn.textContent = 'These two';
         btn.addEventListener('click', () => {
-          const n1 = input1.querySelector('input').value.trim() || defaultName1;
-          const n2 = input2.querySelector('input').value.trim() || defaultName2;
+          const n1 = /** @type {HTMLInputElement} */ (input1.querySelector('input')).value.trim() || defaultName1;
+          const n2 = /** @type {HTMLInputElement} */ (input2.querySelector('input')).value.trim() || defaultName2;
           callback(n1, n2);
         });
         actionsEl.appendChild(btn);
@@ -348,11 +355,12 @@ const Chargen = (() => {
     }, 150);
   }
 
+  /** @param {string} text @param {string} defaultName1 @param {string} defaultName2 @param {string} defaultName3 @param {(n1: string, n2: string, n3: string) => void} callback */
   function showNameTripleScreen(text, defaultName1, defaultName2, defaultName3, callback) {
-    const passageEl = document.getElementById('passage');
-    const actionsEl = document.getElementById('actions');
-    const movementEl = document.getElementById('movement');
-    const eventTextEl = document.getElementById('event-text');
+    const passageEl = /** @type {HTMLElement} */ (document.getElementById('passage'));
+    const actionsEl = /** @type {HTMLElement} */ (document.getElementById('actions'));
+    const movementEl = /** @type {HTMLElement} */ (document.getElementById('movement'));
+    const eventTextEl = /** @type {HTMLElement} */ (document.getElementById('event-text'));
 
     passageEl.classList.remove('visible');
     actionsEl.innerHTML = '';
@@ -363,7 +371,7 @@ const Chargen = (() => {
     eventTextEl.classList.remove('visible');
 
     setTimeout(() => {
-      passageEl.innerHTML = text.split(/\n\n+/).filter(p => p.trim()).map(p => `<p>${p.trim()}</p>`).join('');
+      passageEl.innerHTML = text.split(/\n\n+/).filter(/** @param {string} p */ p => p.trim()).map(/** @param {string} p */ p => `<p>${p.trim()}</p>`).join('');
       passageEl.classList.add('visible');
 
       setTimeout(() => {
@@ -379,9 +387,9 @@ const Chargen = (() => {
         btn.className = 'action';
         btn.textContent = 'That\'s them';
         btn.addEventListener('click', () => {
-          const n1 = input1.querySelector('input').value.trim() || defaultName1;
-          const n2 = input2.querySelector('input').value.trim() || defaultName2;
-          const n3 = input3.querySelector('input').value.trim() || defaultName3;
+          const n1 = /** @type {HTMLInputElement} */ (input1.querySelector('input')).value.trim() || defaultName1;
+          const n2 = /** @type {HTMLInputElement} */ (input2.querySelector('input')).value.trim() || defaultName2;
+          const n3 = /** @type {HTMLInputElement} */ (input3.querySelector('input')).value.trim() || defaultName3;
           callback(n1, n2, n3);
         });
         actionsEl.appendChild(btn);
@@ -390,6 +398,7 @@ const Chargen = (() => {
     }, 150);
   }
 
+  /** @param {string} defaultValue */
   function createNameInput(defaultValue) {
     const wrapper = document.createElement('div');
     wrapper.className = 'name-input-wrapper';
@@ -404,6 +413,7 @@ const Chargen = (() => {
 
   // --- Finish ---
 
+  /** @param {GameCharacter} char */
   function finishCreation(char) {
     Timeline.setCharacter(char);
     Character.set(char);

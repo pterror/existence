@@ -1,9 +1,11 @@
 // character.js — character schema, accessors, state application
 
 const Character = (() => {
+  /** @type {GameCharacter | null} */
   let current = null;
 
   // Legacy defaults — matches the original hardcoded content.js values
+  /** @returns {GameCharacter} */
   function legacyDefaults() {
     return {
       first_name: 'You',
@@ -22,10 +24,12 @@ const Character = (() => {
     };
   }
 
+  /** @param {GameCharacter} character */
   function set(character) {
     current = { ...legacyDefaults(), ...character };
   }
 
+  /** @template {keyof GameCharacter} K @param {K} key @returns {GameCharacter[K]} */
   function get(key) {
     if (!current) return legacyDefaults()[key];
     return current[key];

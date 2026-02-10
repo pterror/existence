@@ -1,11 +1,20 @@
 // ui.js — rendering, text display, interaction handling
 
 const UI = (() => {
-  let passageEl, eventTextEl, actionsEl, movementEl;
-  let awarenessEl, awarenessTimeEl, awarenessMoneyEl;
-  let onAction = null; // callback set by game.js
+  /** @type {HTMLElement} */ let passageEl;
+  /** @type {HTMLElement} */ let eventTextEl;
+  /** @type {HTMLElement} */ let actionsEl;
+  /** @type {HTMLElement} */ let movementEl;
+  /** @type {HTMLElement} */ let awarenessEl;
+  /** @type {HTMLElement} */ let awarenessTimeEl;
+  /** @type {HTMLElement} */ let awarenessMoneyEl;
+  /** @type {((interaction: Interaction) => void) | null} */
+  let onAction = null;
+  /** @type {((destId: string) => void) | null} */
   let onMove = null;
+  /** @type {ReturnType<typeof setTimeout> | null} */
   let idleTimer = null;
+  /** @type {(() => void) | null} */
   let idleCallback = null;
 
   // Focus state — UI-only, not saved or replayed
@@ -18,6 +27,7 @@ const UI = (() => {
   const FOCUSED_COLOR = { r: 0xc8, g: 0xc0, b: 0xb8 };
   const UNFOCUSED_COLOR = { r: 0x50, g: 0x48, b: 0x40 };
 
+  /** @param {number} t */
   function lerpColor(t) {
     const r = Math.round(UNFOCUSED_COLOR.r + (FOCUSED_COLOR.r - UNFOCUSED_COLOR.r) * t);
     const g = Math.round(UNFOCUSED_COLOR.g + (FOCUSED_COLOR.g - UNFOCUSED_COLOR.g) * t);
@@ -25,14 +35,15 @@ const UI = (() => {
     return `rgb(${r},${g},${b})`;
   }
 
+  /** @param {UICallbacks} callbacks */
   function init(callbacks) {
-    passageEl = document.getElementById('passage');
-    eventTextEl = document.getElementById('event-text');
-    actionsEl = document.getElementById('actions');
-    movementEl = document.getElementById('movement');
-    awarenessEl = document.getElementById('awareness');
-    awarenessTimeEl = document.getElementById('awareness-time');
-    awarenessMoneyEl = document.getElementById('awareness-money');
+    passageEl = /** @type {HTMLElement} */ (document.getElementById('passage'));
+    eventTextEl = /** @type {HTMLElement} */ (document.getElementById('event-text'));
+    actionsEl = /** @type {HTMLElement} */ (document.getElementById('actions'));
+    movementEl = /** @type {HTMLElement} */ (document.getElementById('movement'));
+    awarenessEl = /** @type {HTMLElement} */ (document.getElementById('awareness'));
+    awarenessTimeEl = /** @type {HTMLElement} */ (document.getElementById('awareness-time'));
+    awarenessMoneyEl = /** @type {HTMLElement} */ (document.getElementById('awareness-money'));
     onAction = callbacks.onAction;
     onMove = callbacks.onMove;
     idleCallback = callbacks.onIdle;
@@ -47,6 +58,7 @@ const UI = (() => {
 
   // --- Text rendering ---
 
+  /** @param {string} text */
   function showPassage(text) {
     // Fade out, swap, fade in
     passageEl.classList.remove('visible');
@@ -63,6 +75,7 @@ const UI = (() => {
     resetIdleTimer();
   }
 
+  /** @param {string} text */
   function showEventText(text) {
     if (!text || text.trim() === '') return;
 
@@ -81,6 +94,7 @@ const UI = (() => {
     }, 500);
   }
 
+  /** @param {string} text */
   function appendEventText(text) {
     if (!text || text.trim() === '') return;
 
@@ -97,18 +111,20 @@ const UI = (() => {
     });
   }
 
+  /** @param {string} text */
   function textToHTML(text) {
     // Split into paragraphs on double newlines, wrap in <p>
     // Single string = single paragraph
-    const paragraphs = text.split(/\n\n+/).filter(p => p.trim());
+    const paragraphs = text.split(/\n\n+/).filter(/** @param {string} p */ p => p.trim());
     if (paragraphs.length <= 1) {
       return `<p>${text}</p>`;
     }
-    return paragraphs.map(p => `<p>${p.trim()}</p>`).join('');
+    return paragraphs.map(/** @param {string} p */ p => `<p>${p.trim()}</p>`).join('');
   }
 
   // --- Actions ---
 
+  /** @param {Interaction[]} interactions */
   function showActions(interactions) {
     actionsEl.innerHTML = '';
     actionsEl.classList.remove('visible');
@@ -136,6 +152,7 @@ const UI = (() => {
 
   // --- Movement ---
 
+  /** @param {ConnectionInfo[]} connections */
   function showMovement(connections) {
     movementEl.innerHTML = '';
     movementEl.classList.remove('visible');
@@ -184,7 +201,7 @@ const UI = (() => {
 
   function render() {
     const location = World.getLocationId();
-    const descFn = Content.locationDescriptions[location];
+    const descFn = /** @type {Record<string, (() => string) | undefined>} */ (Content.locationDescriptions)[location];
     const description = descFn ? descFn() : '';
 
     showPassage(description);
@@ -208,9 +225,9 @@ const UI = (() => {
     awarenessMoneyEl.textContent = State.perceivedMoneyString();
 
     // Apply focus-driven opacity and color
-    awarenessTimeEl.style.opacity = timeFocus;
+    awarenessTimeEl.style.opacity = String(timeFocus);
     awarenessTimeEl.style.color = lerpColor(timeFocus);
-    awarenessMoneyEl.style.opacity = moneyFocus;
+    awarenessMoneyEl.style.opacity = String(moneyFocus);
     awarenessMoneyEl.style.color = lerpColor(moneyFocus);
   }
 

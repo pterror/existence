@@ -2,6 +2,17 @@
 
 const Game = (() => {
 
+  /** @param {string[]} events @param {string[]} eventTexts */
+  function generateEventTexts(events, eventTexts) {
+    for (const eventId of events) {
+      const eventFn = /** @type {Record<string, (() => string) | undefined>} */ (Content.eventText)[eventId];
+      if (eventFn) {
+        const text = eventFn();
+        if (text && text.trim()) eventTexts.push(text);
+      }
+    }
+  }
+
   function init() {
     // Try to restore existing game
     const saved = Timeline.restore();
@@ -19,7 +30,7 @@ const Game = (() => {
       // Consume same initial RNG as fresh start (opening events)
       const initEvents = World.checkEvents();
       for (const eventId of initEvents) {
-        const eventFn = Content.eventText[eventId];
+        const eventFn = /** @type {Record<string, (() => string) | undefined>} */ (Content.eventText)[eventId];
         if (eventFn) eventFn();
       }
       replayActions(saved.actions);
@@ -61,27 +72,23 @@ const Game = (() => {
 
         // Opening — check for initial events (consumes RNG)
         const events = World.checkEvents();
+        /** @type {string[]} */
         const eventTexts = [];
-        for (const eventId of events) {
-          const eventFn = Content.eventText[eventId];
-          if (eventFn) {
-            const text = eventFn();
-            if (text && text.trim()) eventTexts.push(text);
-          }
-        }
+        generateEventTexts(events, eventTexts);
 
         UI.render();
         UI.showAwareness();
         UI.updateAwareness();
 
         if (eventTexts.length > 0) {
-          const firstText = eventTexts[0];
+          const firstText = /** @type {string} */ (eventTexts[0]);
           setTimeout(() => UI.showEventText(firstText), 1200);
         }
       });
     }
   }
 
+  /** @param {ActionEntry[]} actions */
   function replayActions(actions) {
     for (const entry of actions) {
       const action = entry.action;
@@ -103,12 +110,14 @@ const Game = (() => {
   function consumeEvents() {
     const events = World.checkEvents();
     for (const eventId of events) {
-      const eventFn = Content.eventText[eventId];
+      const eventFn = /** @type {Record<string, (() => string) | undefined>} */ (Content.eventText)[eventId];
       if (eventFn) eventFn();
     }
   }
 
+  /** @param {string | undefined} id */
   function replayInteraction(id) {
+    if (!id) return;
     // During replay, always execute — don't check availability.
     const interaction = findInteraction(id);
     if (interaction) {
@@ -125,7 +134,9 @@ const Game = (() => {
     }
   }
 
+  /** @param {string | undefined} destId */
   function replayMove(destId) {
+    if (!destId) return;
     // During replay, always execute the move
     const fromId = World.getLocationId();
     World.travelTo(destId);
@@ -133,6 +144,7 @@ const Game = (() => {
     Content.transitionText(fromId, destId);
   }
 
+  /** @param {string} id */
   function findInteraction(id) {
     for (const interaction of Object.values(Content.interactions)) {
       if (interaction.id === id) return interaction;
@@ -167,6 +179,7 @@ const Game = (() => {
 
   // --- Focus triggers from events ---
 
+  /** @param {string[]} events @param {Interaction | null} interaction */
   function applyFocusTriggers(events, interaction) {
     for (const eventId of events) {
       if (eventId === 'alarm' || eventId === 'late_anxiety') {
@@ -185,6 +198,7 @@ const Game = (() => {
     }
   }
 
+  /** @param {string} destId */
   function applyMoveFocusTriggers(destId) {
     if (destId === 'corner_store') {
       UI.boostMoneyFocus();
@@ -196,6 +210,7 @@ const Game = (() => {
 
   // --- Action handling ---
 
+  /** @param {Interaction} interaction */
   function handleAction(interaction) {
     // Record the action
     Timeline.recordAction({ type: 'interact', id: interaction.id });
@@ -210,14 +225,9 @@ const Game = (() => {
     UI.showPassage(responseText);
 
     // Generate event text now (consuming RNG synchronously), display later
+    /** @type {string[]} */
     const eventTexts = [];
-    for (const eventId of events) {
-      const eventFn = Content.eventText[eventId];
-      if (eventFn) {
-        const text = eventFn();
-        if (text && text.trim()) eventTexts.push(text);
-      }
-    }
+    generateEventTexts(events, eventTexts);
 
     // Apply focus triggers
     applyFocusTriggers(events, interaction);
@@ -242,6 +252,7 @@ const Game = (() => {
     }, 800);
   }
 
+  /** @param {string} destId */
   function handleMove(destId) {
     if (!World.canTravel(destId)) return;
 
@@ -261,14 +272,9 @@ const Game = (() => {
     const events = World.checkEvents();
 
     // Generate event text now (consuming RNG synchronously), display later
+    /** @type {string[]} */
     const eventTexts = [];
-    for (const eventId of events) {
-      const eventFn = Content.eventText[eventId];
-      if (eventFn) {
-        const text = eventFn();
-        if (text && text.trim()) eventTexts.push(text);
-      }
-    }
+    generateEventTexts(events, eventTexts);
 
     // Apply focus triggers
     applyMoveFocusTriggers(travel.to);
@@ -324,14 +330,9 @@ const Game = (() => {
     // Occasionally check for events during idle
     if (Timeline.chance(0.3)) {
       const events = World.checkEvents();
+      /** @type {string[]} */
       const eventTexts = [];
-      for (const eventId of events) {
-        const eventFn = Content.eventText[eventId];
-        if (eventFn) {
-          const text = eventFn();
-          if (text && text.trim()) eventTexts.push(text);
-        }
-      }
+      generateEventTexts(events, eventTexts);
 
       // Apply focus triggers from idle events
       applyFocusTriggers(events, null);

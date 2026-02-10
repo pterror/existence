@@ -6,6 +6,7 @@ const Timeline = (() => {
   // --- xoshiro128** PRNG ---
   // 128-bit state, excellent statistical quality, deterministic
 
+  /** @param {number} a @param {number} b @param {number} c @param {number} d */
   function xoshiro128ss(a, b, c, d) {
     return () => {
       const t = b << 9;
@@ -25,6 +26,7 @@ const Timeline = (() => {
   }
 
   // Seed splitmix32 to initialize xoshiro state from a single integer
+  /** @param {number} seed */
   function splitmix32(seed) {
     return () => {
       seed |= 0;
@@ -38,6 +40,7 @@ const Timeline = (() => {
     };
   }
 
+  /** @param {number} seed */
   function createPRNG(seed) {
     const sm = splitmix32(seed);
     return xoshiro128ss(sm(), sm(), sm(), sm());
@@ -45,16 +48,21 @@ const Timeline = (() => {
 
   // --- Timeline state ---
   let seed = 0;
+  /** @type {ActionEntry[]} */
   let actions = [];
+  /** @type {(() => number) | null} */
   let rng = null;       // game PRNG stream
+  /** @type {(() => number) | null} */
   let charRng = null;   // character generation PRNG stream (separate)
+  /** @type {GameCharacter | null} */
   let character = null;  // stored character data
 
   // Track how many RNG calls have been made (for replay)
   let rngCallCount = 0;
 
+  /** @param {number} [existingSeed] */
   function init(existingSeed) {
-    seed = existingSeed != null ? existingSeed : generateSeed();
+    seed = /** @type {number} */ (existingSeed !== undefined ? existingSeed : generateSeed());
     actions = [];
 
     // Derive two independent sub-seeds from master seed
@@ -81,20 +89,23 @@ const Timeline = (() => {
   // Get next random number [0, 1)
   function random() {
     rngCallCount++;
-    return rng();
+    return /** @type {() => number} */ (rng)();
   }
 
   // Random integer in [min, max] inclusive
+  /** @param {number} min @param {number} max */
   function randomInt(min, max) {
     return min + Math.floor(random() * (max - min + 1));
   }
 
   // Random float in [min, max)
+  /** @param {number} min @param {number} max */
   function randomFloat(min, max) {
     return min + random() * (max - min);
   }
 
   // Weighted random pick from array of { weight, value } objects
+  /** @template T @param {WeightedItem<T>[]} items @returns {T} */
   function weightedPick(items) {
     let total = 0;
     for (const item of items) total += item.weight;
@@ -103,15 +114,17 @@ const Timeline = (() => {
       r -= item.weight;
       if (r <= 0) return item.value;
     }
-    return items[items.length - 1].value;
+    return /** @type {WeightedItem<T>} */ (items[items.length - 1]).value;
   }
 
   // Random boolean with given probability
+  /** @param {number} probability */
   function chance(probability) {
     return random() < probability;
   }
 
   // Pick random element from array
+  /** @template T @param {T[]} arr @returns {T | undefined} */
   function pick(arr) {
     if (arr.length === 0) return undefined;
     return arr[Math.floor(random() * arr.length)];
@@ -120,13 +133,15 @@ const Timeline = (() => {
   // --- Character PRNG (chargen only, separate stream) ---
 
   function charRandom() {
-    return charRng();
+    return /** @type {() => number} */ (charRng)();
   }
 
+  /** @param {number} min @param {number} max */
   function charRandomInt(min, max) {
     return min + Math.floor(charRandom() * (max - min + 1));
   }
 
+  /** @template T @param {T[]} arr @returns {T | undefined} */
   function charPick(arr) {
     if (arr.length === 0) return undefined;
     return arr[Math.floor(charRandom() * arr.length)];
@@ -134,6 +149,7 @@ const Timeline = (() => {
 
   // Weighted pick using character stream — for name sampling
   // Takes array of [value, weight] pairs (compact format from names.js)
+  /** @param {NamePair[]} pairs */
   function charWeightedPick(pairs) {
     let total = 0;
     for (const pair of pairs) total += pair[1];
@@ -142,11 +158,12 @@ const Timeline = (() => {
       r -= pair[1];
       if (r <= 0) return pair[0];
     }
-    return pairs[pairs.length - 1][0];
+    return /** @type {NamePair} */ (pairs[pairs.length - 1])[0];
   }
 
   // --- Action log ---
 
+  /** @param {{ type: string; id?: string; destination?: string }} action */
   function recordAction(action) {
     actions.push({ action, timestamp: actions.length });
     save();
@@ -162,6 +179,7 @@ const Timeline = (() => {
 
   // --- Autosave / Restore ---
 
+  /** @param {GameCharacter} char */
   function setCharacter(char) {
     character = char;
   }
@@ -179,6 +197,7 @@ const Timeline = (() => {
     }
   }
 
+  /** @returns {SaveData | null} */
   function load() {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);

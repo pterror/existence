@@ -5,6 +5,7 @@ const World = (() => {
   // --- Location definitions ---
   // Each location has an id, connections, and travel times (in minutes)
 
+  /** @type {Record<string, LocationDef>} */
   const locations = {
     apartment_bedroom: {
       name: 'bedroom',
@@ -64,6 +65,7 @@ const World = (() => {
     },
   };
 
+  /** @param {string} id */
   function getLocation(id) {
     return locations[id] || null;
   }
@@ -94,12 +96,14 @@ const World = (() => {
     return connections;
   }
 
+  /** @param {string} destId */
   function canTravel(destId) {
     const loc = getCurrentLocation();
     if (!loc) return false;
     return destId in loc.connections;
   }
 
+  /** @param {string} destId */
   function travelTo(destId) {
     const loc = getCurrentLocation();
     if (!loc || !loc.connections[destId]) return null;
@@ -144,7 +148,9 @@ const World = (() => {
   // --- Event checking ---
   // Returns events that should fire based on current state
 
+  /** @returns {string[]} */
   function checkEvents() {
+    /** @type {(string | undefined)[]} */
     const events = [];
     const time = State.get('time');
     const hour = State.getHour();
@@ -227,7 +233,7 @@ const World = (() => {
       }
     }
 
-    return events;
+    return /** @type {string[]} */ (events.filter(e => e !== undefined));
   }
 
   // --- Weather ---

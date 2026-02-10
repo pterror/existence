@@ -6,6 +6,7 @@ const Content = (() => {
   // --- Relationship prose tables ---
   // Keyed on flavor archetype. Name is the only dynamic part.
 
+  /** @type {Record<string, (name: string) => string | undefined>} */
   const friendMessages = {
     sends_things: (name) => Timeline.pick([
       `${name} sent a picture of a cat sitting in a shopping bag. No caption. None needed.`,
@@ -33,6 +34,7 @@ const Content = (() => {
     ]),
   };
 
+  /** @type {Record<string, (name: string) => string>} */
   const friendIsolatedMessages = {
     sends_things: (name) => `Your phone buzzes. ${name}. You look at the name on the screen. You don't open it yet.`,
     checks_in: (name) => `A message from ${name}. "Hey, you good?" You stare at it. You don't type anything back yet.`,
@@ -40,6 +42,7 @@ const Content = (() => {
     earnest: (name) => `Your phone buzzes. ${name}. You look at the name on the screen for a while.`,
   };
 
+  /** @type {Record<string, (name: string) => string[]>} */
   const friendIdleThoughts = {
     sends_things: (name) => [
       `You think about messaging ${name}. You don't pick up the phone.`,
@@ -61,6 +64,7 @@ const Content = (() => {
 
   // --- Coworker prose tables ---
 
+  /** @type {Record<string, (name: string) => string | undefined>} */
   const coworkerChatter = {
     warm_quiet: (name) => Timeline.pick([
       `"Long day, huh?" ${name}, not really expecting an answer. Never does.`,
@@ -82,6 +86,7 @@ const Content = (() => {
     ]),
   };
 
+  /** @type {Record<string, (name: string) => string | undefined>} */
   const coworkerInteraction = {
     warm_quiet: (name) => Timeline.pick([
       `"Hey." ${name} looks up. "Hey." That's it. That's the whole exchange. But it happened.`,
@@ -102,6 +107,7 @@ const Content = (() => {
 
   // --- Job-specific workplace descriptions ---
 
+  /** @type {Record<string, () => string>} */
   const workplaceDescriptions = {
     office: () => {
       const mood = State.moodTone();
@@ -238,6 +244,7 @@ const Content = (() => {
 
   // --- Job-specific do_work prose ---
 
+  /** @type {Record<string, (canFocus: boolean, energy: string, stress: string) => string>} */
   const doWorkProse = {
     office: (canFocus, energy, stress) => {
       if (!canFocus && energy === 'depleted') {
@@ -290,6 +297,7 @@ const Content = (() => {
 
   // --- Job-specific work_break prose ---
 
+  /** @type {Record<string, (mood: string) => string>} */
   const workBreakProse = {
     office: (mood) => {
       if (mood === 'numb' || mood === 'hollow') {
@@ -324,6 +332,7 @@ const Content = (() => {
 
   // --- Job-specific work_task_appears event ---
 
+  /** @type {Record<string, () => string | undefined>} */
   const workTaskEvent = {
     office: () => {
       State.adjustStress(3);
@@ -349,6 +358,7 @@ const Content = (() => {
 
   // --- Job-specific break_room_noise / ambient ---
 
+  /** @type {Record<string, () => string | undefined>} */
   const workAmbientEvent = {
     office: () => {
       return 'Laughter from the break room. You\'re not sure about what. It drifts and fades.';
@@ -597,7 +607,7 @@ const Content = (() => {
 
     workplace: () => {
       const jobType = Character.get('job_type');
-      const descFn = workplaceDescriptions[jobType] || workplaceDescriptions.office;
+      const descFn = /** @type {() => string} */ (workplaceDescriptions[jobType] || workplaceDescriptions.office);
       return descFn();
     },
 
@@ -970,7 +980,7 @@ const Content = (() => {
         State.advanceTime(timeCost);
 
         const jobType = Character.get('job_type');
-        const proseFn = doWorkProse[jobType] || doWorkProse.office;
+        const proseFn = /** @type {(canFocus: boolean, energy: string, stress: string) => string} */ (doWorkProse[jobType] || doWorkProse.office);
         return proseFn(canFocus, energy, stress);
       },
     },
@@ -987,7 +997,7 @@ const Content = (() => {
 
         const mood = State.moodTone();
         const jobType = Character.get('job_type');
-        const proseFn = workBreakProse[jobType] || workBreakProse.office;
+        const proseFn = /** @type {(mood: string) => string} */ (workBreakProse[jobType] || workBreakProse.office);
         return proseFn(mood);
       },
     },
@@ -1011,12 +1021,12 @@ const Content = (() => {
           : Character.get('coworker2');
 
         if (social === 'isolated' || social === 'withdrawn') {
-          return coworkerInteraction[coworker.flavor](coworker.name);
+          return /** @type {(name: string) => string | undefined} */ (coworkerInteraction[coworker.flavor])(coworker.name);
         }
         if (mood === 'present' || mood === 'clear') {
-          return coworkerInteraction[coworker.flavor](coworker.name);
+          return /** @type {(name: string) => string | undefined} */ (coworkerInteraction[coworker.flavor])(coworker.name);
         }
-        return coworkerChatter[coworker.flavor](coworker.name);
+        return /** @type {(name: string) => string | undefined} */ (coworkerChatter[coworker.flavor])(coworker.name);
       },
     },
 
@@ -1149,9 +1159,9 @@ const Content = (() => {
         : Character.get('friend2');
 
       if (social === 'isolated' || social === 'withdrawn') {
-        results.push(friendIsolatedMessages[friend.flavor](friend.name));
+        results.push(/** @type {(name: string) => string} */ (friendIsolatedMessages[friend.flavor])(friend.name));
       } else {
-        results.push(friendMessages[friend.flavor](friend.name));
+        results.push(/** @type {(name: string) => string | undefined} */ (friendMessages[friend.flavor])(friend.name));
       }
       State.adjustSocial(3);
     }
@@ -1229,9 +1239,9 @@ const Content = (() => {
         : Character.get('friend2');
 
       if (social === 'isolated') {
-        return friendIsolatedMessages[friend.flavor](friend.name);
+        return /** @type {(name: string) => string} */ (friendIsolatedMessages[friend.flavor])(friend.name);
       }
-      return friendMessages[friend.flavor](friend.name);
+      return /** @type {(name: string) => string | undefined} */ (friendMessages[friend.flavor])(friend.name);
     },
 
     late_anxiety: () => {
@@ -1289,18 +1299,18 @@ const Content = (() => {
       const coworker = Timeline.chance(0.5)
         ? Character.get('coworker1')
         : Character.get('coworker2');
-      return coworkerChatter[coworker.flavor](coworker.name);
+      return /** @type {(name: string) => string | undefined} */ (coworkerChatter[coworker.flavor])(coworker.name);
     },
 
     work_task_appears: () => {
       const jobType = Character.get('job_type');
-      const fn = workTaskEvent[jobType] || workTaskEvent.office;
+      const fn = /** @type {() => string | undefined} */ (workTaskEvent[jobType] || workTaskEvent.office);
       return fn();
     },
 
     break_room_noise: () => {
       const jobType = Character.get('job_type');
-      const fn = workAmbientEvent[jobType] || workAmbientEvent.office;
+      const fn = /** @type {() => string | undefined} */ (workAmbientEvent[jobType] || workAmbientEvent.office);
       return fn();
     },
 
@@ -1464,8 +1474,8 @@ const Content = (() => {
     if (social === 'isolated') {
       const friend1 = Character.get('friend1');
       const friend2 = Character.get('friend2');
-      const f1thoughts = friendIdleThoughts[friend1.flavor](friend1.name);
-      const f2thoughts = friendIdleThoughts[friend2.flavor](friend2.name);
+      const f1thoughts = /** @type {(name: string) => string[]} */ (friendIdleThoughts[friend1.flavor])(friend1.name);
+      const f2thoughts = /** @type {(name: string) => string[]} */ (friendIdleThoughts[friend2.flavor])(friend2.name);
       thoughts.push(...f1thoughts, ...f2thoughts);
     }
 
@@ -1474,6 +1484,7 @@ const Content = (() => {
 
   // --- Transition text ---
 
+  /** @param {string} from @param {string} to */
   const transitionText = (from, to) => {
     const mood = State.moodTone();
     const energy = State.energyTier();
@@ -1555,24 +1566,27 @@ const Content = (() => {
 
   // --- Get available interactions for current location ---
 
+  /** @returns {Interaction[]} */
   function getAvailableInteractions() {
     const location = World.getLocationId();
+    /** @type {Interaction[]} */
     const available = [];
 
     for (const interaction of Object.values(interactions)) {
       if (interaction.location === location && interaction.available()) {
-        available.push(interaction);
+        available.push(/** @type {Interaction} */ (interaction));
       }
     }
 
     // Call in sick — available anywhere
     if (callInSick.available()) {
-      available.push(callInSick);
+      available.push(/** @type {Interaction} */ (callInSick));
     }
 
     return available;
   }
 
+  /** @param {string} id */
   function getInteraction(id) {
     for (const interaction of Object.values(interactions)) {
       if (interaction.id === id) return interaction;
@@ -1583,6 +1597,7 @@ const Content = (() => {
 
   // --- Awareness source functions ---
 
+  /** @type {Record<string, () => string>} */
   const timeSources = {
     apartment_bedroom: () => 'The alarm clock on the nightstand. ' + State.getTimeString() + '.',
     apartment_kitchen: () => 'The microwave clock. ' + State.getTimeString() + '.',
@@ -1592,7 +1607,8 @@ const Content = (() => {
 
   function getTimeSource() {
     const loc = World.getLocationId();
-    if (timeSources[loc]) return timeSources[loc]();
+    const fn = timeSources[loc];
+    if (fn) return fn();
     if (State.get('has_phone') && State.get('phone_battery') > 0)
       return 'You check your phone. ' + State.getTimeString() + '.';
     return null;
