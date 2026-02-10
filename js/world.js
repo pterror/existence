@@ -174,21 +174,25 @@ const World = (() => {
       }
     }
 
-    // Late for work stress
+    // Late for work stress — escalates twice then goes silent
     if (State.isLateForWork() && hour < 12) {
-      if (Timeline.chance(0.15)) {
+      if (Timeline.chance(0.15) && State.get('surfaced_late') < 2) {
         events.push('late_anxiety');
       }
     }
 
-    // Hunger pangs
+    // Hunger pangs — surfaces twice then the prose carries it
     if (State.get('hunger') > 65 && Timeline.chance(0.12)) {
-      events.push('hunger_pang');
+      if (State.get('surfaced_hunger') < 2) {
+        events.push('hunger_pang');
+      }
     }
 
-    // Exhaustion
+    // Exhaustion — surfaces twice then silence
     if (State.get('energy') < 15 && Timeline.chance(0.15)) {
-      events.push('exhaustion_wave');
+      if (State.get('surfaced_exhaustion') < 2) {
+        events.push('exhaustion_wave');
+      }
     }
 
     // Weather change
@@ -206,7 +210,13 @@ const World = (() => {
     // Apartment ambient
     if (locations[location]?.area === 'apartment') {
       if (Timeline.chance(0.06)) {
-        events.push(Timeline.pick(['apartment_sound', 'apartment_notice']));
+        const picked = Timeline.pick(['apartment_sound', 'apartment_notice']);
+        // apartment_notice caps after surfacing enough — fall back to sound
+        if (picked === 'apartment_notice' && State.get('surfaced_mess') >= 2) {
+          events.push('apartment_sound');
+        } else {
+          events.push(picked);
+        }
       }
     }
 

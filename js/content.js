@@ -831,6 +831,7 @@ const Content = (() => {
       available: () => State.get('apartment_mess') > 40 && State.get('energy') > 15,
       execute: () => {
         State.set('apartment_mess', Math.max(0, State.get('apartment_mess') - 25));
+        State.set('surfaced_mess', 0);
         State.adjustEnergy(-8);
         State.adjustStress(-5);
         State.advanceTime(15);
@@ -1256,20 +1257,35 @@ const Content = (() => {
     },
 
     late_anxiety: () => {
+      const n = State.get('surfaced_late');
+      State.set('surfaced_late', n + 1);
       State.adjustStress(5);
-      return 'You\'re aware of the time. The kind of awareness that sits in your chest.';
+      if (n === 0) {
+        return 'You\'re aware of the time. The kind of awareness that sits in your chest.';
+      }
+      return 'The time. It\'s still there, pressing against the inside of your ribs. You know. You already know.';
     },
 
     hunger_pang: () => {
-      const location = World.getLocationId();
-      if (location === 'workplace') {
-        return 'Your stomach makes a sound. You glance around to see if anyone heard.';
+      const n = State.get('surfaced_hunger');
+      State.set('surfaced_hunger', n + 1);
+      if (n === 0) {
+        const location = World.getLocationId();
+        if (location === 'workplace') {
+          return 'Your stomach makes a sound. You glance around to see if anyone heard.';
+        }
+        return 'A wave of hunger. Not dramatic. Just your body reminding you it\'s there and it needs things.';
       }
-      return 'A wave of hunger. Not dramatic. Just your body reminding you it\'s there and it needs things.';
+      return 'The hunger again. Sharper this time. Your body is done being polite about it.';
     },
 
     exhaustion_wave: () => {
-      return 'For a second everything feels heavy. Not just your body — the air, the light, the idea of doing the next thing.';
+      const n = State.get('surfaced_exhaustion');
+      State.set('surfaced_exhaustion', n + 1);
+      if (n === 0) {
+        return 'For a second everything feels heavy. Not just your body — the air, the light, the idea of doing the next thing.';
+      }
+      return 'Your body is making its case. The argument is getting harder to ignore.';
     },
 
     weather_shift: () => {
@@ -1329,18 +1345,20 @@ const Content = (() => {
     },
 
     apartment_notice: () => {
+      const n = State.get('surfaced_mess');
+      State.set('surfaced_mess', n + 1);
       const mess = State.get('apartment_mess');
       if (mess > 70) {
-        return Timeline.pick([
-          'You notice how cluttered things have gotten. When did that happen.',
-          'The apartment looks like someone stopped trying. You live here.',
-        ]);
+        if (n === 0) {
+          return 'You notice how cluttered things have gotten. When did that happen.';
+        }
+        return 'The apartment. You see it for a second the way a visitor would. Then you stop seeing it that way.';
       }
       if (mess > 40) {
-        return Timeline.pick([
-          'A few things out of place. The kind of mess that builds without you deciding to let it.',
-          'You see the apartment the way a visitor would, for a second. Then you stop.',
-        ]);
+        if (n === 0) {
+          return 'A few things out of place. The kind of mess that builds without you deciding to let it.';
+        }
+        return 'The mess hasn\'t moved. You knew it wouldn\'t.';
       }
       return '';
     },
@@ -1405,39 +1423,63 @@ const Content = (() => {
       thoughts.push(
         'Everything takes more than it should. Even thinking about doing things.',
         'You stand still for a moment, not deciding. Just not moving yet.',
+        'Gravity is personal today. It\'s working harder on you specifically.',
+        'You breathe. That\'s happening. You notice it like you notice weather.',
+        'The next thing. There\'s always a next thing. You look at it from a distance.',
       );
     } else if (mood === 'fraying') {
       thoughts.push(
         'Your jaw is clenched. When did that start.',
         'There\'s a tightness behind your eyes. Not a headache. Just proximity to one.',
+        'Something small would set you off. You can feel the edge of it.',
+        'You catch yourself holding your breath. You let it out. It doesn\'t help much.',
+        'Everything is a little too loud. A little too close.',
       );
     } else if (mood === 'quiet') {
       thoughts.push(
         'It\'s quiet. It\'s been quiet. You\'re used to it, which is different from liking it.',
         'You exist in the room. The room exists around you. That\'s the arrangement.',
+        'The sound of nothing. It has a frequency, if you listen long enough.',
+        'You\'re here. Not going anywhere. Not coming from anywhere. Just here.',
+        'A thought starts to form and doesn\'t finish. That\'s fine. It wasn\'t going anywhere.',
       );
     } else if (mood === 'clear' || mood === 'present') {
       thoughts.push(
         'For a moment, nothing needs doing. This is rare. You notice it.',
         'The light coming through the window is doing something interesting on the wall. You watch it.',
+        'A breath that feels like it belongs to you. Not many of those today.',
+        'You\'re here. Actually here. Not thinking about being somewhere else.',
       );
     } else {
       thoughts.push(
         'A moment. Nothing happening. Just a moment.',
         'You wait, though you\'re not sure for what.',
+        'The day has a shape. You\'re somewhere in the middle of it.',
+        'Nothing urgent. Nothing pulling. Just the hum of being somewhere.',
       );
     }
 
     // Hunger
     if (hunger === 'starving') {
-      thoughts.push('Your stomach has stopped asking and started insisting.');
+      thoughts.push(
+        'Your stomach has stopped asking and started insisting.',
+        'The hunger is a dull weight now. Less sharp, more permanent.',
+        'You think about food. Then you think about something else. Then food again.',
+      );
     } else if (hunger === 'very_hungry') {
-      thoughts.push('Food. The thought comes and goes and comes back.');
+      thoughts.push(
+        'Food. The thought comes and goes and comes back.',
+        'You could eat. The thought has an edge to it.',
+      );
     }
 
     // Energy
     if (energy === 'depleted') {
-      thoughts.push('Your eyelids are heavy. Everything is heavy.');
+      thoughts.push(
+        'Your eyelids are heavy. Everything is heavy.',
+        'Sitting down sounds like the best idea anyone ever had.',
+        'The distance between you and lying down is a math problem you keep solving.',
+      );
     }
 
     // Social

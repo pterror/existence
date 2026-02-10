@@ -50,6 +50,13 @@ const State = (() => {
       consecutive_meals_skipped: 0,
       last_social_interaction: 0, // action count at last interaction
 
+      // Event surfacing — tracks how many times state-condition events have appeared.
+      // After cap, they go silent and let tier-based prose carry the weight.
+      surfaced_hunger: 0,
+      surfaced_exhaustion: 0,
+      surfaced_late: 0,
+      surfaced_mess: 0,
+
       // Observation tracking — fidelity degrades with distance from last observation
       last_observed_time: 6 * 60 + 30,   // alarm time
       last_observed_money: 47.50,         // matches default starting money
@@ -120,6 +127,7 @@ const State = (() => {
       s.dressed = false;
       s.work_tasks_done = 0;
       s.alarm_went_off = false;
+      s.surfaced_late = 0;
       s.apartment_mess = Math.min(100, s.apartment_mess + 5);
 
       // Fridge food slowly goes bad
@@ -266,6 +274,8 @@ const State = (() => {
 
   function adjustEnergy(amount) {
     s.energy = Math.max(0, Math.min(100, s.energy + amount));
+    // Resting resets exhaustion surfacing
+    if (amount >= 10) s.surfaced_exhaustion = 0;
   }
 
   function adjustStress(amount) {
@@ -274,6 +284,8 @@ const State = (() => {
 
   function adjustHunger(amount) {
     s.hunger = Math.max(0, Math.min(100, s.hunger + amount));
+    // Eating resets hunger surfacing — next time hunger builds, it's noticed fresh
+    if (amount < 0) s.surfaced_hunger = 0;
   }
 
   function adjustSocial(amount) {
