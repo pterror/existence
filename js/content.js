@@ -61,7 +61,7 @@ const Content = (() => {
       }
 
       if (!State.get('dressed') && time !== 'deep_night' && time !== 'night') {
-        desc += ' You\'re still in what you slept in.';
+        desc += ' You\'re still in the old grey t-shirt and boxers you slept in.';
       }
 
       return desc;
@@ -380,12 +380,12 @@ const Content = (() => {
         const mess = State.get('apartment_mess');
 
         if (mood === 'numb' || mood === 'heavy') {
-          return 'You put on clothes. Each piece is a separate decision. You make them all, eventually.';
+          return 'Jeans. The black hoodie. Each piece is a separate decision. You make them all, eventually.';
         }
         if (mess > 60) {
-          return 'Clean enough clothes from the pile. You get dressed.';
+          return 'You find a shirt in the pile that passes the smell test. Jeans from the chair. Good enough.';
         }
-        return 'You get dressed. Regular clothes. The ones you wear.';
+        return 'Jeans, a flannel, socks that match close enough. You get dressed.';
       },
     },
 
@@ -656,14 +656,14 @@ const Content = (() => {
 
         if (social === 'isolated' || social === 'withdrawn') {
           if (Timeline.chance(0.5)) {
-            return '"Hey." They look up. "Hey." That\'s it. That\'s the whole exchange. But it happened.';
+            return '"Hey." Priya looks up. "Hey." That\'s it. That\'s the whole exchange. But it happened.';
           }
-          return 'You say something about the coffee or the weather. They respond. It\'s small. It\'s something.';
+          return 'You ask Kevin about the coffee. He says it\'s the same as yesterday. You nod. It\'s small. It\'s something.';
         }
         if (mood === 'present' || mood === 'clear') {
-          return 'A few words with someone about nothing important. They almost smile. You almost do too.';
+          return 'Priya\'s talking about a restaurant she went to. You ask which one. She almost smiles when she describes it.';
         }
-        return 'You make conversation. Brief, surface-level. It\'s what work is.';
+        return 'Kevin says something about the weather. You say something back. The ritual of it.';
       },
     },
 
@@ -766,13 +766,13 @@ const Content = (() => {
     // Work message if late
     if (State.isLateForWork() && !State.get('at_work_today') && !State.get('called_in')) {
       if (Timeline.chance(0.5)) {
-        results.push('A message from work. Short. Asking where you are.');
+        results.push('A message from your supervisor, Terri. "Everything okay?" Which means: where are you.');
       }
     }
 
     // Bill notification
     if (State.get('money') < 30 && Timeline.chance(0.3)) {
-      results.push('A notification about a bill. You can\'t deal with it right now, but now you know it\'s there.');
+      results.push('A notification from the electric company. The amount is higher than last month. It\'s always higher than last month.');
       State.adjustStress(5);
     }
 
@@ -780,9 +780,13 @@ const Content = (() => {
     if (Timeline.chance(0.25)) {
       const social = State.socialTier();
       if (social === 'isolated' || social === 'withdrawn') {
-        results.push('A message from someone you haven\'t talked to in a while. "Hey, you good?" Two words you don\'t know how to answer.');
+        results.push('A message from Marcus. "Hey, you good?" You stare at it. You don\'t type anything back yet.');
       } else {
-        results.push('A message. Someone sharing something — a link, a thought. Nothing urgent. Proof someone thought of you.');
+        results.push(Timeline.pick([
+          'Dana sent a picture of a cat sitting in a shopping bag. No caption. None needed.',
+          'Marcus linked a video with "lmao this is you." You don\'t watch it yet but you save it.',
+          'A message from Dana — a screenshot of a tweet, no context. The kind of thing that means she was thinking of you.',
+        ]));
       }
       State.adjustSocial(3);
     }
@@ -836,26 +840,30 @@ const Content = (() => {
       if (energy === 'depleted' || energy === 'exhausted') {
         return 'The alarm. That sound. It exists only to tell you that lying here isn\'t an option. Except it is. The snooze button is right there.';
       }
-      return 'The alarm goes off. 6:30. The day starts whether you\'re ready or not.';
+      return 'The alarm goes off. 6:30. That sound you picked because you thought you wouldn\'t hate it. You were wrong.';
     },
 
     phone_work_where_are_you: () => {
       State.adjustStress(8);
-      return 'Your phone buzzes. Work. "Are you coming in today?" The screen waits for an answer you don\'t type yet.';
+      return 'Your phone buzzes. Terri. "Hey, are you coming in today?" The screen waits for an answer you don\'t type yet.';
     },
 
     phone_bill_notification: () => {
       State.adjustStress(5);
-      return 'A notification slides down from the top of your phone. An amount due. A date. You\'ve seen it before. Seeing it again doesn\'t help.';
+      return 'A notification slides down. Electric bill, due in four days. The number is right there. You swipe it away but the number stays.';
     },
 
     phone_message_friend: () => {
       State.adjustSocial(2);
       const social = State.socialTier();
       if (social === 'isolated') {
-        return 'Your phone buzzes. A name you haven\'t seen in a while. You look at it. You don\'t open it yet.';
+        return 'Your phone buzzes. Dana. You look at her name on the screen. You don\'t open it yet.';
       }
-      return 'A message from a friend. Something small. A link, a joke, a thought that made them think of you.';
+      return Timeline.pick([
+        'A text from Dana. A photo of her neighbor\'s dog wearing a sweater. "Emergency," she wrote.',
+        'Marcus in the group chat, complaining about his landlord again. The usual.',
+        'Dana sent a voice memo. Fifteen seconds long. You\'ll listen to it later. Probably.',
+      ]);
     },
 
     late_anxiety: () => {
@@ -896,10 +904,10 @@ const Content = (() => {
     coworker_speaks: () => {
       State.adjustSocial(3);
       const phrases = [
-        '"Long day, huh?" Someone near you, not really expecting an answer.',
-        'Someone mentions something about the weekend. You nod.',
-        '"You want coffee?" A coworker, already walking to the machine, asking over their shoulder.',
-        'The person next to you sighs loudly. Solidarity, maybe.',
+        '"Long day, huh?" Priya, not really expecting an answer. She never does.',
+        'Kevin mentions something about his kid\'s soccer game. You nod in the right places.',
+        '"You want coffee?" Priya, already walking to the machine, asking over her shoulder.',
+        'Kevin sighs loudly at his screen. He does this about once an hour.',
       ];
       return Timeline.pick(phrases);
     },
@@ -1000,7 +1008,7 @@ const Content = (() => {
       );
     } else if (mood === 'hollow') {
       thoughts.push(
-        'You think about calling someone. You don\'t think about who.',
+        'You think about calling Dana. You don\'t pick up the phone.',
         'What would you do if you could do anything. The question doesn\'t even finish forming.',
         'The silence has texture. You\'re learning its patterns.',
       );
@@ -1022,7 +1030,7 @@ const Content = (() => {
     } else if (mood === 'clear' || mood === 'present') {
       thoughts.push(
         'For a moment, nothing needs doing. This is rare. You notice it.',
-        'You breathe. Actually notice yourself breathing. That\'s something.',
+        'The light coming through the window is doing something interesting on the wall. You watch it.',
       );
     } else {
       thoughts.push(
@@ -1046,8 +1054,8 @@ const Content = (() => {
     // Social
     if (social === 'isolated') {
       thoughts.push(
-        'You try to remember the last real conversation you had. Not words. Conversation.',
-        'Your phone is right there. It\'s always right there.',
+        'You try to remember the last time you talked to Dana. Actually talked, not just reacted to something she sent.',
+        'Your phone is right there. Marcus texted two days ago. You still haven\'t answered.',
       );
     }
 
@@ -1074,7 +1082,7 @@ const Content = (() => {
         return 'You lock the door. The hallway, the stairs, the outside. Each one a small decision you make by making it.';
       }
       if (!State.get('dressed')) {
-        return 'You step outside in what you\'re wearing. It\'s fine. Probably.';
+        return 'You step outside in the grey t-shirt and boxers. The air reminds you immediately. You don\'t go back in.';
       }
       return 'You lock up and head out.';
     }
