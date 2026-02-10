@@ -47,18 +47,26 @@ const Content = (() => {
     sends_things: (name) => [
       `You think about messaging ${name}. You don't pick up the phone.`,
       `You try to remember the last time you talked to ${name}. Actually talked, not just reacted to something sent.`,
+      `${name} would send you something if she knew. But she doesn't know, because you haven't said anything.`,
+      `There's probably something from ${name} you haven't opened yet.`,
     ],
     checks_in: (name) => [
       `${name} would want to know how you're doing. That's the problem.`,
       `You could text ${name} back. The thought comes and goes.`,
+      `${name} asked how you were. You said fine. That was days ago. The word just sits there.`,
+      `Somewhere ${name} is going about the day, not knowing you're here, doing this. Nothing.`,
     ],
     dry_humor: (name) => [
       `Your phone is right there. ${name} texted two days ago. You still haven't answered.`,
       `You think about ${name}'s last message. You almost type something back.`,
+      `${name} would have something to say about this. Something dry. You almost smile, almost.`,
+      `You draft a message to ${name} in your head. It stays there.`,
     ],
     earnest: (name) => [
       `${name} would listen, if you called. You know that. It doesn't help as much as it should.`,
       `You think about ${name}. About reaching out. The thought weighs more than it should.`,
+      `${name} said to call anytime. Anytime is a big word. It includes now. You don't call.`,
+      `You wonder what ${name} is doing. Not enough to find out.`,
     ],
   };
 
@@ -1384,6 +1392,9 @@ const Content = (() => {
 
   // --- Idle thoughts ---
 
+  /** @type {string[]} */
+  const recentIdle = [];
+
   const idleThoughts = () => {
     const mood = State.moodTone();
     const hunger = State.hungerTier();
@@ -1399,6 +1410,10 @@ const Content = (() => {
         'You\'re here. That\'s the whole thought.',
         'Time is passing. You know this because things are slightly different than before.',
         'There\'s a blankness that isn\'t peace and isn\'t pain. Just absence of the energy for either.',
+        'You look at your hands. They\'re your hands. That\'s all you\'ve got.',
+        'Something should be happening. Nothing is. That\'s the thing about nothing — it keeps going.',
+        'Your eyes are open. That counts as being awake, technically.',
+        'You\'re aware of the room. The room is not aware of you. Fair enough.',
       );
     } else if (mood === 'hollow') {
       const friend1 = Character.get('friend1');
@@ -1406,6 +1421,10 @@ const Content = (() => {
         `You think about calling ${friend1.name}. You don't pick up the phone.`,
         'What would you do if you could do anything. The question doesn\'t even finish forming.',
         'The silence has texture. You\'re learning its patterns.',
+        'You had a thought a minute ago. It\'s gone now. It wasn\'t important. Probably.',
+        'There\'s a shape where something used to matter. You can feel the outline of it.',
+        'You open your mouth to say something, then realize there\'s no one to say it to. And nothing to say.',
+        'A memory tries to surface. You let it sink back down.',
       );
     } else if (mood === 'heavy') {
       thoughts.push(
@@ -1414,6 +1433,9 @@ const Content = (() => {
         'Gravity is personal today. It\'s working harder on you specifically.',
         'You breathe. That\'s happening. You notice it like you notice weather.',
         'The next thing. There\'s always a next thing. You look at it from a distance.',
+        'Your body wants to be horizontal. Your life requires you to be vertical. The negotiation continues.',
+        'You shift your weight from one foot to the other. That\'s the most you\'ve done in a while.',
+        'The thought of doing something and the doing of it — there\'s a gap there. It\'s wider than usual.',
       );
     } else if (mood === 'fraying') {
       thoughts.push(
@@ -1422,6 +1444,9 @@ const Content = (() => {
         'Something small would set you off. You can feel the edge of it.',
         'You catch yourself holding your breath. You let it out. It doesn\'t help much.',
         'Everything is a little too loud. A little too close.',
+        'Your shoulders are up near your ears. You force them down. They\'ll be back.',
+        'A sound from somewhere. You flinch. It was nothing.',
+        'The inside of your skin feels too small for what\'s in there.',
       );
     } else if (mood === 'quiet') {
       thoughts.push(
@@ -1430,6 +1455,9 @@ const Content = (() => {
         'The sound of nothing. It has a frequency, if you listen long enough.',
         'You\'re here. Not going anywhere. Not coming from anywhere. Just here.',
         'A thought starts to form and doesn\'t finish. That\'s fine. It wasn\'t going anywhere.',
+        'Somewhere a pipe ticks. Or a wall settles. Something structural, doing what it does.',
+        'You notice yourself noticing the quiet. That\'s a layer you didn\'t need.',
+        'The stillness has a weight to it. Not heavy. Just present.',
       );
     } else if (mood === 'clear' || mood === 'present') {
       thoughts.push(
@@ -1437,6 +1465,9 @@ const Content = (() => {
         'The light coming through the window is doing something interesting on the wall. You watch it.',
         'A breath that feels like it belongs to you. Not many of those today.',
         'You\'re here. Actually here. Not thinking about being somewhere else.',
+        'Your hands are warm. When did that happen.',
+        'Something close to okay. You don\'t examine it too closely. Just let it be there.',
+        'The ordinary is ordinary. That\'s enough. That\'s more than enough.',
       );
     } else {
       thoughts.push(
@@ -1444,6 +1475,9 @@ const Content = (() => {
         'You wait, though you\'re not sure for what.',
         'The day has a shape. You\'re somewhere in the middle of it.',
         'Nothing urgent. Nothing pulling. Just the hum of being somewhere.',
+        'You\'re between things. Not in a hurry to get to the next one.',
+        'The light is different than it was a while ago. Things shift without you deciding.',
+        'You look around. Everything is where you left it.',
       );
     }
 
@@ -1453,11 +1487,15 @@ const Content = (() => {
         'Your stomach has stopped asking and started insisting.',
         'The hunger is a dull weight now. Less sharp, more permanent.',
         'You think about food. Then you think about something else. Then food again.',
+        'Everything you look at, you evaluate whether it\'s food. Nothing is.',
+        'The emptiness in your stomach has its own gravity.',
       );
     } else if (hunger === 'very_hungry') {
       thoughts.push(
         'Food. The thought comes and goes and comes back.',
         'You could eat. The thought has an edge to it.',
+        'There\'s a hollowness below your ribs. Not painful. Just insistent.',
+        'You swallow. Your body notices there\'s nothing there.',
       );
     }
 
@@ -1467,6 +1505,8 @@ const Content = (() => {
         'Your eyelids are heavy. Everything is heavy.',
         'Sitting down sounds like the best idea anyone ever had.',
         'The distance between you and lying down is a math problem you keep solving.',
+        'You blink and it takes longer than it should. Each one a negotiation to reopen.',
+        'Your thoughts are moving through something thick. They get there. Eventually.',
       );
     }
 
@@ -1479,7 +1519,18 @@ const Content = (() => {
       thoughts.push(...f1thoughts, ...f2thoughts);
     }
 
-    return Timeline.pick(thoughts);
+    // Filter out recently shown thoughts
+    const fresh = thoughts.filter(t => !recentIdle.includes(t));
+    const pool = fresh.length > 0 ? fresh : thoughts;
+    const picked = Timeline.pick(pool);
+
+    // Track recency — keep buffer under half typical pool size
+    if (picked) {
+      recentIdle.push(picked);
+      while (recentIdle.length > 6) recentIdle.shift();
+    }
+
+    return picked;
   };
 
   // --- Transition text ---
