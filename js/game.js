@@ -7,8 +7,15 @@ const Game = (() => {
     const saved = Timeline.restore();
 
     if (saved) {
+      // Restore character from save
+      if (saved.character) {
+        Character.set(saved.character);
+      }
+
       // Replay all actions to reconstruct state
       State.init();
+      Character.applyToState();
+
       // Consume same initial RNG as fresh start (opening events)
       const initEvents = World.checkEvents();
       for (const eventId of initEvents) {
@@ -16,41 +23,53 @@ const Game = (() => {
         if (eventFn) eventFn();
       }
       replayActions(saved.actions);
+
+      // Initialize UI
+      UI.init({
+        onAction: handleAction,
+        onMove: handleMove,
+        onIdle: handleIdle,
+      });
+
+      UI.render();
     } else {
-      // Fresh start
+      // Fresh start — character creation first
       Timeline.init();
-      State.init();
-    }
 
-    // Initialize UI
-    UI.init({
-      onAction: handleAction,
-      onMove: handleMove,
-      onIdle: handleIdle,
-    });
+      // Initialize UI early (chargen uses the same DOM)
+      UI.init({
+        onAction: handleAction,
+        onMove: handleMove,
+        onIdle: handleIdle,
+      });
 
-    // First render
-    if (!saved) {
-      // Opening — check for initial events (consumes RNG)
-      const events = World.checkEvents();
-      // Generate event text synchronously to consume RNG in order
-      const eventTexts = [];
-      for (const eventId of events) {
-        const eventFn = Content.eventText[eventId];
-        if (eventFn) {
-          const text = eventFn();
-          if (text && text.trim()) eventTexts.push(text);
+      // Pause idle timer during chargen
+      UI.stopIdleTimer();
+
+      Chargen.startCreation().then(character => {
+        // Character is set and saved by chargen.
+        // Now start the game.
+        State.init();
+        Character.applyToState();
+
+        // Opening — check for initial events (consumes RNG)
+        const events = World.checkEvents();
+        const eventTexts = [];
+        for (const eventId of events) {
+          const eventFn = Content.eventText[eventId];
+          if (eventFn) {
+            const text = eventFn();
+            if (text && text.trim()) eventTexts.push(text);
+          }
         }
-      }
 
-      UI.render();
+        UI.render();
 
-      if (eventTexts.length > 0) {
-        const firstText = eventTexts[0];
-        setTimeout(() => UI.showEventText(firstText), 1200);
-      }
-    } else {
-      UI.render();
+        if (eventTexts.length > 0) {
+          const firstText = eventTexts[0];
+          setTimeout(() => UI.showEventText(firstText), 1200);
+        }
+      });
     }
   }
 
@@ -82,8 +101,6 @@ const Game = (() => {
 
   function replayInteraction(id) {
     // During replay, always execute — don't check availability.
-    // The action was available when originally taken; re-checking
-    // could cause divergence.
     const interaction = findInteraction(id);
     if (interaction) {
       interaction.execute();
@@ -103,7 +120,7 @@ const Game = (() => {
     // During replay, always execute the move
     const fromId = World.getLocationId();
     World.travelTo(destId);
-    // Consume same RNG as live play (transitionText may use RNG in future)
+    // Consume same RNG as live play
     Content.transitionText(fromId, destId);
   }
 

@@ -71,6 +71,8 @@ No build step. Plain JS loaded via script tags.
 
 **Minimize file churn.** When editing a file, read it once, plan all changes, and apply them in one pass. Avoid read-edit-fail-read-fix cycles by thinking through the complete change before starting.
 
+**Always commit when done.** When you finish a task, commit the work. Don't leave changes uncommitted. If a task has multiple logical pieces, commit each piece separately.
+
 ## Commit Convention
 
 Use conventional commits: `type(scope): message`

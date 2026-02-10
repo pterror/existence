@@ -46,7 +46,9 @@ const Timeline = (() => {
   // --- Timeline state ---
   let seed = 0;
   let actions = [];
-  let rng = null;
+  let rng = null;       // game PRNG stream
+  let charRng = null;   // character generation PRNG stream (separate)
+  let character = null;  // stored character data
 
   // Track how many RNG calls have been made (for replay)
   let rngCallCount = 0;
@@ -54,8 +56,17 @@ const Timeline = (() => {
   function init(existingSeed) {
     seed = existingSeed != null ? existingSeed : generateSeed();
     actions = [];
-    rng = createPRNG(seed);
+
+    // Derive two independent sub-seeds from master seed
+    // so chargen changes never break gameplay replay
+    const sm = splitmix32(seed);
+    const charSeed = sm();
+    const gameSeed = sm();
+
+    charRng = createPRNG(charSeed);
+    rng = createPRNG(gameSeed);
     rngCallCount = 0;
+    character = null;
   }
 
   function generateSeed() {
@@ -64,6 +75,8 @@ const Timeline = (() => {
     crypto.getRandomValues(arr);
     return arr[0];
   }
+
+  // --- Game PRNG (gameplay, events, prose) ---
 
   // Get next random number [0, 1)
   function random() {
@@ -104,6 +117,34 @@ const Timeline = (() => {
     return arr[Math.floor(random() * arr.length)];
   }
 
+  // --- Character PRNG (chargen only, separate stream) ---
+
+  function charRandom() {
+    return charRng();
+  }
+
+  function charRandomInt(min, max) {
+    return min + Math.floor(charRandom() * (max - min + 1));
+  }
+
+  function charPick(arr) {
+    if (arr.length === 0) return undefined;
+    return arr[Math.floor(charRandom() * arr.length)];
+  }
+
+  // Weighted pick using character stream — for name sampling
+  // Takes array of [value, weight] pairs (compact format from names.js)
+  function charWeightedPick(pairs) {
+    let total = 0;
+    for (const pair of pairs) total += pair[1];
+    let r = charRandom() * total;
+    for (const pair of pairs) {
+      r -= pair[1];
+      if (r <= 0) return pair[0];
+    }
+    return pairs[pairs.length - 1][0];
+  }
+
   // --- Action log ---
 
   function recordAction(action) {
@@ -121,9 +162,17 @@ const Timeline = (() => {
 
   // --- Autosave / Restore ---
 
+  function setCharacter(char) {
+    character = char;
+  }
+
+  function getCharacter() {
+    return character;
+  }
+
   function save() {
     try {
-      const data = JSON.stringify({ seed, actions });
+      const data = JSON.stringify({ seed, character, actions });
       localStorage.setItem(STORAGE_KEY, data);
     } catch (e) {
       // localStorage might be full or unavailable — silently continue
@@ -162,10 +211,18 @@ const Timeline = (() => {
 
     seed = data.seed;
     actions = data.actions;
-    rng = createPRNG(seed);
+    character = data.character || null;
+
+    // Re-derive the same sub-seeds
+    const sm = splitmix32(seed);
+    const charSeed = sm();
+    const gameSeed = sm();
+
+    charRng = createPRNG(charSeed);
+    rng = createPRNG(gameSeed);
     rngCallCount = 0;
 
-    return { seed, actions: data.actions };
+    return { seed, character, actions: data.actions };
   }
 
   function getSeed() {
@@ -180,6 +237,12 @@ const Timeline = (() => {
     weightedPick,
     chance,
     pick,
+    charRandom,
+    charRandomInt,
+    charPick,
+    charWeightedPick,
+    setCharacter,
+    getCharacter,
     recordAction,
     getActions,
     getActionCount,

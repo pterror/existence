@@ -3,6 +3,372 @@
 
 const Content = (() => {
 
+  // --- Relationship prose tables ---
+  // Keyed on flavor archetype. Name is the only dynamic part.
+
+  const friendMessages = {
+    sends_things: (name) => Timeline.pick([
+      `${name} sent a picture of a cat sitting in a shopping bag. No caption. None needed.`,
+      `A message from ${name} — a screenshot of a tweet, no context. The kind of thing that means she was thinking of you.`,
+      `${name} sent a voice memo. Fifteen seconds long. You'll listen to it later. Probably.`,
+      `A link from ${name}. No message, just the link. You'll look at it eventually.`,
+    ]),
+    checks_in: (name) => Timeline.pick([
+      `A message from ${name}. "Hey, you good?" You stare at it. You don't type anything back yet.`,
+      `${name} texted. "Haven't heard from you." Simple. Not pushy. That makes it harder to ignore.`,
+      `A text from ${name}: "Just checking in." Three words that sit there, waiting.`,
+      `${name} sent a thumbs up emoji, then "thinking of you." Nothing else. Nothing else needed.`,
+    ]),
+    dry_humor: (name) => Timeline.pick([
+      `${name} linked a video with "lmao this is you." You don't watch it yet but you save it.`,
+      `${name} in the group chat, complaining about his landlord again. The usual.`,
+      `A text from ${name}: "life update: still alive." You almost smile.`,
+      `${name} sent a meme. It's not funny, but that's the joke. You get it.`,
+    ]),
+    earnest: (name) => Timeline.pick([
+      `A message from ${name}. Something about a sunset. Genuine in a way you can't match right now.`,
+      `${name} texted a long paragraph about their week. You read it twice. You don't reply yet.`,
+      `A text from ${name}: "Saw something that reminded me of you today." It lands somewhere soft.`,
+      `${name} asks how you're really doing. The "really" is doing a lot of work in that sentence.`,
+    ]),
+  };
+
+  const friendIsolatedMessages = {
+    sends_things: (name) => `Your phone buzzes. ${name}. You look at the name on the screen. You don't open it yet.`,
+    checks_in: (name) => `A message from ${name}. "Hey, you good?" You stare at it. You don't type anything back yet.`,
+    dry_humor: (name) => `${name} texted something. The notification sits there. You'll read it later.`,
+    earnest: (name) => `Your phone buzzes. ${name}. You look at the name on the screen for a while.`,
+  };
+
+  const friendIdleThoughts = {
+    sends_things: (name) => [
+      `You think about messaging ${name}. You don't pick up the phone.`,
+      `You try to remember the last time you talked to ${name}. Actually talked, not just reacted to something sent.`,
+    ],
+    checks_in: (name) => [
+      `${name} would want to know how you're doing. That's the problem.`,
+      `You could text ${name} back. The thought comes and goes.`,
+    ],
+    dry_humor: (name) => [
+      `Your phone is right there. ${name} texted two days ago. You still haven't answered.`,
+      `You think about ${name}'s last message. You almost type something back.`,
+    ],
+    earnest: (name) => [
+      `${name} would listen, if you called. You know that. It doesn't help as much as it should.`,
+      `You think about ${name}. About reaching out. The thought weighs more than it should.`,
+    ],
+  };
+
+  // --- Coworker prose tables ---
+
+  const coworkerChatter = {
+    warm_quiet: (name) => Timeline.pick([
+      `"Long day, huh?" ${name}, not really expecting an answer. Never does.`,
+      `"You want coffee?" ${name}, already walking to the machine, asking over a shoulder.`,
+      `${name} glances over and half-smiles. Doesn't say anything. Doesn't need to.`,
+      `${name} sets a cup of water near you without a word. Small.`,
+    ]),
+    mundane_talker: (name) => Timeline.pick([
+      `${name} mentions something about the weather. You say something back. The ritual of it.`,
+      `${name} is talking about a show from last night. You nod in the right places.`,
+      `${name} sighs loudly at the screen. Does this about once an hour.`,
+      `${name} says something about traffic this morning. You make a sound of agreement.`,
+    ]),
+    stressed_out: (name) => Timeline.pick([
+      `${name} mutters something under their breath. Screen-related, probably.`,
+      `${name} is on the phone again, voice tighter than it needs to be.`,
+      `"Can you believe this?" ${name}, to no one in particular. The screen is the problem today.`,
+      `${name} exhales through teeth. Something happened. Something always happens.`,
+    ]),
+  };
+
+  const coworkerInteraction = {
+    warm_quiet: (name) => Timeline.pick([
+      `"Hey." ${name} looks up. "Hey." That's it. That's the whole exchange. But it happened.`,
+      `${name}'s talking about a restaurant from the weekend. You ask which one. An almost-smile while describing it.`,
+      `You say something to ${name}. Something small. The response is warm and brief. Enough.`,
+    ]),
+    mundane_talker: (name) => Timeline.pick([
+      `You ask ${name} about the coffee. Same as yesterday. You nod. It's small. It's something.`,
+      `${name} tells you about a sale somewhere. You listen. It's easier than not listening.`,
+      `You mention the weather to ${name}. The conversation goes exactly where you'd expect. It's fine.`,
+    ]),
+    stressed_out: (name) => Timeline.pick([
+      `You ask ${name} how it's going. The answer involves a deadline. It always involves a deadline.`,
+      `${name} vents for thirty seconds about something that happened. You listen. That's what's needed.`,
+      `"Don't even ask," ${name} says, before you ask. So you don't.`,
+    ]),
+  };
+
+  // --- Job-specific workplace descriptions ---
+
+  const workplaceDescriptions = {
+    office: () => {
+      const mood = State.moodTone();
+      const job = State.jobTier();
+      const energy = State.energyTier();
+      const stress = State.stressTier();
+      const tasksDone = State.get('work_tasks_done');
+      const tasksExpected = State.get('work_tasks_expected');
+      const time = State.timePeriod();
+
+      let desc = '';
+
+      if (mood === 'numb' || mood === 'heavy') {
+        desc = 'The office. Fluorescent lights that make everything the same temperature of visible.';
+      } else if (mood === 'fraying') {
+        desc = 'The office. The sound of keyboards and the smell of someone\'s microwave lunch.';
+      } else {
+        desc = 'The workplace. Your desk, your screen, the sounds of other people working.';
+      }
+
+      if (job === 'at_risk') {
+        desc += ' You can feel people noticing when you arrive. When you leave. What you do in between.';
+      } else if (job === 'shaky') {
+        desc += ' Nobody has said anything directly. That might be worse.';
+      }
+
+      if (tasksDone < tasksExpected) {
+        if (energy === 'depleted' || energy === 'exhausted') {
+          desc += ' There are things to do. The screen is right there. Your eyes keep sliding off it.';
+        } else if (stress === 'overwhelmed') {
+          desc += ' The task list exists. Looking at it feels like swallowing something solid.';
+        } else {
+          desc += ' Things to do on the screen. The usual.';
+        }
+      } else {
+        desc += ' You\'ve gotten through what was expected today. The time still needs to pass.';
+      }
+
+      if (time === 'afternoon') {
+        desc += ' The afternoon stretches.';
+      }
+
+      return desc;
+    },
+
+    retail: () => {
+      const mood = State.moodTone();
+      const job = State.jobTier();
+      const energy = State.energyTier();
+      const stress = State.stressTier();
+      const tasksDone = State.get('work_tasks_done');
+      const tasksExpected = State.get('work_tasks_expected');
+      const time = State.timePeriod();
+
+      let desc = '';
+
+      if (mood === 'numb' || mood === 'heavy') {
+        desc = 'The store. Overhead music you stopped hearing weeks ago. Fluorescent everything.';
+      } else if (mood === 'fraying') {
+        desc = 'The store. The music is always the same playlist. Someone is always looking for something.';
+      } else {
+        desc = 'The store floor. Registers, shelves, the quiet hum of the place being open.';
+      }
+
+      if (job === 'at_risk') {
+        desc += ' You feel the cameras more than usual. Or maybe that\'s just you.';
+      } else if (job === 'shaky') {
+        desc += ' The schedule has been shorter lately. Nobody explains why.';
+      }
+
+      if (tasksDone < tasksExpected) {
+        if (energy === 'depleted' || energy === 'exhausted') {
+          desc += ' There\'s stock to move. Your legs already know how long you\'ve been standing.';
+        } else if (stress === 'overwhelmed') {
+          desc += ' The returns pile. The reshelf cart. The customer at register two who\'s been waiting.';
+        } else {
+          desc += ' Things to restock. The usual.';
+        }
+      } else {
+        desc += ' The tasks are done. The shift isn\'t. You find something to look busy with.';
+      }
+
+      if (time === 'afternoon') {
+        desc += ' The afternoon lull. Fewer customers, more standing.';
+      }
+
+      return desc;
+    },
+
+    food_service: () => {
+      const mood = State.moodTone();
+      const job = State.jobTier();
+      const energy = State.energyTier();
+      const stress = State.stressTier();
+      const tasksDone = State.get('work_tasks_done');
+      const tasksExpected = State.get('work_tasks_expected');
+      const time = State.timePeriod();
+
+      let desc = '';
+
+      if (mood === 'numb' || mood === 'heavy') {
+        desc = 'The kitchen. Grease smell baked into everything. The floor mats are the only mercy.';
+      } else if (mood === 'fraying') {
+        desc = 'The line. Ticket printer going. Someone calls an order. Timer beeps. All of it at once.';
+      } else {
+        desc = 'Behind the counter. The kitchen hum, the fryer, the steady rhythm of orders.';
+      }
+
+      if (job === 'at_risk') {
+        desc += ' The manager has been watching more. Counting things. Making notes.';
+      } else if (job === 'shaky') {
+        desc += ' Your hours got cut last week. Nobody said why. You didn\'t ask.';
+      }
+
+      if (tasksDone < tasksExpected) {
+        if (energy === 'depleted' || energy === 'exhausted') {
+          desc += ' Tickets keep coming. Your hands know the work but the rest of you is somewhere else.';
+        } else if (stress === 'overwhelmed') {
+          desc += ' Three tickets deep and the printer isn\'t stopping. The lunch rush doesn\'t care how you feel.';
+        } else {
+          desc += ' Orders on the rail. The usual flow.';
+        }
+      } else {
+        desc += ' The rush is over. Cleaning. Prep for next round. The quieter kind of work.';
+      }
+
+      if (time === 'morning' || time === 'early_morning') {
+        desc += ' Morning prep. The opening routine your body does without you.';
+      }
+
+      return desc;
+    },
+  };
+
+  // --- Job-specific do_work prose ---
+
+  const doWorkProse = {
+    office: (canFocus, energy, stress) => {
+      if (!canFocus && energy === 'depleted') {
+        return 'You stare at the screen. Words move but they don\'t mean anything. Time passes anyway. You\'re not sure what you accomplished.';
+      }
+      if (!canFocus) {
+        return 'You try to focus. It\'s like pushing through water. Things get done, maybe, but you couldn\'t say what exactly.';
+      }
+      if (stress === 'overwhelmed') {
+        return 'You work through it. Each task is a small wall you have to climb. You climb them because that\'s what\'s there.';
+      }
+      if (energy === 'tired') {
+        return 'You work. Slowly, but it happens. One thing, then the next. The clock moves.';
+      }
+      return 'You settle into it. The work is the work — it\'s not interesting, but your hands know what to do. Something gets finished.';
+    },
+
+    retail: (canFocus, energy, stress) => {
+      if (!canFocus && energy === 'depleted') {
+        return 'You stand at the register. Scan, bag, repeat. Your body does it. Your mind is somewhere behind glass.';
+      }
+      if (!canFocus) {
+        return 'Restock, face the shelves, help someone find something. The motions happen. Whether you\'re in them is another question.';
+      }
+      if (stress === 'overwhelmed') {
+        return '"Excuse me, do you work here?" You do. You help them. Another one. Another one after that.';
+      }
+      if (energy === 'tired') {
+        return 'Shelves. Register. Customer. Shelves again. Your feet have their own opinion about all of this.';
+      }
+      return 'You work the floor. Straighten things, ring people up, answer the same three questions. It fills the time.';
+    },
+
+    food_service: (canFocus, energy, stress) => {
+      if (!canFocus && energy === 'depleted') {
+        return 'The ticket says what to do. Your hands do it. There\'s a gap between you and the work that\'s getting wider.';
+      }
+      if (!canFocus) {
+        return 'Orders come in. You make them. The fryer beeps and you pull the basket. It\'s not focus, it\'s muscle memory.';
+      }
+      if (stress === 'overwhelmed') {
+        return 'Three tickets at once. The timer. Someone needs more fries. You work through it because stopping isn\'t one of the options.';
+      }
+      if (energy === 'tired') {
+        return 'You work the line. Plate, garnish, slide. Your back has a suggestion about when to stop. You ignore it.';
+      }
+      return 'The rhythm of it. Ticket comes, you make it, it goes out. When it\'s flowing like this, the time actually moves.';
+    },
+  };
+
+  // --- Job-specific work_break prose ---
+
+  const workBreakProse = {
+    office: (mood) => {
+      if (mood === 'numb' || mood === 'hollow') {
+        return 'You stand in the hallway near the water fountain. Not getting water. Just standing somewhere that isn\'t your desk.';
+      }
+      if (mood === 'fraying') {
+        return 'You go to the bathroom and stand there. Breathe. The tiles are cool. Nobody needs anything from you for sixty seconds.';
+      }
+      return 'Break room. Stale coffee smell. You stand by the window and look at nothing in particular. It helps more than it should.';
+    },
+
+    retail: (mood) => {
+      if (mood === 'numb' || mood === 'hollow') {
+        return 'The stockroom. You lean against a shelf of product and close your eyes for a minute. Nobody comes looking.';
+      }
+      if (mood === 'fraying') {
+        return 'You go to the back. Stand by the loading dock door. The air is different back here. Colder. Better.';
+      }
+      return 'You step into the break room. Plastic chair, vending machine hum. You sit. Your feet thank you silently.';
+    },
+
+    food_service: (mood) => {
+      if (mood === 'numb' || mood === 'hollow') {
+        return 'You step outside the back door. Concrete, dumpster, sky. It\'s not pretty but it\'s not the kitchen.';
+      }
+      if (mood === 'fraying') {
+        return 'You lean against the walk-in cooler door. The cold on your back. Thirty seconds of something like relief.';
+      }
+      return 'You drink water from the plastic cup you\'ve been refilling all shift. Lean against the wall. Breathe air that isn\'t fryer grease.';
+    },
+  };
+
+  // --- Job-specific work_task_appears event ---
+
+  const workTaskEvent = {
+    office: () => {
+      State.adjustStress(3);
+      return 'An email. Another thing that needs doing. It goes on the list, which is the same as all the other lists.';
+    },
+    retail: () => {
+      State.adjustStress(3);
+      return Timeline.pick([
+        'The walkie crackles. Someone needs help in aisle six.',
+        'A customer is waiting at the counter. Has been for a while, apparently.',
+        'A delivery showed up. Boxes in the back that need to be somewhere else.',
+      ]);
+    },
+    food_service: () => {
+      State.adjustStress(3);
+      return Timeline.pick([
+        'The ticket printer rattles. Another order. The paper curls off the end.',
+        'Someone calls out an order correction. You adjust. Again.',
+        'The timer beeps. Something needs to come out of the fryer now.',
+      ]);
+    },
+  };
+
+  // --- Job-specific break_room_noise / ambient ---
+
+  const workAmbientEvent = {
+    office: () => {
+      return 'Laughter from the break room. You\'re not sure about what. It drifts and fades.';
+    },
+    retail: () => {
+      return Timeline.pick([
+        'The overhead music changes to a song you know. You wish it hadn\'t.',
+        'The automatic doors open and close. Open and close.',
+        'A child is crying somewhere in the store. The sound carries.',
+      ]);
+    },
+    food_service: () => {
+      return Timeline.pick([
+        'The exhaust fan changes pitch for a second, then settles.',
+        'Someone drops a pan in the back. The clatter hangs in the air.',
+        'The drive-through speaker crackles with a voice you can\'t quite make out.',
+      ]);
+    },
+  };
+
   // --- Location descriptions ---
   // Each returns prose based on current state. No labels, no meters.
 
@@ -61,7 +427,7 @@ const Content = (() => {
       }
 
       if (!State.get('dressed') && time !== 'deep_night' && time !== 'night') {
-        desc += ' You\'re still in the old grey t-shirt and boxers you slept in.';
+        desc += ' You\'re still in ' + Character.get('sleepwear') + '.';
       }
 
       return desc;
@@ -226,50 +592,9 @@ const Content = (() => {
     },
 
     workplace: () => {
-      const time = State.timePeriod();
-      const job = State.jobTier();
-      const stress = State.stressTier();
-      const energy = State.energyTier();
-      const mood = State.moodTone();
-      const tasksDone = State.get('work_tasks_done');
-      const tasksExpected = State.get('work_tasks_expected');
-
-      let desc = '';
-
-      if (mood === 'numb' || mood === 'heavy') {
-        desc = 'The office. Fluorescent lights that make everything the same temperature of visible.';
-      } else if (mood === 'fraying') {
-        desc = 'The office. The sound of keyboards and the smell of someone\'s microwave lunch.';
-      } else {
-        desc = 'The workplace. Your desk, your screen, the sounds of other people working.';
-      }
-
-      // Job standing flavor
-      if (job === 'at_risk') {
-        desc += ' You can feel people noticing when you arrive. When you leave. What you do in between.';
-      } else if (job === 'shaky') {
-        desc += ' Nobody has said anything directly. That might be worse.';
-      }
-
-      // Tasks
-      if (tasksDone < tasksExpected) {
-        if (energy === 'depleted' || energy === 'exhausted') {
-          desc += ' There are things to do. The screen is right there. Your eyes keep sliding off it.';
-        } else if (stress === 'overwhelmed') {
-          desc += ' The task list exists. Looking at it feels like swallowing something solid.';
-        } else {
-          desc += ' Things to do on the screen. The usual.';
-        }
-      } else {
-        desc += ' You\'ve gotten through what was expected today. The time still needs to pass.';
-      }
-
-      // Time
-      if (time === 'afternoon') {
-        desc += ' The afternoon stretches.';
-      }
-
-      return desc;
+      const jobType = Character.get('job_type');
+      const descFn = workplaceDescriptions[jobType] || workplaceDescriptions.office;
+      return descFn();
     },
 
     corner_store: () => {
@@ -302,9 +627,6 @@ const Content = (() => {
   };
 
   // --- Interactions ---
-  // Each interaction: { id, label, available(state), execute(state), timeCost }
-  // available() returns true/false — things just aren't there when they can't be
-  // execute() modifies state and returns prose
 
   const interactions = {
     // === BEDROOM ===
@@ -322,22 +644,20 @@ const Content = (() => {
         const energy = State.energyTier();
         const stress = State.stressTier();
 
-        // Sleep duration varies
         let sleepMinutes;
         if (energy === 'depleted') {
-          sleepMinutes = Timeline.randomInt(180, 360); // crash hard
+          sleepMinutes = Timeline.randomInt(180, 360);
         } else if (energy === 'exhausted') {
           sleepMinutes = Timeline.randomInt(120, 300);
         } else {
           sleepMinutes = Timeline.randomInt(60, 180);
         }
 
-        // Stress makes sleep less restful
         let energyGain;
         if (stress === 'overwhelmed' || stress === 'strained') {
-          energyGain = sleepMinutes / 10; // poor sleep
+          energyGain = sleepMinutes / 10;
         } else {
-          energyGain = sleepMinutes / 5; // decent sleep
+          energyGain = sleepMinutes / 5;
         }
 
         State.adjustEnergy(energyGain);
@@ -347,7 +667,6 @@ const Content = (() => {
 
         const hours = Math.round(sleepMinutes / 60);
 
-        // Response variants
         if (energy === 'depleted') {
           if (stress === 'overwhelmed') {
             return 'You lie down and something gives way. Not quite sleep. More like your body collecting a debt. You surface ' + hours + ' hours later, not rested exactly, but less far from it.';
@@ -380,12 +699,12 @@ const Content = (() => {
         const mess = State.get('apartment_mess');
 
         if (mood === 'numb' || mood === 'heavy') {
-          return 'Jeans. The black hoodie. Each piece is a separate decision. You make them all, eventually.';
+          return Character.get('outfit_low_mood');
         }
         if (mess > 60) {
-          return 'You find a shirt in the pile that passes the smell test. Jeans from the chair. Good enough.';
+          return Character.get('outfit_messy');
         }
-        return 'Jeans, a flannel, socks that match close enough. You get dressed.';
+        return Character.get('outfit_default');
       },
     },
 
@@ -592,7 +911,6 @@ const Content = (() => {
           timeCost = Timeline.randomInt(45, 90);
           energyCost = -15;
           stressEffect = 5;
-          // Might not even finish the task
           if (Timeline.chance(0.6)) {
             State.set('work_tasks_done', State.get('work_tasks_done') + 1);
           }
@@ -602,20 +920,9 @@ const Content = (() => {
         State.adjustStress(stressEffect);
         State.advanceTime(timeCost);
 
-        // Prose
-        if (!canFocus && energy === 'depleted') {
-          return 'You stare at the screen. Words move but they don\'t mean anything. Time passes anyway. You\'re not sure what you accomplished.';
-        }
-        if (!canFocus) {
-          return 'You try to focus. It\'s like pushing through water. Things get done, maybe, but you couldn\'t say what exactly.';
-        }
-        if (stress === 'overwhelmed') {
-          return 'You work through it. Each task is a small wall you have to climb. You climb them because that\'s what\'s there.';
-        }
-        if (energy === 'tired') {
-          return 'You work. Slowly, but it happens. One thing, then the next. The clock moves.';
-        }
-        return 'You settle into it. The work is the work — it\'s not interesting, but your hands know what to do. Something gets finished.';
+        const jobType = Character.get('job_type');
+        const proseFn = doWorkProse[jobType] || doWorkProse.office;
+        return proseFn(canFocus, energy, stress);
       },
     },
 
@@ -630,14 +937,9 @@ const Content = (() => {
         State.advanceTime(10);
 
         const mood = State.moodTone();
-
-        if (mood === 'numb' || mood === 'hollow') {
-          return 'You stand in the hallway near the water fountain. Not getting water. Just standing somewhere that isn\'t your desk.';
-        }
-        if (mood === 'fraying') {
-          return 'You go to the bathroom and stand there. Breathe. The tiles are cool. Nobody needs anything from you for sixty seconds.';
-        }
-        return 'Break room. Stale coffee smell. You stand by the window and look at nothing in particular. It helps more than it should.';
+        const jobType = Character.get('job_type');
+        const proseFn = workBreakProse[jobType] || workBreakProse.office;
+        return proseFn(mood);
       },
     },
 
@@ -654,16 +956,18 @@ const Content = (() => {
         const social = State.socialTier();
         const mood = State.moodTone();
 
+        // Pick a coworker
+        const coworker = Timeline.chance(0.5)
+          ? Character.get('coworker1')
+          : Character.get('coworker2');
+
         if (social === 'isolated' || social === 'withdrawn') {
-          if (Timeline.chance(0.5)) {
-            return '"Hey." Priya looks up. "Hey." That\'s it. That\'s the whole exchange. But it happened.';
-          }
-          return 'You ask Kevin about the coffee. He says it\'s the same as yesterday. You nod. It\'s small. It\'s something.';
+          return coworkerInteraction[coworker.flavor](coworker.name);
         }
         if (mood === 'present' || mood === 'clear') {
-          return 'Priya\'s talking about a restaurant she went to. You ask which one. She almost smiles when she describes it.';
+          return coworkerInteraction[coworker.flavor](coworker.name);
         }
-        return 'Kevin says something about the weather. You say something back. The ritual of it.';
+        return coworkerChatter[coworker.flavor](coworker.name);
       },
     },
 
@@ -762,11 +1066,12 @@ const Content = (() => {
     State.advanceTime(3);
 
     const results = [];
+    const supervisor = Character.get('supervisor');
 
     // Work message if late
     if (State.isLateForWork() && !State.get('at_work_today') && !State.get('called_in')) {
       if (Timeline.chance(0.5)) {
-        results.push('A message from your supervisor, Terri. "Everything okay?" Which means: where are you.');
+        results.push(`A message from your supervisor, ${supervisor.name}. "Everything okay?" Which means: where are you.`);
       }
     }
 
@@ -779,14 +1084,15 @@ const Content = (() => {
     // Social message
     if (Timeline.chance(0.25)) {
       const social = State.socialTier();
+      // Pick a friend
+      const friend = Timeline.chance(0.5)
+        ? Character.get('friend1')
+        : Character.get('friend2');
+
       if (social === 'isolated' || social === 'withdrawn') {
-        results.push('A message from Marcus. "Hey, you good?" You stare at it. You don\'t type anything back yet.');
+        results.push(friendIsolatedMessages[friend.flavor](friend.name));
       } else {
-        results.push(Timeline.pick([
-          'Dana sent a picture of a cat sitting in a shopping bag. No caption. None needed.',
-          'Marcus linked a video with "lmao this is you." You don\'t watch it yet but you save it.',
-          'A message from Dana — a screenshot of a tweet, no context. The kind of thing that means she was thinking of you.',
-        ]));
+        results.push(friendMessages[friend.flavor](friend.name));
       }
       State.adjustSocial(3);
     }
@@ -811,7 +1117,7 @@ const Content = (() => {
   const callInSick = {
     id: 'call_in',
     label: 'Call in to work',
-    location: null, // available anywhere with phone
+    location: null,
     available: () => {
       return State.get('has_phone') && State.get('phone_battery') > 5
         && !State.get('at_work_today') && !State.get('called_in')
@@ -832,7 +1138,6 @@ const Content = (() => {
   };
 
   // --- Events ---
-  // Prose for events triggered by world.js
 
   const eventText = {
     alarm: () => {
@@ -845,7 +1150,8 @@ const Content = (() => {
 
     phone_work_where_are_you: () => {
       State.adjustStress(8);
-      return 'Your phone buzzes. Terri. "Hey, are you coming in today?" The screen waits for an answer you don\'t type yet.';
+      const supervisor = Character.get('supervisor');
+      return `Your phone buzzes. ${supervisor.name}. "Hey, are you coming in today?" The screen waits for an answer you don't type yet.`;
     },
 
     phone_bill_notification: () => {
@@ -856,14 +1162,14 @@ const Content = (() => {
     phone_message_friend: () => {
       State.adjustSocial(2);
       const social = State.socialTier();
+      const friend = Timeline.chance(0.5)
+        ? Character.get('friend1')
+        : Character.get('friend2');
+
       if (social === 'isolated') {
-        return 'Your phone buzzes. Dana. You look at her name on the screen. You don\'t open it yet.';
+        return friendIsolatedMessages[friend.flavor](friend.name);
       }
-      return Timeline.pick([
-        'A text from Dana. A photo of her neighbor\'s dog wearing a sweater. "Emergency," she wrote.',
-        'Marcus in the group chat, complaining about his landlord again. The usual.',
-        'Dana sent a voice memo. Fifteen seconds long. You\'ll listen to it later. Probably.',
-      ]);
+      return friendMessages[friend.flavor](friend.name);
     },
 
     late_anxiety: () => {
@@ -890,7 +1196,7 @@ const Content = (() => {
         if (weather === 'drizzle') {
           return 'Rain starts outside. You hear it on the window.';
         }
-        return '';  // Don't always notice weather changes from inside
+        return '';
       }
       if (weather === 'drizzle') {
         return 'It starts to rain. Not hard. Just enough to matter.';
@@ -903,22 +1209,22 @@ const Content = (() => {
 
     coworker_speaks: () => {
       State.adjustSocial(3);
-      const phrases = [
-        '"Long day, huh?" Priya, not really expecting an answer. She never does.',
-        'Kevin mentions something about his kid\'s soccer game. You nod in the right places.',
-        '"You want coffee?" Priya, already walking to the machine, asking over her shoulder.',
-        'Kevin sighs loudly at his screen. He does this about once an hour.',
-      ];
-      return Timeline.pick(phrases);
+      const coworker = Timeline.chance(0.5)
+        ? Character.get('coworker1')
+        : Character.get('coworker2');
+      return coworkerChatter[coworker.flavor](coworker.name);
     },
 
     work_task_appears: () => {
-      State.adjustStress(3);
-      return 'An email. Another thing that needs doing. It goes on the list, which is the same as all the other lists.';
+      const jobType = Character.get('job_type');
+      const fn = workTaskEvent[jobType] || workTaskEvent.office;
+      return fn();
     },
 
     break_room_noise: () => {
-      return 'Laughter from the break room. You\'re not sure about what. It drifts and fades.';
+      const jobType = Character.get('job_type');
+      const fn = workAmbientEvent[jobType] || workAmbientEvent.office;
+      return fn();
     },
 
     apartment_sound: () => {
@@ -988,7 +1294,6 @@ const Content = (() => {
   };
 
   // --- Idle thoughts ---
-  // Surface when the player does nothing for a while
 
   const idleThoughts = () => {
     const mood = State.moodTone();
@@ -1007,8 +1312,9 @@ const Content = (() => {
         'There\'s a blankness that isn\'t peace and isn\'t pain. Just absence of the energy for either.',
       );
     } else if (mood === 'hollow') {
+      const friend1 = Character.get('friend1');
       thoughts.push(
-        'You think about calling Dana. You don\'t pick up the phone.',
+        `You think about calling ${friend1.name}. You don't pick up the phone.`,
         'What would you do if you could do anything. The question doesn\'t even finish forming.',
         'The silence has texture. You\'re learning its patterns.',
       );
@@ -1053,10 +1359,11 @@ const Content = (() => {
 
     // Social
     if (social === 'isolated') {
-      thoughts.push(
-        'You try to remember the last time you talked to Dana. Actually talked, not just reacted to something she sent.',
-        'Your phone is right there. Marcus texted two days ago. You still haven\'t answered.',
-      );
+      const friend1 = Character.get('friend1');
+      const friend2 = Character.get('friend2');
+      const f1thoughts = friendIdleThoughts[friend1.flavor](friend1.name);
+      const f2thoughts = friendIdleThoughts[friend2.flavor](friend2.name);
+      thoughts.push(...f1thoughts, ...f2thoughts);
     }
 
     return Timeline.pick(thoughts);
@@ -1070,7 +1377,7 @@ const Content = (() => {
 
     // Within apartment
     if (World.getLocation(from)?.area === 'apartment' && World.getLocation(to)?.area === 'apartment') {
-      return ''; // No text for moving between rooms
+      return '';
     }
 
     // Leaving apartment
@@ -1082,7 +1389,7 @@ const Content = (() => {
         return 'You lock the door. The hallway, the stairs, the outside. Each one a small decision you make by making it.';
       }
       if (!State.get('dressed')) {
-        return 'You step outside in the grey t-shirt and boxers. The air reminds you immediately. You don\'t go back in.';
+        return 'You step outside in ' + Character.get('sleepwear') + '. The air reminds you immediately. You don\'t go back in.';
       }
       return 'You lock up and head out.';
     }

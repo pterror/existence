@@ -170,6 +170,36 @@ body {
   border-radius: 2px;
 }
 
+/* Name inputs — chargen custom name fields */
+
+.name-input-wrapper {
+  margin-bottom: 0.5em;
+}
+
+.name-input {
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid #3a3530;
+  color: #c8c0b8;
+  font-family: 'Source Serif 4', 'Georgia', serif;
+  font-weight: 300;
+  font-size: 1rem;
+  line-height: 1.7;
+  padding: 0.2em 0;
+  width: 100%;
+  max-width: 14em;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.name-input:focus {
+  border-bottom-color: #8a8078;
+}
+
+.name-input::placeholder {
+  color: #4a4540;
+}
+
 /* Selection */
 
 ::selection {
