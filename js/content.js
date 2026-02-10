@@ -1,0 +1,1171 @@
+// content.js — all text content, variants, events
+// A world, not a script. Text carries everything.
+
+const Content = (() => {
+
+  // --- Location descriptions ---
+  // Each returns prose based on current state. No labels, no meters.
+
+  const locationDescriptions = {
+    apartment_bedroom: () => {
+      const energy = State.energyTier();
+      const time = State.timePeriod();
+      const mess = State.get('apartment_mess');
+      const mood = State.moodTone();
+
+      let desc = '';
+
+      // Time-based opening
+      if (time === 'early_morning' || time === 'morning') {
+        if (energy === 'depleted' || energy === 'exhausted') {
+          desc = 'The room is too bright. Everything about getting up feels like a negotiation with your own body.';
+        } else if (energy === 'tired') {
+          desc = 'Morning light pushes through the blinds. You\'re awake, technically.';
+        } else {
+          desc = 'Morning. The blinds let in pale light. The day is there, waiting.';
+        }
+      } else if (time === 'deep_night' || time === 'night') {
+        if (mood === 'numb' || mood === 'hollow') {
+          desc = 'The ceiling is there. It\'s been there. You\'ve been looking at it.';
+        } else if (energy === 'depleted') {
+          desc = 'The bed has you. Not in a restful way — more like gravity won.';
+        } else {
+          desc = 'Your room in the dark. The shapes of things you know are there.';
+        }
+      } else if (time === 'evening') {
+        if (mood === 'heavy' || mood === 'numb') {
+          desc = 'The room feels smaller in the evening. The walls are close.';
+        } else {
+          desc = 'Evening light makes the room almost warm. Almost.';
+        }
+      } else {
+        if (mood === 'clear') {
+          desc = 'Your bedroom. Familiar, small, yours.';
+        } else if (mood === 'hollow' || mood === 'quiet') {
+          desc = 'Your room. The quiet is the loudest thing in it.';
+        } else {
+          desc = 'Your bedroom. The bed, the dresser, the window.';
+        }
+      }
+
+      // Mess details
+      if (mess > 70) {
+        desc += ' Clothes on the floor have been there long enough to stop looking like they just fell.';
+      } else if (mess > 45) {
+        desc += ' A few things out of place. Not bad. Not great.';
+      }
+
+      // Alarm detail
+      if (State.get('alarm_set') && !State.get('alarm_went_off') && time === 'early_morning') {
+        desc += ' The alarm clock on the nightstand shows ' + State.getTimeString() + '.';
+      }
+
+      if (!State.get('dressed') && time !== 'deep_night' && time !== 'night') {
+        desc += ' You\'re still in what you slept in.';
+      }
+
+      return desc;
+    },
+
+    apartment_kitchen: () => {
+      const hunger = State.hungerTier();
+      const fridge = State.get('fridge_food');
+      const mess = State.get('apartment_mess');
+      const mood = State.moodTone();
+      const time = State.timePeriod();
+
+      let desc = '';
+
+      if (mood === 'numb' || mood === 'heavy') {
+        desc = 'The kitchen. Fluorescent light. Linoleum.';
+      } else if (mood === 'clear') {
+        desc = 'The kitchen. Small but functional.';
+      } else {
+        desc = 'The kitchen.';
+      }
+
+      // Fridge
+      if (fridge === 0) {
+        if (hunger === 'starving' || hunger === 'very_hungry') {
+          desc += ' The fridge is empty. You checked already, but you check again.';
+        } else {
+          desc += ' The fridge has nothing in it worth mentioning.';
+        }
+      } else if (fridge === 1) {
+        desc += ' There\'s something in the fridge. Not much.';
+      } else if (fridge <= 3) {
+        desc += ' A few things in the fridge. Enough for now.';
+      } else {
+        desc += ' The fridge is reasonably stocked.';
+      }
+
+      // Hunger
+      if (hunger === 'starving') {
+        desc += ' Your stomach has moved past complaining into something quieter and worse.';
+      } else if (hunger === 'very_hungry') {
+        desc += ' Standing in here makes the hunger sharper.';
+      }
+
+      // Mess
+      if (mess > 60) {
+        desc += ' Dishes in the sink. They\'ve been there.';
+      }
+
+      // Time of day flavor
+      if (time === 'morning' || time === 'early_morning') {
+        desc += ' The window shows grey morning outside.';
+      }
+
+      // The door out
+      desc += ' The front door is through here.';
+
+      return desc;
+    },
+
+    apartment_bathroom: () => {
+      const energy = State.energyTier();
+      const mood = State.moodTone();
+      const showered = State.get('showered');
+
+      let desc = 'The bathroom. Mirror, sink, shower.';
+
+      if (mood === 'numb' || mood === 'hollow') {
+        desc = 'The bathroom. The mirror is there. You don\'t have to look.';
+      } else if (mood === 'fraying') {
+        desc = 'Tile walls. The faucet drips on its own schedule.';
+      }
+
+      if (!showered) {
+        if (energy === 'depleted' || energy === 'exhausted') {
+          desc += ' A shower would take something you\'re not sure you have.';
+        } else if (energy === 'tired') {
+          desc += ' A shower might help. Or it might just be one more thing.';
+        } else {
+          desc += ' The shower is right there.';
+        }
+      }
+
+      return desc;
+    },
+
+    street: () => {
+      const weather = State.get('weather');
+      const time = State.timePeriod();
+      const energy = State.energyTier();
+      const mood = State.moodTone();
+
+      let desc = '';
+
+      // Weather + time
+      if (weather === 'drizzle') {
+        if (mood === 'heavy' || mood === 'numb') {
+          desc = 'Rain. Not hard enough to be dramatic. Just enough to be one more thing.';
+        } else {
+          desc = 'A light drizzle. The sidewalk darkens in patches.';
+        }
+      } else if (weather === 'overcast') {
+        desc = 'The sky is flat and grey. The kind of sky that doesn\'t commit.';
+      } else if (weather === 'clear') {
+        if (mood === 'clear' || mood === 'present') {
+          desc = 'Clear sky. The light is honest today.';
+        } else {
+          desc = 'The sky is clear. It doesn\'t help as much as it should.';
+        }
+      } else {
+        desc = 'Grey. Everything out here is some shade of grey today.';
+      }
+
+      // Time
+      if (time === 'early_morning' || time === 'morning') {
+        desc += ' A few people heading somewhere. Everyone is heading somewhere.';
+      } else if (time === 'deep_night') {
+        desc += ' Empty street. Streetlights. The occasional car.';
+      } else if (time === 'evening') {
+        desc += ' The light is going. People walk faster in the evening.';
+      }
+
+      // Energy
+      if (energy === 'depleted' || energy === 'exhausted') {
+        desc += ' The sidewalk feels longer than it is.';
+      }
+
+      desc += ' Your apartment building is behind you. The bus stop is down the block. There\'s a corner store across the way.';
+
+      return desc;
+    },
+
+    bus_stop: () => {
+      const time = State.timePeriod();
+      const weather = State.get('weather');
+      const energy = State.energyTier();
+      const mood = State.moodTone();
+
+      let desc = 'The bus stop. A bench, a sign, a schedule nobody trusts.';
+
+      if (time === 'morning' || time === 'late_morning') {
+        desc += ' Other people waiting. Nobody makes eye contact.';
+      } else if (time === 'deep_night') {
+        desc = 'The bus stop at night. The schedule says buses run until midnight. It\'s vague about what "run" means.';
+      } else if (time === 'evening') {
+        desc += ' Fewer people now. The ones here look like they\'re coming from the same kind of day.';
+      }
+
+      if (weather === 'drizzle') {
+        desc += ' The shelter doesn\'t quite cover the bench.';
+      }
+
+      if (energy === 'depleted') {
+        desc += ' The bench is the best thing here.';
+      }
+
+      if (mood === 'hollow' || mood === 'quiet') {
+        desc += ' Waiting. That\'s what this place is for.';
+      }
+
+      return desc;
+    },
+
+    workplace: () => {
+      const time = State.timePeriod();
+      const job = State.jobTier();
+      const stress = State.stressTier();
+      const energy = State.energyTier();
+      const mood = State.moodTone();
+      const tasksDone = State.get('work_tasks_done');
+      const tasksExpected = State.get('work_tasks_expected');
+
+      let desc = '';
+
+      if (mood === 'numb' || mood === 'heavy') {
+        desc = 'The office. Fluorescent lights that make everything the same temperature of visible.';
+      } else if (mood === 'fraying') {
+        desc = 'The office. The sound of keyboards and the smell of someone\'s microwave lunch.';
+      } else {
+        desc = 'The workplace. Your desk, your screen, the sounds of other people working.';
+      }
+
+      // Job standing flavor
+      if (job === 'at_risk') {
+        desc += ' You can feel people noticing when you arrive. When you leave. What you do in between.';
+      } else if (job === 'shaky') {
+        desc += ' Nobody has said anything directly. That might be worse.';
+      }
+
+      // Tasks
+      if (tasksDone < tasksExpected) {
+        if (energy === 'depleted' || energy === 'exhausted') {
+          desc += ' There are things to do. The screen is right there. Your eyes keep sliding off it.';
+        } else if (stress === 'overwhelmed') {
+          desc += ' The task list exists. Looking at it feels like swallowing something solid.';
+        } else {
+          desc += ' Things to do on the screen. The usual.';
+        }
+      } else {
+        desc += ' You\'ve gotten through what was expected today. The time still needs to pass.';
+      }
+
+      // Time
+      if (time === 'afternoon') {
+        desc += ' The afternoon stretches.';
+      }
+
+      return desc;
+    },
+
+    corner_store: () => {
+      const money = State.moneyTier();
+      const hunger = State.hungerTier();
+      const mood = State.moodTone();
+
+      let desc = 'The corner store. Bright inside, that chemical-clean smell.';
+
+      if (money === 'broke') {
+        desc += ' You look at things. Looking is free.';
+      } else if (money === 'scraping' || money === 'tight') {
+        if (hunger === 'starving' || hunger === 'very_hungry') {
+          desc += ' Everything has a price tag. You do the math without wanting to.';
+        } else {
+          desc += ' Shelves of things. You know what things cost here.';
+        }
+      } else {
+        desc += ' Shelves of the usual. Bread, canned stuff, drinks.';
+      }
+
+      if (mood === 'hollow') {
+        desc += ' The cashier doesn\'t look up.';
+      } else {
+        desc += ' The person at the register is watching something on their phone.';
+      }
+
+      return desc;
+    },
+  };
+
+  // --- Interactions ---
+  // Each interaction: { id, label, available(state), execute(state), timeCost }
+  // available() returns true/false — things just aren't there when they can't be
+  // execute() modifies state and returns prose
+
+  const interactions = {
+    // === BEDROOM ===
+    sleep: {
+      id: 'sleep',
+      label: 'Lie down',
+      location: 'apartment_bedroom',
+      available: () => {
+        const energy = State.energyTier();
+        const time = State.timePeriod();
+        return energy === 'depleted' || energy === 'exhausted' || energy === 'tired'
+          || time === 'night' || time === 'deep_night' || time === 'evening';
+      },
+      execute: () => {
+        const energy = State.energyTier();
+        const stress = State.stressTier();
+
+        // Sleep duration varies
+        let sleepMinutes;
+        if (energy === 'depleted') {
+          sleepMinutes = Timeline.randomInt(180, 360); // crash hard
+        } else if (energy === 'exhausted') {
+          sleepMinutes = Timeline.randomInt(120, 300);
+        } else {
+          sleepMinutes = Timeline.randomInt(60, 180);
+        }
+
+        // Stress makes sleep less restful
+        let energyGain;
+        if (stress === 'overwhelmed' || stress === 'strained') {
+          energyGain = sleepMinutes / 10; // poor sleep
+        } else {
+          energyGain = sleepMinutes / 5; // decent sleep
+        }
+
+        State.adjustEnergy(energyGain);
+        State.adjustStress(-sleepMinutes / 20);
+        State.set('actions_since_rest', 0);
+        State.advanceTime(sleepMinutes);
+
+        const hours = Math.round(sleepMinutes / 60);
+
+        // Response variants
+        if (energy === 'depleted') {
+          if (stress === 'overwhelmed') {
+            return 'You lie down and something gives way. Not quite sleep. More like your body collecting a debt. You surface ' + hours + ' hours later, not rested exactly, but less far from it.';
+          }
+          return 'You\'re asleep before you finish lying down. ' + hours + ' hours disappear. You wake up like coming up from deep water.';
+        }
+
+        if (stress === 'overwhelmed' || stress === 'strained') {
+          return 'Sleep comes in pieces. You\'re awake, then you\'re not, then you are again and the ceiling is the same. ' + hours + ' hours of something that isn\'t quite rest.';
+        }
+
+        if (hours >= 4) {
+          return 'You sleep. Actually sleep. ' + hours + ' hours that feel like they belonged to you. You wake up and the light has changed.';
+        }
+
+        return 'You close your eyes. Time passes — maybe an hour, maybe more. When you open them the room looks the same, but something shifted.';
+      },
+    },
+
+    get_dressed: {
+      id: 'get_dressed',
+      label: 'Get dressed',
+      location: 'apartment_bedroom',
+      available: () => !State.get('dressed'),
+      execute: () => {
+        State.set('dressed', true);
+        State.advanceTime(5);
+
+        const mood = State.moodTone();
+        const mess = State.get('apartment_mess');
+
+        if (mood === 'numb' || mood === 'heavy') {
+          return 'You put on clothes. Each piece is a separate decision. You make them all, eventually.';
+        }
+        if (mess > 60) {
+          return 'Clean enough clothes from the pile. You get dressed.';
+        }
+        return 'You get dressed. Regular clothes. The ones you wear.';
+      },
+    },
+
+    check_phone_bedroom: {
+      id: 'check_phone_bedroom',
+      label: 'Check your phone',
+      location: 'apartment_bedroom',
+      available: () => State.get('has_phone') && State.get('phone_battery') > 0,
+      execute: () => checkPhoneContent(),
+    },
+
+    // === KITCHEN ===
+    eat_food: {
+      id: 'eat_food',
+      label: 'Eat something',
+      location: 'apartment_kitchen',
+      available: () => State.get('fridge_food') > 0,
+      execute: () => {
+        State.set('fridge_food', State.get('fridge_food') - 1);
+        State.adjustHunger(-35);
+        State.set('ate_today', true);
+        State.set('consecutive_meals_skipped', 0);
+        State.advanceTime(15);
+
+        const hunger = State.hungerTier();
+        const mood = State.moodTone();
+
+        if (mood === 'numb') {
+          return 'You eat. It goes in. You don\'t taste much of it, but your body takes it without complaint.';
+        }
+        if (hunger === 'starving' || hunger === 'very_hungry') {
+          return 'You eat too fast. Standing at the counter, not even sitting down. It helps. It helps a lot, actually.';
+        }
+        return 'You put something together from what\'s there and eat it. Nothing special. It\'s enough.';
+      },
+    },
+
+    drink_water: {
+      id: 'drink_water',
+      label: 'Glass of water',
+      location: 'apartment_kitchen',
+      available: () => true,
+      execute: () => {
+        State.adjustEnergy(2);
+        State.adjustHunger(-3);
+        State.advanceTime(2);
+
+        const energy = State.energyTier();
+        if (energy === 'depleted' || energy === 'exhausted') {
+          return 'Water from the tap. You drink it standing at the sink. Your body wanted it more than you realized.';
+        }
+        return 'You fill a glass and drink it. Tap water. It\'s fine.';
+      },
+    },
+
+    do_dishes: {
+      id: 'do_dishes',
+      label: 'Deal with the dishes',
+      location: 'apartment_kitchen',
+      available: () => State.get('apartment_mess') > 40 && State.get('energy') > 15,
+      execute: () => {
+        State.set('apartment_mess', Math.max(0, State.get('apartment_mess') - 25));
+        State.adjustEnergy(-8);
+        State.adjustStress(-5);
+        State.advanceTime(15);
+
+        const mood = State.moodTone();
+        if (mood === 'heavy' || mood === 'numb') {
+          return 'You wash dishes. The warm water is the closest thing to comfort available right now. One thing, at least, is done.';
+        }
+        return 'You wash the dishes. Warm water, soap, the repetition of it. The kitchen looks a little more like someone lives here on purpose.';
+      },
+    },
+
+    check_phone_kitchen: {
+      id: 'check_phone_kitchen',
+      label: 'Check your phone',
+      location: 'apartment_kitchen',
+      available: () => State.get('has_phone') && State.get('phone_battery') > 0,
+      execute: () => checkPhoneContent(),
+    },
+
+    // === BATHROOM ===
+    shower: {
+      id: 'shower',
+      label: 'Take a shower',
+      location: 'apartment_bathroom',
+      available: () => !State.get('showered') && State.get('energy') > 8,
+      execute: () => {
+        State.set('showered', true);
+        State.adjustEnergy(-3);
+        State.adjustStress(-8);
+        State.advanceTime(15);
+
+        const mood = State.moodTone();
+        const energy = State.energyTier();
+
+        if (mood === 'numb' || mood === 'heavy') {
+          return 'The water is warm. You stand in it longer than you need to. The world outside the shower curtain can wait.';
+        }
+        if (energy === 'tired' || energy === 'exhausted') {
+          return 'Hot water. It doesn\'t fix anything but it makes the surface of things bearable. You get out when it starts going cold.';
+        }
+        return 'A shower. Hot water, steam, the sound of it. You feel more like a person when you step out.';
+      },
+    },
+
+    use_sink: {
+      id: 'use_sink',
+      label: 'Wash your face',
+      location: 'apartment_bathroom',
+      available: () => true,
+      execute: () => {
+        State.adjustEnergy(2);
+        State.adjustStress(-2);
+        State.advanceTime(3);
+
+        return 'Cold water on your face. You look at yourself in the mirror, briefly. You look away.';
+      },
+    },
+
+    // === STREET ===
+    check_phone_street: {
+      id: 'check_phone_street',
+      label: 'Check your phone',
+      location: 'street',
+      available: () => State.get('has_phone') && State.get('phone_battery') > 0,
+      execute: () => checkPhoneContent(),
+    },
+
+    sit_on_step: {
+      id: 'sit_on_step',
+      label: 'Sit on the step for a minute',
+      location: 'street',
+      available: () => State.get('energy') < 50,
+      execute: () => {
+        State.adjustEnergy(3);
+        State.advanceTime(Timeline.randomInt(5, 12));
+
+        const mood = State.moodTone();
+        const weather = State.get('weather');
+
+        if (weather === 'drizzle') {
+          return 'You sit on the step under the awning. Rain taps the concrete. A few minutes. No one bothers you about it.';
+        }
+        if (mood === 'hollow' || mood === 'quiet') {
+          return 'You sit. Watch people. They\'re all going places. You\'re sitting. Both of these things are fine.';
+        }
+        return 'You sit on the step. Just for a minute. The air is better than inside.';
+      },
+    },
+
+    // === BUS STOP ===
+    wait_for_bus: {
+      id: 'wait_for_bus',
+      label: 'Wait',
+      location: 'bus_stop',
+      available: () => true,
+      execute: () => {
+        const waitTime = Timeline.randomInt(3, 15);
+        State.advanceTime(waitTime);
+
+        const mood = State.moodTone();
+        const weather = State.get('weather');
+
+        let text = '';
+        if (waitTime > 10) {
+          text = 'The bus takes its time. You wait. ';
+        } else {
+          text = 'A few minutes. ';
+        }
+
+        if (weather === 'drizzle') {
+          text += 'Rain collects on the shelter roof and drips from the edge in a line.';
+        } else if (mood === 'hollow') {
+          text += 'You stand there. People come and go. The bus doesn\'t, and then it does.';
+        } else {
+          text += 'Buses arrive when they arrive.';
+        }
+
+        return text;
+      },
+    },
+
+    // === WORKPLACE ===
+    do_work: {
+      id: 'do_work',
+      label: 'Work on what\'s in front of you',
+      location: 'workplace',
+      available: () => State.get('work_tasks_done') < State.get('work_tasks_expected'),
+      execute: () => {
+        const canFocus = State.canFocus();
+        const energy = State.energyTier();
+        const stress = State.stressTier();
+
+        let timeCost, energyCost, stressEffect;
+
+        if (canFocus) {
+          timeCost = Timeline.randomInt(30, 60);
+          energyCost = -10;
+          stressEffect = -3;
+          State.set('work_tasks_done', State.get('work_tasks_done') + 1);
+        } else {
+          timeCost = Timeline.randomInt(45, 90);
+          energyCost = -15;
+          stressEffect = 5;
+          // Might not even finish the task
+          if (Timeline.chance(0.6)) {
+            State.set('work_tasks_done', State.get('work_tasks_done') + 1);
+          }
+        }
+
+        State.adjustEnergy(energyCost);
+        State.adjustStress(stressEffect);
+        State.advanceTime(timeCost);
+
+        // Prose
+        if (!canFocus && energy === 'depleted') {
+          return 'You stare at the screen. Words move but they don\'t mean anything. Time passes anyway. You\'re not sure what you accomplished.';
+        }
+        if (!canFocus) {
+          return 'You try to focus. It\'s like pushing through water. Things get done, maybe, but you couldn\'t say what exactly.';
+        }
+        if (stress === 'overwhelmed') {
+          return 'You work through it. Each task is a small wall you have to climb. You climb them because that\'s what\'s there.';
+        }
+        if (energy === 'tired') {
+          return 'You work. Slowly, but it happens. One thing, then the next. The clock moves.';
+        }
+        return 'You settle into it. The work is the work — it\'s not interesting, but your hands know what to do. Something gets finished.';
+      },
+    },
+
+    work_break: {
+      id: 'work_break',
+      label: 'Step away for a minute',
+      location: 'workplace',
+      available: () => State.get('energy') < 60 || State.get('stress') > 40,
+      execute: () => {
+        State.adjustEnergy(5);
+        State.adjustStress(-5);
+        State.advanceTime(10);
+
+        const mood = State.moodTone();
+
+        if (mood === 'numb' || mood === 'hollow') {
+          return 'You stand in the hallway near the water fountain. Not getting water. Just standing somewhere that isn\'t your desk.';
+        }
+        if (mood === 'fraying') {
+          return 'You go to the bathroom and stand there. Breathe. The tiles are cool. Nobody needs anything from you for sixty seconds.';
+        }
+        return 'Break room. Stale coffee smell. You stand by the window and look at nothing in particular. It helps more than it should.';
+      },
+    },
+
+    talk_to_coworker: {
+      id: 'talk_to_coworker',
+      label: 'Say something to someone nearby',
+      location: 'workplace',
+      available: () => State.get('social') < 70 && State.get('energy') > 10 && State.isWorkHours(),
+      execute: () => {
+        State.adjustSocial(8);
+        State.adjustStress(-3);
+        State.advanceTime(5);
+
+        const social = State.socialTier();
+        const mood = State.moodTone();
+
+        if (social === 'isolated' || social === 'withdrawn') {
+          if (Timeline.chance(0.5)) {
+            return '"Hey." They look up. "Hey." That\'s it. That\'s the whole exchange. But it happened.';
+          }
+          return 'You say something about the coffee or the weather. They respond. It\'s small. It\'s something.';
+        }
+        if (mood === 'present' || mood === 'clear') {
+          return 'A few words with someone about nothing important. They almost smile. You almost do too.';
+        }
+        return 'You make conversation. Brief, surface-level. It\'s what work is.';
+      },
+    },
+
+    check_phone_work: {
+      id: 'check_phone_work',
+      label: 'Check your phone',
+      location: 'workplace',
+      available: () => State.get('has_phone') && State.get('phone_battery') > 0,
+      execute: () => checkPhoneContent(),
+    },
+
+    // === CORNER STORE ===
+    buy_groceries: {
+      id: 'buy_groceries',
+      label: 'Get a few things',
+      location: 'corner_store',
+      available: () => State.get('money') >= 8,
+      execute: () => {
+        const cost = Timeline.randomFloat(8, 14);
+        const roundedCost = Math.round(cost * 100) / 100;
+
+        if (!State.spendMoney(roundedCost)) {
+          return 'You pick things up and put them back. The math doesn\'t work today.';
+        }
+
+        State.set('fridge_food', Math.min(6, State.get('fridge_food') + 3));
+        State.advanceTime(10);
+
+        const money = State.moneyTier();
+
+        if (money === 'scraping' || money === 'tight') {
+          return 'Bread. Rice. A can of beans. You count it out at the register and try not to think about what\'s left.';
+        }
+        if (money === 'broke') {
+          return 'The basics. Just the basics. The receipt is a small piece of bad news you fold and put in your pocket.';
+        }
+        return 'You pick up what you need. Bread, some produce, a couple of cans. The cashier rings it up without comment.';
+      },
+    },
+
+    buy_cheap_meal: {
+      id: 'buy_cheap_meal',
+      label: 'Grab something to eat now',
+      location: 'corner_store',
+      available: () => State.get('money') >= 3,
+      execute: () => {
+        const cost = Timeline.randomFloat(3, 5.50);
+        const roundedCost = Math.round(cost * 100) / 100;
+
+        if (!State.spendMoney(roundedCost)) {
+          return 'Not enough. You put it back.';
+        }
+
+        State.adjustHunger(-30);
+        State.set('ate_today', true);
+        State.set('consecutive_meals_skipped', 0);
+        State.advanceTime(5);
+
+        const mood = State.moodTone();
+
+        if (mood === 'numb' || mood === 'heavy') {
+          return 'You eat it on the way out. Something wrapped in plastic from a warmer. It\'s food. It does what food does.';
+        }
+        return 'A sandwich from the cooler. You eat it standing outside the store. It\'s fine. It\'s enough.';
+      },
+    },
+
+    browse_store: {
+      id: 'browse_store',
+      label: 'Look around',
+      location: 'corner_store',
+      available: () => true,
+      execute: () => {
+        State.advanceTime(5);
+
+        const money = State.moneyTier();
+        const hunger = State.hungerTier();
+
+        if (money === 'broke') {
+          return 'You walk the aisles. Everything has a number attached and the numbers all say no.';
+        }
+        if (hunger === 'starving' && (money === 'scraping' || money === 'tight')) {
+          return 'You look at things you want and things you can afford and the overlap is very small.';
+        }
+        if (money === 'scraping') {
+          return 'You look at the prices. You know most of them already. They haven\'t gotten better.';
+        }
+        return 'You walk through. The fluorescent aisles. Same stuff as always. You don\'t need anything specific, but you look.';
+      },
+    },
+  };
+
+  // --- Shared phone content ---
+  function checkPhoneContent() {
+    State.set('phone_battery', Math.max(0, State.get('phone_battery') - 2));
+    State.advanceTime(3);
+
+    const results = [];
+
+    // Work message if late
+    if (State.isLateForWork() && !State.get('at_work_today') && !State.get('called_in')) {
+      if (Timeline.chance(0.5)) {
+        results.push('A message from work. Short. Asking where you are.');
+      }
+    }
+
+    // Bill notification
+    if (State.get('money') < 30 && Timeline.chance(0.3)) {
+      results.push('A notification about a bill. You can\'t deal with it right now, but now you know it\'s there.');
+      State.adjustStress(5);
+    }
+
+    // Social message
+    if (Timeline.chance(0.25)) {
+      const social = State.socialTier();
+      if (social === 'isolated' || social === 'withdrawn') {
+        results.push('A message from someone you haven\'t talked to in a while. "Hey, you good?" Two words you don\'t know how to answer.');
+      } else {
+        results.push('A message. Someone sharing something — a link, a thought. Nothing urgent. Proof someone thought of you.');
+      }
+      State.adjustSocial(3);
+    }
+
+    // Low battery
+    if (State.get('phone_battery') < 15) {
+      results.push('The battery is getting low.');
+    }
+
+    if (results.length === 0) {
+      const mood = State.moodTone();
+      if (mood === 'hollow' || mood === 'quiet') {
+        return 'You look at your phone. Nothing new. The screen looks at you back.';
+      }
+      return 'Nothing new. You put it away.';
+    }
+
+    return results.join(' ');
+  }
+
+  // --- Call in sick ---
+  const callInSick = {
+    id: 'call_in',
+    label: 'Call in to work',
+    location: null, // available anywhere with phone
+    available: () => {
+      return State.get('has_phone') && State.get('phone_battery') > 5
+        && !State.get('at_work_today') && !State.get('called_in')
+        && State.isWorkHours() && State.getHour() < 12;
+    },
+    execute: () => {
+      State.set('called_in', true);
+      State.adjustJobStanding(-8);
+      State.adjustStress(-10);
+      State.advanceTime(5);
+
+      const job = State.jobTier();
+      if (job === 'at_risk' || job === 'shaky') {
+        return 'You call. The phone rings twice. You say you\'re not coming in. The pause on the other end says more than the words that follow.';
+      }
+      return 'You call in. They say okay. It\'s fine. It\'s always fine, until it isn\'t.';
+    },
+  };
+
+  // --- Events ---
+  // Prose for events triggered by world.js
+
+  const eventText = {
+    alarm: () => {
+      const energy = State.energyTier();
+      if (energy === 'depleted' || energy === 'exhausted') {
+        return 'The alarm. That sound. It exists only to tell you that lying here isn\'t an option. Except it is. The snooze button is right there.';
+      }
+      return 'The alarm goes off. 6:30. The day starts whether you\'re ready or not.';
+    },
+
+    phone_work_where_are_you: () => {
+      State.adjustStress(8);
+      return 'Your phone buzzes. Work. "Are you coming in today?" The screen waits for an answer you don\'t type yet.';
+    },
+
+    phone_bill_notification: () => {
+      State.adjustStress(5);
+      return 'A notification slides down from the top of your phone. An amount due. A date. You\'ve seen it before. Seeing it again doesn\'t help.';
+    },
+
+    phone_message_friend: () => {
+      State.adjustSocial(2);
+      const social = State.socialTier();
+      if (social === 'isolated') {
+        return 'Your phone buzzes. A name you haven\'t seen in a while. You look at it. You don\'t open it yet.';
+      }
+      return 'A message from a friend. Something small. A link, a joke, a thought that made them think of you.';
+    },
+
+    late_anxiety: () => {
+      State.adjustStress(5);
+      return 'You\'re aware of the time. The kind of awareness that sits in your chest.';
+    },
+
+    hunger_pang: () => {
+      const location = World.getLocationId();
+      if (location === 'workplace') {
+        return 'Your stomach makes a sound. You glance around to see if anyone heard.';
+      }
+      return 'A wave of hunger. Not dramatic. Just your body reminding you it\'s there and it needs things.';
+    },
+
+    exhaustion_wave: () => {
+      return 'For a second everything feels heavy. Not just your body — the air, the light, the idea of doing the next thing.';
+    },
+
+    weather_shift: () => {
+      World.updateWeather();
+      const weather = State.get('weather');
+      if (World.isInside()) {
+        if (weather === 'drizzle') {
+          return 'Rain starts outside. You hear it on the window.';
+        }
+        return '';  // Don't always notice weather changes from inside
+      }
+      if (weather === 'drizzle') {
+        return 'It starts to rain. Not hard. Just enough to matter.';
+      }
+      if (weather === 'clear') {
+        return 'The clouds thin. Actual light comes through. It changes the look of everything.';
+      }
+      return 'The sky shifts. Still grey, but a different grey.';
+    },
+
+    coworker_speaks: () => {
+      State.adjustSocial(3);
+      const phrases = [
+        '"Long day, huh?" Someone near you, not really expecting an answer.',
+        'Someone mentions something about the weekend. You nod.',
+        '"You want coffee?" A coworker, already walking to the machine, asking over their shoulder.',
+        'The person next to you sighs loudly. Solidarity, maybe.',
+      ];
+      return Timeline.pick(phrases);
+    },
+
+    work_task_appears: () => {
+      State.adjustStress(3);
+      return 'An email. Another thing that needs doing. It goes on the list, which is the same as all the other lists.';
+    },
+
+    break_room_noise: () => {
+      return 'Laughter from the break room. You\'re not sure about what. It drifts and fades.';
+    },
+
+    apartment_sound: () => {
+      const time = State.timePeriod();
+      if (time === 'deep_night' || time === 'night') {
+        const sounds = [
+          'A pipe knocks somewhere in the wall. The building talking to itself.',
+          'The fridge hums louder for a moment, then settles.',
+          'Footsteps above you. Someone else awake.',
+        ];
+        return Timeline.pick(sounds);
+      }
+      const sounds = [
+        'A door shuts somewhere else in the building.',
+        'Muffled TV from next door. Voices that aren\'t talking to you.',
+        'The radiator clicks.',
+      ];
+      return Timeline.pick(sounds);
+    },
+
+    apartment_notice: () => {
+      const mess = State.get('apartment_mess');
+      if (mess > 70) {
+        return Timeline.pick([
+          'You notice how cluttered things have gotten. When did that happen.',
+          'The apartment looks like someone stopped trying. You live here.',
+        ]);
+      }
+      if (mess > 40) {
+        return Timeline.pick([
+          'A few things out of place. The kind of mess that builds without you deciding to let it.',
+          'You see the apartment the way a visitor would, for a second. Then you stop.',
+        ]);
+      }
+      return '';
+    },
+
+    street_ambient: () => {
+      const time = State.timePeriod();
+      const weather = State.get('weather');
+      if (weather === 'drizzle') {
+        return 'Car tires on wet road. That specific hiss.';
+      }
+      if (time === 'morning') {
+        return Timeline.pick([
+          'A bus goes past, full of people who look like they\'re still waking up.',
+          'Someone walks a dog. The dog is more enthusiastic about it than they are.',
+        ]);
+      }
+      return Timeline.pick([
+        'Traffic. The city sound that stops being a sound if you live here long enough.',
+        'A siren, far off. Moving away from you.',
+      ]);
+    },
+
+    someone_passes: () => {
+      const social = State.socialTier();
+      if (social === 'isolated') {
+        return 'Someone walks past. They don\'t see you. You\'re part of the scenery.';
+      }
+      return Timeline.pick([
+        'Someone passes, talking on their phone. Fragments of someone else\'s life.',
+        'A person walks by quickly, somewhere to be.',
+        'An older woman passes and nods. You nod back. That\'s enough.',
+      ]);
+    },
+  };
+
+  // --- Idle thoughts ---
+  // Surface when the player does nothing for a while
+
+  const idleThoughts = () => {
+    const mood = State.moodTone();
+    const hunger = State.hungerTier();
+    const energy = State.energyTier();
+    const social = State.socialTier();
+    const location = World.getLocationId();
+
+    const thoughts = [];
+
+    // Mood-based
+    if (mood === 'numb') {
+      thoughts.push(
+        'You\'re here. That\'s the whole thought.',
+        'Time is passing. You know this because things are slightly different than before.',
+        'There\'s a blankness that isn\'t peace and isn\'t pain. Just absence of the energy for either.',
+      );
+    } else if (mood === 'hollow') {
+      thoughts.push(
+        'You think about calling someone. You don\'t think about who.',
+        'What would you do if you could do anything. The question doesn\'t even finish forming.',
+        'The silence has texture. You\'re learning its patterns.',
+      );
+    } else if (mood === 'heavy') {
+      thoughts.push(
+        'Everything takes more than it should. Even thinking about doing things.',
+        'You stand still for a moment, not deciding. Just not moving yet.',
+      );
+    } else if (mood === 'fraying') {
+      thoughts.push(
+        'Your jaw is clenched. When did that start.',
+        'There\'s a tightness behind your eyes. Not a headache. Just proximity to one.',
+      );
+    } else if (mood === 'quiet') {
+      thoughts.push(
+        'It\'s quiet. It\'s been quiet. You\'re used to it, which is different from liking it.',
+        'You exist in the room. The room exists around you. That\'s the arrangement.',
+      );
+    } else if (mood === 'clear' || mood === 'present') {
+      thoughts.push(
+        'For a moment, nothing needs doing. This is rare. You notice it.',
+        'You breathe. Actually notice yourself breathing. That\'s something.',
+      );
+    } else {
+      thoughts.push(
+        'A moment. Nothing happening. Just a moment.',
+        'You wait, though you\'re not sure for what.',
+      );
+    }
+
+    // Hunger
+    if (hunger === 'starving') {
+      thoughts.push('Your stomach has stopped asking and started insisting.');
+    } else if (hunger === 'very_hungry') {
+      thoughts.push('Food. The thought comes and goes and comes back.');
+    }
+
+    // Energy
+    if (energy === 'depleted') {
+      thoughts.push('Your eyelids are heavy. Everything is heavy.');
+    }
+
+    // Social
+    if (social === 'isolated') {
+      thoughts.push(
+        'You try to remember the last real conversation you had. Not words. Conversation.',
+        'Your phone is right there. It\'s always right there.',
+      );
+    }
+
+    return Timeline.pick(thoughts);
+  };
+
+  // --- Transition text ---
+
+  const transitionText = (from, to) => {
+    const mood = State.moodTone();
+    const energy = State.energyTier();
+
+    // Within apartment
+    if (World.getLocation(from)?.area === 'apartment' && World.getLocation(to)?.area === 'apartment') {
+      return ''; // No text for moving between rooms
+    }
+
+    // Leaving apartment
+    if (World.getLocation(from)?.area === 'apartment' && to === 'street') {
+      if (energy === 'depleted' || energy === 'exhausted') {
+        return 'Getting out the door takes more than it should. But you\'re out.';
+      }
+      if (mood === 'heavy') {
+        return 'You lock the door. The hallway, the stairs, the outside. Each one a small decision you make by making it.';
+      }
+      if (!State.get('dressed')) {
+        return 'You step outside in what you\'re wearing. It\'s fine. Probably.';
+      }
+      return 'You lock up and head out.';
+    }
+
+    // Going home
+    if (from === 'street' && World.getLocation(to)?.area === 'apartment') {
+      if (energy === 'depleted') {
+        return 'The stairs up to your apartment are the last obstacle. You clear them.';
+      }
+      return 'Back inside. The apartment is the same as you left it.';
+    }
+
+    // To bus stop
+    if (from === 'street' && to === 'bus_stop') {
+      return 'You walk to the bus stop. It\'s not far.';
+    }
+
+    // Bus ride to work
+    if (from === 'bus_stop' && to === 'workplace') {
+      const hour = State.getHour();
+      if (hour >= 7 && hour <= 9) {
+        if (mood === 'numb' || mood === 'heavy') {
+          return 'The bus is full. Bodies pressed together going the same direction. You find a spot to stand and not be. Twenty minutes of that.';
+        }
+        return 'The morning bus. Standing room only. You wedge in and stare at the back of someone\'s jacket for twenty minutes.';
+      }
+      return 'The bus comes. It\'s quieter this time of day. You find a seat and watch the city slide past the window.';
+    }
+
+    // Bus ride from work
+    if (from === 'workplace' && to === 'bus_stop') {
+      if (energy === 'depleted' || energy === 'exhausted') {
+        return 'The bus ride back. You sit and close your eyes and exist in the motion of it.';
+      }
+      return 'The ride back. The city in reverse. You\'re not thinking about work anymore, mostly.';
+    }
+
+    // To corner store
+    if (from === 'street' && to === 'corner_store') {
+      return 'The corner store\'s door chimes when you push it open.';
+    }
+
+    // From corner store
+    if (from === 'corner_store' && to === 'street') {
+      return 'Back outside.';
+    }
+
+    // From bus stop back to street
+    if (from === 'bus_stop' && to === 'street') {
+      return 'You walk back from the bus stop.';
+    }
+
+    return '';
+  };
+
+  // --- Get available interactions for current location ---
+
+  function getAvailableInteractions() {
+    const location = World.getLocationId();
+    const available = [];
+
+    for (const interaction of Object.values(interactions)) {
+      if (interaction.location === location && interaction.available()) {
+        available.push(interaction);
+      }
+    }
+
+    // Call in sick — available anywhere
+    if (callInSick.available()) {
+      available.push(callInSick);
+    }
+
+    return available;
+  }
+
+  function getInteraction(id) {
+    for (const interaction of Object.values(interactions)) {
+      if (interaction.id === id) return interaction;
+    }
+    if (callInSick.id === id) return callInSick;
+    return null;
+  }
+
+  return {
+    locationDescriptions,
+    interactions,
+    eventText,
+    idleThoughts,
+    transitionText,
+    getAvailableInteractions,
+    getInteraction,
+    checkPhoneContent,
+  };
+})();
