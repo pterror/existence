@@ -1,7 +1,6 @@
 // timeline.js — seeded PRNG, action log, autosave/restore, deterministic replay
 
 const Timeline = (() => {
-  const STORAGE_KEY = 'existence_timeline';
 
   // --- xoshiro128** PRNG ---
   // 128-bit state, excellent statistical quality, deterministic
@@ -59,6 +58,10 @@ const Timeline = (() => {
 
   // Track how many RNG calls have been made (for replay)
   let rngCallCount = 0;
+
+  // Active run tracking
+  /** @type {string | null} */
+  let activeRunId = null;
 
   /** @param {number} [existingSeed] */
   function init(existingSeed) {
@@ -177,7 +180,7 @@ const Timeline = (() => {
     return actions.length;
   }
 
-  // --- Autosave / Restore ---
+  // --- Character ---
 
   /** @param {GameCharacter} char */
   function setCharacter(char) {
@@ -188,49 +191,32 @@ const Timeline = (() => {
     return character;
   }
 
+  // --- Save / Restore via Runs (IndexedDB) ---
+
+  /** @param {string} id */
+  function setActiveRunId(id) {
+    activeRunId = id;
+  }
+
+  function getActiveRunId() {
+    return activeRunId;
+  }
+
   function save() {
-    try {
-      const data = JSON.stringify({ seed, character, actions });
-      localStorage.setItem(STORAGE_KEY, data);
-    } catch (e) {
-      // localStorage might be full or unavailable — silently continue
+    if (activeRunId) {
+      Runs.saveActions(activeRunId, actions);
     }
   }
 
-  /** @returns {SaveData | null} */
-  function load() {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) return null;
-      const data = JSON.parse(raw);
-      if (data && typeof data.seed === 'number' && Array.isArray(data.actions)) {
-        return data;
-      }
-    } catch (e) {
-      // Corrupted save — treat as fresh start
-    }
-    return null;
-  }
-
-  function hasSave() {
-    return load() !== null;
-  }
-
-  function clearSave() {
-    localStorage.removeItem(STORAGE_KEY);
-  }
-
-  // --- Replay ---
-  // Reconstruct state by replaying seed + action sequence
-  // Returns the action list for the game to replay through its own update logic
-
-  function restore() {
-    const data = load();
-    if (!data) return null;
-
-    seed = data.seed;
-    actions = data.actions;
-    character = data.character || null;
+  /**
+   * Restore from a loaded run record. Initializes seed, character, actions, and PRNG.
+   * @param {RunRecord} runData
+   * @returns {{ seed: number, character: GameCharacter | null, actions: ActionEntry[] }}
+   */
+  function restoreFrom(runData) {
+    seed = runData.seed;
+    actions = runData.actions;
+    character = runData.character || null;
 
     // Re-derive the same sub-seeds
     const sm = splitmix32(seed);
@@ -241,7 +227,7 @@ const Timeline = (() => {
     rng = createPRNG(gameSeed);
     rngCallCount = 0;
 
-    return { seed, character, actions: data.actions };
+    return { seed, character, actions: runData.actions };
   }
 
   function getSeed() {
@@ -266,10 +252,9 @@ const Timeline = (() => {
     getActions,
     getActionCount,
     save,
-    load,
-    hasSave,
-    clearSave,
-    restore,
+    setActiveRunId,
+    getActiveRunId,
+    restoreFrom,
     getSeed
   };
 })();

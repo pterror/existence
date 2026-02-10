@@ -106,6 +106,30 @@ interface SaveData {
   actions: ActionEntry[];
 }
 
+// --- Run records ---
+
+interface RunRecord {
+  id: string;
+  seed: number;
+  character: GameCharacter;
+  actions: ActionEntry[];
+  status: 'active' | 'finished';
+  createdAt: number;
+  lastPlayed: number;
+  version: number;
+}
+
+interface RunSummary {
+  id: string;
+  status: 'active' | 'finished';
+  createdAt: number;
+  lastPlayed: number;
+  actionCount: number;
+  characterName: string;
+  jobType: string;
+  ageStage: string;
+}
+
 // --- UI callbacks ---
 
 interface UICallbacks {
@@ -114,4 +138,5 @@ interface UICallbacks {
   onIdle: () => void;
   onFocusTime: () => void;
   onFocusMoney: () => void;
+  onStepAway?: () => void;
 }

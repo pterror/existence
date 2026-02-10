@@ -218,6 +218,38 @@ body {
   color: #4a4540;
 }
 
+/* Step away — quiet, persistent exit to threshold */
+
+#step-away {
+  margin-top: 1.5rem;
+  padding-top: 0.5rem;
+  color: #3a3530;
+  font-size: 0.9rem;
+  cursor: pointer;
+  opacity: 0.4;
+  transition: opacity 0.4s ease, color 0.3s ease;
+  letter-spacing: 0.15em;
+}
+
+#step-away:hover {
+  opacity: 0.8;
+  color: #605850;
+}
+
+#step-away.hidden {
+  display: none;
+}
+
+/* Threshold — finished run entries */
+
+.threshold-finished {
+  opacity: 0.5;
+}
+
+.threshold-finished:hover {
+  opacity: 0.8;
+}
+
 /* Selection */
 
 ::selection {

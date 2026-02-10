@@ -414,10 +414,13 @@ const Chargen = (() => {
   // --- Finish ---
 
   /** @param {GameCharacter} char */
-  function finishCreation(char) {
+  async function finishCreation(char) {
     Timeline.setCharacter(char);
     Character.set(char);
-    Timeline.save();
+
+    // Create run in IndexedDB and set as active
+    const runId = await Runs.createRun(Timeline.getSeed(), char);
+    Timeline.setActiveRunId(runId);
 
     if (resolveCreation) {
       resolveCreation(char);
