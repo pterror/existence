@@ -182,7 +182,7 @@ const Chargen = (() => {
           label: 'Begin with a random life',
           action: () => {
             const char = generateRandom();
-            finishCreation(char);
+            showPlayerNameScreen(char);
           }
         },
         {
@@ -308,7 +308,7 @@ const Chargen = (() => {
         sandboxState.first_name = playerName.first;
         sandboxState.last_name = playerName.last;
 
-        finishCreation(/** @type {GameCharacter} */ (sandboxState));
+        showPlayerNameScreen(/** @type {GameCharacter} */ (sandboxState));
       }
     );
   }
@@ -409,6 +409,86 @@ const Chargen = (() => {
     input.maxLength = 20;
     wrapper.appendChild(input);
     return wrapper;
+  }
+
+  // --- Player name screen ---
+
+  /** @param {GameCharacter} char */
+  function showPlayerNameScreen(char) {
+    const passageEl = /** @type {HTMLElement} */ (document.getElementById('passage'));
+    const actionsEl = /** @type {HTMLElement} */ (document.getElementById('actions'));
+    const movementEl = /** @type {HTMLElement} */ (document.getElementById('movement'));
+    const eventTextEl = /** @type {HTMLElement} */ (document.getElementById('event-text'));
+
+    passageEl.classList.remove('visible');
+    actionsEl.innerHTML = '';
+    actionsEl.classList.remove('visible');
+    movementEl.innerHTML = '';
+    movementEl.classList.remove('visible');
+    eventTextEl.innerHTML = '';
+    eventTextEl.classList.remove('visible');
+
+    setTimeout(() => {
+      const first = document.createElement('span');
+      first.className = 'editable-name';
+      first.contentEditable = 'true';
+      first.spellcheck = false;
+      first.textContent = char.first_name;
+
+      const last = document.createElement('span');
+      last.className = 'editable-name';
+      last.contentEditable = 'true';
+      last.spellcheck = false;
+      last.textContent = char.last_name;
+
+      const p = document.createElement('p');
+      p.append(
+        'Your name is ',
+        first,
+        ' ',
+        last,
+        '. At least, that\u2019s what it says on everything.'
+      );
+
+      passageEl.innerHTML = '';
+      passageEl.appendChild(p);
+      passageEl.classList.add('visible');
+
+      // Prevent line breaks and strip pasted formatting
+      /** @param {KeyboardEvent} e */
+      const preventEnter = (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          /** @type {HTMLElement} */ (e.target).blur();
+        }
+      };
+      /** @param {ClipboardEvent} e */
+      const pastePlain = (e) => {
+        e.preventDefault();
+        const text = e.clipboardData ? e.clipboardData.getData('text/plain') : '';
+        document.execCommand('insertText', false, text.replace(/\n/g, ''));
+      };
+
+      first.addEventListener('keydown', preventEnter);
+      first.addEventListener('paste', pastePlain);
+      last.addEventListener('keydown', preventEnter);
+      last.addEventListener('paste', pastePlain);
+
+      setTimeout(() => {
+        const btn = document.createElement('button');
+        btn.className = 'action';
+        btn.textContent = 'This is you.';
+        btn.addEventListener('click', () => {
+          const firstName = (first.textContent || '').trim() || char.first_name;
+          const lastName = (last.textContent || '').trim() || char.last_name;
+          char.first_name = firstName;
+          char.last_name = lastName;
+          finishCreation(char);
+        });
+        actionsEl.appendChild(btn);
+        actionsEl.classList.add('visible');
+      }, 400);
+    }, 150);
   }
 
   // --- Finish ---

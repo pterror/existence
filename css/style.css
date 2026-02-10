@@ -218,6 +218,25 @@ body {
   color: #4a4540;
 }
 
+/* Editable name — inline contenteditable, looks like prose */
+
+.editable-name {
+  border-bottom: 1px solid #3a3530;
+  padding-bottom: 1px;
+  outline: none;
+  transition: border-color 0.3s ease, color 0.3s ease;
+  cursor: text;
+}
+
+.editable-name:hover {
+  border-bottom-color: #504840;
+}
+
+.editable-name:focus {
+  border-bottom-color: #8a8078;
+  color: #e0d8d0;
+}
+
 /* Step away — quiet, persistent exit to threshold */
 
 #step-away {
