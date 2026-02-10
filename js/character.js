@@ -59,22 +59,31 @@ const Character = (() => {
         break;
     }
 
-    // Job type affects shift times and task expectations
+    // Job type affects shift times, alarm, and task expectations
     switch (current.job_type) {
       case 'office':
-        State.set('work_shift_start', 9 * 60);   // 9:00 AM
-        State.set('work_shift_end', 17 * 60);     // 5:00 PM
+        State.set('work_shift_start', 9 * 60);    // 9:00 AM
+        State.set('work_shift_end', 17 * 60);      // 5:00 PM
         State.set('work_tasks_expected', 4);
+        State.set('alarm_time', 7 * 60 + 30);      // 7:30 AM
+        State.set('time', 7 * 60 + 30);
+        State.set('last_observed_time', 7 * 60 + 30);
         break;
       case 'retail':
         State.set('work_shift_start', 10 * 60);   // 10:00 AM
         State.set('work_shift_end', 18 * 60);      // 6:00 PM
         State.set('work_tasks_expected', 5);
+        State.set('alarm_time', 8 * 60 + 30);      // 8:30 AM
+        State.set('time', 8 * 60 + 30);
+        State.set('last_observed_time', 8 * 60 + 30);
         break;
       case 'food_service':
         State.set('work_shift_start', 7 * 60);    // 7:00 AM
         State.set('work_shift_end', 15 * 60);      // 3:00 PM
         State.set('work_tasks_expected', 6);
+        State.set('alarm_time', 5 * 60 + 30);      // 5:30 AM
+        State.set('time', 5 * 60 + 30);
+        State.set('last_observed_time', 5 * 60 + 30);
         break;
     }
   }

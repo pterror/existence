@@ -16,6 +16,7 @@ const State = (() => {
       job_standing: 65, // 0-100. How work perceives you.
 
       // Flags and soft state
+      alarm_time: 6 * 60 + 30,  // Minutes since midnight. When the alarm fires.
       alarm_set: true,
       alarm_went_off: false,
       at_work_today: false,

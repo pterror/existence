@@ -151,7 +151,8 @@ const World = (() => {
     const location = State.get('location');
 
     // Alarm
-    if (State.get('alarm_set') && !State.get('alarm_went_off') && time >= 6 * 60 + 30 && time < 7 * 60) {
+    const alarmTime = State.get('alarm_time');
+    if (State.get('alarm_set') && !State.get('alarm_went_off') && time >= alarmTime && time < alarmTime + 30) {
       if (location === 'apartment_bedroom') {
         State.set('alarm_went_off', true);
         events.push('alarm');

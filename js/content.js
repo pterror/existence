@@ -422,7 +422,8 @@ const Content = (() => {
       }
 
       // Alarm detail
-      if (State.get('alarm_set') && !State.get('alarm_went_off') && time === 'early_morning') {
+      if (State.get('alarm_set') && !State.get('alarm_went_off')
+          && (time === 'early_morning' || time === 'deep_night' || time === 'morning')) {
         desc += ' The alarm clock on the nightstand shows ' + State.getTimeString() + '.';
       }
 
@@ -724,6 +725,50 @@ const Content = (() => {
           return Character.get('outfit_messy');
         }
         return Character.get('outfit_default');
+      },
+    },
+
+    set_alarm: {
+      id: 'set_alarm',
+      label: 'Set your alarm',
+      location: 'apartment_bedroom',
+      available: () => {
+        const time = State.timePeriod();
+        return (time === 'evening' || time === 'night' || time === 'deep_night')
+          && State.get('has_phone') && State.get('phone_battery') > 0;
+      },
+      execute: () => {
+        // Set alarm relative to work shift — enough time to get ready and commute
+        const shiftStart = State.get('work_shift_start');
+        const alarmTime = shiftStart - 90; // 90 min before shift
+        State.set('alarm_time', alarmTime);
+        State.set('alarm_set', true);
+        State.set('alarm_went_off', false);
+        State.advanceTime(1);
+
+        const h = Math.floor(alarmTime / 60);
+        const m = alarmTime % 60;
+        const period = h >= 12 ? 'PM' : 'AM';
+        const displayH = h === 0 ? 12 : h > 12 ? h - 12 : h;
+        const timeStr = displayH + ':' + m.toString().padStart(2, '0') + ' ' + period;
+
+        return 'You set the alarm. ' + timeStr + '. The phone screen dims.';
+      },
+    },
+
+    skip_alarm: {
+      id: 'skip_alarm',
+      label: 'Turn off your alarm',
+      location: 'apartment_bedroom',
+      available: () => {
+        const time = State.timePeriod();
+        return State.get('alarm_set') && !State.get('alarm_went_off')
+          && (time === 'evening' || time === 'night' || time === 'deep_night');
+      },
+      execute: () => {
+        State.set('alarm_set', false);
+        State.advanceTime(1);
+        return 'You turn off the alarm. Tomorrow is tomorrow\'s problem.';
       },
     },
 
