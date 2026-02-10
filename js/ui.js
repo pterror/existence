@@ -55,6 +55,16 @@ const UI = (() => {
     awarenessMoneyEl.addEventListener('click', () => {
       if (callbacks.onFocusMoney) callbacks.onFocusMoney();
     });
+
+    // Pause idle timer when tab is hidden — prevents queued timeouts
+    // from dumping a wall of idle text when the player returns
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        stopIdleTimer();
+      } else if (idleCallback) {
+        scheduleNextIdle();
+      }
+    });
   }
 
   // --- Text rendering ---
