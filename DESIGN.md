@@ -249,6 +249,30 @@ Isolation builds over time without interaction. It's not a punishment — it's p
 
 Responding improves things. Ignoring doesn't make it worse immediately — but time does. Neither is judged.
 
+### Family
+
+Family isn't chosen. That's the thing. A friend who hurts you, you can stop calling. A parent who hurts you is still your parent, and the weight of that doesn't go away when you move out.
+
+**The spectrum of parental relationship:**
+
+**Supportive** — they call, they mean well, sometimes they help. The phone lights up with their name and it's fine. Maybe even good. This is the baseline the world assumes everyone has.
+
+**Conditional** — they love you, but. The "but" is where it lives. They love you but they wish you'd chosen a different career. They love you but they don't use your name. They love you but they liked who you were before. The condition is never stated. It's the shape of every conversation — the thing they don't ask about, the compliment that's also a correction, the silence after you tell them something true.
+
+**Hostile** — active rejection. Could be about identity (trans, gay, nonbinary). Could be about life choices (career, partner, religion, dropping out). Could be about nothing you can name. The consequences are material:
+- **Financial cutoff** — especially devastating for younger characters. A teen whose parents stop paying for things. A college student cut off. An adult who was counting on help that evaporated.
+- **Housing** — being kicked out. For a teen, this is existential. For an adult, it's a crisis that doesn't announce itself as one.
+- **Social network damage** — the parent who tells the rest of the family. Holidays that become performances or absences. Siblings who take sides.
+
+**Absent** — not hostile, just gone. The parent who left, who died, who was never there. The absence is its own weight. The contact that doesn't exist in the phone. The form that asks for an emergency contact.
+
+**Age shapes everything:**
+- A child or teen under a hostile parent has almost no agency. The parent controls housing, food, money, mobility. Judgment isn't just emotional — it's material power over your life.
+- A young adult might be financially dependent, partially or fully. Cutoff is a cliff.
+- An independent adult still carries it. The phone call you dread. The holiday math. The voice in your head that sounds like theirs.
+
+The phone is where this relationship lives for most ages. A message from a supportive parent and a message from a conditional parent look the same on the screen. The difference is in the body — the chest, the jaw, the pause before opening it.
+
 ### Coworkers and supervisor
 
 Coworkers are social proximity, not chosen relationships. The supervisor is an authority relationship. These people exist at work. They have patterns. You interact with them or you don't. (See Work section.)
