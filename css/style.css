@@ -192,6 +192,9 @@ body {
 
 .name-input-wrapper {
   margin-bottom: 0.5em;
+  display: flex;
+  align-items: baseline;
+  gap: 0.5em;
 }
 
 .name-input {
@@ -246,6 +249,23 @@ body {
 
 .chargen-option.selected {
   color: #c8c0b8;
+}
+
+/* Name re-roll buttons */
+
+.name-reroll {
+  background: none;
+  border: none;
+  color: #4a4540;
+  font-size: 0.85rem;
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 0;
+  transition: color 0.2s ease;
+}
+
+.name-reroll:hover {
+  color: #8a8078;
 }
 
 /* Editable name — inline contenteditable, looks like prose */

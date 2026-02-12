@@ -196,7 +196,7 @@ const Chargen = (() => {
     sandboxState = {};
     const usedNames = new Set();
 
-    // Consume all charRng upfront
+    // Consume charRng upfront for random elements
     const shuffled = [...outfitSets];
     for (let i = shuffled.length - 1; i > 0; i--) {
       const j = Timeline.charRandomInt(0, i);
@@ -204,7 +204,6 @@ const Chargen = (() => {
     }
     const outfitOptions = shuffled.slice(0, 3);
     const sleepwear = /** @type {string} */ (Timeline.charPick(sleepwearOptions));
-    sandboxState.age_stage = /** @type {string} */ (Timeline.charPick(['twenties', 'thirties', 'forties']));
 
     const friendFlavors = ['sends_things', 'checks_in', 'dry_humor', 'earnest'];
     const f1flavor = /** @type {string} */ (Timeline.charPick(friendFlavors));
@@ -266,6 +265,32 @@ const Chargen = (() => {
       }
       passageEl.appendChild(jobGroup);
 
+      // --- Age ---
+      const ageP = document.createElement('p');
+      ageP.textContent = 'Time has passed. How much depends.';
+      passageEl.appendChild(ageP);
+
+      const ageGroup = document.createElement('div');
+      ageGroup.className = 'chargen-group';
+      const ages = [
+        { label: 'Twenties', value: 'twenties' },
+        { label: 'Thirties', value: 'thirties' },
+        { label: 'Forties', value: 'forties' },
+      ];
+      for (const age of ages) {
+        const btn = document.createElement('button');
+        btn.className = 'chargen-option';
+        btn.textContent = age.label;
+        btn.addEventListener('click', () => {
+          sandboxState.age_stage = age.value;
+          ageGroup.querySelectorAll('.chargen-option').forEach(b => b.classList.remove('selected'));
+          btn.classList.add('selected');
+          maybeShowConfirm();
+        });
+        ageGroup.appendChild(btn);
+      }
+      passageEl.appendChild(ageGroup);
+
       // --- Wardrobe ---
       const wardrobeP = document.createElement('p');
       wardrobeP.textContent = 'Getting dressed. The daily negotiation with what to put on.';
@@ -296,8 +321,8 @@ const Chargen = (() => {
 
       const friendGroup = document.createElement('div');
       friendGroup.className = 'chargen-group';
-      const friend1Input = createNameInput(friend1Default);
-      const friend2Input = createNameInput(friend2Default);
+      const friend1Input = createNameInput(friend1Default, usedNames);
+      const friend2Input = createNameInput(friend2Default, usedNames);
       friendGroup.appendChild(friend1Input);
       friendGroup.appendChild(friend2Input);
       passageEl.appendChild(friendGroup);
@@ -309,9 +334,9 @@ const Chargen = (() => {
 
       const workGroup = document.createElement('div');
       workGroup.className = 'chargen-group';
-      const co1Input = createNameInput(coworker1Default);
-      const co2Input = createNameInput(coworker2Default);
-      const supInput = createNameInput(supervisorDefault);
+      const co1Input = createNameInput(coworker1Default, usedNames);
+      const co2Input = createNameInput(coworker2Default, usedNames);
+      const supInput = createNameInput(supervisorDefault, usedNames);
       workGroup.appendChild(co1Input);
       workGroup.appendChild(co2Input);
       workGroup.appendChild(supInput);
@@ -330,8 +355,19 @@ const Chargen = (() => {
       last.spellcheck = false;
       last.textContent = playerDefault.last;
 
+      const nameReroll = document.createElement('button');
+      nameReroll.className = 'name-reroll';
+      nameReroll.textContent = '\u21bb';
+      nameReroll.addEventListener('click', () => {
+        const currentFirst = (first.textContent || '').trim();
+        if (currentFirst) usedNames.delete(currentFirst);
+        const newName = generateName(usedNames);
+        first.textContent = newName.first;
+        last.textContent = newName.last;
+      });
+
       const nameP = document.createElement('p');
-      nameP.append('Your name is ', first, ' ', last, '. At least, that\u2019s what it says on everything.');
+      nameP.append('Your name is ', first, ' ', last, '. At least, that\u2019s what it says on everything. ', nameReroll);
       passageEl.appendChild(nameP);
 
       /** @param {KeyboardEvent} e */
@@ -349,9 +385,18 @@ const Chargen = (() => {
       last.addEventListener('keydown', preventEnter);
       last.addEventListener('paste', pastePlain);
 
+      // --- Start over ---
+      const startOverBtn = document.createElement('button');
+      startOverBtn.className = 'chargen-option';
+      startOverBtn.textContent = 'Start over';
+      startOverBtn.addEventListener('click', () => showSandboxPage());
+      const startOverP = document.createElement('p');
+      startOverP.appendChild(startOverBtn);
+      passageEl.appendChild(startOverP);
+
       passageEl.classList.add('visible');
 
-      // Confirm button — appears once job and wardrobe are chosen
+      // Confirm button — appears once job, age, and wardrobe are chosen
       const confirmBtn = document.createElement('button');
       confirmBtn.className = 'action';
       confirmBtn.textContent = 'This is you.';
@@ -369,7 +414,7 @@ const Chargen = (() => {
       actionsEl.appendChild(confirmBtn);
 
       function maybeShowConfirm() {
-        if (sandboxState.job_type && sandboxState.outfit_default) {
+        if (sandboxState.job_type && sandboxState.age_stage && sandboxState.outfit_default) {
           actionsEl.classList.add('visible');
         }
       }
@@ -378,8 +423,8 @@ const Chargen = (() => {
 
   // --- Helpers ---
 
-  /** @param {string} defaultValue */
-  function createNameInput(defaultValue) {
+  /** @param {string} defaultValue @param {Set<string>} [usedNames] */
+  function createNameInput(defaultValue, usedNames) {
     const wrapper = document.createElement('div');
     wrapper.className = 'name-input-wrapper';
     const input = document.createElement('input');
@@ -388,6 +433,20 @@ const Chargen = (() => {
     input.value = defaultValue;
     input.maxLength = 20;
     wrapper.appendChild(input);
+
+    if (usedNames) {
+      const btn = document.createElement('button');
+      btn.className = 'name-reroll';
+      btn.textContent = '\u21bb';
+      btn.addEventListener('click', () => {
+        const current = input.value.trim();
+        if (current) usedNames.delete(current);
+        const newName = generateFirstName(usedNames);
+        input.value = newName;
+      });
+      wrapper.appendChild(btn);
+    }
+
     return wrapper;
   }
 
@@ -399,6 +458,12 @@ const Chargen = (() => {
     const actionsEl = /** @type {HTMLElement} */ (document.getElementById('actions'));
     const movementEl = /** @type {HTMLElement} */ (document.getElementById('movement'));
     const eventTextEl = /** @type {HTMLElement} */ (document.getElementById('event-text'));
+
+    const usedNames = new Set([
+      char.friend1.name, char.friend2.name,
+      char.coworker1.name, char.coworker2.name,
+      char.supervisor.name, char.first_name,
+    ]);
 
     passageEl.classList.remove('visible');
     actionsEl.innerHTML = '';
@@ -421,13 +486,25 @@ const Chargen = (() => {
       last.spellcheck = false;
       last.textContent = char.last_name;
 
+      const nameReroll = document.createElement('button');
+      nameReroll.className = 'name-reroll';
+      nameReroll.textContent = '\u21bb';
+      nameReroll.addEventListener('click', () => {
+        const currentFirst = (first.textContent || '').trim();
+        if (currentFirst) usedNames.delete(currentFirst);
+        const newName = generateName(usedNames);
+        first.textContent = newName.first;
+        last.textContent = newName.last;
+      });
+
       const p = document.createElement('p');
       p.append(
         'Your name is ',
         first,
         ' ',
         last,
-        '. At least, that\u2019s what it says on everything.'
+        '. At least, that\u2019s what it says on everything. ',
+        nameReroll
       );
 
       passageEl.innerHTML = '';
@@ -466,6 +543,16 @@ const Chargen = (() => {
           finishCreation(char);
         });
         actionsEl.appendChild(btn);
+
+        const rerollBtn = document.createElement('button');
+        rerollBtn.className = 'action';
+        rerollBtn.textContent = 'A different life';
+        rerollBtn.addEventListener('click', () => {
+          const newChar = generateRandom();
+          showPlayerNameScreen(newChar);
+        });
+        actionsEl.appendChild(rerollBtn);
+
         actionsEl.classList.add('visible');
       }, 400);
     }, 150);
