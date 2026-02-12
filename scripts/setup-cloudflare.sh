@@ -16,8 +16,15 @@ WRANGLER="pnpm dlx wrangler"
 echo "==> Creating Cloudflare Pages project..."
 $WRANGLER pages project create existence --production-branch master 2>/dev/null || echo "    (project may already exist)"
 
+echo "==> Building deploy directory..."
+rm -rf dist
+mkdir dist
+cp index.html dist/
+cp -r css dist/
+cp -r js dist/
+
 echo "==> Deploying static site to Pages..."
-$WRANGLER pages deploy . --project-name existence
+$WRANGLER pages deploy dist --project-name existence --commit-dirty=true
 
 echo "==> Deploying subpath Worker..."
 cd worker
