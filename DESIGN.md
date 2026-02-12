@@ -64,6 +64,16 @@ None of these are numbers the player sees. They show up as: which interactions a
 
 Health is terrain, not a problem to solve. A chronic condition isn't a debuff — it's the ground you walk on. The game models health as constraints that shape daily texture, not as obstacles on a path to "better."
 
+But not all health effects are ambient texture. Some are concrete mechanical changes — hard modifications to what's physically possible.
+
+**Two kinds of effect:**
+
+**Texture** — how things feel. Energy baseline shifts, stress thresholds change, prose reads differently, interactions cost more. Depression doesn't remove "go to work" — it makes getting there feel like dragging yourself through concrete. This is the ambient layer.
+
+**Concrete changes** — what's possible. An amputation removes or fundamentally alters specific interactions. One arm means cooking is different, carrying things is different, getting dressed is different. A wheelchair means stairs don't exist as a path. Blindness means the phone is a different object. An autoimmune flare means today, right now, certain things cannot be done — not "they're harder," they're gone. These are hard simulation changes: interactions appear, disappear, or transform. The game doesn't soften this. The interaction isn't there. That's the reality.
+
+Most conditions have both. Diabetes is mostly texture (the daily management, the anxiety, the cost) until a blood sugar crash makes it concrete (you can't do anything right now). Chronic pain is texture most days (everything costs more) and concrete on bad days (you can't stand long enough to cook). The simulation needs to handle both — the ambient weight and the hard walls.
+
 ### Physical health
 
 **Chronic conditions** — diabetes, chronic pain, autoimmune disorders, migraines, asthma, heart conditions, blood pressure. These aren't events. They're daily. You manage them or you don't, and managing them costs time, money, energy, and attention. A good day means the condition is background. A bad day means it's everything.
