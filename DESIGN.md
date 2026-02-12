@@ -392,6 +392,22 @@ Family isn't chosen. That's the thing. A friend who hurts you, you can stop call
 
 **Absent** — not hostile, just gone. The parent who left, who died, who was never there. The absence is its own weight. The contact that doesn't exist in the phone. The form that asks for an emergency contact.
 
+### Upbringing and neglect
+
+Neglect isn't one thing. The empty apartment looks the same from the outside. The kid in it knows why it's empty, and the why is everything.
+
+**Working** — they love you. They're just never here. Double shifts, two jobs, the commute that eats the evening. The microwave dinner isn't neglect to them — it's the best they can do. The guilt is theirs but the loneliness is yours. You learn to take care of yourself early. You learn that love and presence aren't the same thing.
+
+**Indifferent** — they're here but you're not a priority. The fridge is empty because nobody thought about it. Your school thing is today and nobody remembered. Not cruel — just... you're in the background. You learn that needing things is an inconvenience. You stop asking.
+
+**Overwhelmed** — they can't cope with their own life, let alone yours. Depression, substance issues, their own trauma. The parent who's more like a child. You end up parenting them — making sure they eat, cleaning up, managing their moods. Parentification: you're ten and you're the adult in the house. You learn that care flows one direction and it's away from you.
+
+**Resentful** — you look like him. Or you remind her of the life she didn't get to have. Or you're the reason they're stuck. They keep you fed, keep a roof over you, and that's all they can do. The love that should be automatic has something in the way — something that isn't your fault but lives in the space between you. You learn that your existence is a burden. That takes a long time to unlearn, if it ever does.
+
+**Abusive** — active harm. Physical, emotional, sexual. Not the absence of care but the presence of damage. This is trauma at the deepest level — it shapes the body's responses, the relationship to authority, the flinch, the inability to trust care when it's offered. The game doesn't need to depict the abuse. It models what comes after: the adult who carries it.
+
+These aren't exclusive. A parent can be working and resentful. Overwhelmed and loving. Absent and mourned. The upbringing is a character property like origin — it's the soil everything else grew from. It shapes what the character expects from people, what care looks like to them, what they flinch at, what they can't receive even when it's offered.
+
 **Age shapes everything:**
 - A child or teen under a hostile parent has almost no agency. The parent controls housing, food, money, mobility. Judgment isn't just emotional — it's material power over your life.
 - A young adult might be financially dependent, partially or fully. Cutoff is a cliff.
