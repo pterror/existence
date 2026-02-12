@@ -38,6 +38,7 @@ const UI = (() => {
 
   /** @param {UICallbacks} callbacks */
   function init(callbacks) {
+    if (passageEl) return;
     passageEl = /** @type {HTMLElement} */ (document.getElementById('passage'));
     eventTextEl = /** @type {HTMLElement} */ (document.getElementById('event-text'));
     actionsEl = /** @type {HTMLElement} */ (document.getElementById('actions'));
