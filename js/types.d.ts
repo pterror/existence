@@ -33,7 +33,7 @@ interface GameCharacter {
   coworker2: RelationshipPerson;
   supervisor: SupervisorPerson;
   job_type: string;
-  age_stage: string;
+  age_stage: number | string;
 }
 
 interface OutfitSet {

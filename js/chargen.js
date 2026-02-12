@@ -104,7 +104,7 @@ const Chargen = (() => {
 
     // Job, age, wardrobe
     const jobType = Timeline.charPick(['office', 'retail', 'food_service']);
-    const ageStage = Timeline.charPick(['twenties', 'thirties', 'forties']);
+    const age = Timeline.charRandomInt(22, 48);
     const outfit = Timeline.charPick(outfitSets);
     const sleepwear = Timeline.charPick(sleepwearOptions);
 
@@ -119,7 +119,7 @@ const Chargen = (() => {
       coworker2: { name: coworker2Name, flavor: c2flavor },
       supervisor: { name: supervisorName },
       job_type: jobType,
-      age_stage: ageStage,
+      age_stage: age,
     });
   }
 
@@ -204,6 +204,7 @@ const Chargen = (() => {
     }
     const outfitOptions = shuffled.slice(0, 3);
     const sleepwear = /** @type {string} */ (Timeline.charPick(sleepwearOptions));
+    const ageDefault = Timeline.charRandomInt(22, 48);
 
     const friendFlavors = ['sends_things', 'checks_in', 'dry_humor', 'earnest'];
     const f1flavor = /** @type {string} */ (Timeline.charPick(friendFlavors));
@@ -266,30 +267,18 @@ const Chargen = (() => {
       passageEl.appendChild(jobGroup);
 
       // --- Age ---
-      const ageP = document.createElement('p');
-      ageP.textContent = 'Time has passed. How much depends.';
-      passageEl.appendChild(ageP);
+      const ageInput = document.createElement('input');
+      ageInput.type = 'text';
+      ageInput.inputMode = 'numeric';
+      ageInput.className = 'age-input';
+      ageInput.value = String(ageDefault);
+      ageInput.maxLength = 2;
 
-      const ageGroup = document.createElement('div');
-      ageGroup.className = 'chargen-group';
-      const ages = [
-        { label: 'Twenties', value: 'twenties' },
-        { label: 'Thirties', value: 'thirties' },
-        { label: 'Forties', value: 'forties' },
-      ];
-      for (const age of ages) {
-        const btn = document.createElement('button');
-        btn.className = 'chargen-option';
-        btn.textContent = age.label;
-        btn.addEventListener('click', () => {
-          sandboxState.age_stage = age.value;
-          ageGroup.querySelectorAll('.chargen-option').forEach(b => b.classList.remove('selected'));
-          btn.classList.add('selected');
-          maybeShowConfirm();
-        });
-        ageGroup.appendChild(btn);
-      }
-      passageEl.appendChild(ageGroup);
+      const ageP = document.createElement('p');
+      ageP.append('You\u2019re ');
+      ageP.appendChild(ageInput);
+      ageP.append('.');
+      passageEl.appendChild(ageP);
 
       // --- Wardrobe ---
       const wardrobeP = document.createElement('p');
@@ -355,6 +344,10 @@ const Chargen = (() => {
       last.spellcheck = false;
       last.textContent = playerDefault.last;
 
+      const nameP = document.createElement('p');
+      nameP.append('Your name is ', first, ' ', last, '. At least, that\u2019s what it says on everything.');
+      passageEl.appendChild(nameP);
+
       const nameReroll = document.createElement('button');
       nameReroll.className = 'name-reroll';
       nameReroll.textContent = '\u21bb';
@@ -365,10 +358,7 @@ const Chargen = (() => {
         first.textContent = newName.first;
         last.textContent = newName.last;
       });
-
-      const nameP = document.createElement('p');
-      nameP.append('Your name is ', first, ' ', last, '. At least, that\u2019s what it says on everything. ', nameReroll);
-      passageEl.appendChild(nameP);
+      passageEl.appendChild(nameReroll);
 
       /** @param {KeyboardEvent} e */
       const preventEnter = (e) => {
@@ -389,18 +379,18 @@ const Chargen = (() => {
       const startOverBtn = document.createElement('button');
       startOverBtn.className = 'chargen-option';
       startOverBtn.textContent = 'Start over';
-      startOverBtn.addEventListener('click', () => showSandboxPage());
-      const startOverP = document.createElement('p');
-      startOverP.appendChild(startOverBtn);
-      passageEl.appendChild(startOverP);
+      startOverBtn.addEventListener('click', () => showOpeningScreen());
+      passageEl.appendChild(startOverBtn);
 
       passageEl.classList.add('visible');
 
-      // Confirm button — appears once job, age, and wardrobe are chosen
+      // Confirm button — appears once job and wardrobe are chosen
       const confirmBtn = document.createElement('button');
       confirmBtn.className = 'action';
       confirmBtn.textContent = 'This is you.';
       confirmBtn.addEventListener('click', () => {
+        const ageVal = parseInt(ageInput.value, 10);
+        sandboxState.age_stage = (ageVal >= 18 && ageVal <= 65) ? ageVal : ageDefault;
         sandboxState.sleepwear = sleepwear;
         sandboxState.friend1 = { name: /** @type {HTMLInputElement} */ (friend1Input.querySelector('input')).value.trim() || friend1Default, flavor: f1flavor };
         sandboxState.friend2 = { name: /** @type {HTMLInputElement} */ (friend2Input.querySelector('input')).value.trim() || friend2Default, flavor: f2flavor };
@@ -414,7 +404,7 @@ const Chargen = (() => {
       actionsEl.appendChild(confirmBtn);
 
       function maybeShowConfirm() {
-        if (sandboxState.job_type && sandboxState.age_stage && sandboxState.outfit_default) {
+        if (sandboxState.job_type && sandboxState.outfit_default) {
           actionsEl.classList.add('visible');
         }
       }
@@ -486,6 +476,18 @@ const Chargen = (() => {
       last.spellcheck = false;
       last.textContent = char.last_name;
 
+      const p = document.createElement('p');
+      p.append(
+        'Your name is ',
+        first,
+        ' ',
+        last,
+        '. At least, that\u2019s what it says on everything.'
+      );
+
+      passageEl.innerHTML = '';
+      passageEl.appendChild(p);
+
       const nameReroll = document.createElement('button');
       nameReroll.className = 'name-reroll';
       nameReroll.textContent = '\u21bb';
@@ -496,19 +498,8 @@ const Chargen = (() => {
         first.textContent = newName.first;
         last.textContent = newName.last;
       });
+      passageEl.appendChild(nameReroll);
 
-      const p = document.createElement('p');
-      p.append(
-        'Your name is ',
-        first,
-        ' ',
-        last,
-        '. At least, that\u2019s what it says on everything. ',
-        nameReroll
-      );
-
-      passageEl.innerHTML = '';
-      passageEl.appendChild(p);
       passageEl.classList.add('visible');
 
       // Prevent line breaks and strip pasted formatting
@@ -552,6 +543,12 @@ const Chargen = (() => {
           showPlayerNameScreen(newChar);
         });
         actionsEl.appendChild(rerollBtn);
+
+        const startOverBtn = document.createElement('button');
+        startOverBtn.className = 'action';
+        startOverBtn.textContent = 'Start over';
+        startOverBtn.addEventListener('click', () => showOpeningScreen());
+        actionsEl.appendChild(startOverBtn);
 
         actionsEl.classList.add('visible');
       }, 400);

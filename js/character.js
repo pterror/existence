@@ -47,22 +47,20 @@ const Character = (() => {
   function applyToState() {
     if (!current) return;
 
-    // Age stage affects starting money
+    // Age affects starting money
     // last_observed_money offset by ~$5 → starts at approximate fidelity
-    switch (current.age_stage) {
-      case 'twenties':
-        State.set('money', 35);
-        State.set('last_observed_money', 30);
-        break;
-      case 'thirties':
-        State.set('money', 47.50);
-        State.set('last_observed_money', 42.50);
-        break;
-      case 'forties':
-        State.set('money', 55);
-        State.set('last_observed_money', 50);
-        break;
+    const age = current.age_stage;
+    let startMoney = 47.50, startLastMoney = 42.50; // default (thirties)
+    if (typeof age === 'number') {
+      if (age < 30) { startMoney = 35; startLastMoney = 30; }
+      else if (age >= 40) { startMoney = 55; startLastMoney = 50; }
+    } else {
+      // Legacy string format
+      if (age === 'twenties') { startMoney = 35; startLastMoney = 30; }
+      else if (age === 'forties') { startMoney = 55; startLastMoney = 50; }
     }
+    State.set('money', startMoney);
+    State.set('last_observed_money', startLastMoney);
 
     // Job type affects shift times, alarm, and task expectations
     // last_observed_time offset by -20 from alarm → starts at rounded fidelity
