@@ -210,6 +210,24 @@ Culture shapes the inner life — not just how the world sees you, but how you s
 
 **Belonging and displacement** — the experience of being between cultures. Too much of one thing for this group, not enough for that one. The trip to the country your parents came from where you're not quite from there either. Second-generation, third-generation — the distance grows but the pull doesn't stop.
 
+### Sexuality and sexual orientation
+
+Who you're attracted to — or not attracted to — shapes daily texture in ways the world mostly doesn't acknowledge.
+
+**The closet** — not a place, an energy cost. Performing straightness. Monitoring pronouns when you talk about your weekend. The calculation before every new person: safe or not safe. The closet isn't hiding — it's constant, active work, and the game can model that as the ambient drain it actually is. You might be out in some contexts and not others. The friend who knows. The parent who doesn't. The coworker you're not sure about.
+
+**Being out** — different friction. The assumption that it's your whole personality. The people who are fine with it and need you to know they're fine with it. The people who aren't. The date that's easy in some neighborhoods and surveilled in others. The hand you drop when the wrong person walks by.
+
+**Homophobia** — ambient, same pattern as the rest. The joke that's not a joke. The coworker who's fine with you but votes against you. The family dinner where it's not discussed. The landlord, the employer, the stranger — you can't always tell who's safe. The game doesn't generate "homophobia events." The texture of interactions shifts based on context and who's around.
+
+**Bisexuality** — the specific friction of not fitting neatly. Too gay for some spaces, too straight for others. The erasure — people assuming based on who you're currently with. The having to come out over and over because it's never the default assumption.
+
+**Asexuality** — the world assumes everyone wants the same thing. The romantic subplot that's supposed to be universal. The friend who keeps trying to set you up. The relationship that's expected to include something you don't want or don't feel. The loneliness of not sharing a drive everyone treats as fundamental. Or: being ace and being fine with it, and the world not believing that's possible.
+
+**Orientation and family** — this connects directly to parental judgment. Coming out to a supportive family is one experience. Coming out to a hostile one is another. Not coming out at all — because you already know — is its own weight. Culture and religion shape the stakes: in some families, this is the thing that breaks the relationship. In others, it's absorbed. In others, it was never going to be discussed.
+
+**Orientation and culture** — some cultures have frameworks for non-straight identities. Some don't. Some have frameworks that look like acceptance but aren't. The intersection of sexual orientation with cultural and religious identity can mean choosing between communities, or finding a way to hold both, or losing one.
+
 ## The Space
 
 ### The apartment
