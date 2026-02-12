@@ -374,8 +374,10 @@ const Game = (() => {
     const el = document.getElementById('step-away');
     if (el) {
       el.classList.remove('hidden');
-      el.textContent = '...';
+      el.classList.add('arriving');
+      el.textContent = 'step away';
       el.onclick = handleStepAway;
+      el.addEventListener('animationend', () => el.classList.remove('arriving'), { once: true });
     }
   }
 

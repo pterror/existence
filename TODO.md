@@ -10,4 +10,4 @@
 - [ ] No run end conditions defined yet. `Runs.finishRun(id)` exists but nothing calls it. Need content-driven endings.
 - [ ] Visual replay of finished runs uses recursive setTimeout chain — very long runs may have performance issues. Consider a skip/fast-forward mechanism.
 - [x] **Bug:** Awareness clicks (checking time/money) are not recorded as actions. On page refresh, `last_observed_time`/`last_observed_money` reset — losing direct observations. Fix: record `observe_time`/`observe_money` as actions so they replay correctly.
-- [ ] Step-away link ("...") may be too subtle. Players may not discover it. Consider clearer affordance or tutorial mention.
+- [x] Step-away link ("...") may be too subtle. Players may not discover it. Consider clearer affordance or tutorial mention.
