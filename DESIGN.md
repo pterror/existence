@@ -8,7 +8,7 @@ The simulation behind the prose. None of this is visible to the player. Text car
 
 **Unfiltered.** The game doesn't protect the player from the experience. It puts them in it. Foster care isn't a backstory tag — it's the garbage bag instead of a suitcase, the bed that smells wrong, the social worker who decides things about your life while you sit in the hall. Poverty isn't a modifier — it's the rice again, the bus that takes 90 minutes, the overdraft fee for being broke. The game fosters understanding by making you live it from inside, not by describing it from a distance. If the game is going to represent a life, it represents the texture of that life honestly — the daily reality, not a summary of it.
 
-This doesn't mean gratuitous depiction of violence or trauma. It means the *experience* of living in the aftermath, or living inside the situation, is rendered with full fidelity. The thin walls of the trailer. The new school where nobody knows you. The parent who can't look at you. The phone that's the only thing that came with you. The game doesn't show you the worst moment — it shows you Tuesday, and Tuesday is enough.
+This doesn't mean gratuitous depiction — lingering on violence for shock, dramatizing trauma for effect. It means *realistic* depiction at the level the character lives it. If Tuesday includes shouting through the wall, the game includes shouting through the wall. If Tuesday includes the bruise you explain at work, the game includes that. If Tuesday is quiet and heavy and nothing happens but you can't breathe, the game includes that too. The game doesn't linger for shock. It also doesn't look away for comfort. It depicts what's there, at the volume it's actually at, and trusts the player to feel it.
 
 ## What the Game Is
 
