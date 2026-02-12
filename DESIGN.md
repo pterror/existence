@@ -140,9 +140,11 @@ Health is the biggest category, but the game should be able to model any constra
 
 Not all of these need to be implemented. But the architecture should allow for them. They're all the same design pattern: a character property that modifies simulation parameters and prose selection. A constraint that's always there, shaping what's possible and how things feel.
 
-## Gender & Identity
+## Identity & Social Landscape
 
-The world isn't neutral. It responds to who you are — your gender, your presentation, your body. The game models this as ambient texture, not as "discrimination events." It's not a cutscene where someone is rude to you. It's the way a room feels different, the way a conversation has a cost that isn't about the conversation, the way some jobs pay less and nobody says why.
+The world isn't neutral. It responds to who you are — your gender, your race, your presentation, your body, your accent, your name. The game models this as ambient texture, not as "discrimination events." It's not a cutscene where someone is rude to you. It's the way a room feels different, the way a conversation has a cost that isn't about the conversation, the way some jobs pay less and nobody says why.
+
+These dimensions don't exist in isolation. A Black trans woman's daily texture isn't "race + gender + trans experience" added together — it's its own thing, with its own specific weight. The game shouldn't model identity as stacking modifiers. Each intersection is a different life.
 
 ### Gender
 
@@ -179,6 +181,34 @@ Gender shapes the employment landscape. Not as hard gates — as probability, as
 ### Gender and relationships
 
 The same friend reads differently depending on gender dynamics. Physical proximity, emotional expectations, who's allowed to be vulnerable, who's expected to perform strength. The game's relationship prose adapts — not because the friend changes, but because the social script around the interaction is different.
+
+### Race and ethnicity
+
+Race is what the world sees. Ethnicity is what you carry. Both shape daily texture.
+
+**The world's response** — ambient, constant, never announced. Being followed in a store. The cab that doesn't stop. The name on a resume that changes callback rates. The coworker who's surprised you're articulate. The cop who's a different kind of presence depending on what you look like. The neighborhood that goes quiet when you walk through it. None of this is an event the game triggers. It's the baseline cost of navigating a world that has assumptions about you before you open your mouth.
+
+**Code-switching** — the energy cost of performing a version of yourself that the context demands. The voice at work versus the voice at home. The way you modulate yourself to be non-threatening, or professional, or palatable. It's work. The game can model it as energy cost — the same interaction is more expensive when you're performing for an audience that doesn't know it's an audience.
+
+**Visibility and invisibility** — sometimes you're too visible (the only one in the room, the one who gets watched, the one who represents). Sometimes you're invisible (overlooked, underestimated, not considered). Both are exhausting in different ways. The game's prose reflects which one is happening without naming it.
+
+**Microaggressions** — the small things that aren't small. "Where are you really from?" The hand in your hair. The compliment that's an othering. The game doesn't label these. They show up as prose that has an edge to it — the interaction that costs slightly more than it should, the moment that's slightly off, the thing someone said that sits in you for the rest of the day.
+
+### Ethnicity and culture
+
+Culture shapes the inner life — not just how the world sees you, but how you see the world.
+
+**Family structure** — the design's family section assumes a model. Culture reshapes it. Multigenerational households. Filial piety. The expectation that you send money home. The cousin who's more like a sibling. The community elder who functions as a parent. "Family" isn't always two parents and maybe siblings — it can be a web of obligation and care that extends further than the game's default.
+
+**Food** — what food means. Comfort food is cultural. What's in the fridge, what you cook, what you crave when you're low — these are shaped by where you come from. The corner store might not have what you need. The grocery trip might require a different store, farther away, more expensive. Missing a food from home is a specific loneliness.
+
+**Language** — thinking in one language, speaking in another. The word that doesn't translate. The accent that marks you. The parent's language that you're losing. This overlaps with the language barrier in Drawn Lots but it's broader — even fluent bilingual people carry the weight of navigating between languages, and the choice of which one to think in shapes the prose itself.
+
+**Religious practice** — daily texture, not belief system. Prayer times that structure the day. Dietary restrictions that shape what eating means. The community that comes with practice, or the isolation of practicing alone, or the loss of a practice you grew up with. The game models this as daily rhythm, not as faith.
+
+**Cultural expectations** — what success looks like, what family expects, what the community considers normal. These can align with or contradict the broader society's expectations. A first-generation college student carries a different weight than a third-generation one. Career choices that honor family versus career choices that honor self — and the guilt or pride that comes with either.
+
+**Belonging and displacement** — the experience of being between cultures. Too much of one thing for this group, not enough for that one. The trip to the country your parents came from where you're not quite from there either. Second-generation, third-generation — the distance grows but the pull doesn't stop.
 
 ## The Space
 
