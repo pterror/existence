@@ -264,6 +264,26 @@ Who you're attracted to — or not attracted to — shapes daily texture in ways
 
 **Orientation and culture** — some cultures have frameworks for non-straight identities. Some don't. Some have frameworks that look like acceptance but aren't. The intersection of sexual orientation with cultural and religious identity can mean choosing between communities, or finding a way to hold both, or losing one.
 
+### Socioeconomic class
+
+Class is the water everything else swims in. It's not just how much money you have right now — it's where you started, what you learned was normal, what networks you have access to, what risks you can afford to take. Money is one dimension. Class is the whole landscape.
+
+**Class as starting position** — you're born into it before you make any choices. It shapes what neighborhood, what school, what "normal" looks like. A middle-class kid's "broke" is a poor kid's "fine." The game sets this at character creation as a property that's deeper than current bank balance — it's the baseline the character measures everything against.
+
+**The daily tax of poverty** — being poor is expensive in time and energy. The bus instead of a car: 20 minutes becomes 90. The laundromat instead of a washer: an afternoon gone. Cooking from scratch because you can't afford convenience, but also can't afford fresh ingredients, so it's rice again. No bulk buying — you pay more per unit because you can't afford the larger size. Overdraft fees for being broke. Late fees for being late because you were at the laundromat. Poverty compounds itself.
+
+**The hidden infrastructure of comfort** — what middle-class and above take for granted. A car. A washer. A primary care doctor. A dentist. A lawyer if you need one. A credit score that works. An emergency fund that means a broken phone isn't a crisis. A parent who can lend you money. The game doesn't model all of these — but class determines which ones exist in the character's world.
+
+**Class and performance** — another form of masking. The job interview in borrowed clothes. The accent you flatten. The reference to a vacation you can't afford but everyone seems to take. Knowing which fork to use, or not knowing and feeling it. Code-switching has a class dimension that stacks with every other kind.
+
+**Class and access** — healthcare you can't afford to use. Legal help that doesn't exist at your income level. Housing that's what you can get, not what you need. Food deserts — the corner store has what it has, and the grocery store is a bus ride away. Education as the thing that's supposed to fix everything and costs more than everything.
+
+**Class and perception** — the world reads class. Clothing, speech, address, teeth, phone model, the things you know and don't know. Being read as poor changes interactions — the store clerk watches you, the landlord wants a bigger deposit, the doctor spends less time. Being read as comfortable opens doors that aren't supposed to be locked but are.
+
+**Class mobility** — the myth is that anyone can move up. The reality is that moving up requires resources that come from already being up. The game doesn't moralize about this. It models the friction: the opportunity that requires an unpaid internship (who can afford to work for free?), the networking that requires being in rooms you weren't invited to, the credential that requires money and time you don't have.
+
+**Class and everything else** — class intersects with every other identity dimension. Racism hits differently at different class levels. The trans experience is shaped by whether you can afford healthcare. Disability without money is a different disability. A hostile parent matters more when they control your housing. Class doesn't override other dimensions — it amplifies or cushions them.
+
 ## The Space
 
 ### The apartment
