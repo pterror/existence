@@ -112,6 +112,7 @@ const Chargen = (() => {
     const baseDateMinutes = 28401120; // 2024-01-01 00:00 UTC
     const dayOffset = Timeline.charRandomInt(0, 364);
     const startTimestamp = baseDateMinutes + dayOffset * 1440;
+    const startSeason = dayOffset < 91 ? 0 : dayOffset < 182 ? 1 : dayOffset < 274 ? 2 : 3;
 
     return /** @type {GameCharacter} */ ({
       first_name: playerName.first,
@@ -126,6 +127,7 @@ const Chargen = (() => {
       job_type: jobType,
       age_stage: age,
       start_timestamp: startTimestamp,
+      start_season: startSeason,
     });
   }
 
@@ -442,9 +444,11 @@ const Chargen = (() => {
         // Compute start_timestamp from selected season
         const seasonStarts = { winter: 0, spring: 91, summer: 182, autumn: 274 };
         const seasonLengths = { winter: 91, spring: 91, summer: 92, autumn: 91 };
+        const seasonIndices = { winter: 0, spring: 1, summer: 2, autumn: 3 };
         const ss = /** @type {'winter'|'spring'|'summer'|'autumn'} */ (selectedSeason);
         const remappedDay = seasonStarts[ss] + (dayOffset % seasonLengths[ss]);
         sandboxState.start_timestamp = baseDateMinutes + remappedDay * 1440;
+        sandboxState.start_season = seasonIndices[ss];
 
         finishCreation(/** @type {GameCharacter} */ (sandboxState));
       });

@@ -20,6 +20,7 @@ const State = (() => {
 
       // Calendar anchor — minutes since Unix epoch. Set once from charRng.
       start_timestamp: 0,
+      start_season: 0,     // 0=winter, 1=spring, 2=summer, 3=autumn
 
       // Flags and soft state
       alarm_time: 6 * 60 + 30,  // Minutes since midnight. When the alarm fires.
@@ -180,11 +181,12 @@ const State = (() => {
   }
 
   function season() {
-    const month = calendarDate().month;
-    if (month >= 2 && month <= 4) return 'spring';
-    if (month >= 5 && month <= 7) return 'summer';
-    if (month >= 8 && month <= 10) return 'autumn';
-    return 'winter';
+    // Derived from player's starting season + elapsed time.
+    // Hemisphere-agnostic — the player's chargen choice anchors the cycle.
+    const elapsedDays = Math.floor(s.time / 1440);
+    const seasonIndex = Math.floor(elapsedDays / 91) % 4;
+    const seasons = ['winter', 'spring', 'summer', 'autumn'];
+    return seasons[(s.start_season + seasonIndex) % 4];
   }
 
   /** @param {number} eventTime @returns {number} */

@@ -22,6 +22,7 @@ const Character = (() => {
       job_type: 'office',
       age_stage: 'thirties',
       start_timestamp: 28401120, // 2024-01-01 00:00 UTC
+      start_season: 0, // 0=winter
     };
   }
 
@@ -51,6 +52,9 @@ const Character = (() => {
     // Calendar anchor
     if (current.start_timestamp) {
       State.set('start_timestamp', current.start_timestamp);
+    }
+    if (current.start_season !== undefined) {
+      State.set('start_season', current.start_season);
     }
 
     // Age affects starting money
