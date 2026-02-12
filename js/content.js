@@ -778,8 +778,13 @@ const Content = (() => {
       id: 'check_phone_bedroom',
       label: 'Check your phone',
       location: 'apartment_bedroom',
-      available: () => State.get('has_phone') && State.get('phone_battery') > 0,
-      execute: () => checkPhoneContent(),
+      available: () => State.get('has_phone') && State.get('phone_battery') > 0 && !State.get('viewing_phone'),
+      execute: () => {
+        State.set('viewing_phone', true);
+        State.set('phone_battery', Math.max(0, State.get('phone_battery') - 1));
+        State.advanceTime(1);
+        return phoneScreenDescription();
+      },
     },
 
     // === KITCHEN ===
@@ -850,8 +855,13 @@ const Content = (() => {
       id: 'check_phone_kitchen',
       label: 'Check your phone',
       location: 'apartment_kitchen',
-      available: () => State.get('has_phone') && State.get('phone_battery') > 0,
-      execute: () => checkPhoneContent(),
+      available: () => State.get('has_phone') && State.get('phone_battery') > 0 && !State.get('viewing_phone'),
+      execute: () => {
+        State.set('viewing_phone', true);
+        State.set('phone_battery', Math.max(0, State.get('phone_battery') - 1));
+        State.advanceTime(1);
+        return phoneScreenDescription();
+      },
     },
 
     // === BATHROOM ===
@@ -898,8 +908,13 @@ const Content = (() => {
       id: 'check_phone_street',
       label: 'Check your phone',
       location: 'street',
-      available: () => State.get('has_phone') && State.get('phone_battery') > 0,
-      execute: () => checkPhoneContent(),
+      available: () => State.get('has_phone') && State.get('phone_battery') > 0 && !State.get('viewing_phone'),
+      execute: () => {
+        State.set('viewing_phone', true);
+        State.set('phone_battery', Math.max(0, State.get('phone_battery') - 1));
+        State.advanceTime(1);
+        return phoneScreenDescription();
+      },
     },
 
     sit_on_step: {
@@ -1042,8 +1057,13 @@ const Content = (() => {
       id: 'check_phone_work',
       label: 'Check your phone',
       location: 'workplace',
-      available: () => State.get('has_phone') && State.get('phone_battery') > 0,
-      execute: () => checkPhoneContent(),
+      available: () => State.get('has_phone') && State.get('phone_battery') > 0 && !State.get('viewing_phone'),
+      execute: () => {
+        State.set('viewing_phone', true);
+        State.set('phone_battery', Math.max(0, State.get('phone_battery') - 1));
+        State.advanceTime(1);
+        return phoneScreenDescription();
+      },
     },
 
     // === CORNER STORE ===
@@ -1127,68 +1147,217 @@ const Content = (() => {
         return 'You walk through. The fluorescent aisles. Same stuff as always. You don\'t need anything specific, but you look.';
       },
     },
+
+    // === PHONE MODE ===
+    read_messages: {
+      id: 'read_messages',
+      label: 'Messages',
+      location: null,
+      available: () => State.get('viewing_phone') && State.hasUnreadMessages(),
+      execute: () => {
+        // Battery death check
+        if (State.get('phone_battery') <= 0) {
+          State.set('viewing_phone', false);
+          return 'The screen goes dark. Dead.';
+        }
+
+        const unread = State.getUnreadMessages();
+        State.markMessagesRead();
+        State.set('phone_battery', Math.max(0, State.get('phone_battery') - 1));
+        State.advanceTime(2);
+
+        const parts = [];
+        for (const msg of unread) {
+          parts.push(msg.text);
+          // Apply per-type effects
+          if (msg.type === 'friend') State.adjustSocial(3);
+          else if (msg.type === 'bill') State.adjustStress(5);
+          else if (msg.type === 'bank') State.glanceMoney();
+          else if (msg.type === 'work') State.adjustStress(3);
+        }
+
+        return parts.join('\n\n');
+      },
+    },
+
+    toggle_phone_silent: {
+      id: 'toggle_phone_silent',
+      label: 'Silence it',
+      location: null,
+      available: () => State.get('viewing_phone'),
+      execute: () => {
+        // Battery death check
+        if (State.get('phone_battery') <= 0) {
+          State.set('viewing_phone', false);
+          return 'The screen goes dark. Dead.';
+        }
+
+        const wasSilent = State.get('phone_silent');
+        State.set('phone_silent', !wasSilent);
+        if (wasSilent) {
+          return 'Sound on. You\'ll hear it now.';
+        }
+        return 'Silent. Whatever comes, it comes quietly.';
+      },
+    },
+
+    put_phone_away: {
+      id: 'put_phone_away',
+      label: 'Put it away',
+      location: null,
+      available: () => State.get('viewing_phone'),
+      execute: () => {
+        State.set('viewing_phone', false);
+        const location = World.getLocationId();
+        const descFn = /** @type {Record<string, (() => string) | undefined>} */ (Content.locationDescriptions)[location];
+        return descFn ? descFn() : '';
+      },
+    },
   };
 
-  // --- Shared phone content ---
-  function checkPhoneContent() {
-    State.set('phone_battery', Math.max(0, State.get('phone_battery') - 2));
-    State.advanceTime(3);
+  // --- Phone mode ---
 
-    const results = [];
+  /**
+   * Generate incoming messages based on elapsed time since last check.
+   * Called once per action/move, after event checks.
+   * Returns true if any new message arrived (for buzz notification).
+   * @returns {boolean}
+   */
+  function generateIncomingMessages() {
+    const now = State.get('time') + (State.get('day') - 1) * 24 * 60;
+    const last = State.get('last_msg_gen_time');
+    const elapsed = Math.max(0, now - last);
+    State.set('last_msg_gen_time', now);
 
-    const supervisor = Character.get('supervisor');
+    if (elapsed <= 0) return false;
 
-    // Work message if late
-    if (State.isLateForWork() && !State.get('at_work_today') && !State.get('called_in')) {
-      if (Timeline.chance(0.5)) {
-        results.push(`A message from your supervisor, ${supervisor.name}. "Everything okay?" Which means: where are you.`);
+    let added = false;
+
+    // --- Friend messages (RNG-consuming) ---
+    const friend1 = Character.get('friend1');
+    const friend2 = Character.get('friend2');
+    const socialT = State.socialTier();
+    const socialLow = socialT === 'withdrawn' || socialT === 'isolated';
+
+    for (const friend of [friend1, friend2]) {
+      let multiplier;
+      switch (friend.flavor) {
+        case 'sends_things': multiplier = 0.007; break;
+        case 'checks_in':    multiplier = socialLow ? 0.008 : 0.004; break;
+        case 'dry_humor':    multiplier = 0.004; break;
+        case 'earnest':      multiplier = 0.003; break;
+        default:             multiplier = 0.004;
       }
-    }
-
-    // Bank notification — glance at money
-    if (Timeline.chance(0.25)) {
-      State.glanceMoney();
-      const moneyStr = State.perceivedMoneyString();
-      results.push('A bank notification. Balance: ' + moneyStr + '.');
-    }
-
-    // Bill notification
-    if (State.get('money') < 30 && Timeline.chance(0.3)) {
-      results.push('A notification from the electric company. The amount is higher than last month. It\'s always higher than last month.');
-      State.adjustStress(5);
-    }
-
-    // Social message
-    if (Timeline.chance(0.25)) {
-      const social = State.socialTier();
-      // Pick a friend
-      const friend = Timeline.chance(0.5)
-        ? Character.get('friend1')
-        : Character.get('friend2');
-
-      if (social === 'isolated' || social === 'withdrawn') {
-        results.push(/** @type {(name: string) => string} */ (friendIsolatedMessages[friend.flavor])(friend.name));
+      const prob = elapsed * multiplier;
+      // Two RNG calls per friend: chance + text pick
+      if (Timeline.chance(prob)) {
+        // friendMessages uses Timeline.pick internally (1 RNG call)
+        // friendIsolatedMessages does not — consume RNG to stay consistent
+        if (socialLow) {
+          Timeline.random(); // balance RNG consumption
+          const msgFn = friendIsolatedMessages[friend.flavor];
+          const text = /** @type {(name: string) => string} */ (msgFn)(friend.name);
+          if (text) {
+            State.addPhoneMessage({ type: 'friend', text, read: false });
+            added = true;
+          }
+        } else {
+          const msgFn = friendMessages[friend.flavor];
+          const text = /** @type {(name: string) => string} */ (msgFn)(friend.name);
+          if (text) {
+            State.addPhoneMessage({ type: 'friend', text, read: false });
+            added = true;
+          }
+        }
       } else {
-        results.push(/** @type {(name: string) => string | undefined} */ (friendMessages[friend.flavor])(friend.name));
+        // Consume matching RNG even on miss (text pick uses 1 call)
+        Timeline.random();
       }
-      State.adjustSocial(3);
     }
 
-    // Low battery
-    if (State.get('phone_battery') < 15) {
-      results.push('The battery is getting low.');
+    // --- Work nag (deterministic trigger, no RNG) ---
+    const minutesLate = State.get('time') - (State.get('work_shift_start') + 15);
+    if (minutesLate >= 30 && !State.get('at_work_today') && !State.get('called_in') && !State.get('work_nagged_today')) {
+      State.set('work_nagged_today', true);
+      const supervisor = Character.get('supervisor');
+      State.addPhoneMessage({
+        type: 'work',
+        text: `A message from ${supervisor.name}. "Everything okay?" Which means: where are you.`,
+        read: false,
+      });
+      added = true;
     }
 
-    if (results.length === 0) {
-      // Nothing happened
-      const mood = State.moodTone();
+    // --- Bill notification (deterministic trigger, no RNG) ---
+    const day = State.get('day');
+    if (day % 7 === 3 && State.get('last_bill_day') !== day) {
+      State.set('last_bill_day', day);
+      State.addPhoneMessage({
+        type: 'bill',
+        text: 'A notification from the electric company. The amount is higher than last month.',
+        read: false,
+      });
+      added = true;
+    }
+
+    return added;
+  }
+
+  /**
+   * Build prose for the phone screen when in phone mode.
+   * @returns {string}
+   */
+  function phoneScreenDescription() {
+    const unread = State.getUnreadMessages();
+    const battery = State.get('phone_battery');
+    const mood = State.moodTone();
+
+    let desc = '';
+
+    // Time — glance when looking at phone
+    State.glanceTime();
+    desc += State.perceivedTimeString() + '.';
+
+    // Messages
+    if (unread.length > 0) {
+      const senders = [];
+      for (const msg of unread) {
+        if (msg.type === 'friend') {
+          // Extract name from message text (first word after "from " or starts with name)
+          senders.push('a message');
+        } else if (msg.type === 'work') {
+          senders.push('something from work');
+        } else if (msg.type === 'bank') {
+          senders.push('a bank notification');
+        } else if (msg.type === 'bill') {
+          senders.push('a bill notification');
+        }
+      }
+      if (senders.length === 1) {
+        desc += ' ' + senders[0].charAt(0).toUpperCase() + senders[0].slice(1) + '.';
+      } else if (senders.length === 2) {
+        desc += ' ' + senders[0].charAt(0).toUpperCase() + senders[0].slice(1) + ', and ' + senders[1] + '.';
+      } else {
+        desc += ' Notifications. Several of them.';
+      }
+    } else {
       if (mood === 'hollow' || mood === 'quiet') {
-        return 'Nothing new. The screen looks at you back.';
+        desc += ' Nothing new. The screen looks at you back.';
+      } else if (mood === 'numb') {
+        desc += ' Nothing. The screen glows.';
+      } else {
+        desc += ' Nothing new.';
       }
-      return 'Nothing new. You put it away.';
     }
 
-    return results.join(' ');
+    // Battery
+    if (battery < 10) {
+      desc += ' The battery icon is a sliver.';
+    } else if (battery < 20) {
+      desc += ' The battery icon is thin.';
+    }
+
+    return desc;
   }
 
   // --- Call in sick ---
@@ -1226,30 +1395,6 @@ const Content = (() => {
         return 'The alarm. ' + timeStr + '. That sound. It exists only to tell you that lying here isn\'t an option. Except it is. The snooze button is right there.';
       }
       return 'The alarm goes off. ' + timeStr + '. That sound you picked because you thought you wouldn\'t hate it. You were wrong.';
-    },
-
-    phone_work_where_are_you: () => {
-      State.adjustStress(8);
-      const supervisor = Character.get('supervisor');
-      return `Your phone buzzes. ${supervisor.name}. "Hey, are you coming in today?" The screen waits for an answer you don't type yet.`;
-    },
-
-    phone_bill_notification: () => {
-      State.adjustStress(5);
-      return 'A notification slides down. Electric bill, due in four days. The number is right there. You swipe it away but the number stays.';
-    },
-
-    phone_message_friend: () => {
-      State.adjustSocial(2);
-      const social = State.socialTier();
-      const friend = Timeline.chance(0.5)
-        ? Character.get('friend1')
-        : Character.get('friend2');
-
-      if (social === 'isolated') {
-        return /** @type {(name: string) => string} */ (friendIsolatedMessages[friend.flavor])(friend.name);
-      }
-      return /** @type {(name: string) => string | undefined} */ (friendMessages[friend.flavor])(friend.name);
     },
 
     late_anxiety: () => {
@@ -1619,9 +1764,28 @@ const Content = (() => {
 
   /** @returns {Interaction[]} */
   function getAvailableInteractions() {
-    const location = World.getLocationId();
     /** @type {Interaction[]} */
     const available = [];
+
+    // Phone mode — only phone interactions
+    if (State.get('viewing_phone')) {
+      const phoneIds = ['read_messages', 'toggle_phone_silent', 'put_phone_away'];
+      for (const id of phoneIds) {
+        const interaction = interactions[id];
+        if (interaction && interaction.available()) {
+          // Dynamic label for silent toggle
+          if (id === 'toggle_phone_silent') {
+            const label = State.get('phone_silent') ? 'Turn sound on' : 'Silence it';
+            available.push(/** @type {Interaction} */ ({ ...interaction, label }));
+          } else {
+            available.push(/** @type {Interaction} */ (interaction));
+          }
+        }
+      }
+      return available;
+    }
+
+    const location = World.getLocationId();
 
     for (const interaction of Object.values(interactions)) {
       if (interaction.location === location && interaction.available()) {
@@ -1679,7 +1843,8 @@ const Content = (() => {
     transitionText,
     getAvailableInteractions,
     getInteraction,
-    checkPhoneContent,
+    generateIncomingMessages,
+    phoneScreenDescription,
     getTimeSource,
     getMoneySource,
   };

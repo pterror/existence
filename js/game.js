@@ -52,12 +52,13 @@ const Game = (() => {
     State.init();
     Character.applyToState();
 
-    // Consume same initial RNG as fresh start (opening events)
+    // Consume same initial RNG as fresh start (opening events + messages)
     const initEvents = World.checkEvents();
     for (const eventId of initEvents) {
       const eventFn = /** @type {Record<string, (() => string) | undefined>} */ (Content.eventText)[eventId];
       if (eventFn) eventFn();
     }
+    Content.generateIncomingMessages();
     const { lastIdleThought } = replayActions(saved.actions);
 
     // Initialize UI
@@ -110,6 +111,7 @@ const Game = (() => {
       /** @type {string[]} */
       const eventTexts = [];
       generateEventTexts(events, eventTexts);
+      Content.generateIncomingMessages();
 
       UI.render();
       UI.showAwareness();
@@ -244,6 +246,7 @@ const Game = (() => {
     /** @type {string[]} */
     const initEventTexts = [];
     generateEventTexts(initEvents, initEventTexts);
+    Content.generateIncomingMessages();
 
     // Show opening description
     const location = World.getLocationId();
@@ -305,6 +308,7 @@ const Game = (() => {
         }
         const events = World.checkEvents();
         generateEventTexts(events, eventTexts);
+        Content.generateIncomingMessages();
       } else if (action.type === 'move') {
         if (action.destination) {
           const fromId = World.getLocationId();
@@ -312,6 +316,7 @@ const Game = (() => {
           responseText = Content.transitionText(fromId, action.destination);
           const events = World.checkEvents();
           generateEventTexts(events, eventTexts);
+          Content.generateIncomingMessages();
         }
       } else if (action.type === 'idle') {
         const thought = Content.idleThoughts();
@@ -448,6 +453,7 @@ const Game = (() => {
       const eventFn = /** @type {Record<string, (() => string) | undefined>} */ (Content.eventText)[eventId];
       if (eventFn) eventFn();
     }
+    Content.generateIncomingMessages();
   }
 
   /** @param {string | undefined} id */
@@ -523,9 +529,6 @@ const Game = (() => {
       if (eventId === 'alarm' || eventId === 'late_anxiety') {
         UI.boostTimeFocus();
       }
-      if (eventId === 'phone_bill_notification') {
-        UI.boostMoneyFocus();
-      }
     }
     // Purchase interactions boost money focus
     if (interaction) {
@@ -569,6 +572,14 @@ const Game = (() => {
     const eventTexts = [];
     generateEventTexts(events, eventTexts);
 
+    // Generate incoming phone messages (consumes RNG)
+    const msgArrived = Content.generateIncomingMessages();
+
+    // Buzz notification if message arrived + not silent + not in phone mode
+    if (msgArrived && !State.get('phone_silent') && !State.get('viewing_phone')) {
+      eventTexts.push('Your phone buzzes.');
+    }
+
     // Apply focus triggers
     applyFocusTriggers(events, interaction);
     UI.updateAwareness();
@@ -587,8 +598,12 @@ const Game = (() => {
       const interactions = Content.getAvailableInteractions();
       UI.showActions(interactions);
 
-      const connections = World.getConnections();
-      UI.showMovement(connections);
+      if (State.get('viewing_phone')) {
+        UI.showMovement([]);
+      } else {
+        const connections = World.getConnections();
+        UI.showMovement(connections);
+      }
     }, 800);
   }
 
@@ -616,6 +631,12 @@ const Game = (() => {
     /** @type {string[]} */
     const eventTexts = [];
     generateEventTexts(events, eventTexts);
+
+    // Generate incoming phone messages (consumes RNG)
+    const msgArrived = Content.generateIncomingMessages();
+    if (msgArrived && !State.get('phone_silent') && !State.get('viewing_phone')) {
+      eventTexts.push('Your phone buzzes.');
+    }
 
     // Apply focus triggers
     applyMoveFocusTriggers(travel.to);

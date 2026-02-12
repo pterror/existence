@@ -44,6 +44,14 @@ const State = (() => {
       work_tasks_done: 0,
       work_tasks_expected: 4,
 
+      // Phone inbox and mode
+      phone_inbox: /** @type {{ type: string, text: string, read: boolean }[]} */ ([]),
+      phone_silent: false,
+      viewing_phone: false,
+      last_msg_gen_time: 0,     // game time of last generateIncomingMessages call
+      work_nagged_today: false, // reset on day rollover
+      last_bill_day: 0,         // last game-day a bill notification arrived
+
       // Day tracking
       day: 1,
 
@@ -135,6 +143,7 @@ const State = (() => {
       s.work_tasks_done = 0;
       s.alarm_went_off = false;
       s.surfaced_late = 0;
+      s.work_nagged_today = false;
       s.apartment_mess = Math.min(100, s.apartment_mess + 5);
 
       // Fridge food slowly goes bad
@@ -320,10 +329,42 @@ const State = (() => {
   /** @param {number} amount */
   function spendMoney(amount) {
     if (s.money >= amount) {
+      const before = s.money;
       adjustMoney(-amount);
+
+      // Bank notification — qualitative balance after purchase
+      const balStr = perceivedMoneyString();
+      addPhoneMessage({ type: 'bank', text: 'Purchase notification. Remaining balance: ' + balStr + '.', read: false });
+
+      // Threshold warnings
+      if (before >= 50 && s.money < 50) {
+        addPhoneMessage({ type: 'bank', text: 'Low balance alert.', read: false });
+      } else if (before >= 20 && s.money < 20) {
+        addPhoneMessage({ type: 'bank', text: 'Your account balance is very low.', read: false });
+      }
+
       return true;
     }
     return false;
+  }
+
+  // --- Phone inbox helpers ---
+
+  /** @param {{ type: string, text: string, read: boolean }} msg */
+  function addPhoneMessage(msg) {
+    s.phone_inbox.push(msg);
+  }
+
+  function getUnreadMessages() {
+    return s.phone_inbox.filter(m => !m.read);
+  }
+
+  function hasUnreadMessages() {
+    return s.phone_inbox.some(m => !m.read);
+  }
+
+  function markMessagesRead() {
+    for (const m of s.phone_inbox) m.read = true;
   }
 
   // --- Observation / fidelity ---
@@ -472,6 +513,10 @@ const State = (() => {
     adjustMoney,
     adjustJobStanding,
     spendMoney,
+    addPhoneMessage,
+    getUnreadMessages,
+    hasUnreadMessages,
+    markMessagesRead,
     observeTime,
     observeMoney,
     glanceTime,

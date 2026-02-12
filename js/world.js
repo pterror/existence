@@ -165,21 +165,6 @@ const World = (() => {
       }
     }
 
-    // Phone buzz — random chance, needs phone and battery
-    if (State.get('has_phone') && State.get('phone_battery') > 5) {
-      if (Timeline.chance(0.08)) {
-        const phoneEvents = [];
-        if (hour >= 9 && hour < 17 && !State.get('at_work_today') && !State.get('called_in')) {
-          phoneEvents.push('phone_work_where_are_you');
-        }
-        if (State.get('money') < 20) {
-          phoneEvents.push('phone_bill_notification');
-        }
-        phoneEvents.push('phone_message_friend');
-        events.push(Timeline.pick(phoneEvents));
-      }
-    }
-
     // Late for work stress — escalates twice then goes silent
     if (State.isLateForWork() && hour < 12) {
       if (Timeline.chance(0.15) && State.get('surfaced_late') < 2) {

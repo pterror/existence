@@ -193,6 +193,7 @@ const UI = (() => {
     // 0: 30s, 1: 60s, 2+: done
     const delays = [30000, 60000];
     if (idleCount >= delays.length) return; // gone quiet
+    if (State.get('viewing_phone')) return; // actively engaged
     idleTimer = setTimeout(() => {
       if (idleCallback) idleCallback();
       idleCount++;
@@ -216,6 +217,13 @@ const UI = (() => {
   // --- Full render ---
 
   function render() {
+    if (State.get('viewing_phone')) {
+      showPassage(Content.phoneScreenDescription());
+      showActions(Content.getAvailableInteractions());
+      showMovement([]);
+      return;
+    }
+
     const location = World.getLocationId();
     const descFn = /** @type {Record<string, (() => string) | undefined>} */ (Content.locationDescriptions)[location];
     const description = descFn ? descFn() : '';
