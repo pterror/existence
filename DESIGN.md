@@ -60,6 +60,66 @@ Sleep is the reset that isn't a full reset. You lie down, hours pass, you wake u
 
 None of these are numbers the player sees. They show up as: which interactions are available (can't do dishes if energy is too low), how the prose reads (the same room described differently at different energy levels), what idle thoughts surface (hunger thoughts when starving, exhaustion thoughts when depleted).
 
+## Health
+
+Health is terrain, not a problem to solve. A chronic condition isn't a debuff — it's the ground you walk on. The game models health as constraints that shape daily texture, not as obstacles on a path to "better."
+
+### Physical health
+
+**Chronic conditions** — diabetes, chronic pain, autoimmune disorders, migraines, asthma. These aren't events. They're daily. You manage them or you don't, and managing them costs time, money, energy, and attention. A good day means the condition is background. A bad day means it's everything.
+
+**Injury** — temporary or permanent. A broken wrist changes what you can do for weeks. Chronic back pain changes it forever. The simulation adjusts what's available, how long things take, what the prose notices.
+
+**Illness** — getting sick, the days of not being able to do anything, the slow return. Not dramatic — just the reality of being in a body that sometimes stops cooperating.
+
+**Disability** — mobility, sensory, cognitive. Not a problem the game solves. A reality the game models. A wheelchair user's apartment is different from a walking person's. A blind person's phone is different. The world is built for a default body and everyone else negotiates.
+
+### Mental health
+
+**Conditions** — depression, anxiety, bipolar, PTSD, OCD. These aren't moods. They're the lens everything comes through. The game already simulates something like depression through energy/stress/social, but as a health condition it's not "low energy" — it's the specific way getting out of bed takes everything you have for reasons that have nothing to do with sleep.
+
+**Anxiety** — beyond stress. The constant hum, the avoidance, the physical symptoms. The difference between "stressed about work" and "unable to open the email because opening the email means knowing."
+
+### Neurodivergence
+
+**ADHD** — executive dysfunction, time blindness, hyperfocus, the gap between wanting to do something and being able to start. The game's "can't focus at work" already touches this. As a trait, it's not situational — it's structural. Some days the medication works, some days it doesn't, some days you forgot to take it.
+
+**Autism** — sensory processing, social interaction patterns, the importance of routine, the cost of masking. The world is loud and bright and expects a specific kind of social performance. Meeting those expectations is work the game can model.
+
+These aren't illnesses to treat. They're ways of being that interact with a world not designed for them.
+
+### Medication
+
+Medication is its own system. Taking it costs time and sometimes money. Not taking it has consequences that vary from immediate to slow-building. Running out means a pharmacy trip, which means money and energy and time. Some medication has side effects (drowsiness, appetite changes, emotional blunting). The negotiation between the condition and the treatment is daily and rarely simple.
+
+### Health as character property
+
+Health conditions are part of who the character is (like age and job type). They're set at creation or develop during play. They modify simulation parameters:
+- Energy baseline and recovery rate
+- Stress baseline
+- What interactions are available
+- Time and energy cost of actions
+- What the prose notices (pain, fatigue, sensory detail, cognitive fog)
+- What objects matter (medication, mobility aids, specific foods)
+- What the phone is for (pharmacy notifications, appointment reminders, health tracking)
+
+### Good days and bad days
+
+Chronic conditions aren't constant. They fluctuate. Some days you almost forget. Some days it's the only thing. The simulation should model this variation — not as random good/bad dice rolls, but as the interaction between the condition, sleep, stress, medication adherence, and the specific demands of the day.
+
+## Drawn Lots
+
+Health is the biggest category, but the game should be able to model any constraint life hands you. These are things that shape your daily existence without being your fault or your choice:
+
+- **Caregiving** — responsible for someone else (aging parent, sick family member, child). Your time and energy aren't fully yours.
+- **Housing instability** — not everyone has an apartment. Couch surfing, shelter, car, street. The "home base" looks different.
+- **Addiction and recovery** — the daily negotiation. Meetings, cravings, medication, the phone numbers you shouldn't call.
+- **Legal constraints** — probation, immigration status, criminal record affecting employment. Invisible walls.
+- **Grief** — recent loss. The phone contact that's still there. The empty chair.
+- **Language barriers** — navigating a world in a language that isn't yours.
+
+Not all of these need to be implemented. But the architecture should allow for them. They're all the same design pattern: a character property that modifies simulation parameters and prose selection. A constraint that's always there, shaping what's possible and how things feel.
+
 ## The Space
 
 ### The apartment
