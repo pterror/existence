@@ -16,17 +16,25 @@ A day. Then another day. The experience of being alive inside constraints you di
 
 No win state. No fail state. No score. No judgment. Just the next moment, and the one after that.
 
-## The Day
+## Time
 
-Time is the core constraint. Everything costs time. Getting dressed, eating, commuting, working, staring at your phone. You start each day with the same 24 hours and the same inability to do everything.
+Time is the core constraint. Everything costs time. Getting dressed, eating, commuting, working, staring at your phone, lying in bed not sleeping. Time doesn't stop. It doesn't wait for you to be ready.
 
-### Structure
+### Continuity
 
-A day starts when you wake up (alarm or not) and ends when you sleep (or pass out from exhaustion). What happens in between isn't prescribed — there's no required sequence. But the world has rhythms: work has hours, stores close, friends text during the day, the light changes.
+There are no days. There's just time. The simulation tracks minutes since the game started. Hour 25 exists. Hour 40 exists. The world doesn't reset at midnight — midnight is just a time. What most people call "a day" is the stretch between when they woke up and when they stopped, and that stretch doesn't have to be 16 hours, doesn't have to start in the morning, doesn't have to contain anything in particular.
+
+Night shift workers sleep at 8 AM. Insomniacs sleep at 4 AM or not at all. Depressed people sleep at 7 AM and wake at 3 PM. Someone pulling a double doesn't sleep between shifts. A parent with a newborn sleeps in fragments. The simulation doesn't impose a structure. It provides time and lets the character exist in it.
+
+### World rhythms
+
+The world has patterns that aren't yours. Work has shifts. Stores have hours. The sun rises and sets. Friends text during certain hours and go quiet at others. Traffic has peaks. The neighborhood is louder at some times and quieter at others. These rhythms exist whether or not you're aligned with them. Being awake at 3 AM when the world is asleep is a specific texture. Being asleep at 2 PM when the world is moving is another.
+
+The light changes. This is the most basic rhythm. Daylight and dark aren't just atmosphere — they mark the world's expectations. Being up in the dark when you should be sleeping. Being asleep in the light when you should be up. The "should" is the world's, not the game's. The game doesn't judge.
 
 ### The alarm
 
-The alarm is an adversary. It exists to tell you that lying here isn't an option. Except it is. Snooze is always available. The negotiation between the alarm and the bed is the first decision of every day, and some days you lose it.
+The alarm is a negotiation between the person who set it and the person who hears it. Those are different people — separated by sleep, by how the night went, by what the body decided overnight. Snooze is always available. Turning it off is always available. Not setting one is available. The alarm doesn't judge. It just makes a sound at the time you told it to, and then you decide.
 
 ### Time perception
 
@@ -36,7 +44,7 @@ You don't always know what time it is. Awareness of time degrades with distance 
 - Longer: "sometime in the morning"
 - Much longer: "The light has shifted. Morning still, probably."
 
-This isn't a mechanic the player sees. It's how the prose renders time. Checking a clock (phone, microwave, alarm) resets the fidelity. Not checking lets it drift.
+This isn't a mechanic the player sees. It's how the prose renders time. Checking a clock (phone, microwave, alarm) resets the fidelity. Not checking lets it drift. At extreme fatigue or distraction, even recent observations blur.
 
 ## The Body
 
@@ -44,7 +52,7 @@ The body is a constraint, not a resource to manage. Energy, hunger, and stress a
 
 ### Energy
 
-You start the day with whatever sleep gave you. Everything costs energy. Some things cost more when other states are bad (hungry and tired together is worse than either alone). Energy isn't a battery with a percentage — it's the difference between "I could do that" and "I can't right now."
+You wake up with whatever sleep gave you. Everything costs energy. Some things cost more when other states are bad (hungry and tired together is worse than either alone). Energy isn't a battery with a percentage — it's the difference between "I could do that" and "I can't right now."
 
 Tiers: depleted → exhausted → tired → okay → rested → alert. Most of the game lives in the tired-to-exhausted range. "Alert" is rare and fleeting. "Depleted" means even thinking about doing things takes more than you have.
 
@@ -58,7 +66,21 @@ Stress accumulates from obligations, money anxiety, work pressure, being late, t
 
 ### Sleep
 
-Sleep is the reset that isn't a full reset. You lie down, hours pass, you wake up with more energy than you had. How much depends on how depleted you were, how stressed, whether you ate. The alarm might wake you before you're done. You might sleep through it. Oversleeping is its own kind of failure that the game doesn't call failure.
+Sleep is an action, not a phase. You choose to lie down — or the body chooses for you. Time passes. You wake up, or the alarm wakes you, or a sound wakes you, or nothing wakes you for a very long time.
+
+**Falling asleep** — not instant. You lie down and time passes before sleep comes. How long depends on stress, caffeine, substances, the body's state, what you're thinking about. Some nights it takes five minutes. Some nights you stare at the ceiling for two hours and sleep never comes. Insomnia isn't a condition flag — it's what happens when the body won't cooperate, and it can happen to anyone on a bad enough night.
+
+**Duration** — the body has an amount of sleep it needs, and that amount varies by person, age, condition, how depleted you are. The alarm might cut it short. You might sleep through the alarm. You might wake up naturally at 4 AM and not be able to go back. Oversleeping is real — the body taking more than it needs because getting up means starting, and starting is the hard part.
+
+**Quality** — not all sleep is the same. Hours spent aren't hours recovered. Stress degrades sleep quality. Hunger. Substances (alcohol disrupts sleep architecture even when it helps you fall asleep). Pain. Noise. The body's own rhythms. You can sleep eight hours and wake up tired. The simulation models recovery as a function of duration and quality, not duration alone.
+
+**Recovery** — sleep restores energy, but not to full and not linearly. Deep depletion doesn't fix in one night. The body pays back sleep debt slowly, over multiple sleeps, and the interest rate is high. One good night after a week of bad ones doesn't make you rested. It makes you slightly less destroyed.
+
+**Waking up** — the transition from sleep to awake isn't a switch. It's a gradient. The alarm goes off and you're not yet a person. The first minutes are fog. Decisions are harder. The snooze button exists in this fog. Getting out of bed is the first thing you do and some days it's the hardest thing you do.
+
+**Not sleeping** — what happens when you don't. The simulation doesn't hit a wall at 24 hours. It degrades. Focus goes first — interactions take longer, cost more, produce worse results. Then mood drops — everything flattens, then frays. Then the prose changes — shorter, less detailed, the world getting further away. Then options disappear — things you could do, you can't start. Then the body might override you — falling asleep on the couch, at the table, wherever you stopped. This isn't a game over. It's a body doing what bodies do.
+
+**Sleep and substances** — caffeine delays sleep onset. Alcohol makes you fall asleep faster and sleep worse. Cannabis suppresses dreaming, and stopping it brings dreams back with a vengeance. Nicotine withdrawal disrupts sleep. Stimulants can make sleep impossible for a day or more. Each substance has its own relationship with sleep, and the simulation models them specifically.
 
 ### The body as prose
 
