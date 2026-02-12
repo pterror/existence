@@ -225,6 +225,48 @@ The body's stress response has its own rhythm. Cortisol peaks in the morning. Ch
 
 The endocrine system is one of mood's autonomous forces. Hormonal cycles, cortisol rhythms, thyroid function, medication effects — these push on mood on their own schedule, independent of what the player does. A bad hormonal day doesn't lift because you ate well and socialized. The body has its own opinion about today.
 
+## Substances
+
+Substances are chemical relationships with the body. Not all of them are problems. Most people have at least one.
+
+### The everyday ones
+
+**Caffeine** — the most normalized drug. Morning coffee isn't a choice for most people — it's the baseline. Skip it and the headache arrives by noon. The simulation models caffeine as a mood and energy floor: present, it holds you at functional. Absent, you drop below where you'd be without it. That's dependency, just one nobody calls dependency.
+
+**Nicotine** — the cigarette break isn't relaxation. It's the withdrawal stopping. Nicotine creates its own need and then satisfies it — the calm you feel after smoking is just the absence of the agitation that not smoking caused. The simulation models this as a cycle: withdrawal builds between doses, the dose resets it to baseline, baseline is where a non-smoker already was. Quitting means weeks of the body recalibrating what baseline is. The cost — financial, health, social (the smoke break, the smell, the people who have opinions about it).
+
+**Alcohol** — the social lubricant, the wind-down, the thing that's fine until it isn't. One drink loosens. Two drinks blur. Three drinks override mood entirely — the heavy lifts, the fraying softens, everything is warmer and less precise. Then it leaves, and where it leaves you is worse than where it found you. The simulation models the curve: the push (mood alteration, inhibition reduction), the plateau, the cost (mood drop, energy crash, the next morning). For some people this is occasional. For some it's nightly. For some it's the thing they can't stop. The line between use and dependency isn't where anyone thinks it is.
+
+**Cannabis** — the edges soften. Time moves differently. The anxiety quiets or gets louder, depending on the person and the strain and the day. The simulation models cannabis as mood modulation with high individual variance — for some characters it's the thing that makes the evening survivable, for others it's the thing that makes the morning harder. Dependency is quieter than alcohol but real — the inability to sleep without it, the irritability when you stop, the way "just tonight" became every night.
+
+### Prescription and grey area
+
+**Painkillers** — the prescribed ones that work too well. The opioid that was for the back injury that's now for everything. The negotiation between pain management and dependency — the dose that handles the pain but that you also need for reasons that aren't about pain anymore. The doctor who cuts you off. The pharmacy that looks at you a certain way. The gap between the last prescription and the next one.
+
+**Benzos** — prescribed for anxiety, and they work. Too well. The calm is real and borrowed. Tolerance builds. The original anxiety, when it comes back, is worse than before you started. Withdrawal is dangerous — seizures, not just discomfort. The medical system that prescribes them and then struggles with what it created.
+
+**Stimulants** — ADHD medication that lets you function. Also: the medication that other people want because it lets them function too. The line between treatment and enhancement. The day you skipped your Adderall versus the day someone else took one. The simulation models the gap between prescribed use (restoring a baseline) and recreational use (exceeding it), and the fact that both involve the same molecule.
+
+### The harder ones
+
+The simulation doesn't rank substances morally. It models what they do to the body.
+
+**Opioids** — beyond prescription. Heroin, fentanyl, whatever's available. The warmth that nothing else provides. The nod. The tolerance that means yesterday's dose is today's minimum. The overdose risk that's math, not drama. The withdrawal that's days of the worst flu plus the certainty that one phone call would fix it. The simulation models the chemical reality: the override (mood replaced entirely), the tolerance curve (diminishing push, increasing need), the withdrawal (mood and energy cratering, physical symptoms, duration).
+
+**Stimulants** — meth, cocaine, crack. The energy that isn't real. The confidence that isn't yours. The crash that takes everything the high gave and then some. The binge pattern — days awake, then days of nothing. The damage that accumulates: teeth, weight, paranoia, the cardiovascular strain. The simulation models the spike and the trough, and the way the troughs get deeper.
+
+**Whatever's available** — not everyone chooses their substance. Sometimes it's what's around, what's cheap, what someone offered. The simulation doesn't require a substance backstory. Someone uses what they use.
+
+### How substances interact with mood
+
+Substances don't go through the state layer. They push on mood directly — chemical override. But the push is temporary and the cost is real:
+
+- **Acute effect** — the substance alters mood for its duration. Some override (opioids replace mood entirely). Some modulate (alcohol loosens, cannabis blurs). Some sharpen (stimulants, caffeine).
+- **Comedown** — the return, which isn't a return to where you were. It's lower. The body borrowed from tomorrow's mood to pay for tonight's.
+- **Tolerance** — repeated use narrows the acute effect. The same dose does less. The body recalibrates around the substance being present.
+- **Withdrawal** — the body's demand. An autonomous drag on mood that operates on its own schedule. Severity and duration depend on the substance, the history, the body. Withdrawal doesn't care what else is going on in your life.
+- **Baseline shift** — long-term use moves where "normal" is. The mood you had before the substance isn't there anymore. Getting it back — if it comes back — takes longer than the withdrawal.
+
 ## Drawn Lots
 
 Constraints life hands you. Not backstory summaries — lived realities the game puts you inside of.
@@ -245,7 +287,11 @@ Constraints life hands you. Not backstory summaries — lived realities the game
 
 - **Housing instability** — not everyone has an apartment. Couch surfing, shelter, car, street. The "home base" looks different. The address you can't put on forms. The belongings that fit in a bag.
 
-- **Addiction and recovery** — the daily negotiation. Meetings, cravings, medication, the phone numbers you shouldn't call. The day count that means everything and nothing. The relapse that isn't failure but feels like it.
+- **Addiction and recovery** — not a character flaw. A chemical relationship. The body learned something and now it needs it. Alcohol, nicotine, opioids, stimulants, cannabis, benzos, whatever it is — the substance isn't the problem, the dependency is. The daily negotiation: the craving that isn't a thought but a pull, physical, in the chest or the hands or the jaw. The meeting, if you go. The sponsor's number. The day count that means everything and nothing. The relapse that isn't failure but the body winning an argument you thought you'd settled. Recovery isn't linear — it's the same day over and over, each one a decision not to. Some days the decision is easy. Some days it's the only thing.
+
+  The chemical reality matters for the simulation. Withdrawal is a physical event — shaking, nausea, insomnia, mood cratering, the body in open revolt. Different substances, different timelines: alcohol withdrawal can kill you, nicotine withdrawal just makes everything unbearable, opioid withdrawal is days of the worst flu plus the certainty that one phone call would end it. The simulation models the substance's actual interaction with the body — the mood override while using, the tolerance that demands more, the withdrawal that drags mood and energy into a pit, the slow recalibration of baseline if you stop.
+
+  And the world's response: the stigma, the job you can't keep, the friend who stopped calling, the family that's watching. The intersection with pain management — chronic pain patients whose medication is also their dependency, and the medical system that treats both badly. The intersection with poverty — the cost of the substance, the cost of treatment, the cost of not being functional.
 
 - **Legal constraints** — probation, immigration status, criminal record affecting employment. Invisible walls. The check-in. The box on the application. The job you can't get because of something you did or something you are.
 
@@ -597,6 +643,9 @@ Mood isn't derived. It isn't a readout of energy plus stress plus hunger. It's i
 - **Weather** — the grey day that sits on you. Air pressure dropping before a front. The thing everyone jokes about but that's real.
 - **Sleep quality** — not just duration but depth. Varied by the PRNG because real sleep varies for no identifiable reason.
 - **Autonomous drift** — the body's own noise. The PRNG generating biological weather — invisible forces on their own timescale. Deterministic in the simulation, opaque to the player.
+- **Substances** — chemical mood alteration. Alcohol loosens the fraying, then drops you somewhere worse. Nicotine is a mood floor — the cigarette doesn't improve anything, it stops withdrawal from pulling you down. Caffeine sharpens until it doesn't. Cannabis blurs the edges. Harder things override mood entirely, then leave. Each substance has its own curve: the push, the plateau, the cost after. Tolerance narrows the push. Withdrawal is its own autonomous force — the body demanding what it's used to, dragging mood somewhere ugly until it gets it or gets through it.
+- **Actions** — some things push mood directly, not through the state layer. A hot shower when you're heavy — the warm water is a moment of okay that isn't about stress reduction. Eating when starved. A conversation that actually lands, not just social contact but genuine connection. Going outside. Music. These aren't large. They're cracks in whatever the mood is, moments where the body remembers something else is possible. Not every instance works — a shower when you're numb might be nothing. Whether an action reaches mood depends on where mood already is.
+- **Inaction** — stagnation has its own weight. Hours of nothing push toward flat, then numb. Not because a state value changed, but because the absence of doing anything is itself a force. The couch, the ceiling, the phone you're not looking at. Inaction doesn't feel like rest. Rest is doing nothing on purpose. Inaction is doing nothing because you can't start.
 
 **Mood states** (not a spectrum — a landscape):
 
