@@ -46,6 +46,8 @@ No build step. Plain JS loaded via script tags.
 
 **Structure serves the moment.** Sometimes choices, sometimes description, sometimes events happening to you. Not locked to one interaction pattern.
 
+**Simulated persistence.** Objects in the world that have state in real life should have state in the simulation. A phone has an inbox — messages arrive whether or not you look, and checking shows what's accumulated. Ignoring things has weight. This isn't UI chrome; it's the simulation being honest.
+
 **One timeline.** No save scumming. Autosave on every action. You live with what happened. Closing and reopening picks up where you left off.
 
 **Deterministic replay.** All RNG through seeded PRNG (`Timeline.random`). No `Math.random`, no `Date.now` in simulation. Given the same seed and action sequence, the game produces the exact same world state.
@@ -66,6 +68,7 @@ No build step. Plain JS loaded via script tags.
 - No numbers, stats, or system voice in player-facing text
 - State affects prose through qualitative tiers, not numeric thresholds exposed to the player
 - The same moment reads differently depending on hidden state
+- Text must reflect actual state, not conjure moments from nothing. If the prose says you received a message, that message should exist in the simulation. Don't generate fake artifacts — if a system can't back it up, the text shouldn't promise it.
 
 ## Workflow
 
