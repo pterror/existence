@@ -1,0 +1,8 @@
+name = "existence-router"
+main = "src/index.js"
+compatibility_date = "2025-01-01"
+
+routes = [
+  { pattern = "para.garden/existence", zone_name = "para.garden" },
+  { pattern = "para.garden/existence/*", zone_name = "para.garden" },
+]
