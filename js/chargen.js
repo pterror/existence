@@ -108,6 +108,11 @@ const Chargen = (() => {
     const outfit = Timeline.charPick(outfitSets);
     const sleepwear = Timeline.charPick(sleepwearOptions);
 
+    // Start date — random day in 2024, stored as minutes since Unix epoch
+    const baseDateMinutes = 28401120; // 2024-01-01 00:00 UTC
+    const dayOffset = Timeline.charRandomInt(0, 364);
+    const startTimestamp = baseDateMinutes + dayOffset * 1440;
+
     return /** @type {GameCharacter} */ ({
       first_name: playerName.first,
       last_name: playerName.last,
@@ -120,6 +125,7 @@ const Chargen = (() => {
       supervisor: { name: supervisorName },
       job_type: jobType,
       age_stage: age,
+      start_timestamp: startTimestamp,
     });
   }
 
@@ -205,6 +211,11 @@ const Chargen = (() => {
     const outfitOptions = shuffled.slice(0, 3);
     const sleepwear = /** @type {string} */ (Timeline.charPick(sleepwearOptions));
     const ageDefault = Timeline.charRandomInt(22, 48);
+
+    // Start date — random day in 2024
+    const baseDateMinutes = 28401120; // 2024-01-01 00:00 UTC
+    const dayOffset = Timeline.charRandomInt(0, 364);
+    const startTimestamp = baseDateMinutes + dayOffset * 1440;
 
     const friendFlavors = ['sends_things', 'checks_in', 'dry_humor', 'earnest'];
     const f1flavor = /** @type {string} */ (Timeline.charPick(friendFlavors));
@@ -399,6 +410,7 @@ const Chargen = (() => {
         sandboxState.supervisor = { name: /** @type {HTMLInputElement} */ (supInput.querySelector('input')).value.trim() || supervisorDefault };
         sandboxState.first_name = (first.textContent || '').trim() || playerDefault.first;
         sandboxState.last_name = (last.textContent || '').trim() || playerDefault.last;
+        sandboxState.start_timestamp = startTimestamp;
         finishCreation(/** @type {GameCharacter} */ (sandboxState));
       });
       actionsEl.appendChild(confirmBtn);

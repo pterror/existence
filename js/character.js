@@ -21,6 +21,7 @@ const Character = (() => {
       supervisor: { name: 'Terri' },
       job_type: 'office',
       age_stage: 'thirties',
+      start_timestamp: 28401120, // 2024-01-01 00:00 UTC
     };
   }
 
@@ -46,6 +47,11 @@ const Character = (() => {
   // Apply character to game state (called once at game start)
   function applyToState() {
     if (!current) return;
+
+    // Calendar anchor
+    if (current.start_timestamp) {
+      State.set('start_timestamp', current.start_timestamp);
+    }
 
     // Age affects starting money
     // last_observed_money offset by ~$5 → starts at approximate fidelity

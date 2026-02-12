@@ -131,10 +131,13 @@ const World = (() => {
     if (destId === 'workplace') {
       if (!State.get('at_work_today')) {
         State.set('at_work_today', true);
-        if (State.get('time') > State.get('work_shift_start') + 15) {
+        const tod = State.timeOfDay();
+        if (tod > State.get('work_shift_start') + 15) {
           State.set('times_late_this_week', State.get('times_late_this_week') + 1);
           State.adjustJobStanding(-5);
+          Events.record('late_for_work', { minutesLate: Math.round(tod - State.get('work_shift_start')) });
         }
+        Events.record('arrived_at_work', { late: tod > State.get('work_shift_start') + 15, minutesLate: Math.round(tod - State.get('work_shift_start')) });
       }
     }
 
@@ -152,13 +155,13 @@ const World = (() => {
   function checkEvents() {
     /** @type {(string | undefined)[]} */
     const events = [];
-    const time = State.get('time');
+    const tod = State.timeOfDay();
     const hour = State.getHour();
     const location = State.get('location');
 
     // Alarm
     const alarmTime = State.get('alarm_time');
-    if (State.get('alarm_set') && !State.get('alarm_went_off') && time >= alarmTime && time < alarmTime + 30) {
+    if (State.get('alarm_set') && !State.get('alarm_went_off') && tod >= alarmTime && tod < alarmTime + 30) {
       if (location === 'apartment_bedroom') {
         State.set('alarm_went_off', true);
         events.push('alarm');

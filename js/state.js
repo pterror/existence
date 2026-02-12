@@ -14,9 +14,12 @@ const State = (() => {
       money: 47.50,     // Dollars. Tight but not zero.
       stress: 30,       // 0-100. Accumulated friction.
       hunger: 25,       // 0-100. 0 = full, 100 = starving.
-      time: 6 * 60 + 30, // Minutes since midnight. Start at 6:30 AM.
+      time: 6 * 60 + 30, // Minutes since game start. Keeps incrementing, never resets.
       social: 40,       // 0-100. 0 = deeply isolated, 100 = connected.
       job_standing: 65, // 0-100. How work perceives you.
+
+      // Calendar anchor — minutes since Unix epoch. Set once from charRng.
+      start_timestamp: 0,
 
       // Flags and soft state
       alarm_time: 6 * 60 + 30,  // Minutes since midnight. When the alarm fires.
@@ -39,8 +42,8 @@ const State = (() => {
       previous_location: /** @type {string | null} */ (null),
 
       // Work specifics
-      work_shift_start: 9 * 60,   // 9:00 AM
-      work_shift_end: 17 * 60,    // 5:00 PM
+      work_shift_start: 9 * 60,   // 9:00 AM in minutes since midnight
+      work_shift_end: 17 * 60,    // 5:00 PM in minutes since midnight
       work_tasks_done: 0,
       work_tasks_expected: 4,
 
@@ -49,11 +52,8 @@ const State = (() => {
       phone_silent: false,
       viewing_phone: false,
       last_msg_gen_time: 0,     // game time of last generateIncomingMessages call
-      work_nagged_today: false, // reset on day rollover
+      work_nagged_today: false, // reset on wake
       last_bill_day: 0,         // last game-day a bill notification arrived
-
-      // Day tracking
-      day: 1,
 
       // Internal counters the player never sees
       actions_since_rest: 0,
@@ -127,38 +127,26 @@ const State = (() => {
       s.social = Math.max(0, s.social - hours * 2);
     }
 
+    // Gradual apartment entropy
+    s.apartment_mess = Math.min(100, s.apartment_mess + hours * 0.2);
+
     // Actions since rest
     s.actions_since_rest++;
+  }
 
-    // Day rollover
-    if (s.time >= 24 * 60) {
-      s.time -= 24 * 60;
-      s.last_observed_time -= 24 * 60;
-      s.day++;
-      s.at_work_today = false;
-      s.called_in = false;
-      s.ate_today = false;
-      s.showered = false;
-      s.dressed = false;
-      s.work_tasks_done = 0;
-      s.alarm_went_off = false;
-      s.surfaced_late = 0;
-      s.work_nagged_today = false;
-      s.apartment_mess = Math.min(100, s.apartment_mess + 5);
+  // --- Time of day / calendar ---
 
-      // Fridge food slowly goes bad
-      if (s.fridge_food > 0 && Timeline.chance(0.15)) {
-        s.fridge_food = Math.max(0, s.fridge_food - 1);
-      }
-    }
+  /** Minutes within the current 24h period */
+  function timeOfDay() {
+    return ((s.time % 1440) + 1440) % 1440;
   }
 
   function getHour() {
-    return Math.floor(s.time / 60);
+    return Math.floor(timeOfDay() / 60);
   }
 
   function getMinute() {
-    return Math.floor(s.time % 60);
+    return Math.floor(timeOfDay() % 60);
   }
 
   function getTimeString() {
@@ -169,12 +157,67 @@ const State = (() => {
     return `${displayH}:${m.toString().padStart(2, '0')} ${period}`;
   }
 
+  /** Game day counter (1-indexed) */
+  function getDay() {
+    return Math.floor(s.time / 1440) + 1;
+  }
+
+  /** Calendar date from start_timestamp + time */
+  function calendarDate() {
+    const d = new Date((s.start_timestamp + s.time) * 60000);
+    return {
+      year: d.getUTCFullYear(),
+      month: d.getUTCMonth(),    // 0-11
+      day: d.getUTCDate(),       // 1-31
+      weekday: d.getUTCDay(),    // 0-6 (Sun=0)
+      hour: d.getUTCHours(),
+      minute: d.getUTCMinutes(),
+    };
+  }
+
+  function dayOfWeek() {
+    return calendarDate().weekday;
+  }
+
+  function season() {
+    const month = calendarDate().month;
+    if (month >= 2 && month <= 4) return 'spring';
+    if (month >= 5 && month <= 7) return 'summer';
+    if (month >= 8 && month <= 10) return 'autumn';
+    return 'winter';
+  }
+
+  /** @param {number} eventTime @returns {number} */
+  function daysSince(eventTime) {
+    return (s.time - eventTime) / 1440;
+  }
+
+  /** @param {number} t1 @param {number} t2 @returns {boolean} */
+  function isSameDay(t1, t2) {
+    return Math.floor(t1 / 1440) === Math.floor(t2 / 1440);
+  }
+
   function isWorkHours() {
-    return s.time >= s.work_shift_start && s.time < s.work_shift_end;
+    const tod = timeOfDay();
+    return tod >= s.work_shift_start && tod < s.work_shift_end;
   }
 
   function isLateForWork() {
-    return s.time > s.work_shift_start + 15 && !s.at_work_today && !s.called_in;
+    const tod = timeOfDay();
+    return tod > s.work_shift_start + 15 && !s.at_work_today && !s.called_in;
+  }
+
+  /** Reset wake-period flags — called when the player wakes from sleep */
+  function wakeUp() {
+    s.dressed = false;
+    s.showered = false;
+    s.ate_today = false;
+    s.at_work_today = false;
+    s.called_in = false;
+    s.work_tasks_done = 0;
+    s.alarm_went_off = false;
+    s.surfaced_late = 0;
+    s.work_nagged_today = false;
   }
 
   // --- Qualitative tiers ---
@@ -425,9 +468,10 @@ const State = (() => {
   }
 
   function roundedTimeString() {
-    // Round to nearest 15 minutes
-    const rounded = Math.round(s.time / 15) * 15;
-    const h = Math.floor(rounded / 60);
+    // Round to nearest 15 minutes within current day
+    const tod = timeOfDay();
+    const rounded = Math.round(tod / 15) * 15;
+    const h = Math.floor(rounded / 60) % 24;
     const m = rounded % 60;
     const period = h >= 12 ? 'PM' : 'AM';
     const displayH = h === 0 ? 12 : h > 12 ? h - 12 : h;
@@ -492,11 +536,19 @@ const State = (() => {
     getAll,
     loadState,
     advanceTime,
+    timeOfDay,
     getHour,
     getMinute,
     getTimeString,
+    getDay,
+    calendarDate,
+    dayOfWeek,
+    season,
+    daysSince,
+    isSameDay,
     isWorkHours,
     isLateForWork,
+    wakeUp,
     energyTier,
     stressTier,
     hungerTier,

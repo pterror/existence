@@ -665,38 +665,99 @@ const Content = (() => {
       execute: () => {
         const energy = State.energyTier();
         const stress = State.stressTier();
+        const hunger = State.hungerTier();
 
+        // Falling-asleep delay — stress and racing thoughts keep you up
+        let fallAsleepDelay;
+        if (energy === 'depleted') {
+          fallAsleepDelay = Timeline.randomInt(2, 8);
+        } else if (stress === 'overwhelmed' || stress === 'strained') {
+          fallAsleepDelay = Timeline.randomInt(15, 45);
+        } else if (stress === 'tense') {
+          fallAsleepDelay = Timeline.randomInt(8, 25);
+        } else {
+          fallAsleepDelay = Timeline.randomInt(3, 15);
+        }
+
+        // Natural sleep duration
         let sleepMinutes;
         if (energy === 'depleted') {
-          sleepMinutes = Timeline.randomInt(180, 360);
+          sleepMinutes = Timeline.randomInt(300, 540);
         } else if (energy === 'exhausted') {
-          sleepMinutes = Timeline.randomInt(120, 300);
+          sleepMinutes = Timeline.randomInt(240, 480);
         } else {
-          sleepMinutes = Timeline.randomInt(60, 180);
+          sleepMinutes = Timeline.randomInt(120, 360);
         }
 
-        let energyGain;
-        if (stress === 'overwhelmed' || stress === 'strained') {
-          energyGain = sleepMinutes / 10;
-        } else {
-          energyGain = sleepMinutes / 5;
+        // Alarm interruption — check if alarm fires during sleep
+        let wokeByAlarm = false;
+        if (State.get('alarm_set') && !State.get('alarm_went_off')) {
+          const alarmTime = State.get('alarm_time');
+          const tod = State.timeOfDay();
+          // Time from now until alarm (wrapping across midnight)
+          const minutesToAlarm = ((alarmTime - tod) % 1440 + 1440) % 1440;
+          if (minutesToAlarm > 0 && minutesToAlarm < fallAsleepDelay + sleepMinutes) {
+            // Alarm fires during sleep — chance to sleep through if depleted
+            if (energy === 'depleted' && Timeline.chance(0.3)) {
+              // Sleep through the alarm
+              State.set('alarm_went_off', true);
+            } else {
+              // Alarm truncates sleep
+              sleepMinutes = Math.max(30, minutesToAlarm - fallAsleepDelay);
+              wokeByAlarm = true;
+              State.set('alarm_went_off', true);
+            }
+          }
         }
 
+        // Quality factor — stress and hunger degrade recovery
+        let qualityMult = 1.0;
+        if (stress === 'overwhelmed') qualityMult *= 0.5;
+        else if (stress === 'strained') qualityMult *= 0.7;
+        if (hunger === 'starving') qualityMult *= 0.7;
+        else if (hunger === 'very_hungry') qualityMult *= 0.85;
+
+        const energyGain = (sleepMinutes / 5) * qualityMult;
+
+        State.advanceTime(fallAsleepDelay + sleepMinutes);
         State.adjustEnergy(energyGain);
         State.adjustStress(-sleepMinutes / 20);
         State.set('actions_since_rest', 0);
-        State.advanceTime(sleepMinutes);
+
+        // Fridge food slowly goes bad overnight
+        if (State.get('fridge_food') > 0 && Timeline.chance(0.15)) {
+          State.set('fridge_food', Math.max(0, State.get('fridge_food') - 1));
+        }
+
+        // Reset wake-period flags
+        State.wakeUp();
+
+        // Record events
+        const quality = qualityMult >= 0.9 ? 'good' : qualityMult >= 0.6 ? 'restless' : 'poor';
+        Events.record('slept', { duration: sleepMinutes, wokeByAlarm, quality });
+        Events.record('woke_up', {});
 
         const hours = Math.round(sleepMinutes / 60);
 
+        // Prose
+        if (wokeByAlarm) {
+          if (energy === 'depleted') {
+            return 'The alarm drags you up from somewhere deep. ' + hours + ' hours — your body wanted more. It\'s not getting it.';
+          }
+          if (stress === 'overwhelmed' || stress === 'strained') {
+            return 'Sleep came late and the alarm came too soon. ' + hours + ' hours of something between rest and not. The sound cuts through whatever you were holding onto.';
+          }
+          return 'The alarm. You were asleep — actually asleep — and now you\'re not. ' + hours + ' hours. The room is different. Morning.';
+        }
+
         if (energy === 'depleted') {
-          if (stress === 'overwhelmed') {
+          if (qualityMult < 0.6) {
             return 'You lie down and something gives way. Not quite sleep. More like your body collecting a debt. You surface ' + hours + ' hours later, not rested exactly, but less far from it.';
           }
           return 'You\'re asleep before you finish lying down. ' + hours + ' hours disappear. You wake up like coming up from deep water.';
         }
 
-        if (stress === 'overwhelmed' || stress === 'strained') {
+        if (qualityMult < 0.6) {
           return 'Sleep comes in pieces. You\'re awake, then you\'re not, then you are again and the ceiling is the same. ' + hours + ' hours of something that isn\'t quite rest.';
         }
 
@@ -716,6 +777,7 @@ const Content = (() => {
       execute: () => {
         State.set('dressed', true);
         State.advanceTime(5);
+        Events.record('got_dressed');
 
         const mood = State.moodTone();
         const mess = State.get('apartment_mess');
@@ -783,6 +845,7 @@ const Content = (() => {
         State.set('viewing_phone', true);
         State.set('phone_battery', Math.max(0, State.get('phone_battery') - 1));
         State.advanceTime(1);
+        Events.record('checked_phone');
         return phoneScreenDescription();
       },
     },
@@ -799,6 +862,7 @@ const Content = (() => {
         State.set('ate_today', true);
         State.set('consecutive_meals_skipped', 0);
         State.advanceTime(15);
+        Events.record('ate', { what: 'fridge_food' });
 
         const hunger = State.hungerTier();
         const mood = State.moodTone();
@@ -860,6 +924,7 @@ const Content = (() => {
         State.set('viewing_phone', true);
         State.set('phone_battery', Math.max(0, State.get('phone_battery') - 1));
         State.advanceTime(1);
+        Events.record('checked_phone');
         return phoneScreenDescription();
       },
     },
@@ -875,6 +940,7 @@ const Content = (() => {
         State.adjustEnergy(-3);
         State.adjustStress(-8);
         State.advanceTime(15);
+        Events.record('showered');
 
         const mood = State.moodTone();
         const energy = State.energyTier();
@@ -913,6 +979,7 @@ const Content = (() => {
         State.set('viewing_phone', true);
         State.set('phone_battery', Math.max(0, State.get('phone_battery') - 1));
         State.advanceTime(1);
+        Events.record('checked_phone');
         return phoneScreenDescription();
       },
     },
@@ -1043,6 +1110,8 @@ const Content = (() => {
           ? Character.get('coworker1')
           : Character.get('coworker2');
 
+        Events.record('talked_to_coworker', { name: coworker.name, flavor: coworker.flavor });
+
         if (social === 'isolated' || social === 'withdrawn') {
           return /** @type {(name: string) => string | undefined} */ (coworkerInteraction[coworker.flavor])(coworker.name);
         }
@@ -1062,6 +1131,7 @@ const Content = (() => {
         State.set('viewing_phone', true);
         State.set('phone_battery', Math.max(0, State.get('phone_battery') - 1));
         State.advanceTime(1);
+        Events.record('checked_phone');
         return phoneScreenDescription();
       },
     },
@@ -1083,6 +1153,7 @@ const Content = (() => {
         State.set('fridge_food', Math.min(6, State.get('fridge_food') + 3));
         State.advanceTime(10);
         State.glanceMoney();
+        Events.record('bought_groceries', { cost: roundedCost });
 
         const money = State.moneyTier();
 
@@ -1114,6 +1185,7 @@ const Content = (() => {
         State.set('consecutive_meals_skipped', 0);
         State.advanceTime(5);
         State.glanceMoney();
+        Events.record('ate', { what: 'cheap_meal' });
 
         const mood = State.moodTone();
 
@@ -1224,7 +1296,7 @@ const Content = (() => {
    * @returns {boolean}
    */
   function generateIncomingMessages() {
-    const now = State.get('time') + (State.get('day') - 1) * 24 * 60;
+    const now = State.get('time');
     const last = State.get('last_msg_gen_time');
     const elapsed = Math.max(0, now - last);
     State.set('last_msg_gen_time', now);
@@ -1276,7 +1348,7 @@ const Content = (() => {
     }
 
     // --- Work nag (deterministic trigger, no RNG) ---
-    const minutesLate = State.get('time') - (State.get('work_shift_start') + 15);
+    const minutesLate = State.timeOfDay() - (State.get('work_shift_start') + 15);
     if (minutesLate >= 30 && !State.get('at_work_today') && !State.get('called_in') && !State.get('work_nagged_today')) {
       State.set('work_nagged_today', true);
       const supervisor = Character.get('supervisor');
@@ -1289,7 +1361,7 @@ const Content = (() => {
     }
 
     // --- Bill notification (deterministic trigger, no RNG) ---
-    const day = State.get('day');
+    const day = State.getDay();
     if (day % 7 === 3 && State.get('last_bill_day') !== day) {
       State.set('last_bill_day', day);
       State.addPhoneMessage({
@@ -1375,6 +1447,7 @@ const Content = (() => {
       State.adjustJobStanding(-8);
       State.adjustStress(-10);
       State.advanceTime(5);
+      Events.record('called_in_sick');
 
       const job = State.jobTier();
       if (job === 'at_risk' || job === 'shaky') {

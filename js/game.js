@@ -51,6 +51,7 @@ const Game = (() => {
     // Replay all actions to reconstruct state
     State.init();
     Character.applyToState();
+    Events.init();
 
     // Consume same initial RNG as fresh start (opening events + messages)
     const initEvents = World.checkEvents();
@@ -105,6 +106,7 @@ const Game = (() => {
       // Now start the game.
       State.init();
       Character.applyToState();
+      Events.init();
 
       // Opening — check for initial events (consumes RNG)
       const events = World.checkEvents();
@@ -240,6 +242,7 @@ const Game = (() => {
 
     State.init();
     Character.applyToState();
+    Events.init();
 
     // Consume initial events (same as live play)
     const initEvents = World.checkEvents();
