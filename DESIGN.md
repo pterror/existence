@@ -304,6 +304,8 @@ Trauma manifests as texture, not exposition:
 
 **Involuntary reactions** — the body responding before the mind can intervene. An interaction is available, you take it, and the prose contracts — goes flat, goes short, goes somewhere else. Not "you feel triggered" — the words themselves change. Shorter sentences. Loss of detail. The narration pulling away from the moment. Sometimes the character does the thing and the body rebels: the tightness in the chest, the nausea, the sudden need to leave. You chose the interaction. You couldn't choose the reaction.
 
+Triggers can be orthogonal to the actual relationship. A coworker who's genuinely kind, who you'd call a friend — but they're male, or they're loud, or they stand too close, or they remind the body of something the mind has filed away. The relationship is warm. The flinch doesn't care. You like this person and your chest tightens anyway. The game doesn't explain the contradiction. It just lets both be true.
+
 **Loaded moments** — a time of day, a sound, a type of message, a quality of light that carries weight the game never explains. The prose shifts when these are present. The same morning reads differently because of something the game doesn't name.
 
 **Avoidance** — what the character gravitates away from. Not as a visible pattern the game announces, but as the shape of what they do and don't do over time. The player might notice it. Or they might not.
