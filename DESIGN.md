@@ -633,6 +633,36 @@ Bills arrive on schedule whether or not income does. The collision between regul
 - Phone bill: monthly, you need it, it costs more than it should
 - Food: continuous, flexible but non-optional
 
+## Content and Consent
+
+The game depicts difficult realities honestly. The player should choose what they're willing to engage with.
+
+### Before starting
+
+A content warning — not vague, not corporate. Direct: "This game can include domestic violence, abuse, addiction, poverty, mental illness, and other difficult experiences. It depicts them as daily life, not as drama. Nothing is softened."
+
+### Content levels
+
+Broad tiers that shape what the character generator can produce:
+
+- A baseline tier that stays within everyday struggles — financial stress, work pressure, loneliness, family tension, health issues. The daily texture of a constrained life without the darkest material.
+- A full tier that opens everything — DV, abuse, foster care, assault aftermath, addiction, forced pregnancy, severe poverty, homelessness. The unfiltered experience.
+- Whatever tiers make sense between those extremes.
+
+The tiers aren't "easy mode" and "hard mode." A baseline life can be devastating in its own right. The tiers control the *category* of experience, not the intensity. Within whatever tier the player chooses, the game depicts with full fidelity. No soft versions.
+
+### Fine-grained configuration
+
+Optionally, the player can toggle specific content categories independently. Someone might be ready for poverty and addiction but not DV. Someone might be fine with everything except sexual assault. The configuration is a list of what can appear in their game.
+
+This isn't about judging what's "too much." It's about consent. The player knows what they're ready to sit with. The game respects that. What it doesn't do is lie about what's inside — if DV is enabled, the DV is real.
+
+### Implementation
+
+Content configuration happens before character generation, not during play. The character is generated within the constraints the player set. Once you're in, you're in — the game doesn't interrupt to ask "are you sure?" That would break immersion. The consent happens once, at the door.
+
+The configuration should be revisitable between runs. You might start with baseline and come back later ready for more. Or you might dial something back after a run that hit too close. Neither is judged.
+
 ## What the Game Doesn't Have
 
 This is as important as what it does have.
