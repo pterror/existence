@@ -12,7 +12,7 @@ const Content = (() => {
       `${name} sent a picture of a cat sitting in a shopping bag. No caption. None needed.`,
       `A message from ${name} — a screenshot of a tweet, no context. The kind of thing that means she was thinking of you.`,
       `${name} sent a voice memo. Fifteen seconds long. You'll listen to it later. Probably.`,
-      `A link from ${name}. No message, just the link. You'll look at it eventually.`,
+      `A link from ${name}. No message, just the link. You save it without opening it.`,
     ]),
     checks_in: (name) => Timeline.pick([
       `A message from ${name}. "Hey, you good?" You stare at it. You don't type anything back yet.`,
@@ -1461,7 +1461,7 @@ const Content = (() => {
       );
     } else if (mood === 'clear' || mood === 'present') {
       thoughts.push(
-        'For a moment, nothing needs doing. This is rare. You notice it.',
+        'Nothing to do. Not in a bad way. Just — nothing.',
         'The light coming through the window is doing something interesting on the wall. You watch it.',
         'A breath that feels like it belongs to you. Not many of those today.',
         'You\'re here. Actually here. Not thinking about being somewhere else.',

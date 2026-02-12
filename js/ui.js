@@ -57,13 +57,11 @@ const UI = (() => {
       if (callbacks.onFocusMoney) callbacks.onFocusMoney();
     });
 
-    // Pause idle timer when tab is hidden — prevents queued timeouts
-    // from dumping a wall of idle text when the player returns
+    // Pause idle timer when tab is hidden.
+    // Don't restart on return — let the player's next action restart it.
     document.addEventListener('visibilitychange', () => {
       if (document.hidden) {
         stopIdleTimer();
-      } else if (idleCallback) {
-        scheduleNextIdle();
       }
     });
   }
@@ -191,9 +189,9 @@ const UI = (() => {
   // --- Idle behavior ---
 
   function scheduleNextIdle() {
-    // Escalating silence: first few come relatively quickly, then stretch out, then stop
-    // 0: 25s, 1: 40s, 2: 60s, 3: 90s, 4+: done
-    const delays = [IDLE_DELAY, 40000, 60000, 90000];
+    // Escalating silence: one comes, then another, then quiet
+    // 0: 30s, 1: 60s, 2+: done
+    const delays = [30000, 60000];
     if (idleCount >= delays.length) return; // gone quiet
     idleTimer = setTimeout(() => {
       if (idleCallback) idleCallback();

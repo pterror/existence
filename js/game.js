@@ -58,7 +58,7 @@ const Game = (() => {
       const eventFn = /** @type {Record<string, (() => string) | undefined>} */ (Content.eventText)[eventId];
       if (eventFn) eventFn();
     }
-    replayActions(saved.actions);
+    const { lastIdleThought } = replayActions(saved.actions);
 
     // Initialize UI
     UI.init({
@@ -74,6 +74,11 @@ const Game = (() => {
     UI.showAwareness();
     UI.updateAwareness();
     showStepAway();
+
+    // Restore last idle thought so it doesn't vanish on refresh
+    if (lastIdleThought) {
+      setTimeout(() => UI.appendEventText(lastIdleThought), 500);
+    }
   }
 
   function startFresh() {
@@ -312,10 +317,6 @@ const Game = (() => {
         const thought = Content.idleThoughts();
         if (thought) responseText = thought;
         State.advanceTime(Timeline.randomInt(2, 5));
-        if (Timeline.chance(0.3)) {
-          const events = World.checkEvents();
-          generateEventTexts(events, eventTexts);
-        }
       } else if (action.type === 'observe_time') {
         State.observeTime();
         const source = Content.getTimeSource();
@@ -415,8 +416,9 @@ const Game = (() => {
 
   // --- Replay (state reconstruction, no visual) ---
 
-  /** @param {ActionEntry[]} actions */
+  /** @param {ActionEntry[]} actions @returns {{ lastIdleThought: string | undefined }} */
   function replayActions(actions) {
+    let lastIdleThought;
     for (const entry of actions) {
       const action = entry.action;
       if (action.type === 'interact') {
@@ -424,18 +426,20 @@ const Game = (() => {
         // Consume the same RNG calls as live play:
         // checkEvents + event text functions
         consumeEvents();
+        lastIdleThought = undefined; // player acted, clear stale idle
       } else if (action.type === 'move') {
         replayMove(action.destination);
         consumeEvents();
+        lastIdleThought = undefined;
       } else if (action.type === 'idle') {
-        // Idle handles its own RNG consumption entirely
-        replayIdle();
+        lastIdleThought = replayIdle();
       } else if (action.type === 'observe_time') {
         State.observeTime();
       } else if (action.type === 'observe_money') {
         State.observeMoney();
       }
     }
+    return { lastIdleThought };
   }
 
   function consumeEvents() {
@@ -456,13 +460,12 @@ const Game = (() => {
     }
   }
 
+  /** @returns {string | undefined} the idle thought text (for resume display) */
   function replayIdle() {
     // Consume the same RNG as live idle
-    Content.idleThoughts();
+    const thought = Content.idleThoughts();
     State.advanceTime(Timeline.randomInt(2, 5));
-    if (Timeline.chance(0.3)) {
-      consumeEvents();
-    }
+    return thought;
   }
 
   /** @param {string | undefined} destId */
@@ -658,7 +661,7 @@ const Game = (() => {
     // Record idle as an action so RNG consumption is replayable
     Timeline.recordAction({ type: 'idle' });
 
-    // Surface an idle thought
+    // Surface an idle thought — pure atmosphere, no events or state changes
     const thought = Content.idleThoughts();
     if (thought) {
       UI.appendEventText(thought);
@@ -666,24 +669,6 @@ const Game = (() => {
 
     // Small time passage from idling
     State.advanceTime(Timeline.randomInt(2, 5));
-
-    // Occasionally check for events during idle
-    if (Timeline.chance(0.3)) {
-      const events = World.checkEvents();
-      /** @type {string[]} */
-      const eventTexts = [];
-      generateEventTexts(events, eventTexts);
-
-      // Apply focus triggers from idle events
-      applyFocusTriggers(events, null);
-
-      let delay = 2000;
-      for (const text of eventTexts) {
-        const t = text;
-        setTimeout(() => UI.appendEventText(t), delay);
-        delay += 1200;
-      }
-    }
 
     UI.updateAwareness();
   }
