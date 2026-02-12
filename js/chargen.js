@@ -215,7 +215,8 @@ const Chargen = (() => {
     // Start date — random day in 2024
     const baseDateMinutes = 28401120; // 2024-01-01 00:00 UTC
     const dayOffset = Timeline.charRandomInt(0, 364);
-    const startTimestamp = baseDateMinutes + dayOffset * 1440;
+    const defaultSeason = dayOffset < 91 ? 'winter' : dayOffset < 182 ? 'spring' : dayOffset < 274 ? 'summer' : 'autumn';
+    let selectedSeason = defaultSeason;
 
     const friendFlavors = ['sends_things', 'checks_in', 'dry_humor', 'earnest'];
     const f1flavor = /** @type {string} */ (Timeline.charPick(friendFlavors));
@@ -290,6 +291,33 @@ const Chargen = (() => {
       ageP.appendChild(ageInput);
       ageP.append('.');
       passageEl.appendChild(ageP);
+
+      // --- Season ---
+      const seasonP = document.createElement('p');
+      seasonP.textContent = 'Outside \u2014';
+      passageEl.appendChild(seasonP);
+
+      const seasonGroup = document.createElement('div');
+      seasonGroup.className = 'chargen-group';
+      const seasons = [
+        { label: 'Cold. Frost on the window, maybe.', value: 'winter' },
+        { label: 'Something blooming somewhere. You can almost smell it.', value: 'spring' },
+        { label: 'Already warm. Going to be one of those days.', value: 'summer' },
+        { label: 'Grey light. Days getting shorter.', value: 'autumn' },
+      ];
+      for (const s of seasons) {
+        const btn = document.createElement('button');
+        btn.className = 'chargen-option';
+        if (s.value === defaultSeason) btn.classList.add('selected');
+        btn.textContent = s.label;
+        btn.addEventListener('click', () => {
+          selectedSeason = s.value;
+          seasonGroup.querySelectorAll('.chargen-option').forEach(b => b.classList.remove('selected'));
+          btn.classList.add('selected');
+        });
+        seasonGroup.appendChild(btn);
+      }
+      passageEl.appendChild(seasonGroup);
 
       // --- Wardrobe ---
       const wardrobeP = document.createElement('p');
@@ -410,7 +438,14 @@ const Chargen = (() => {
         sandboxState.supervisor = { name: /** @type {HTMLInputElement} */ (supInput.querySelector('input')).value.trim() || supervisorDefault };
         sandboxState.first_name = (first.textContent || '').trim() || playerDefault.first;
         sandboxState.last_name = (last.textContent || '').trim() || playerDefault.last;
-        sandboxState.start_timestamp = startTimestamp;
+
+        // Compute start_timestamp from selected season
+        const seasonStarts = { winter: 0, spring: 91, summer: 182, autumn: 274 };
+        const seasonLengths = { winter: 91, spring: 91, summer: 92, autumn: 91 };
+        const ss = /** @type {'winter'|'spring'|'summer'|'autumn'} */ (selectedSeason);
+        const remappedDay = seasonStarts[ss] + (dayOffset % seasonLengths[ss]);
+        sandboxState.start_timestamp = baseDateMinutes + remappedDay * 1440;
+
         finishCreation(/** @type {GameCharacter} */ (sandboxState));
       });
       actionsEl.appendChild(confirmBtn);
