@@ -92,7 +92,53 @@ Each condition has its own texture:
 
 **Illness** — getting sick, the days of not being able to do anything, the slow return. Not dramatic — just the reality of being in a body that sometimes stops cooperating.
 
-**Disability** — mobility, sensory, cognitive. Not a problem the game solves. A reality the game models. A wheelchair user's apartment is different from a walking person's. A blind person's phone is different. The world is built for a default body and everyone else negotiates.
+**Disability** — not a category. A landscape. The world is built for a default body and everyone else negotiates. The game models what that negotiation actually looks like.
+
+#### Sensory
+
+**Blindness** — total blindness transforms every interaction involving sight. The phone is a voice, not a screen. The apartment is spatial memory — furniture doesn't move, and when it does, that's a crisis. The street is sound and surface and the cane finding the edge. Getting dressed means knowing what you put where. The microwave beeps tell you when. The world is designed for eyes, and navigating it without them is work that never stops.
+
+**Legal blindness** — not the same thing. You have some vision — enough to almost pass, not enough to trust. The phone at arm's length, font size maxed, still squinting. The bus number you can't read until it's too close. The person who waved that you didn't see, and now thinks you're rude. Legal blindness lives in the gap between what the world assumes you can see and what you actually can.
+
+**Genetic deafness** — born into a Deaf world. ASL as first language, Deaf culture as community. This isn't loss — it's a different relationship to language and the world. The hearing world is the inaccessible one, designed around sound and impatient with alternatives. School, work, medical appointments — these are navigation problems. The phone is text. Conversation is visual. The richness is real; so is the friction with a hearing world that treats you as broken.
+
+**Acquired deafness / hearing loss** — this *is* loss. The world you knew becoming muffled, then quiet, then gone. The conversation you can't follow. The alarm that doesn't work anymore. The isolation that builds because every interaction now costs more. Hearing aids that help and don't help. The exhaustion of lip-reading. The music you remember but can't hear anymore. Different from genetic deafness the way emigration is different from being born somewhere — you carry the before.
+
+**Cataracts** — the slow dimming. Progressive, usually age-related but not always. The world getting hazier. Driving at night becomes impossible before driving during the day does. Surgery fixes it sometimes. Waiting for surgery is its own thing — the months of not quite seeing.
+
+**Tinnitus** — the sound that's always there. Not silence when it's quiet — a ring, a hum, a tone that doesn't stop. Some days you barely notice it. Some days it's the only thing. It doesn't kill you. It just never leaves.
+
+#### Cognitive
+
+**Dementia** — not one disease. A family of them, each with its own shape.
+
+**Alzheimer's** — the one people know. Memory first — the word that won't come, the name that should be there, the route you've driven a thousand times that suddenly isn't there. Then everything else. The progression is slow enough to watch, which is its own cruelty.
+
+**Vascular dementia** — after strokes, large or small. Stepwise — fine, then worse, then stable at worse, then worse again. The steps down are sudden. The plateaus between them are unpredictable.
+
+**Lewy body** — hallucinations, fluctuation. Good hours and bad hours in the same day. The person is there and then isn't and then is again. Parkinson's-like movement problems. The caregivers learn to track which version of the day they're in.
+
+**Frontotemporal** — personality changes first, not memory. The person becoming someone else. Inhibition dissolving. The things they say now that they never would have said. The cruelty that isn't them but comes from where they used to be. This one is especially hard on families because the person looks the same.
+
+**Early-onset** — under 65. You're 50 and losing yourself. Still working, maybe. Still parenting. The diagnosis that rewrites the future. Late-onset is expected, grieved, accommodated. Early-onset is a theft.
+
+For the character: dementia could be the player character (early-onset, playing inside the fog — the unreliable narration *is* the experience) or someone they're caring for (the caregiving drawn lot with a specific, progressing weight).
+
+#### Genetic and chromosomal conditions
+
+The body's blueprint, and what happens when it varies.
+
+**Chromosomal** — the textbook says XX or XY. The reality is wider. Klinefelter (XXY) — affects hormones, fertility, sometimes height and learning. Turner (X0) — affects growth, heart, fertility. Mosaic karyotypes — different cells, different chromosomes, in the same body. These aren't rare diseases. They're variations, sometimes diagnosed at birth, sometimes at puberty when things don't go as expected, sometimes never. Each one changes the body's baseline in ways the world may or may not see.
+
+**Intersex conditions** — a spectrum of developmental variations where the body doesn't fit neatly into male or female categories. Could be chromosomal, hormonal, anatomical, or some combination. Some are visible at birth. Some aren't discovered until puberty. Some are never discovered. The medical system has historically treated intersex bodies as problems to fix — surgeries on infants, hormones prescribed to normalize. The person living in that body has opinions the doctors didn't ask for. The game models the body having its own reality that may or may not match what the world assumes.
+
+**Colorblindness** — the world uses color to communicate, and you can't see it the way it was designed. Red-green is most common. The traffic light read by position. The chart at work that means nothing. The thing everyone else sees that you don't, and the moment someone realizes, and the way they react — fascination, disbelief, "but what color is THIS?" for the rest of the conversation. It's minor. It's also daily.
+
+**Sickle cell** — pain crises. The daily management. The emergency that comes from nowhere. Disproportionately affects people of African descent — which means the medical system's response is shaped by race in ways that compound the condition. The crisis that gets undertreated because the person in pain is Black and the doctor has assumptions about pain management.
+
+**Cystic fibrosis** — the breathing. The mucus. The treatments that take hours. The shortened timeline that medicine keeps pushing further — people used to die in childhood, now live to 30, 40, longer. But "longer" still means living with a horizon that's closer than most people's. The daily percussion, the pills, the clinic visits. The normalcy built around abnormal lungs.
+
+**Hemophilia** — the bruises. A minor injury that isn't minor. The care around edges, the medication that costs more than rent. The joint damage that accumulates. The thing that makes roughhousing, sports, a kitchen knife, a fall — all different calculations.
 
 ### Mental health
 
@@ -140,6 +186,44 @@ Health conditions are part of who the character is (like age and job type). They
 ### Good days and bad days
 
 Chronic conditions aren't constant. They fluctuate. Some days you almost forget. Some days it's the only thing. The simulation should model this variation — not as random good/bad dice rolls, but as the interaction between the condition, sleep, stress, medication adherence, and the specific demands of the day.
+
+## Biology & the Endocrine System
+
+The body's chemistry doesn't care about categories. It runs on hormones, cycles, and systems that vary from person to person in ways that don't map to a binary.
+
+### Sex isn't gender
+
+Gender is social, performative, chosen or unchosen. Biological sex is what the body is actually doing — chromosomes, hormones, organs, development. These often correlate. They don't have to. A trans man on testosterone has a different endocrine reality than a cis man with Klinefelter. A post-menopausal woman has a different hormonal profile than a woman on birth control. An intersex person's biology might not map to either standard model. The simulation models the body that's actually there, not the category it's assigned to.
+
+### Hormonal profile
+
+What the body produces, what it receives from medication, what it doesn't produce anymore. This is the body's baseline chemical environment:
+
+- **Endogenous production** — what the gonads and adrenals make on their own. Varies by anatomy, age, conditions, and individual variation.
+- **HRT** — exogenous hormones that change the profile. Testosterone, estrogen, progesterone — each with its own timeline and effects.
+- **Birth control** — hormonal contraception modifies the cycle or suppresses it. Side effects are real and varied.
+- **Menopause** — the transition. Hot flashes, mood shifts, sleep disruption, the body rewriting its own chemistry over months or years.
+- **Conditions** — PCOS, thyroid disorders, adrenal conditions. The body over- or under-producing, and the cascade that follows.
+
+### Hormonal cycles
+
+When the body cycles, it affects everything. Menstrual cycles push on mood, energy, pain, appetite, focus. The cycle isn't universal:
+
+- Present in some bodies, absent in others — not determined by gender
+- Absent after hysterectomy, oophorectomy, some hormonal treatments
+- Irregular with PCOS, stress, malnutrition, extreme exercise
+- Modified by birth control (suppressed, regulated, altered)
+- Absent or different in various intersex conditions
+
+The cycle, when present, is an autonomous force on mood that the player never sees the mechanism of. Some days the body is just harder to live in. The game doesn't explain why. The character might not know why either.
+
+### Cortisol and stress hormones
+
+The body's stress response has its own rhythm. Cortisol peaks in the morning. Chronic stress flattens the rhythm. The body's chemical response to stress isn't the same as the feeling of stress — they interact but don't map cleanly. You can feel calm and be chemically stressed. You can feel anxious with normal cortisol. The simulation models the chemical layer as an influence on mood, not as the mood itself.
+
+### How this feeds into mood
+
+The endocrine system is one of mood's autonomous forces. Hormonal cycles, cortisol rhythms, thyroid function, medication effects — these push on mood on their own schedule, independent of what the player does. A bad hormonal day doesn't lift because you ate well and socialized. The body has its own opinion about today.
 
 ## Drawn Lots
 
@@ -502,16 +586,28 @@ This is the game's primary expressive tool. Not mechanics, not UI, not numbers �
 
 ### Mood
 
-Mood isn't a single axis. It's a compound state derived from energy, stress, hunger, and social connection:
+Mood isn't derived. It isn't a readout of energy plus stress plus hunger. It's its own thing — a state the body is in that moves on its own timeline.
 
-- **numb** — depleted and stressed. The absence of the energy for feeling.
+**Mood has inertia.** It doesn't snap to match conditions. You can be rested and fed and still heavy. You can be exhausted and have a moment of clarity. Numb doesn't lift because you ate a sandwich. A good day when you're numb might nudge you toward flat. Not toward clear. Clear is rare and you have to get there the slow way.
+
+**Mood is influenced, not determined:**
+
+- **State pressure** — energy, stress, hunger, social connection push on mood. Low energy pushes toward heavy. High stress pushes toward fraying. Isolation pushes toward hollow. But mood resists. The push takes time.
+- **Endocrine rhythms** — hormonal cycles, cortisol patterns, thyroid function. The body's chemistry has its own schedule. Some days are worse for reasons the character can't name.
+- **Weather** — the grey day that sits on you. Air pressure dropping before a front. The thing everyone jokes about but that's real.
+- **Sleep quality** — not just duration but depth. Varied by the PRNG because real sleep varies for no identifiable reason.
+- **Autonomous drift** — the body's own noise. The PRNG generating biological weather — invisible forces on their own timescale. Deterministic in the simulation, opaque to the player.
+
+**Mood states** (not a spectrum — a landscape):
+
+- **numb** — depleted and stressed past the point of feeling. The absence of the energy for feeling.
 - **fraying** — high stress. Everything too loud, too close, too much.
 - **heavy** — low energy. Gravity is personal today.
 - **hollow** — isolated and stressed. The shape where something used to matter.
-- **quiet** — isolated but not stressed. Used to the silence.
-- **clear** — rested and calm. Rare. You notice it.
+- **quiet** — isolated but not calm. Used to the silence. The distance isn't painful anymore. It just is.
+- **clear** — rested and calm. Rare. You notice it because it's unusual.
 - **present** — okay energy, manageable stress. Here, actually here.
-- **flat** — default. Getting through it.
+- **flat** — default. Getting through it. Not good, not bad. The most common state.
 
 Mood selects prose variants. The same action, the same location, the same moment — described differently depending on where you are inside.
 
