@@ -3,7 +3,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 ROOT="$(dirname "$SCRIPT_DIR")"
-DATA="$ROOT/data"
+DATA="$ROOT/vendor"
 
 mkdir -p "$DATA/census-surnames" "$DATA/ssa-babynames"
 

@@ -7,7 +7,7 @@ import { fileURLToPath } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = dirname(__dirname);
-const DATA = join(ROOT, 'data');
+const DATA = join(ROOT, 'vendor');
 const OUT = join(ROOT, 'js', 'names.js');
 
 // --- Surnames (Census 2010) ---
