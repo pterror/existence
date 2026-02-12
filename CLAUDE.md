@@ -68,7 +68,7 @@ No build step. Plain JS loaded via script tags.
 - No numbers, stats, or system voice in player-facing text
 - State affects prose through qualitative tiers, not numeric thresholds exposed to the player
 - The same moment reads differently depending on hidden state
-- Text must reflect actual state, not conjure moments from nothing. If the prose says you received a message, that message should exist in the simulation. Don't generate fake artifacts — if a system can't back it up, the text shouldn't promise it.
+- Prose leads, simulation follows. If the text needs a phone inbox to feel real, build the inbox. Don't hollow out prose to match a thin simulation — deepen the simulation to support the prose.
 
 ## Workflow
 
