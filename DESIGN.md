@@ -120,6 +120,46 @@ Health is the biggest category, but the game should be able to model any constra
 
 Not all of these need to be implemented. But the architecture should allow for them. They're all the same design pattern: a character property that modifies simulation parameters and prose selection. A constraint that's always there, shaping what's possible and how things feel.
 
+## Gender & Identity
+
+The world isn't neutral. It responds to who you are — your gender, your presentation, your body. The game models this as ambient texture, not as "discrimination events." It's not a cutscene where someone is rude to you. It's the way a room feels different, the way a conversation has a cost that isn't about the conversation, the way some jobs pay less and nobody says why.
+
+### Gender
+
+Gender is a character property set at creation. It shapes the social landscape:
+
+**Misogyny** — not always overt. The coworker who explains things. The supervisor who listens less. The pay that's lower for reasons that don't have reasons. The street at night being a different place. These aren't events the game triggers — they're the baseline texture of interactions, weighted by context. Some workplaces are worse. Some people are fine. You can't always predict which.
+
+**Misandry** — rarer, differently shaped. The assumption of threat. The emotional labor you're not expected to need. The loneliness that's not supposed to exist.
+
+Both are ambient. The game doesn't announce them. The prose just reads differently — the same interaction with the same person, but the undertone shifts based on how the world sees your gender.
+
+### Trans experience
+
+Being trans isn't one experience. It's a spectrum of visibility, transition, and social response:
+
+**Pre-transition or early transition** — the gap between who you are and what the world sees. Pronouns that don't fit. A name that isn't yours. The daily negotiation of being perceived wrong. The energy cost of that is real and constant.
+
+**HRT** — changes that are yours but invite commentary. The body becoming more right while the world's response becomes less predictable. Some people adjust. Some don't. Some become hostile in ways they weren't before.
+
+**Post-transition / passing** — different friction. The fear of being clocked. Medical costs. The history that's yours but that you may not want visible. The relationships that survived and the ones that didn't.
+
+**Nonbinary** — existing outside the categories the world insists on. The friction is different — less overt hostility (sometimes), more erasure. The constant low-grade work of being illegible to systems designed for two options.
+
+The game doesn't rank these. Each is a different texture of daily existence. The social response varies by person, by workplace, by stranger on the street. Some people are warm. Some are confused. Some are cruel. Most are just... not thinking about it, which is its own thing.
+
+### Gender and employment
+
+Gender shapes the employment landscape. Not as hard gates — as probability, as texture:
+- Profession expectations (nursing, construction, tech — the assumptions baked in)
+- Pay gaps that aren't explained and aren't acknowledged
+- Hiring bias that's invisible from the outside
+- The different flavor of "not being taken seriously" depending on gender
+
+### Gender and relationships
+
+The same friend reads differently depending on gender dynamics. Physical proximity, emotional expectations, who's allowed to be vulnerable, who's expected to perform strength. The game's relationship prose adapts — not because the friend changes, but because the social script around the interaction is different.
+
 ## The Space
 
 ### The apartment
