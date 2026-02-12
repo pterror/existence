@@ -11,8 +11,8 @@ const Content = (() => {
     sends_things: (name) => Timeline.pick([
       `${name} sent a picture of a cat sitting in a shopping bag. No caption. None needed.`,
       `A message from ${name} — a screenshot of a tweet, no context. The kind of thing that means she was thinking of you.`,
-      `${name} sent a voice memo. Fifteen seconds long. You'll listen to it later. Probably.`,
-      `A link from ${name}. No message, just the link. You save it without opening it.`,
+      `${name} sent a voice memo. Fifteen seconds of background noise and half a laugh. That's it.`,
+      `A link from ${name}. No message, just the link. You tap it, skim two sentences, close it.`,
     ]),
     checks_in: (name) => Timeline.pick([
       `A message from ${name}. "Hey, you good?" You stare at it. You don't type anything back yet.`,
