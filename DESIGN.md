@@ -66,7 +66,13 @@ Health is terrain, not a problem to solve. A chronic condition isn't a debuff �
 
 ### Physical health
 
-**Chronic conditions** — diabetes, chronic pain, autoimmune disorders, migraines, asthma. These aren't events. They're daily. You manage them or you don't, and managing them costs time, money, energy, and attention. A good day means the condition is background. A bad day means it's everything.
+**Chronic conditions** — diabetes, chronic pain, autoimmune disorders, migraines, asthma, heart conditions, blood pressure. These aren't events. They're daily. You manage them or you don't, and managing them costs time, money, energy, and attention. A good day means the condition is background. A bad day means it's everything.
+
+Each condition has its own texture:
+- Diabetes: blood sugar monitoring, insulin, dietary restrictions, the cost of supplies, the fear of episodes, stress making it worse, the way it touches every decision about food.
+- Heart conditions: medication that you can't skip, activity limits you didn't used to have, the awareness of your own heartbeat, the doctor appointments that cost money and time.
+- Blood pressure: the silent one. The medication that makes you tired. The salt math at every meal. Nothing feels wrong until something is very wrong.
+- Chronic pain: the thing that's always there. Good days mean it's quiet. Bad days mean it's everything. The negotiation between pain medication and being present. The things you used to do without thinking.
 
 **Injury** — temporary or permanent. A broken wrist changes what you can do for weeks. Chronic back pain changes it forever. The simulation adjusts what's available, how long things take, what the prose notices.
 
@@ -91,6 +97,20 @@ These aren't illnesses to treat. They're ways of being that interact with a worl
 ### Medication
 
 Medication is its own system. Taking it costs time and sometimes money. Not taking it has consequences that vary from immediate to slow-building. Running out means a pharmacy trip, which means money and energy and time. Some medication has side effects (drowsiness, appetite changes, emotional blunting). The negotiation between the condition and the treatment is daily and rarely simple.
+
+### Acquired conditions
+
+Not all conditions are there from the start. Some happen to you.
+
+**Workplace injury** — you went to work and came back different. A fall, a repetitive strain injury, a back that gave out. The before and after. The job you can't do anymore. Workers' comp if you're lucky, nothing if you're not. The paperwork alone is exhausting. The coworker who says "at least you get time off."
+
+**Developing illness** — the diagnosis that reframes everything. Diabetes that builds from prediabetes. Heart problems that announce themselves. The first doctor's appointment, the medication, the new daily routine that didn't exist last month. The cost — always the cost.
+
+**Accidents** — outside work, outside anyone's control. A fall, a car, a thing that just happened. The body was one way and now it's another. Recovery if recovery is possible. Adaptation if it isn't.
+
+**Deterioration** — the slow version. Eyesight worsening. Joints getting worse. The thing that wasn't a problem becoming a problem so gradually you didn't notice until you did. Age-related but not only age-related — stress, poverty, poor nutrition, lack of healthcare all accelerate it.
+
+These aren't plot twists. They're things that happen to bodies. The game models the transition: the before, the event (if sudden), the after. The after is the new terrain.
 
 ### Health as character property
 
