@@ -316,6 +316,14 @@ const Game = (() => {
           const events = World.checkEvents();
           generateEventTexts(events, eventTexts);
         }
+      } else if (action.type === 'observe_time') {
+        State.observeTime();
+        const source = Content.getTimeSource();
+        if (source) responseText = source;
+      } else if (action.type === 'observe_money') {
+        State.observeMoney();
+        const source = Content.getMoneySource();
+        if (source) responseText = source;
       }
 
       // Show the text
@@ -420,6 +428,10 @@ const Game = (() => {
       } else if (action.type === 'idle') {
         // Idle handles its own RNG consumption entirely
         replayIdle();
+      } else if (action.type === 'observe_time') {
+        State.observeTime();
+      } else if (action.type === 'observe_money') {
+        State.observeMoney();
       }
     }
   }
@@ -475,9 +487,11 @@ const Game = (() => {
   // --- Focus handlers (clicking awareness display) ---
 
   function handleFocusTime() {
+    if (isReplaying) return;
     UI.boostTimeFocus();
     const source = Content.getTimeSource();
     if (source) {
+      Timeline.recordAction({ type: 'observe_time' });
       State.observeTime();
       UI.appendEventText(source);
     }
@@ -485,9 +499,11 @@ const Game = (() => {
   }
 
   function handleFocusMoney() {
+    if (isReplaying) return;
     UI.boostMoneyFocus();
     const source = Content.getMoneySource();
     if (source) {
+      Timeline.recordAction({ type: 'observe_money' });
       State.observeMoney();
       UI.appendEventText(source);
     }
