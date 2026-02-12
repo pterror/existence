@@ -265,6 +265,14 @@ Using it costs energy but reduces stress. Not using it costs nothing mechanicall
 
 ## The Inner Life
 
+### Narration voice
+
+The game's narration isn't neutral. It's colored by who the character is and how they're doing. Mood changes what gets noticed and how. Personality changes sentence rhythm, what matters, what's overlooked. Trauma changes what's loaded — a place, a person, a time of day can carry weight the game never explains. Neurodivergence changes the structure of attention itself.
+
+But the prose is never prescriptive. It doesn't say "you feel sad." It shows you a world through a particular lens, and the feeling is yours. Emotionally loaded, never emotionally labeled. The same apartment, the same morning, the same phone — but the words are different because the person behind the eyes is different.
+
+This is the game's primary expressive tool. Not mechanics, not UI, not numbers — the voice.
+
 ### Mood
 
 Mood isn't a single axis. It's a compound state derived from energy, stress, hunger, and social connection:
@@ -285,6 +293,24 @@ Mood selects prose variants. The same action, the same location, the same moment
 You don't have perfect information about your own life. Time drifts. Money is approximate. This isn't a fog-of-war mechanic — it's the experience of not always knowing exactly what's going on because you're tired and distracted and hungry.
 
 Observation fidelity degrades with distance from direct observation and sharpens when you look. This affects both the awareness display (the peripheral sense of time and money) and the prose.
+
+### Trauma
+
+Trauma isn't a condition or a status effect. It's a lens. It can be part of who the character is from the start, or it can develop during play. It doesn't require a name or a backstory — the game models the residue, not the event.
+
+Trauma manifests as texture, not exposition:
+
+**Absences** — interactions that should be there but aren't. A place that can't be entered easily. A person who can't be called. The game never explains why. The option is simply not available, or it's there but costs more than it should.
+
+**Involuntary reactions** — the body responding before the mind can intervene. An interaction is available, you take it, and the prose contracts — goes flat, goes short, goes somewhere else. Not "you feel triggered" — the words themselves change. Shorter sentences. Loss of detail. The narration pulling away from the moment. Sometimes the character does the thing and the body rebels: the tightness in the chest, the nausea, the sudden need to leave. You chose the interaction. You couldn't choose the reaction.
+
+**Loaded moments** — a time of day, a sound, a type of message, a quality of light that carries weight the game never explains. The prose shifts when these are present. The same morning reads differently because of something the game doesn't name.
+
+**Avoidance** — what the character gravitates away from. Not as a visible pattern the game announces, but as the shape of what they do and don't do over time. The player might notice it. Or they might not.
+
+Not all trauma is dramatic. Some is quiet — the friend who stopped calling, the job you lost, the thing you never talk about. Some is structural — the world being built for people who didn't live your life. The game doesn't rank it. It models the weight.
+
+Trauma interacts with everything: it shapes narration voice, it modifies available interactions, it affects how relationships feel, it changes what the phone means, it makes certain moments heavier than others. It's not separate from mood or personality — it's underneath them.
 
 ## Weather
 
