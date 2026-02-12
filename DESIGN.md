@@ -146,6 +146,32 @@ The world isn't neutral. It responds to who you are — your gender, your race, 
 
 These dimensions don't exist in isolation. A Black trans woman's daily texture isn't "race + gender + trans experience" added together — it's its own thing, with its own specific weight. The game shouldn't model identity as stacking modifiers. Each intersection is a different life.
 
+### Performance
+
+Many of the conditions below share a pattern: the world demands a version of you that isn't the real one, and maintaining that performance costs energy.
+
+- **Masking** (autism, ADHD, mental health) — performing neurotypical. Suppressing stims, forcing eye contact, pretending the fluorescent lights aren't unbearable, acting like you're following the conversation when your brain left ten minutes ago. The effort is invisible to everyone except you.
+- **Code-switching** (race, culture) — modulating yourself for the dominant context. Voice, vocabulary, body language, what you mention and what you don't. Professional means performing a specific culture's version of professional.
+- **The closet** (sexuality) — performing straight. Editing pronouns, inventing weekend plans, the constant background calculation of who knows and who doesn't.
+- **Boymoding / girlmoding** (trans) — presenting as a gender that isn't yours because it's safer, or presenting as the one that is and carrying the cost of visibility. Either way, performance.
+- **Body management** (weight, disability, chronic illness) — performing health, performing able-bodiedness, performing a body the world finds acceptable.
+
+The game models all of these as the same thing: ambient energy drain that varies by context. Some spaces require more performance. Some people let you drop it. The relief of a space where you don't have to perform is real and the game should let you feel it — the prose relaxes, the energy cost drops, the narration breathes differently.
+
+The danger of long-term performance: it hollows you out. The mask becomes hard to remove. You forget what the unperformed version feels like. The game can model this as: the longer you've been performing without a break, the more the narration voice flattens, the less the character notices, the smaller the inner life becomes.
+
+### Body
+
+The body you have is a body the world has opinions about.
+
+**Weight** — fat bodies navigate a different world. Chairs that don't fit. Clothes that aren't available. The doctor who attributes everything to weight. The stranger who has thoughts about what you're eating. The friend who "worries about your health." The dating landscape that's crueler. The job interview where you're assessed before you speak. This is ambient, constant, and rarely acknowledged. The game models it as texture — the world being slightly less accommodating, interactions carrying slightly more weight (the irony is not lost), the prose noticing what the body notices.
+
+**Thinness** — its own set of assumptions. The concern that's really surveillance. "You should eat more" from people who don't get to say that. Eating disorders as the invisible thing the world accidentally encourages and then panics about. The body that's praised for being small and punished for being too small.
+
+**Height, build, appearance** — the world reads you before you speak. Assumptions about capability, threat, competence, attractiveness. These aren't dramatic — they're the low hum of being perceived. The game doesn't need to model every physical dimension. But the principle holds: the body is a social object, and the world's response to it is part of daily texture.
+
+**Body and performance** — the work of managing how your body is perceived. Clothing choices that hide or reveal. Posture that compensates. The energy of existing in a body that doesn't match what the world expects or rewards. This is another form of masking, and it carries the same ambient cost.
+
 ### Gender
 
 Gender is a character property set at creation. It shapes the social landscape:
