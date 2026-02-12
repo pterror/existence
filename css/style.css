@@ -218,6 +218,36 @@ body {
   color: #4a4540;
 }
 
+/* Chargen — single-page option buttons */
+
+.chargen-group {
+  margin-bottom: 1.5em;
+}
+
+.chargen-option {
+  display: block;
+  background: none;
+  border: none;
+  color: #605850;
+  font-family: 'Source Serif 4', 'Georgia', serif;
+  font-weight: 300;
+  font-size: 1rem;
+  line-height: 1.7;
+  padding: 0.15em 0;
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+  transition: color 0.2s ease;
+}
+
+.chargen-option:hover {
+  color: #a09890;
+}
+
+.chargen-option.selected {
+  color: #c8c0b8;
+}
+
 /* Editable name — inline contenteditable, looks like prose */
 
 .editable-name {
