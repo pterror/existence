@@ -2,9 +2,13 @@
 
 The simulation behind the prose. None of this is visible to the player. Text carries everything.
 
-## Core Principle
+## Core Principles
 
-Prose leads, simulation follows. If the text needs a phone inbox to feel real, build the inbox. If a character's age changes what financial stress looks like, the simulation models that. Don't hollow out prose to match a thin sim — deepen the sim to support the prose.
+**Prose leads, simulation follows.** If the text needs a phone inbox to feel real, build the inbox. If a character's age changes what financial stress looks like, the simulation models that. Don't hollow out prose to match a thin sim — deepen the sim to support the prose.
+
+**Unfiltered.** The game doesn't protect the player from the experience. It puts them in it. Foster care isn't a backstory tag — it's the garbage bag instead of a suitcase, the bed that smells wrong, the social worker who decides things about your life while you sit in the hall. Poverty isn't a modifier — it's the rice again, the bus that takes 90 minutes, the overdraft fee for being broke. The game fosters understanding by making you live it from inside, not by describing it from a distance. If the game is going to represent a life, it represents the texture of that life honestly — the daily reality, not a summary of it.
+
+This doesn't mean gratuitous depiction of violence or trauma. It means the *experience* of living in the aftermath, or living inside the situation, is rendered with full fidelity. The thin walls of the trailer. The new school where nobody knows you. The parent who can't look at you. The phone that's the only thing that came with you. The game doesn't show you the worst moment — it shows you Tuesday, and Tuesday is enough.
 
 ## What the Game Is
 
@@ -139,16 +143,33 @@ Chronic conditions aren't constant. They fluctuate. Some days you almost forget.
 
 ## Drawn Lots
 
-Health is the biggest category, but the game should be able to model any constraint life hands you. These are things that shape your daily existence without being your fault or your choice:
+Constraints life hands you. Not backstory summaries — lived realities the game puts you inside of.
 
-- **Caregiving** — responsible for someone else (aging parent, sick family member, child). Your time and energy aren't fully yours.
-- **Housing instability** — not everyone has an apartment. Couch surfing, shelter, car, street. The "home base" looks different.
-- **Addiction and recovery** — the daily negotiation. Meetings, cravings, medication, the phone numbers you shouldn't call.
-- **Legal constraints** — probation, immigration status, criminal record affecting employment. Invisible walls.
-- **Grief** — recent loss. The phone contact that's still there. The empty chair.
-- **Language barriers** — navigating a world in a language that isn't yours.
+- **Foster care** — the system. New house, new school, new rules, new adults who might be kind or might not be. The garbage bag instead of a suitcase. The social worker who has thirty other cases. The bed that isn't yours. The family that might be temporary. Aging out at 18 into nothing. The game models this as daily texture: where you live isn't stable, the adults in your life rotate, the things other kids take for granted aren't there.
 
-Not all of these need to be implemented. But the architecture should allow for them. They're all the same design pattern: a character property that modifies simulation parameters and prose selection. A constraint that's always there, shaping what's possible and how things feel.
+- **Domestic violence** — living inside it. The eggshells. The door. The quiet after. The parent who's different when they drink. The other parent who can't leave, or won't, or tried and came back. For the child: the thing you can't talk about at school. For the adult: the thing you're planning to leave or have left or went back to. The shelter. The phone you had to get rid of. The name you changed.
+
+- **CPS and social services** — the system that's supposed to help. The knock on the door. The home visit. The questions the kid answers carefully. The parent performing normalcy. Sometimes the system helps. Sometimes it makes things worse. Sometimes it takes you away from something bad into something also bad. The loss of agency — adults deciding your life in offices you've never seen.
+
+- **Childbearing** — planned, unplanned, unwanted, forced. Each is a different life. The teen parent whose childhood ended. The adult who wanted this and is still drowning. The pregnancy from assault that you carried because you had no choice, or because you chose to, and both are complicated. The financial cost is real — diapers, formula, doctor visits, the job you can't keep because childcare costs more than you earn. The body that changed. The sleep that ended. The love that's real and the exhaustion that's also real. Some people have support systems: parents, siblings, community. Some people have the opposite of a support system.
+
+- **Fetal alcohol syndrome, neonatal conditions** — the thing that happened before you were born. The cognitive ceiling. The face people read. The diagnosis that explains things or doesn't. The parent who caused it, who might be in your life or might not. The school that doesn't know what to do with you. Not your fault. Never your fault. The world doesn't care whose fault it is.
+
+- **Instability** — bouncing between towns because the parent has to move for work. Or because of eviction. Or because they're running from something. New school, new town, the friend you left, the phone number that's all you kept. The kid who never unpacks all the way. The adult who does the same thing to their own kids because it's all they know, or fights not to.
+
+- **Caregiving** — responsible for someone else. Aging parent, sick family member, child with needs. Your time and energy aren't fully yours. The appointment, the medication schedule, the call from the school, the guilt of needing an hour for yourself.
+
+- **Housing instability** — not everyone has an apartment. Couch surfing, shelter, car, street. The "home base" looks different. The address you can't put on forms. The belongings that fit in a bag.
+
+- **Addiction and recovery** — the daily negotiation. Meetings, cravings, medication, the phone numbers you shouldn't call. The day count that means everything and nothing. The relapse that isn't failure but feels like it.
+
+- **Legal constraints** — probation, immigration status, criminal record affecting employment. Invisible walls. The check-in. The box on the application. The job you can't get because of something you did or something you are.
+
+- **Grief** — recent loss. The phone contact that's still there. The empty chair. The thing you reach for before remembering. The world that moved on when you didn't.
+
+- **Language barriers** — navigating a world in a language that isn't yours. The form you can't read. The joke you didn't get. The intelligence people don't see because your words come out wrong.
+
+The architecture models all of these the same way: character properties and active situations that modify what's available, what things cost, how the prose reads, where you live, who's in your life. But the game doesn't treat them as modifiers. It treats them as the ground you walk on. You live inside them.
 
 ## Identity & Social Landscape
 
