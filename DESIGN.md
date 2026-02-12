@@ -217,6 +217,34 @@ The body's chemistry doesn't care about categories. It runs on hormones, cycles,
 
 Gender is social, performative, chosen or unchosen. Biological sex is what the body is actually doing — chromosomes, hormones, organs, development. These often correlate. They don't have to. A trans man on testosterone has a different endocrine reality than a cis man with Klinefelter. A post-menopausal woman has a different hormonal profile than a woman on birth control. An intersex person's biology might not map to either standard model. The simulation models the body that's actually there, not the category it's assigned to.
 
+### Metabolism
+
+The body's processing layer. How it converts input into output — and why the same input produces different lives in different bodies.
+
+**Metabolic rate** — how fast the body burns. Not just "fast" or "slow" — it's specific. Some people burn through food in two hours. Some carry a meal for six. Thyroid function, body composition, age, activity, genetics — all of it. The player doesn't see a number. They see how soon the hunger comes back.
+
+**Drug metabolism** — CYP enzyme variation. This is pharmacogenomics — your enzymes determine what a substance actually does to you. Some people are ultra-rapid metabolizers: caffeine at 9 PM, asleep by 10. Some are poor metabolizers: half a dose and they're on the floor. This varies by substance, by gene, by ethnicity. A doctor prescribes the standard dose and your body decides what that dose actually does. The same is true for every substance in the Substances section — alcohol, nicotine, medication, everything. Two characters with the same substance intake will feel it differently because their metabolisms process it differently.
+
+**Nutrient processing** — the body's ability to extract what it needs from food varies. Iron absorption rates differ. Lactose processing depends on whether you produce lactase. Celiac disease means gluten is poison. PKU means phenylalanine accumulates. Some bodies run well on a diet that would leave another body deficient. The simulation models this as the body having specific processing characteristics — not as dietary preferences, but as what the body can and can't do with what you give it.
+
+**Metabolic conditions** — diabetes (the body's relationship to insulin), thyroid disorders (the thermostat is broken — hyper runs too hot, hypo too cold), PCOS (insulin resistance feeding hormonal disruption). These aren't separate from metabolism — they *are* metabolism going a different way.
+
+### Dietary needs
+
+The body's requirements aren't generic. What you need to eat — and what you can't eat — is specific to your body, your conditions, your life stage, and your beliefs.
+
+**Condition-driven** — diabetes means carb counting. Celiac means gluten-free everything, which costs three times as much and the corner store doesn't stock it. Kidney disease means potassium and sodium restrictions. PKU means reading every label. Iron deficiency means the fatigue that isn't about sleep, and the supplements that upset your stomach.
+
+**Allergies** — nut-free, shellfish, dairy, the long list that shapes where you can eat and what you can buy. The EpiPen that costs $300 and expires. The restaurant where nothing's safe. The friend's dinner where you bring your own food or don't eat. The label-reading that's automatic now.
+
+**Pregnancy** — more folate, more iron, more calcium, more calories, more water. The prenatal vitamins that cost money. The cravings and aversions that override everything. The nausea that makes eating a negotiation. The foods you're told to avoid, the ones you're told to seek out, the cost of all of it.
+
+**Religious and cultural** — halal, kosher, vegetarian, fasting. Not restrictions to work around — daily structures that shape what eating means. Ramadan changes the entire rhythm of the day. Keeping kosher means the grocery trip is different. These intersect with what's available and what it costs — a halal butcher isn't on every corner.
+
+**Eating disorders** — the relationship to food *is* the condition. Anorexia, bulimia, binge eating, ARFID. The body needs fuel and the mind has a different agenda. The hunger that's present and ignored, or the fullness that's present and overridden. The game models this not as a choice but as a war between need and compulsion. Recovery is daily and not linear.
+
+**Poverty makes all of it worse.** The specialized diet costs more. The gluten-free bread is $7. The diabetic-friendly groceries aren't at the dollar store. The fresh produce is a bus ride away. The dietary requirement that a comfortable person manages easily becomes an impossible equation when money is the binding constraint.
+
 ### Hormonal profile
 
 What the body produces, what it receives from medication, what it doesn't produce anymore. This is the body's baseline chemical environment:
