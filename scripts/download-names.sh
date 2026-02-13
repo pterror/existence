@@ -61,9 +61,14 @@ if [ ! -f "$SSA_MARKER" ]; then
     rm -f "$SSA_ZIP"
   else
     rm -f "$SSA_ZIP"
-    echo "ERROR: SSA blocked the download. Manually download from:"
-    echo "  $SSA_URL"
-    echo "Extract into: $DATA/ssa-babynames/"
+    echo ""
+    echo "ERROR: SSA blocked the automated download (they reject non-browser requests)."
+    echo ""
+    echo "  1. Open in your browser:  $SSA_URL"
+    echo "  2. Save the zip file, then extract it:"
+    echo "     unzip names.zip -d $DATA/ssa-babynames/"
+    echo "  3. Re-run this script to verify, then run: bun scripts/build-names.js"
+    echo ""
     exit 1
   fi
   echo "Done: $DATA/ssa-babynames/"

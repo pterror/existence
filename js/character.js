@@ -4,41 +4,18 @@ const Character = (() => {
   /** @type {GameCharacter | null} */
   let current = null;
 
-  // Legacy defaults — matches the original hardcoded content.js values
-  /** @returns {GameCharacter} */
-  function legacyDefaults() {
-    return {
-      first_name: 'You',
-      last_name: '',
-      sleepwear: 'the old grey t-shirt and boxers you slept in',
-      outfit_default: 'Jeans, a flannel, socks that match close enough. You get dressed.',
-      outfit_low_mood: 'Jeans. The black hoodie. Each piece is a separate decision. You make them all, eventually.',
-      outfit_messy: 'You find a shirt in the pile that passes the smell test. Jeans from the chair. Good enough.',
-      friend1: { name: 'Dana', flavor: 'sends_things' },
-      friend2: { name: 'Marcus', flavor: 'dry_humor' },
-      coworker1: { name: 'Priya', flavor: 'warm_quiet' },
-      coworker2: { name: 'Kevin', flavor: 'mundane_talker' },
-      supervisor: { name: 'Terri' },
-      job_type: 'office',
-      age_stage: 'thirties',
-      start_timestamp: 28401120, // 2024-01-01 00:00 UTC
-      latitude: 42,
-    };
-  }
-
   /** @param {GameCharacter} character */
   function set(character) {
-    current = { ...legacyDefaults(), ...character };
+    current = { ...character };
   }
 
   /** @template {keyof GameCharacter} K @param {K} key @returns {GameCharacter[K]} */
   function get(key) {
-    if (!current) return legacyDefaults()[key];
-    return current[key];
+    return current?.[key];
   }
 
   function getAll() {
-    return current ? { ...current } : legacyDefaults();
+    return current ? { ...current } : null;
   }
 
   function isSet() {
@@ -105,7 +82,6 @@ const Character = (() => {
   }
 
   return {
-    legacyDefaults,
     set,
     get,
     getAll,
