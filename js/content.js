@@ -8,30 +8,50 @@ const Content = (() => {
 
   /** @type {Record<string, (name: string) => string | undefined>} */
   const friendMessages = {
-    sends_things: (name) => Timeline.pick([
-      `${name} sent a picture of a cat sitting in a shopping bag. No caption. None needed.`,
-      `A message from ${name} — a screenshot of a tweet, no context. The kind of thing that means she was thinking of you.`,
-      `${name} sent a voice memo. Fifteen seconds of background noise and half a laugh. That's it.`,
-      `A link from ${name}. No message, just the link. You tap it, skim two sentences, close it.`,
-    ]),
-    checks_in: (name) => Timeline.pick([
-      `A message from ${name}. "Hey, you good?" You stare at it. You don't type anything back yet.`,
-      `${name} texted. "Haven't heard from you." Simple. Not pushy. That makes it harder to ignore.`,
-      `A text from ${name}: "Just checking in." Three words that sit there, waiting.`,
-      `${name} sent a thumbs up emoji, then "thinking of you." Nothing else. Nothing else needed.`,
-    ]),
-    dry_humor: (name) => Timeline.pick([
-      `${name} linked a video with "lmao this is you." You don't watch it yet but you save it.`,
-      `${name} in the group chat, complaining about his landlord again. The usual.`,
-      `A text from ${name}: "life update: still alive." You almost smile.`,
-      `${name} sent a meme. It's not funny, but that's the joke. You get it.`,
-    ]),
-    earnest: (name) => Timeline.pick([
-      `A message from ${name}. Something about a sunset. Genuine in a way you can't match right now.`,
-      `${name} texted a long paragraph about their week. You read it twice. You don't reply yet.`,
-      `A text from ${name}: "Saw something that reminded me of you today." It lands somewhere soft.`,
-      `${name} asks how you're really doing. The "really" is doing a lot of work in that sentence.`,
-    ]),
+    sends_things: (name) => {
+      const dopa = State.get('dopamine');
+      return Timeline.weightedPick([
+        { weight: 1, value: `${name} sent a picture of a cat sitting in a shopping bag. No caption. None needed.` },
+        { weight: 1, value: `A message from ${name} — a screenshot of a tweet, no context. The kind of thing that means she was thinking of you.` },
+        { weight: 1, value: `${name} sent a voice memo. Fifteen seconds of background noise and half a laugh. That's it.` },
+        { weight: 1, value: `A link from ${name}. No message, just the link. You tap it, skim two sentences, close it.` },
+        // Low dopamine — the gesture doesn't land
+        { weight: State.lerp01(dopa, 40, 15), value: `${name} sent something. A picture, a link — you see the notification. You don't open it. It sits there, proof that someone thought of you, and that proof does nothing.` },
+      ]);
+    },
+    checks_in: (name) => {
+      const ser = State.get('serotonin');
+      return Timeline.weightedPick([
+        { weight: 1, value: `A message from ${name}. "Hey, you good?" You stare at it. You don't type anything back yet.` },
+        { weight: 1, value: `${name} texted. "Haven't heard from you." Simple. Not pushy. That makes it harder to ignore.` },
+        { weight: 1, value: `A text from ${name}: "Just checking in." Three words that sit there, waiting.` },
+        { weight: 1, value: `${name} sent a thumbs up emoji, then "thinking of you." Nothing else. Nothing else needed.` },
+        // Low serotonin — the check-in is a weight
+        { weight: State.lerp01(ser, 35, 15), value: `A message from ${name}. "Hey, you good?" The question lands like something you have to carry. You're not good. The lie you'd have to type is heavier than not answering.` },
+      ]);
+    },
+    dry_humor: (name) => {
+      const dopa = State.get('dopamine');
+      return Timeline.weightedPick([
+        { weight: 1, value: `${name} linked a video with "lmao this is you." You don't watch it yet but you save it.` },
+        { weight: 1, value: `${name} in the group chat, complaining about his landlord again. The usual.` },
+        { weight: 1, value: `A text from ${name}: "life update: still alive." You almost smile.` },
+        { weight: 1, value: `${name} sent a meme. It's not funny, but that's the joke. You get it.` },
+        // Low dopamine — the humor slides off
+        { weight: State.lerp01(dopa, 40, 15), value: `${name} sent something meant to be funny. You read it. You understand that it's funny. The understanding and the feeling are in different rooms.` },
+      ]);
+    },
+    earnest: (name) => {
+      const ser = State.get('serotonin');
+      return Timeline.weightedPick([
+        { weight: 1, value: `A message from ${name}. Something about a sunset. Genuine in a way you can't match right now.` },
+        { weight: 1, value: `${name} texted a long paragraph about their week. You read it twice. You don't reply yet.` },
+        { weight: 1, value: `A text from ${name}: "Saw something that reminded me of you today." It lands somewhere soft.` },
+        { weight: 1, value: `${name} asks how you're really doing. The "really" is doing a lot of work in that sentence.` },
+        // Low serotonin — sincerity is unbearable
+        { weight: State.lerp01(ser, 35, 15), value: `A long message from ${name}. Genuine. Open. The kind that would need you to be honest back, and that's the one thing you can't do right now. You read it and close the phone.` },
+      ]);
+    },
   };
 
   /** @type {Record<string, (name: string) => string>} */
@@ -74,43 +94,73 @@ const Content = (() => {
 
   /** @type {Record<string, (name: string) => string | undefined>} */
   const coworkerChatter = {
-    warm_quiet: (name) => Timeline.pick([
-      `"Long day, huh?" ${name}, not really expecting an answer. Never does.`,
-      `"You want coffee?" ${name}, already walking to the machine, asking over a shoulder.`,
-      `${name} glances over and half-smiles. Doesn't say anything. Doesn't need to.`,
-      `${name} sets a cup of water near you without a word. Small.`,
-    ]),
-    mundane_talker: (name) => Timeline.pick([
-      `${name} mentions something about the weather. You say something back. The ritual of it.`,
-      `${name} is talking about a show from last night. You nod in the right places.`,
-      `${name} sighs loudly at the screen. Does this about once an hour.`,
-      `${name} says something about traffic this morning. You make a sound of agreement.`,
-    ]),
-    stressed_out: (name) => Timeline.pick([
-      `${name} mutters something under their breath. Screen-related, probably.`,
-      `${name} is on the phone again, voice tighter than it needs to be.`,
-      `"Can you believe this?" ${name}, to no one in particular. The screen is the problem today.`,
-      `${name} exhales through teeth. Something happened. Something always happens.`,
-    ]),
+    warm_quiet: (name) => {
+      const ser = State.get('serotonin');
+      return Timeline.weightedPick([
+        { weight: 1, value: `"Long day, huh?" ${name}, not really expecting an answer. Never does.` },
+        { weight: 1, value: `"You want coffee?" ${name}, already walking to the machine, asking over a shoulder.` },
+        { weight: 1, value: `${name} glances over and half-smiles. Doesn't say anything. Doesn't need to.` },
+        { weight: 1, value: `${name} sets a cup of water near you without a word. Small.` },
+        // Higher serotonin — the small gesture lands
+        { weight: State.lerp01(ser, 45, 65), value: `${name} looks over. Half-smile. Something about it — the lack of expectation, the ease — actually reaches you. A small warm thing that doesn't ask anything back.` },
+      ]);
+    },
+    mundane_talker: (name) => {
+      const ne = State.get('norepinephrine');
+      return Timeline.weightedPick([
+        { weight: 1, value: `${name} mentions something about the weather. You say something back. The ritual of it.` },
+        { weight: 1, value: `${name} is talking about a show from last night. You nod in the right places.` },
+        { weight: 1, value: `${name} sighs loudly at the screen. Does this about once an hour.` },
+        { weight: 1, value: `${name} says something about traffic this morning. You make a sound of agreement.` },
+        // High NE — the chatter grates
+        { weight: State.lerp01(ne, 55, 75), value: `${name} is talking. About what, you've lost track — the words arrive one at a time, each one landing on the last nerve you have. You nod. You can't stop nodding.` },
+      ]);
+    },
+    stressed_out: (name) => {
+      const gaba = State.get('gaba');
+      return Timeline.weightedPick([
+        { weight: 1, value: `${name} mutters something under their breath. Screen-related, probably.` },
+        { weight: 1, value: `${name} is on the phone again, voice tighter than it needs to be.` },
+        { weight: 1, value: `"Can you believe this?" ${name}, to no one in particular. The screen is the problem today.` },
+        { weight: 1, value: `${name} exhales through teeth. Something happened. Something always happens.` },
+        // Low GABA — their stress is contagious
+        { weight: State.lerp01(gaba, 40, 20), value: `${name} is tense — you can feel it from here. The tight voice, the sharp movements. Your own shoulders climb in response. Other people's stress is a frequency and you're tuned to it.` },
+      ]);
+    },
   };
 
   /** @type {Record<string, (name: string) => string | undefined>} */
   const coworkerInteraction = {
-    warm_quiet: (name) => Timeline.pick([
-      `"Hey." ${name} looks up. "Hey." That's it. That's the whole exchange. But it happened.`,
-      `${name}'s talking about a restaurant from the weekend. You ask which one. An almost-smile while describing it.`,
-      `You say something to ${name}. Something small. The response is warm and brief. Enough.`,
-    ]),
-    mundane_talker: (name) => Timeline.pick([
-      `You ask ${name} about the coffee. Same as yesterday. You nod. It's small. It's something.`,
-      `${name} tells you about a sale somewhere. You listen. It's easier than not listening.`,
-      `You mention the weather to ${name}. The conversation goes exactly where you'd expect. It's fine.`,
-    ]),
-    stressed_out: (name) => Timeline.pick([
-      `You ask ${name} how it's going. The answer involves a deadline. It always involves a deadline.`,
-      `${name} vents for thirty seconds about something that happened. You listen. That's what's needed.`,
-      `"Don't even ask," ${name} says, before you ask. So you don't.`,
-    ]),
+    warm_quiet: (name) => {
+      const ser = State.get('serotonin');
+      return Timeline.weightedPick([
+        { weight: 1, value: `"Hey." ${name} looks up. "Hey." That's it. That's the whole exchange. But it happened.` },
+        { weight: 1, value: `${name}'s talking about a restaurant from the weekend. You ask which one. An almost-smile while describing it.` },
+        { weight: 1, value: `You say something to ${name}. Something small. The response is warm and brief. Enough.` },
+        // Higher serotonin — the exchange has warmth
+        { weight: State.lerp01(ser, 45, 65), value: `You and ${name} exchange a few words. Nothing important. But the rhythm of it — the easy back and forth, the pauses that aren't awkward — is like a small door opening.` },
+      ]);
+    },
+    mundane_talker: (name) => {
+      const aden = State.get('adenosine');
+      return Timeline.weightedPick([
+        { weight: 1, value: `You ask ${name} about the coffee. Same as yesterday. You nod. It's small. It's something.` },
+        { weight: 1, value: `${name} tells you about a sale somewhere. You listen. It's easier than not listening.` },
+        { weight: 1, value: `You mention the weather to ${name}. The conversation goes exactly where you'd expect. It's fine.` },
+        // High adenosine — you drift through the interaction
+        { weight: State.lerp01(aden, 50, 70), value: `${name} is saying something. You catch every third word — enough to nod, enough to make the right face. The rest dissolves. You're here but the fog is doing most of the work.` },
+      ]);
+    },
+    stressed_out: (name) => {
+      const ne = State.get('norepinephrine');
+      return Timeline.weightedPick([
+        { weight: 1, value: `You ask ${name} how it's going. The answer involves a deadline. It always involves a deadline.` },
+        { weight: 1, value: `${name} vents for thirty seconds about something that happened. You listen. That's what's needed.` },
+        { weight: 1, value: `"Don't even ask," ${name} says, before you ask. So you don't.` },
+        // High NE — the tension is catching
+        { weight: State.lerp01(ne, 50, 70), value: `${name} starts talking and the tension in their voice does something to yours. By the time they finish, your jaw has been clenched the whole time. Their stress is a frequency and you're receiving it.` },
+      ]);
+    },
   };
 
   // --- Job-specific workplace descriptions ---
