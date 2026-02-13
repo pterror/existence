@@ -251,6 +251,33 @@ body {
   color: #c8c0b8;
 }
 
+/* Chargen — custom dropdown (looks like prose, expands on click) */
+
+.chargen-dropdown {
+  display: inline;
+  position: relative;
+}
+
+.chargen-dropdown-trigger {
+  border-bottom: 1px solid #3a3530;
+  padding-bottom: 1px;
+  cursor: pointer;
+  transition: border-color 0.3s ease, color 0.3s ease;
+}
+
+.chargen-dropdown-trigger:hover {
+  border-bottom-color: #504840;
+}
+
+.chargen-dropdown-options {
+  display: none;
+  padding: 0.3em 0;
+}
+
+.chargen-dropdown-options.open {
+  display: block;
+}
+
 /* Name re-roll buttons */
 
 .name-reroll {

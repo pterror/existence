@@ -75,6 +75,56 @@ const Chargen = (() => {
     'a worn hoodie and shorts',
   ];
 
+  // --- Season helpers ---
+
+  const seasonLabels = {
+    winter: 'Cold. Frost on the window.',
+    spring: 'Something blooming somewhere. You can almost smell it.',
+    summer: 'Already warm. Going to be one of those days.',
+    autumn: 'Grey light. Days getting shorter.',
+  };
+
+  const jobLabels = {
+    office: 'An office',
+    retail: 'A store',
+    food_service: 'A kitchen counter',
+  };
+
+  /**
+   * Derive the season name from a start_timestamp and latitude.
+   * Mirrors State.season() logic — month from timestamp, hemisphere flip.
+   */
+  function deriveSeasonFromTimestamp(startTimestamp, latitude) {
+    const d = new Date(startTimestamp * 60000);
+    let month = d.getUTCMonth(); // 0-11
+    if (latitude < 0) {
+      month = (month + 6) % 12;
+    }
+    if (month >= 2 && month <= 4) return 'spring';
+    if (month >= 5 && month <= 7) return 'summer';
+    if (month >= 8 && month <= 10) return 'autumn';
+    return 'winter';
+  }
+
+  /**
+   * Compute a new start_timestamp that falls in the requested season.
+   * Keeps the same year but picks a day within the target season's months.
+   * Accounts for hemisphere by flipping months for southern latitudes.
+   */
+  function timestampForSeason(seasonName, latitude) {
+    const baseDateMinutes = 28401120; // 2024-01-01 00:00 UTC
+    // Target NH month ranges for each season
+    const seasonMonthStarts = { spring: 2, summer: 5, autumn: 8, winter: 11 };
+    let targetMonth = seasonMonthStarts[seasonName];
+    // For SH, flip by 6 months so the calendar date produces the right derived season
+    if (latitude < 0) {
+      targetMonth = (targetMonth + 6) % 12;
+    }
+    // Pick the 15th of that month
+    const d = new Date(Date.UTC(2024, targetMonth, 15));
+    return Math.floor(d.getTime() / 60000);
+  }
+
   // --- Random character generation ---
 
   function generateRandom() {
@@ -129,10 +179,78 @@ const Chargen = (() => {
     });
   }
 
+  // --- Custom dropdown component ---
+
+  /**
+   * @param {Array<{label: string, value: string}>} options
+   * @param {string} selectedValue
+   * @param {(value: string) => void} onChange
+   * @returns {{ element: HTMLElement, getValue: () => string, setValue: (v: string) => void }}
+   */
+  function createDropdown(options, selectedValue, onChange) {
+    const wrapper = document.createElement('span');
+    wrapper.className = 'chargen-dropdown';
+
+    const trigger = document.createElement('span');
+    trigger.className = 'chargen-dropdown-trigger';
+    const selected = options.find(o => o.value === selectedValue);
+    trigger.textContent = selected ? selected.label : options[0].label;
+
+    const optionsContainer = document.createElement('div');
+    optionsContainer.className = 'chargen-dropdown-options';
+
+    let currentValue = selectedValue;
+
+    for (const opt of options) {
+      const btn = document.createElement('button');
+      btn.className = 'chargen-option';
+      if (opt.value === selectedValue) btn.classList.add('selected');
+      btn.textContent = opt.label;
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        currentValue = opt.value;
+        trigger.textContent = opt.label;
+        optionsContainer.querySelectorAll('.chargen-option').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        optionsContainer.classList.remove('open');
+        onChange(opt.value);
+      });
+      optionsContainer.appendChild(btn);
+    }
+
+    trigger.addEventListener('click', (e) => {
+      e.stopPropagation();
+      // Close any other open dropdowns
+      document.querySelectorAll('.chargen-dropdown-options.open').forEach(el => {
+        if (el !== optionsContainer) el.classList.remove('open');
+      });
+      optionsContainer.classList.toggle('open');
+    });
+
+    wrapper.appendChild(trigger);
+    wrapper.appendChild(optionsContainer);
+
+    return {
+      element: wrapper,
+      getValue: () => currentValue,
+      setValue: (v) => {
+        currentValue = v;
+        const match = options.find(o => o.value === v);
+        if (match) {
+          trigger.textContent = match.label;
+          optionsContainer.querySelectorAll('.chargen-option').forEach(b => b.classList.remove('selected'));
+          const btns = optionsContainer.querySelectorAll('.chargen-option');
+          btns.forEach(b => { if (b.textContent === match.label) b.classList.add('selected'); });
+        }
+      },
+    };
+  }
+
   // --- Creation UI flow ---
 
-  /** @type {Partial<GameCharacter>} */
-  let sandboxState = {};
+  /** @type {(() => void) | null} */
+  let activeCloseDropdowns = null;
+
   /** @type {((char: GameCharacter) => void) | null} */
   let resolveCreation = null;
 
@@ -143,8 +261,7 @@ const Chargen = (() => {
     });
   }
 
-  /** @param {string} text @param {ScreenChoice[]} choices */
-  function showScreen(text, choices) {
+  function showOpeningScreen() {
     const passageEl = /** @type {HTMLElement} */ (document.getElementById('passage'));
     const actionsEl = /** @type {HTMLElement} */ (document.getElementById('actions'));
     const movementEl = /** @type {HTMLElement} */ (document.getElementById('movement'));
@@ -159,88 +276,38 @@ const Chargen = (() => {
     eventTextEl.classList.remove('visible');
 
     setTimeout(() => {
-      passageEl.innerHTML = text.split(/\n\n+/).filter(/** @param {string} p */ p => p.trim()).map(/** @param {string} p */ p => `<p>${p.trim()}</p>`).join('');
+      passageEl.innerHTML = '<p>A life.</p><p>Not the one you would have picked, maybe. But the one that\u2019s here.</p>';
       passageEl.classList.add('visible');
 
       setTimeout(() => {
-        for (const choice of choices) {
-          const btn = document.createElement('button');
-          btn.className = 'action';
-          btn.textContent = choice.label;
-          btn.addEventListener('click', () => choice.action());
-          actionsEl.appendChild(btn);
-        }
+        const btn = document.createElement('button');
+        btn.className = 'action';
+        btn.textContent = 'Begin.';
+        btn.addEventListener('click', () => {
+          const char = generateRandom();
+          showCharacterScreen(char);
+        });
+        actionsEl.appendChild(btn);
         actionsEl.classList.add('visible');
       }, 400);
     }, 150);
   }
 
-  function showOpeningScreen() {
-    showScreen(
-      'A life.\n\nNot the one you would have picked, maybe. But the one that\'s here.',
-      [
-        {
-          label: 'Begin with a random life',
-          action: () => {
-            const char = generateRandom();
-            showPlayerNameScreen(char);
-          }
-        },
-        {
-          label: 'Choose your own',
-          action: () => {
-            showSandboxPage();
-          }
-        },
-      ]
-    );
-  }
+  // --- Character screen (merged, always expanded) ---
 
-  // --- Sandbox: single-page character creation ---
-
-  function showSandboxPage() {
-    sandboxState = {};
-    const usedNames = new Set();
-
-    // Consume charRng upfront for random elements
-    const shuffled = [...outfitSets];
-    for (let i = shuffled.length - 1; i > 0; i--) {
-      const j = Timeline.charRandomInt(0, i);
-      [shuffled[i], shuffled[j]] = [/** @type {OutfitSet} */ (shuffled[j]), /** @type {OutfitSet} */ (shuffled[i])];
-    }
-    const outfitOptions = shuffled.slice(0, 3);
-    const sleepwear = /** @type {string} */ (Timeline.charPick(sleepwearOptions));
-    const ageDefault = Timeline.charRandomInt(22, 48);
-
-    // Start date — random day in 2024
-    const baseDateMinutes = 28401120; // 2024-01-01 00:00 UTC
-    const dayOffset = Timeline.charRandomInt(0, 364);
-    const defaultSeason = dayOffset < 91 ? 'winter' : dayOffset < 182 ? 'spring' : dayOffset < 274 ? 'summer' : 'autumn';
-    let selectedSeason = defaultSeason;
-    let selectedLatitude = 42;
-
-    const friendFlavors = ['sends_things', 'checks_in', 'dry_humor', 'earnest'];
-    const f1flavor = /** @type {string} */ (Timeline.charPick(friendFlavors));
-    const remainingFriend = friendFlavors.filter(f => f !== f1flavor);
-    const f2flavor = /** @type {string} */ (Timeline.charPick(remainingFriend));
-
-    const coworkerFlavors = ['warm_quiet', 'mundane_talker', 'stressed_out'];
-    const c1flavor = /** @type {string} */ (Timeline.charPick(coworkerFlavors));
-    const remainingCoworker = coworkerFlavors.filter(f => f !== c1flavor);
-    const c2flavor = /** @type {string} */ (Timeline.charPick(remainingCoworker));
-
-    const friend1Default = generateFirstName(usedNames);
-    const friend2Default = generateFirstName(usedNames);
-    const coworker1Default = generateFirstName(usedNames);
-    const coworker2Default = generateFirstName(usedNames);
-    const supervisorDefault = generateFirstName(usedNames);
-    const playerDefault = generateName(usedNames);
-
-    // Build page
+  /** @param {GameCharacter} char */
+  function showCharacterScreen(char) {
     const passageEl = /** @type {HTMLElement} */ (document.getElementById('passage'));
     const actionsEl = /** @type {HTMLElement} */ (document.getElementById('actions'));
     const movementEl = /** @type {HTMLElement} */ (document.getElementById('movement'));
     const eventTextEl = /** @type {HTMLElement} */ (document.getElementById('event-text'));
+
+    const usedNames = new Set([
+      char.first_name,
+      char.friend1.name, char.friend2.name,
+      char.coworker1.name, char.coworker2.name,
+      char.supervisor.name,
+    ]);
 
     passageEl.classList.remove('visible');
     actionsEl.innerHTML = '';
@@ -250,41 +317,35 @@ const Chargen = (() => {
     eventTextEl.innerHTML = '';
     eventTextEl.classList.remove('visible');
 
+    // Close dropdowns when clicking outside
+    if (activeCloseDropdowns) {
+      document.removeEventListener('click', activeCloseDropdowns);
+    }
+    activeCloseDropdowns = () => {
+      document.querySelectorAll('.chargen-dropdown-options.open').forEach(el => el.classList.remove('open'));
+    };
+    document.addEventListener('click', activeCloseDropdowns);
+
     setTimeout(() => {
       passageEl.innerHTML = '';
 
       // --- Job ---
-      const jobP = document.createElement('p');
-      jobP.textContent = 'Work is a fact. The kind depends on what life handed you.';
-      passageEl.appendChild(jobP);
+      const jobDropdown = createDropdown(
+        Object.entries(jobLabels).map(([value, label]) => ({ label, value })),
+        char.job_type,
+        (v) => { char.job_type = v; }
+      );
 
-      const jobGroup = document.createElement('div');
-      jobGroup.className = 'chargen-group';
-      const jobs = [
-        { label: 'An office', value: 'office' },
-        { label: 'A store', value: 'retail' },
-        { label: 'A kitchen counter', value: 'food_service' },
-      ];
-      for (const job of jobs) {
-        const btn = document.createElement('button');
-        btn.className = 'chargen-option';
-        btn.textContent = job.label;
-        btn.addEventListener('click', () => {
-          sandboxState.job_type = job.value;
-          jobGroup.querySelectorAll('.chargen-option').forEach(b => b.classList.remove('selected'));
-          btn.classList.add('selected');
-          maybeShowConfirm();
-        });
-        jobGroup.appendChild(btn);
-      }
-      passageEl.appendChild(jobGroup);
+      const jobP = document.createElement('p');
+      jobP.append('Work is a fact. ', jobDropdown.element, '.');
+      passageEl.appendChild(jobP);
 
       // --- Age ---
       const ageInput = document.createElement('input');
       ageInput.type = 'text';
       ageInput.inputMode = 'numeric';
       ageInput.className = 'age-input';
-      ageInput.value = String(ageDefault);
+      ageInput.value = String(char.age_stage);
       ageInput.maxLength = 2;
 
       const ageP = document.createElement('p');
@@ -294,54 +355,41 @@ const Chargen = (() => {
       passageEl.appendChild(ageP);
 
       // --- Season ---
+      const currentSeason = deriveSeasonFromTimestamp(char.start_timestamp, char.latitude);
+
+      const seasonDropdown = createDropdown(
+        Object.entries(seasonLabels).map(([value, label]) => ({ label, value })),
+        currentSeason,
+        (v) => {
+          char.start_timestamp = timestampForSeason(v, char.latitude);
+        }
+      );
+
       const seasonP = document.createElement('p');
-      seasonP.textContent = 'Outside \u2014';
+      seasonP.append('Outside \u2014 ', seasonDropdown.element);
       passageEl.appendChild(seasonP);
 
-      const seasonGroup = document.createElement('div');
-      seasonGroup.className = 'chargen-group';
-      const seasons = [
-        { label: 'Cold. Frost on the window, maybe.', value: 'winter' },
-        { label: 'Something blooming somewhere. You can almost smell it.', value: 'spring' },
-        { label: 'Already warm. Going to be one of those days.', value: 'summer' },
-        { label: 'Grey light. Days getting shorter.', value: 'autumn' },
-      ];
-      for (const s of seasons) {
-        const btn = document.createElement('button');
-        btn.className = 'chargen-option';
-        if (s.value === defaultSeason) btn.classList.add('selected');
-        btn.textContent = s.label;
-        btn.addEventListener('click', () => {
-          selectedSeason = s.value;
-          seasonGroup.querySelectorAll('.chargen-option').forEach(b => b.classList.remove('selected'));
-          btn.classList.add('selected');
-        });
-        seasonGroup.appendChild(btn);
-      }
-      passageEl.appendChild(seasonGroup);
-
       // --- Wardrobe ---
-      const wardrobeP = document.createElement('p');
-      wardrobeP.textContent = 'Getting dressed. The daily negotiation with what to put on.';
-      passageEl.appendChild(wardrobeP);
+      const currentOutfitIndex = outfitSets.findIndex(o => o.outfit_default === char.outfit_default);
+      const wardrobeOptions = outfitSets.map((outfit, i) => ({
+        label: outfit.outfit_default.split('.')[0] + '.',
+        value: String(i),
+      }));
 
-      const wardrobeGroup = document.createElement('div');
-      wardrobeGroup.className = 'chargen-group';
-      for (const outfit of outfitOptions) {
-        const btn = document.createElement('button');
-        btn.className = 'chargen-option';
-        btn.textContent = outfit.outfit_default.split('.')[0] + '.';
-        btn.addEventListener('click', () => {
-          sandboxState.outfit_default = outfit.outfit_default;
-          sandboxState.outfit_low_mood = outfit.outfit_low_mood;
-          sandboxState.outfit_messy = outfit.outfit_messy;
-          wardrobeGroup.querySelectorAll('.chargen-option').forEach(b => b.classList.remove('selected'));
-          btn.classList.add('selected');
-          maybeShowConfirm();
-        });
-        wardrobeGroup.appendChild(btn);
-      }
-      passageEl.appendChild(wardrobeGroup);
+      const wardrobeDropdown = createDropdown(
+        wardrobeOptions,
+        String(currentOutfitIndex === -1 ? 0 : currentOutfitIndex),
+        (v) => {
+          const outfit = outfitSets[parseInt(v, 10)];
+          char.outfit_default = outfit.outfit_default;
+          char.outfit_low_mood = outfit.outfit_low_mood;
+          char.outfit_messy = outfit.outfit_messy;
+        }
+      );
+
+      const wardrobeP = document.createElement('p');
+      wardrobeP.append('Getting dressed. ', wardrobeDropdown.element);
+      passageEl.appendChild(wardrobeP);
 
       // --- Friends ---
       const friendP = document.createElement('p');
@@ -350,22 +398,22 @@ const Chargen = (() => {
 
       const friendGroup = document.createElement('div');
       friendGroup.className = 'chargen-group';
-      const friend1Input = createNameInput(friend1Default, usedNames);
-      const friend2Input = createNameInput(friend2Default, usedNames);
+      const friend1Input = createNameInput(char.friend1.name, usedNames);
+      const friend2Input = createNameInput(char.friend2.name, usedNames);
       friendGroup.appendChild(friend1Input);
       friendGroup.appendChild(friend2Input);
       passageEl.appendChild(friendGroup);
 
-      // --- Work ---
+      // --- Coworkers ---
       const workP = document.createElement('p');
       workP.textContent = 'The people at work. You didn\'t choose them. They didn\'t choose you.';
       passageEl.appendChild(workP);
 
       const workGroup = document.createElement('div');
       workGroup.className = 'chargen-group';
-      const co1Input = createNameInput(coworker1Default, usedNames);
-      const co2Input = createNameInput(coworker2Default, usedNames);
-      const supInput = createNameInput(supervisorDefault, usedNames);
+      const co1Input = createNameInput(char.coworker1.name, usedNames);
+      const co2Input = createNameInput(char.coworker2.name, usedNames);
+      const supInput = createNameInput(char.supervisor.name, usedNames);
       workGroup.appendChild(co1Input);
       workGroup.appendChild(co2Input);
       workGroup.appendChild(supInput);
@@ -376,13 +424,13 @@ const Chargen = (() => {
       first.className = 'editable-name';
       first.contentEditable = 'true';
       first.spellcheck = false;
-      first.textContent = playerDefault.first;
+      first.textContent = char.first_name;
 
       const last = document.createElement('span');
       last.className = 'editable-name';
       last.contentEditable = 'true';
       last.spellcheck = false;
-      last.textContent = playerDefault.last;
+      last.textContent = char.last_name;
 
       const nameP = document.createElement('p');
       nameP.append('Your name is ', first, ' ', last, '. At least, that\u2019s what it says on everything.');
@@ -415,52 +463,61 @@ const Chargen = (() => {
       last.addEventListener('keydown', preventEnter);
       last.addEventListener('paste', pastePlain);
 
-      // --- Start over ---
-      const startOverBtn = document.createElement('button');
-      startOverBtn.className = 'chargen-option';
-      startOverBtn.textContent = 'Start over';
-      startOverBtn.addEventListener('click', () => showOpeningScreen());
-      passageEl.appendChild(startOverBtn);
-
       passageEl.classList.add('visible');
 
-      // Confirm button — appears once job and wardrobe are chosen
-      const confirmBtn = document.createElement('button');
-      confirmBtn.className = 'action';
-      confirmBtn.textContent = 'This is you.';
-      confirmBtn.addEventListener('click', () => {
-        const ageVal = parseInt(ageInput.value, 10);
-        sandboxState.age_stage = (ageVal >= 18 && ageVal <= 65) ? ageVal : ageDefault;
-        sandboxState.sleepwear = sleepwear;
-        sandboxState.friend1 = { name: /** @type {HTMLInputElement} */ (friend1Input.querySelector('input')).value.trim() || friend1Default, flavor: f1flavor };
-        sandboxState.friend2 = { name: /** @type {HTMLInputElement} */ (friend2Input.querySelector('input')).value.trim() || friend2Default, flavor: f2flavor };
-        sandboxState.coworker1 = { name: /** @type {HTMLInputElement} */ (co1Input.querySelector('input')).value.trim() || coworker1Default, flavor: c1flavor };
-        sandboxState.coworker2 = { name: /** @type {HTMLInputElement} */ (co2Input.querySelector('input')).value.trim() || coworker2Default, flavor: c2flavor };
-        sandboxState.supervisor = { name: /** @type {HTMLInputElement} */ (supInput.querySelector('input')).value.trim() || supervisorDefault };
-        sandboxState.first_name = (first.textContent || '').trim() || playerDefault.first;
-        sandboxState.last_name = (last.textContent || '').trim() || playerDefault.last;
+      // --- Action buttons ---
+      setTimeout(() => {
+        const confirmBtn = document.createElement('button');
+        confirmBtn.className = 'action';
+        confirmBtn.textContent = 'This is you.';
+        confirmBtn.addEventListener('click', () => {
+          // Read final values from controls
+          const ageVal = parseInt(ageInput.value, 10);
+          char.age_stage = (ageVal >= 18 && ageVal <= 65) ? ageVal : char.age_stage;
+          char.friend1 = { ...char.friend1, name: /** @type {HTMLInputElement} */ (friend1Input.querySelector('input')).value.trim() || char.friend1.name };
+          char.friend2 = { ...char.friend2, name: /** @type {HTMLInputElement} */ (friend2Input.querySelector('input')).value.trim() || char.friend2.name };
+          char.coworker1 = { ...char.coworker1, name: /** @type {HTMLInputElement} */ (co1Input.querySelector('input')).value.trim() || char.coworker1.name };
+          char.coworker2 = { ...char.coworker2, name: /** @type {HTMLInputElement} */ (co2Input.querySelector('input')).value.trim() || char.coworker2.name };
+          char.supervisor = { name: /** @type {HTMLInputElement} */ (supInput.querySelector('input')).value.trim() || char.supervisor.name };
+          char.first_name = (first.textContent || '').trim() || char.first_name;
+          char.last_name = (last.textContent || '').trim() || char.last_name;
+          // job_type, outfit, start_timestamp already updated via dropdown callbacks
 
-        // Compute start_timestamp from selected season + latitude.
-        // Season names map to NH calendar months; SH flips by 182 days.
-        const seasonStarts = { winter: 0, spring: 91, summer: 182, autumn: 274 };
-        const seasonLengths = { winter: 91, spring: 91, summer: 92, autumn: 91 };
-        const ss = /** @type {'winter'|'spring'|'summer'|'autumn'} */ (selectedSeason);
-        let remappedDay = seasonStarts[ss] + (dayOffset % seasonLengths[ss]);
-        if (selectedLatitude < 0) {
-          remappedDay = (remappedDay + 182) % 365;
-        }
-        sandboxState.start_timestamp = baseDateMinutes + remappedDay * 1440;
-        sandboxState.latitude = selectedLatitude;
+          if (activeCloseDropdowns) {
+            document.removeEventListener('click', activeCloseDropdowns);
+            activeCloseDropdowns = null;
+          }
+          finishCreation(char);
+        });
+        actionsEl.appendChild(confirmBtn);
 
-        finishCreation(/** @type {GameCharacter} */ (sandboxState));
-      });
-      actionsEl.appendChild(confirmBtn);
+        const rerollBtn = document.createElement('button');
+        rerollBtn.className = 'action';
+        rerollBtn.textContent = 'A different life';
+        rerollBtn.addEventListener('click', () => {
+          if (activeCloseDropdowns) {
+            document.removeEventListener('click', activeCloseDropdowns);
+            activeCloseDropdowns = null;
+          }
+          const newChar = generateRandom();
+          showCharacterScreen(newChar);
+        });
+        actionsEl.appendChild(rerollBtn);
 
-      function maybeShowConfirm() {
-        if (sandboxState.job_type && sandboxState.outfit_default) {
-          actionsEl.classList.add('visible');
-        }
-      }
+        const startOverBtn = document.createElement('button');
+        startOverBtn.className = 'action';
+        startOverBtn.textContent = 'Start over';
+        startOverBtn.addEventListener('click', () => {
+          if (activeCloseDropdowns) {
+            document.removeEventListener('click', activeCloseDropdowns);
+            activeCloseDropdowns = null;
+          }
+          showOpeningScreen();
+        });
+        actionsEl.appendChild(startOverBtn);
+
+        actionsEl.classList.add('visible');
+      }, 400);
     }, 150);
   }
 
@@ -491,121 +548,6 @@ const Chargen = (() => {
     }
 
     return wrapper;
-  }
-
-  // --- Player name screen (random path) ---
-
-  /** @param {GameCharacter} char */
-  function showPlayerNameScreen(char) {
-    const passageEl = /** @type {HTMLElement} */ (document.getElementById('passage'));
-    const actionsEl = /** @type {HTMLElement} */ (document.getElementById('actions'));
-    const movementEl = /** @type {HTMLElement} */ (document.getElementById('movement'));
-    const eventTextEl = /** @type {HTMLElement} */ (document.getElementById('event-text'));
-
-    const usedNames = new Set([
-      char.friend1.name, char.friend2.name,
-      char.coworker1.name, char.coworker2.name,
-      char.supervisor.name, char.first_name,
-    ]);
-
-    passageEl.classList.remove('visible');
-    actionsEl.innerHTML = '';
-    actionsEl.classList.remove('visible');
-    movementEl.innerHTML = '';
-    movementEl.classList.remove('visible');
-    eventTextEl.innerHTML = '';
-    eventTextEl.classList.remove('visible');
-
-    setTimeout(() => {
-      const first = document.createElement('span');
-      first.className = 'editable-name';
-      first.contentEditable = 'true';
-      first.spellcheck = false;
-      first.textContent = char.first_name;
-
-      const last = document.createElement('span');
-      last.className = 'editable-name';
-      last.contentEditable = 'true';
-      last.spellcheck = false;
-      last.textContent = char.last_name;
-
-      const p = document.createElement('p');
-      p.append(
-        'Your name is ',
-        first,
-        ' ',
-        last,
-        '. At least, that\u2019s what it says on everything.'
-      );
-
-      passageEl.innerHTML = '';
-      passageEl.appendChild(p);
-
-      const nameReroll = document.createElement('button');
-      nameReroll.className = 'name-reroll';
-      nameReroll.textContent = '\u21bb';
-      nameReroll.addEventListener('click', () => {
-        const currentFirst = (first.textContent || '').trim();
-        if (currentFirst) usedNames.delete(currentFirst);
-        const newName = generateName(usedNames);
-        first.textContent = newName.first;
-        last.textContent = newName.last;
-      });
-      passageEl.appendChild(nameReroll);
-
-      passageEl.classList.add('visible');
-
-      // Prevent line breaks and strip pasted formatting
-      /** @param {KeyboardEvent} e */
-      const preventEnter = (e) => {
-        if (e.key === 'Enter') {
-          e.preventDefault();
-          /** @type {HTMLElement} */ (e.target).blur();
-        }
-      };
-      /** @param {ClipboardEvent} e */
-      const pastePlain = (e) => {
-        e.preventDefault();
-        const text = e.clipboardData ? e.clipboardData.getData('text/plain') : '';
-        document.execCommand('insertText', false, text.replace(/\n/g, ''));
-      };
-
-      first.addEventListener('keydown', preventEnter);
-      first.addEventListener('paste', pastePlain);
-      last.addEventListener('keydown', preventEnter);
-      last.addEventListener('paste', pastePlain);
-
-      setTimeout(() => {
-        const btn = document.createElement('button');
-        btn.className = 'action';
-        btn.textContent = 'This is you.';
-        btn.addEventListener('click', () => {
-          const firstName = (first.textContent || '').trim() || char.first_name;
-          const lastName = (last.textContent || '').trim() || char.last_name;
-          char.first_name = firstName;
-          char.last_name = lastName;
-          finishCreation(char);
-        });
-        actionsEl.appendChild(btn);
-
-        const rerollBtn = document.createElement('button');
-        rerollBtn.className = 'action';
-        rerollBtn.textContent = 'A different life';
-        rerollBtn.addEventListener('click', () => {
-          const newChar = generateRandom();
-          showPlayerNameScreen(newChar);
-        });
-        actionsEl.appendChild(rerollBtn);
-
-        const startOverBtn = document.createElement('button');
-        startOverBtn.className = 'action';
-        startOverBtn.textContent = 'Start over';
-        startOverBtn.addEventListener('click', () => showOpeningScreen());
-        actionsEl.appendChild(startOverBtn);
-
-        actionsEl.classList.add('visible');
-      }, 400);
-    }, 150);
   }
 
   // --- Finish ---
