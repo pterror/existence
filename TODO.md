@@ -9,7 +9,6 @@
 - [x] Idle actions no longer trigger events (`Timeline.chance(0.3)` + `World.checkEvents()` removed). Existing saves with idle actions will replay differently (RNG consumption changed). Dev-only concern. **Resolved by version bump to v2.**
 - [x] Old localStorage saves (`existence_timeline`) are not migrated to IndexedDB. Players with existing saves will start fresh. **Won't fix — no real players on old format.**
 - [x] Continuous time + start_timestamp + sleep rewrite changes RNG consumption order. Existing IDB saves are incompatible (replay will diverge). No migration path — old runs will produce wrong state. **Resolved by version bump to v2.**
-- [ ] No run end conditions defined yet. `Runs.finishRun(id)` exists but nothing calls it. Need content-driven endings.
 - [x] Visual replay of finished runs uses recursive setTimeout chain — very long runs may have performance issues. Consider a skip/fast-forward mechanism. **Replaced with scrubber-based replay.**
 - [x] **Bug:** Awareness clicks (checking time/money) are not recorded as actions. On page refresh, `last_observed_time`/`last_observed_money` reset — losing direct observations. Fix: record `observe_time`/`observe_money` as actions so they replay correctly.
 - [x] Chargen: fold the two creation paths together. "Choose your own" should be the random path with a toggle that makes configurable options visible — not a separate screen. Random generates everything, toggle reveals the knobs.
