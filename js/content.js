@@ -90,6 +90,34 @@ const Content = (() => {
     ],
   };
 
+  /** @type {Record<string, (name: string) => string[]>} */
+  const friendGuiltThoughts = {
+    sends_things: (name) => [
+      `${name} sent you something. Days ago. You still haven't opened it. The notification just sits there, getting heavier.`,
+      `You think about how easy it would be to just reply to ${name}. One line. Anything. But the gap has its own weight now.`,
+      `${name} keeps reaching out. You keep not answering. The asymmetry of it — she hasn't stopped, and you haven't started.`,
+      `You could open what ${name} sent. You almost do. Then the thought of all the ones before it, unanswered, stops your hand.`,
+    ],
+    checks_in: (name) => [
+      `${name} asked how you were. That was — how long ago? The silence since then is its own answer.`,
+      `You think about ${name}. About the message you haven't replied to. The one before that. The gap is becoming a thing with edges.`,
+      `${name} checks in because that's what ${name} does. You don't reply because that's what you do. The pattern is settling into something permanent.`,
+      `The longer you don't answer ${name}, the harder the answering gets. You know this. It doesn't help.`,
+    ],
+    dry_humor: (name) => [
+      `${name} texted. You read it, almost laughed, almost replied. Almost is doing a lot of work in that sentence.`,
+      `You owe ${name} a reply. Several, actually. They're stacking up in a way that makes each one harder to send than the last.`,
+      `${name} would make a joke about how long it's been. That's the problem — you can already hear it, and it's easier to avoid than to face.`,
+      `The draft you keep composing to ${name} in your head never makes it to your hands. Something about putting it in writing makes the silence before it too visible.`,
+    ],
+    earnest: (name) => [
+      `${name} said to reach out anytime. The word "anytime" has a shelf life, and you're testing it.`,
+      `You think about ${name} waiting. Not dramatically — just the small background fact of someone who cared and got nothing back.`,
+      `${name} would understand if you explained. But explaining means starting, and starting means acknowledging how long it's been.`,
+      `The thing about ${name} is that the kindness makes it worse. It would be easier to ignore someone who didn't mean it.`,
+    ],
+  };
+
   // --- Coworker prose tables ---
 
   /** @type {Record<string, (name: string) => string | undefined>} */
@@ -935,6 +963,9 @@ const Content = (() => {
 
         // Sleep emotional processing — attenuate sentiment deviations from baseline
         State.processSleepEmotions(Character.get().sentiments || [], qualityMult, sleepMinutes);
+
+        // Friend absence — guilt accumulates per night of silence
+        State.processAbsenceEffects();
 
         // Fridge food slowly goes bad overnight
         if (State.get('fridge_food') > 0 && Timeline.chance(0.15)) {
@@ -2228,7 +2259,15 @@ const Content = (() => {
         for (const msg of unread) {
           parts.push(msg.text);
           // Apply per-type effects
-          if (msg.type === 'friend') State.adjustSocial(3);
+          if (msg.type === 'friend') {
+            State.adjustSocial(3);
+            // Reading a friend's message = contact. Reset timer, reduce guilt.
+            if (msg.source) {
+              const contactKey = msg.source === 'friend1' ? 'last_friend1_contact' : 'last_friend2_contact';
+              State.set(contactKey, State.get('time'));
+              State.adjustSentiment(msg.source, 'guilt', -0.02);
+            }
+          }
           else if (msg.type === 'bill') State.adjustStress(5);
           else if (msg.type === 'bank') State.glanceMoney();
           else if (msg.type === 'work') State.adjustStress(3);
@@ -2297,7 +2336,11 @@ const Content = (() => {
     const socialT = State.socialTier();
     const socialLow = socialT === 'withdrawn' || socialT === 'isolated';
 
-    for (const friend of [friend1, friend2]) {
+    const friendSlots = [
+      { friend: friend1, slot: 'friend1' },
+      { friend: friend2, slot: 'friend2' },
+    ];
+    for (const { friend, slot } of friendSlots) {
       let multiplier;
       switch (friend.flavor) {
         case 'sends_things': multiplier = 0.007; break;
@@ -2316,14 +2359,14 @@ const Content = (() => {
           const msgFn = friendIsolatedMessages[friend.flavor];
           const text = /** @type {(name: string) => string} */ (msgFn)(friend.name);
           if (text) {
-            State.addPhoneMessage({ type: 'friend', text, read: false });
+            State.addPhoneMessage({ type: 'friend', text, read: false, source: slot });
             added = true;
           }
         } else {
           const msgFn = friendMessages[friend.flavor];
           const text = /** @type {(name: string) => string} */ (msgFn)(friend.name);
           if (text) {
-            State.addPhoneMessage({ type: 'friend', text, read: false });
+            State.addPhoneMessage({ type: 'friend', text, read: false, source: slot });
             added = true;
           }
         }
@@ -2378,10 +2421,21 @@ const Content = (() => {
     // Messages
     if (unread.length > 0) {
       const senders = [];
+      // Track which friend slots have unread messages for guilt nudge
+      const seenFriendSlots = new Set();
       for (const msg of unread) {
         if (msg.type === 'friend') {
-          // Extract name from message text (first word after "from " or starts with name)
           senders.push('a message');
+          // Seeing an unread friend message nudges guilt proportionally
+          if (msg.source) {
+            if (!seenFriendSlots.has(msg.source)) {
+              seenFriendSlots.add(msg.source);
+              const guilt = State.sentimentIntensity(msg.source, 'guilt');
+              if (guilt > 0.03) {
+                State.adjustSentiment(msg.source, 'guilt', guilt * 0.02);
+              }
+            }
+          }
         } else if (msg.type === 'work') {
           senders.push('something from work');
         } else if (msg.type === 'bank') {
@@ -2803,6 +2857,22 @@ const Content = (() => {
       const f1thoughts = /** @type {(name: string) => string[]} */ (friendIdleThoughts[friend1.flavor])(friend1.name);
       const f2thoughts = /** @type {(name: string) => string[]} */ (friendIdleThoughts[friend2.flavor])(friend2.name);
       thoughts.push(...f1thoughts.map(w1), ...f2thoughts.map(w1));
+    }
+
+    // Friend guilt — fires regardless of social tier
+    {
+      const f1 = Character.get('friend1');
+      const f2 = Character.get('friend2');
+      const g1 = State.sentimentIntensity('friend1', 'guilt');
+      const g2 = State.sentimentIntensity('friend2', 'guilt');
+      if (g1 > 0.03) {
+        const gThoughts = /** @type {(name: string) => string[]} */ (friendGuiltThoughts[f1.flavor])(f1.name);
+        thoughts.push(...gThoughts.map(t => ({ weight: g1 * 8, value: t })));
+      }
+      if (g2 > 0.03) {
+        const gThoughts = /** @type {(name: string) => string[]} */ (friendGuiltThoughts[f2.flavor])(f2.name);
+        thoughts.push(...gThoughts.map(t => ({ weight: g2 * 8, value: t })));
+      }
     }
 
     // Filter out recently shown thoughts (compare .value)

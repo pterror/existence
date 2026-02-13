@@ -92,6 +92,25 @@ Three mechanics deepening how sentiments change over time:
 
 **Habituation** — comfort sentiments (eating, rain_sound, outside, warmth, quiet) lose small amounts of intensity each time they activate (-0.002 to -0.003). Sleep restores toward character baseline. Light use stays stable; heavy use fades slightly. Quiet irritation also habituates (-0.001). Weather/time-of-day prefs and work/coworker sentiments are NOT habituated.
 
+### Friend Absence Effects (Layer 2 of DESIGN-EMOTIONS.md)
+Friends who reach out and get silence back generate guilt over time. Per-friend contact timestamps track last message engagement.
+
+**Mechanics:**
+- `last_friend1_contact` / `last_friend2_contact` — game time of last engagement (reading a friend's message)
+- Grace period: 1.5 days. After that, guilt accumulates each sleep cycle
+- Growth rate: ~0.005–0.008 per night, scaling with absence duration (cap 1.6x at 14+ days)
+- Unread messages from the ignored friend intensify guilt by 40%
+- Seeing unread friend messages on phone screen nudges guilt by `guilt * 0.02` (proportional, only when guilt > 0.03)
+- Reading a friend's message: resets contact timer, reduces guilt by 0.02
+
+**Effects:**
+- Friend guilt lowers serotonin target when at home (max ~6 points at extreme guilt toward both friends)
+- Guilt-aware idle thoughts fire based on guilt intensity, independent of social tier (4 thoughts per friend flavor, 16 total)
+- Sleep processing factor 0.7 — between comfort (1.0) and dread/irritation (0.6)
+- Legacy saves: first sleep initializes contact times to current time, no guilt burst
+
+**Friend messages tagged with source** — `phone_inbox` entries from friends carry `source: 'friend1'|'friend2'` for contact tracking.
+
 ### Derived Systems
 - **Mood tone** — primarily from neurochemistry (serotonin, dopamine, NE, GABA) with physical state overrides → numb / fraying / heavy / hollow / quiet / clear / present / flat. Same 8 tones, now with inertia instead of instant derivation.
 - **Prose-neurochemistry shading** — three-layer pattern: moodTone() as coarse selector, weighted variant selection via `State.lerp01()` + `Timeline.weightedPick()`, deterministic modifiers (adenosine fog, NE+low-GABA restlessness). **All 67 `Timeline.pick` call sites converted.** Covered: idle thoughts, bedroom description, lie_there, sleep prose (23 branches), look_out_window (7 branches), sit_at_table (6 branches), go_for_walk (12 branches), work events (4 branches), ambient events (5 branches), friend messages (4 flavors), coworker chatter (3 flavors), coworker interactions (3 flavors). No `Timeline.pick` calls remain. See DESIGN.md "Prose-neurochemistry interface" for the full pattern.

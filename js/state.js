@@ -181,7 +181,7 @@ const State = (() => {
       work_tasks_expected: 4,
 
       // Phone inbox and mode
-      phone_inbox: /** @type {{ type: string, text: string, read: boolean }[]} */ ([]),
+      phone_inbox: /** @type {{ type: string, text: string, read: boolean, source?: string }[]} */ ([]),
       phone_silent: false,
       viewing_phone: false,
       last_msg_gen_time: 0,     // game time of last generateIncomingMessages call
@@ -193,6 +193,8 @@ const State = (() => {
       times_late_this_week: 0,
       consecutive_meals_skipped: 0,
       last_social_interaction: 0, // action count at last interaction
+      last_friend1_contact: 0,    // game time of last friend1 engagement (0 = never/legacy)
+      last_friend2_contact: 0,    // game time of last friend2 engagement (0 = never/legacy)
 
       // Event surfacing — tracks how many times state-condition events have appeared.
       // After cap, they go silent and let tier-based prose carry the weight.
@@ -602,7 +604,7 @@ const State = (() => {
 
   // --- Phone inbox helpers ---
 
-  /** @param {{ type: string, text: string, read: boolean }} msg */
+  /** @param {{ type: string, text: string, read: boolean, source?: string }} msg */
   function addPhoneMessage(msg) {
     s.phone_inbox.push(msg);
   }
@@ -777,6 +779,7 @@ const State = (() => {
     comfort: 1.0,
     satisfaction: 0.9,
     warmth: 0.85,
+    guilt: 0.7,
     dread: 0.6,
     irritation: 0.6,
   };
@@ -816,6 +819,50 @@ const State = (() => {
 
       const effectiveRate = baseRate * intensityFactor * qf * regulation;
       sent.intensity -= deviation * effectiveRate;
+    }
+  }
+
+  // --- Friend absence effects ---
+  // Friends who reach out deserve a response. Ignoring them builds guilt over time.
+  // Called during sleep — guilt accumulates per night of absence, not per tick.
+  // No PRNG consumed — fully deterministic.
+
+  /**
+   * Process friend absence effects during sleep.
+   * For each friend: if contact time is 0 (legacy/new), initialize to current time.
+   * After 1.5 days grace period, guilt accumulates each night.
+   * Unread messages from the friend intensify guilt by 40%.
+   */
+  function processAbsenceEffects() {
+    const now = s.time;
+    const inbox = s.phone_inbox;
+
+    for (const slot of ['friend1', 'friend2']) {
+      const contactKey = slot === 'friend1' ? 'last_friend1_contact' : 'last_friend2_contact';
+      let lastContact = s[contactKey];
+
+      // Legacy/new: initialize contact time on first sleep, skip guilt
+      if (lastContact === 0) {
+        s[contactKey] = now;
+        continue;
+      }
+
+      const absenceMinutes = now - lastContact;
+      const absenceDays = absenceMinutes / 1440;
+
+      // Grace period: 1.5 days
+      if (absenceDays <= 1.5) continue;
+
+      // Growth rate: base 0.005, scaling gently with duration (cap 1.6x at 14 days)
+      let growth = 0.005 * Math.min(1 + absenceDays / 14, 1.6);
+
+      // Unread messages from this friend intensify guilt
+      const hasUnreadFromFriend = inbox.some(m => !m.read && m.source === slot);
+      if (hasUnreadFromFriend) {
+        growth *= 1.4;
+      }
+
+      adjustSentiment(slot, 'guilt', growth);
     }
   }
 
@@ -884,6 +931,13 @@ const State = (() => {
       const workSat = sentimentIntensity('work', 'satisfaction');
       t -= workDread * 6;    // dread lowers serotonin target at work
       t += workSat * 3;      // satisfaction gives a small lift
+    }
+
+    // Friend guilt at home — the weight of not responding
+    if (s.location && s.location.startsWith('apartment')) {
+      const g1 = sentimentIntensity('friend1', 'guilt');
+      const g2 = sentimentIntensity('friend2', 'guilt');
+      t -= (g1 + g2) * 3;   // max ~6 points at extreme guilt toward both friends
     }
 
     return clamp(t, 15, 85);
@@ -1256,6 +1310,7 @@ const State = (() => {
     sentimentIntensity,
     adjustSentiment,
     processSleepEmotions,
+    processAbsenceEffects,
     regulationCapacity,
   };
 })();

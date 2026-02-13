@@ -617,6 +617,24 @@ Isolation builds over time without interaction. It's not a punishment — it's p
 
 Responding improves things. Ignoring doesn't make it worse immediately — but time does. Neither is judged.
 
+### Friend absence effects (implemented)
+
+Friends who reach out and get silence back generate guilt — the specific weight of knowing someone cared and you didn't respond. This is distinct from social isolation (the general state of not talking to people). You can be socially fine and still guilty about a specific friend you've been ignoring.
+
+**Per-friend contact tracking.** `last_friend1_contact` and `last_friend2_contact` record the game time of the last message engagement (reading a message from that friend). Legacy saves initialize on first sleep — no retroactive guilt.
+
+**Guilt accumulation during sleep.** After a 1.5-day grace period, guilt builds each night. Growth rate ~0.005 per night, scaling gently with absence duration (up to 1.6x at 14+ days of silence). Unread messages from the ignored friend intensify growth by 40% — the message sitting there, visible, unanswered, makes it worse.
+
+**Phone screen amplification.** Seeing unread friend messages on the phone screen nudges guilt by `guilt * 0.02` — a consistent ~2% proportional increase. Only fires when guilt is already above 0.03, so it amplifies existing guilt rather than creating it. Each check makes the next check slightly heavier.
+
+**Reading as relief.** Reading a friend's message resets the contact timer and reduces guilt by 0.02. Small per-message, but consistent — engaging with what they sent is the mechanism for recovery.
+
+**Serotonin target penalty at home.** Friend guilt lowers serotonin target when at home (where you could reach out but aren't). Max ~6 points at extreme guilt toward both friends. Small, persistent, and location-specific.
+
+**Guilt-aware idle thoughts.** 16 guilt-specific thoughts (4 per friend flavor), weighted by `guilt * 8`. Fire regardless of social tier. Themes: the gap widening, the asymmetry of reaching out, the difficulty of starting after silence. Distinct from the existing isolated friend thoughts — these are about the specific weight of not responding, not general loneliness.
+
+**Sleep processing.** Guilt's processing factor is 0.7 — between comfort (1.0) and dread/irritation (0.6). Not as entrenched as dread, but not as easily processed as comfort. Good sleep helps, but the fix is engaging with the person, not sleeping it off.
+
 ### Family
 
 Family isn't chosen. That's the thing. A friend who hurts you, you can stop calling. A parent who hurts you is still your parent, and the weight of that doesn't go away when you move out.
