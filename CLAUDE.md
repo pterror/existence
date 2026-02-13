@@ -28,7 +28,8 @@ serve.js        # Bun static file server
 scripts/
   download-names.sh  # Downloads raw Census + SSA data into vendor/
   build-names.js     # Processes raw data into js/names.js
-DESIGN.md       # Full simulation design vision — what exists and what's planned
+DESIGN.md       # Simulation design vision — what the game should become
+STATUS.md       # What's actually implemented right now
 ```
 
 ## Development
@@ -87,7 +88,7 @@ No build step. Plain JS loaded via script tags.
 
 **Always commit when done.** When you finish a task, commit the work. Don't leave changes uncommitted. If a task has multiple logical pieces, commit each piece separately.
 
-**Keep DESIGN.md current.** Before every commit, check whether the work you're committing changes the scope of what's implemented relative to DESIGN.md. If it does — a new system, a new interaction category, a structural change to how something works — update DESIGN.md to reflect the current reality. DESIGN.md is the source of truth for the game's design vision and should always describe both what exists and what's planned. Don't let implementation drift from documentation.
+**Keep STATUS.md current.** Before every commit, check whether the work changes what's implemented — a new interaction, a new state variable, a new system, a structural change. If it does, update STATUS.md to match. STATUS.md is the ground truth for what the codebase actually does right now.
 
 ## Commit Convention
 

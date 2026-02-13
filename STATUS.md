@@ -1,0 +1,136 @@
+# What's Implemented
+
+Current state of the codebase. Keep this up to date — see CLAUDE.md workflow rules.
+
+## Simulation
+
+### State Variables (all hidden)
+- **energy** (0–100) — tiers: depleted / exhausted / tired / okay / rested / alert
+- **stress** (0–100) — tiers: calm / baseline / tense / strained / overwhelmed
+- **hunger** (0–100) — tiers: satisfied / fine / hungry / very_hungry / starving
+- **social** (0–100) — tiers: isolated / withdrawn / neutral / connected / warm
+- **job_standing** (0–100) — tiers: at_risk / shaky / adequate / solid / valued
+- **money** (float) — tiers: broke / scraping / tight / careful / okay / comfortable
+- **time** — continuous minutes since game start, never resets
+
+### Derived Systems
+- **Mood tone** — compound of energy + stress + hunger + social → numb / fraying / heavy / hollow / quiet / clear / present / flat
+- **Time period** — deep_night / early_morning / morning / late_morning / midday / afternoon / evening / night
+- **Observation fidelity** — time and money awareness degrade with distance from last check (exact → rounded → vague → sensory/qualitative)
+- **Season** — derived from latitude + start_timestamp. Tropical: wet/dry. Temperate: four seasons. Hemisphere from sign.
+- **Weather** — overcast / clear / grey / drizzle. 3% shift chance per action. Affects prose, not mechanics.
+
+### Daily Flags (reset on wake)
+dressed, showered, ate_today, at_work_today, called_in, alarm_set, alarm_went_off, work_nagged_today
+
+### Phone State
+Battery (passive drain), silent mode, inbox (messages accumulate whether or not you look). Message sources: friends (flavor-driven frequency), work nag (30min late), bill notifications (every 7 days).
+
+### Apartment State
+fridge_food (integer, depletes on eating, restocked by groceries), apartment_mess (0–100, grows passively)
+
+## Locations (7)
+
+```
+apartment_bedroom ─── apartment_kitchen ─── street ─── bus_stop ─── workplace
+       │                     │                │
+apartment_bathroom ──────────┘          corner_store
+```
+
+Travel times: 1min within apartment, 2min apartment↔street, 3min street↔bus_stop, 4min street↔corner_store, 20min bus_stop↔workplace.
+
+## Interactions (28)
+
+### Bedroom (6)
+sleep, get_dressed, set_alarm, skip_alarm, check_phone_bedroom, (alarm event wakes you)
+
+### Kitchen (4)
+eat_food, drink_water, do_dishes, check_phone_kitchen
+
+### Bathroom (2)
+shower, use_sink
+
+### Street (2)
+check_phone_street, sit_on_step
+
+### Bus Stop (1)
+wait_for_bus
+
+### Workplace (4)
+do_work, work_break, talk_to_coworker, check_phone_work
+
+### Corner Store (3)
+buy_groceries, buy_cheap_meal, browse_store
+
+### Phone Mode (3, available anywhere)
+read_messages, toggle_phone_silent, put_phone_away
+
+### Global (1, available anywhere with phone)
+call_in (call in sick — morning only, work hours)
+
+## Events (13 types)
+
+- **alarm** — fires at alarm_time in bedroom
+- **late_anxiety** — stress when late for work (capped at 2 surfaces)
+- **hunger_pang** — when hunger > 65 (capped at 2)
+- **exhaustion_wave** — when energy < 15 (capped at 2)
+- **weather_shift** — random weather change
+- **coworker_speaks** — samples coworker, uses chatter table
+- **work_task_appears** — job-specific
+- **break_room_noise** — job-specific ambient
+- **apartment_sound** — pipes, fridge, footsteps
+- **apartment_notice** — mess awareness (capped at 2)
+- **street_ambient** — cars, buses, sirens
+- **someone_passes** — people on street
+
+## Content
+
+### Jobs (3)
+**office** — 9am–5pm, 4 tasks expected, cubicle/open-plan prose
+**retail** — 10am–6pm, 5 tasks expected, floor/register/stockroom prose
+**food_service** — 7am–3pm, 6 tasks expected, kitchen/counter prose
+
+Each has: workplace description (dynamic), do_work prose (6 variants), work_break prose (3 variants), work_task event text, ambient event text.
+
+### Relationships
+**Friends (2 per character, 4 flavors):** sends_things, checks_in, dry_humor, earnest. Each has normal messages, isolated messages, idle thoughts.
+
+**Coworkers (2 per character, 3 flavors):** warm_quiet, mundane_talker, stressed_out. Each has chatter and interaction prose.
+
+**Supervisor (1):** named, referenced in work prose.
+
+### Idle Thoughts
+Dynamic generation based on mood (8 categories × ~7 variants each), hunger (starving/very_hungry), energy (depleted), social isolation (friend-specific thoughts). Recency tracking avoids repeats.
+
+### Outfit Prose
+6 outfit sets, each with 3 variants: default / low_mood / messy. 6 sleepwear options. All complete prose sentences.
+
+## Character Generation
+
+Single-screen UI with:
+- Job dropdown (3 options)
+- Age input (numeric, default random 22–48)
+- Location dropdown (4 options: tropical, NH temperate, NH cold, SH temperate)
+- Season dropdown (dynamic based on location's climate zone)
+- Sleepwear dropdown (6 options)
+- Wardrobe dropdown (6 outfit sets)
+- Friend/coworker/supervisor names (editable, with reroll)
+- Player first/last name (editable, with reroll)
+- Name sampling from weighted US Census + SSA data (100 first names, 100 surnames)
+
+## Infrastructure
+
+### Save System
+IndexedDB. RunRecord: `{ id, seed, character, actions, status, createdAt, lastPlayed, version }`. Debounced writes (500ms), flush on beforeunload.
+
+### Multi-Run
+Threshold screen lists all runs. Click to resume. "Another life" starts fresh. Step-away link pauses current run and returns to threshold.
+
+### Deterministic Replay
+Dual PRNG streams (charRng for chargen, rng for gameplay) derived from master seed via splitmix32. Changing chargen never breaks gameplay replay. Actions logged as `{ type, id/destination, timestamp }`.
+
+### In-Game Look-Back
+Replay scrubber with significance heatmap. Scene segmentation (by movement). Snapshot system for fast seeking. Autoplay with variable speed. Keyboard navigation (arrows, ctrl+arrows, space).
+
+### UI
+Fade transitions on all text changes. Awareness bar (time + money, clickable to focus). Idle timer (30s → 60s → silent). Phone buzz on new messages. Tab-visibility-aware.
