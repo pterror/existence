@@ -272,10 +272,14 @@ body {
 .chargen-dropdown-options {
   display: none;
   padding: 0.3em 0;
+  overflow-wrap: break-word;
 }
 
 .chargen-dropdown-options.open {
   display: block;
+  position: sticky;
+  bottom: 0;
+  right: 0;
 }
 
 /* Name re-roll buttons */

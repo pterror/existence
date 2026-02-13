@@ -3,7 +3,7 @@
 ## Backlog
 
 - [x] SSA download script falls back to manual download when SSA blocks curl. Document this in README or script output. **Script already handles this; improved error message with step-by-step instructions.**
-- [ ] Chargen sandbox: sleepwear is randomly assigned during wardrobe screen. Could offer as separate choice.
+- [x] Chargen sandbox: sleepwear is randomly assigned during wardrobe screen. Could offer as separate choice. **Added inline prose dropdown before wardrobe, matching daywear pattern.**
 - [x] Legacy defaults in character.js still use original names (Dana/Marcus/etc.) as fallback. Only used if somehow no character is set. **Removed — chargen always generates a complete character, and IDB saves store it verbatim.**
 - [x] Phone system redesigned: phone events removed from world.js checkEvents, inbox generation (generateIncomingMessages) added to game.js action/move flow. checkPhoneContent no longer generates random messages — phone is now an interactive mode with persistent inbox. RNG consumption order changed. Breaks all existing saves. **Resolved by version bump to v2.**
 - [x] Idle actions no longer trigger events (`Timeline.chance(0.3)` + `World.checkEvents()` removed). Existing saves with idle actions will replay differently (RNG consumption changed). Dev-only concern. **Resolved by version bump to v2.**

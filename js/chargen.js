@@ -261,6 +261,9 @@ const Chargen = (() => {
         if (el !== optionsContainer) el.classList.remove('open');
       });
       optionsContainer.classList.toggle('open');
+      if (optionsContainer.classList.contains('open')) {
+        requestAnimationFrame(() => optionsContainer.scrollIntoView({ block: 'nearest', behavior: 'smooth' }));
+      }
     });
 
     wrapper.appendChild(trigger);
@@ -436,6 +439,23 @@ const Chargen = (() => {
       }
 
       rebuildSeasonDropdown();
+
+      // --- Sleepwear ---
+      const currentSleepwearIndex = sleepwearOptions.indexOf(char.sleepwear);
+      const sleepwearDropdownOptions = sleepwearOptions.map((sw, i) => ({
+        label: sw,
+        value: String(i),
+      }));
+
+      const sleepwearDropdown = createDropdown(
+        sleepwearDropdownOptions,
+        String(currentSleepwearIndex === -1 ? 0 : currentSleepwearIndex),
+        (v) => { char.sleepwear = sleepwearOptions[parseInt(v, 10)]; }
+      );
+
+      const sleepwearP = document.createElement('p');
+      sleepwearP.append('You\u2019re still in ', sleepwearDropdown.element, '.');
+      passageEl.appendChild(sleepwearP);
 
       // --- Wardrobe ---
       const currentOutfitIndex = outfitSets.findIndex(o => o.outfit_default === char.outfit_default);
