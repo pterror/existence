@@ -18,6 +18,19 @@
     </div>
     <div id="actions"></div>
     <div id="movement"></div>
+    <div id="replay-controls" class="hidden">
+      <div id="replay-scrubber-track">
+        <canvas id="replay-heatmap"></canvas>
+        <input type="range" id="replay-scrubber" min="0" max="0" value="0">
+      </div>
+      <div id="replay-nav">
+        <button id="replay-prev" class="replay-btn" aria-label="Previous scene">&lsaquo;</button>
+        <button id="replay-autoplay" class="replay-btn">play</button>
+        <button id="replay-next" class="replay-btn" aria-label="Next scene">&rsaquo;</button>
+        <span id="replay-scene-label"></span>
+        <button id="replay-back" class="replay-btn replay-btn-back">back</button>
+      </div>
+    </div>
     <div id="step-away" class="hidden"></div>
   </div>
 

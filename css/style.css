@@ -378,6 +378,120 @@ body {
   opacity: 0.8;
 }
 
+.threshold-faded {
+  color: #4a4540;
+  font-style: italic;
+  font-size: 1rem;
+  padding: 0.3em 0;
+}
+
+/* Replay controls — scrubber + heatmap */
+
+#replay-controls {
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+}
+
+#replay-controls.hidden {
+  display: none;
+}
+
+#replay-scrubber-track {
+  position: relative;
+  width: 100%;
+  height: 18px;
+  display: flex;
+  align-items: center;
+}
+
+#replay-heatmap {
+  position: absolute;
+  top: 5px;
+  left: 0;
+  width: 100%;
+  height: 8px;
+  image-rendering: pixelated;
+  pointer-events: none;
+  border-radius: 1px;
+}
+
+#replay-scrubber {
+  position: relative;
+  width: 100%;
+  height: 18px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+  z-index: 1;
+}
+
+#replay-scrubber::-webkit-slider-runnable-track {
+  height: 8px;
+  background: transparent;
+  border-radius: 1px;
+}
+
+#replay-scrubber::-moz-range-track {
+  height: 8px;
+  background: transparent;
+  border-radius: 1px;
+  border: none;
+}
+
+#replay-scrubber::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 3px;
+  height: 14px;
+  background: #8a8078;
+  border: none;
+  border-radius: 1px;
+  margin-top: -3px;
+  cursor: pointer;
+}
+
+#replay-scrubber::-moz-range-thumb {
+  width: 3px;
+  height: 14px;
+  background: #8a8078;
+  border: none;
+  border-radius: 1px;
+  cursor: pointer;
+}
+
+#replay-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.8em;
+  margin-top: 0.5rem;
+}
+
+.replay-btn {
+  background: none;
+  border: none;
+  color: #605850;
+  font-family: 'Source Serif 4', 'Georgia', serif;
+  font-weight: 300;
+  font-size: 0.85rem;
+  cursor: pointer;
+  padding: 0.2em 0.4em;
+  transition: color 0.2s ease;
+}
+
+.replay-btn:hover {
+  color: #a09890;
+}
+
+.replay-btn-back {
+  margin-left: auto;
+}
+
+#replay-scene-label {
+  color: #605850;
+  font-size: 0.8rem;
+  font-style: italic;
+}
+
 /* Selection */
 
 ::selection {
