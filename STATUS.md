@@ -102,6 +102,9 @@ Each has: workplace description (dynamic), do_work prose (6 variants), work_brea
 ### Idle Thoughts
 Dynamic generation based on mood (8 categories × ~7 variants each), hunger (starving/very_hungry), energy (depleted), social isolation (friend-specific thoughts). Recency tracking avoids repeats.
 
+### Sleep Prose
+Two-phase system: falling-asleep (how sleep came) + waking-up (the gradient back to consciousness). Falling-asleep branches on pre-sleep energy, stress, quality, and duration (~14 variants). Waking-up branches on post-sleep energy, sleep quality, alarm vs natural wake, time of day (dark/late/morning), and mood (~28 variants). Composed together as a single passage. No numeric hour counts — all qualitative.
+
 ### Outfit Prose
 6 outfit sets, each with 3 variants: default / low_mood / messy. 6 sleepwear options. All complete prose sentences.
 

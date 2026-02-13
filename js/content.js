@@ -744,35 +744,169 @@ const Content = (() => {
         Events.record('slept', { duration: sleepMinutes, wokeByAlarm, quality });
         Events.record('woke_up', {});
 
-        const hours = Math.round(sleepMinutes / 60);
+        // Post-sleep state — how you actually are on waking
+        const postEnergy = State.energyTier();
+        const postMood = State.moodTone();
+        const wakeTime = State.timePeriod();
 
-        // Prose
+        // --- Falling asleep ---
+        let asleep;
         if (wokeByAlarm) {
           if (energy === 'depleted') {
-            return 'The alarm drags you up from somewhere deep. ' + hours + ' hours — your body wanted more. It\'s not getting it.';
+            asleep = Timeline.pick([
+              'You\'re gone before your head settles. The kind of sleep that takes you — no transition, no drift, just off.',
+              'Your body gives out. Not falling asleep so much as shutting down. One breath you\'re lying there, the next you\'re nowhere.',
+            ]);
+          } else if (stress === 'overwhelmed' || stress === 'strained') {
+            asleep = Timeline.pick([
+              'Sleep comes late. You lie there turning the same thoughts over, the same knots, until exhaustion wins. It\'s not rest. It\'s surrender.',
+              'You stare at the dark for a long time. The thoughts don\'t stop — they just blur, eventually, into something close enough to unconsciousness.',
+              'It takes a while. You lie still and your head won\'t stop. Eventually the gap between thoughts gets wide enough and you slip through.',
+            ]);
+          } else {
+            asleep = Timeline.pick([
+              'You close your eyes and the day lets go of you. Sleep comes — not instantly, but without a fight.',
+              'The pillow, the dark, the quiet. You drift. Somewhere between one thought and the next you stop being awake.',
+              'You settle in. A few minutes of the ceiling, then nothing. Actual sleep.',
+            ]);
           }
-          if (stress === 'overwhelmed' || stress === 'strained') {
-            return 'Sleep came late and the alarm came too soon. ' + hours + ' hours of something between rest and not. The sound cuts through whatever you were holding onto.';
+        } else {
+          if (energy === 'depleted' && quality === 'poor') {
+            asleep = Timeline.pick([
+              'You lie down and something gives way. Not quite sleep. More like your body collecting a debt it\'s owed.',
+              'Your body folds into the mattress. Sleep takes you, but roughly — dragging you under before you\'re ready.',
+            ]);
+          } else if (energy === 'depleted') {
+            asleep = Timeline.pick([
+              'You\'re asleep before you finish lying down. Gone. The kind of unconsciousness that doesn\'t feel like rest because you weren\'t awake enough to notice the transition.',
+              'Your body doesn\'t ask. It takes. You\'re horizontal and then you\'re nowhere, instantly, like a switch thrown.',
+            ]);
+          } else if (quality === 'poor') {
+            asleep = Timeline.pick([
+              'Sleep comes in pieces. You\'re awake, then you\'re not, then you are again and the ceiling is the same.',
+              'You drift, surface, drift again. Every time you almost get there, something pulls you back — a thought, a sound, your own body shifting.',
+              'Not really sleeping. More like visiting unconsciousness in short trips and coming back each time with less to show for it.',
+            ]);
+          } else if (sleepMinutes >= 240) {
+            asleep = Timeline.pick([
+              'You sleep. Actually sleep. The kind that takes you somewhere and brings you back changed.',
+              'You close your eyes and the world does the decent thing and goes away for a while.',
+              'Sleep comes, and it\'s the real kind. Deep, blank, generous.',
+            ]);
+          } else {
+            asleep = Timeline.pick([
+              'You close your eyes. Something between sleep and not — the body resting even if the mind doesn\'t fully let go.',
+              'You drift. Not deep, not long, but your body takes what it can get.',
+            ]);
           }
-          return 'The alarm. You were asleep — actually asleep — and now you\'re not. ' + hours + ' hours. The room is different. Morning.';
         }
 
-        if (energy === 'depleted') {
-          if (qualityMult < 0.6) {
-            return 'You lie down and something gives way. Not quite sleep. More like your body collecting a debt. You surface ' + hours + ' hours later, not rested exactly, but less far from it.';
+        // --- Waking up ---
+        let waking;
+        if (wokeByAlarm) {
+          // Alarm waking — the specific fog of being pulled out
+          if (postEnergy === 'depleted' || postEnergy === 'exhausted') {
+            waking = Timeline.pick([
+              'The alarm. It comes from far away and then it\'s right there, inside your skull. Your hand finds it somehow. The silence after is worse — now you have to be a person. Your body says no. Every part of you says no.',
+              'Sound. Your arm moves before you\'re awake. The alarm stops. You lie in the sudden quiet and your eyelids weigh more than anything has ever weighed. Not enough. It wasn\'t enough.',
+              'The alarm drags you up from somewhere deep. You kill it and lie there in the aftermath, not yet a person, not yet anything. The room is dark, or bright, or something. You can\'t make it matter yet.',
+            ]);
+          } else if (quality === 'poor') {
+            waking = Timeline.pick([
+              'The alarm. You were already half-awake anyway, floating in that grey zone between sleep and not. The sound just makes it official. Your eyes feel like they\'ve been open for days.',
+              'Sound cuts through the thin sleep you had. You turn it off. The room comes back — same room, same light, same you. Except grittier, like something\'s been rubbed raw.',
+            ]);
+          } else if (postEnergy === 'tired' || postEnergy === 'okay') {
+            waking = Timeline.pick([
+              'The alarm. You were actually sleeping — deeply enough that the sound takes a second to become a sound and not just part of whatever you were dreaming. You reach for the phone. The room assembles itself around you: walls, ceiling, the light saying morning.',
+              'The alarm goes off and you\'re not yet a person. A hand hits the phone. Silence. You lie there while the fog lifts in layers — first you know where you are, then when, then why it matters. A minute passes before any of it feels real.',
+              'Noise. Then not noise. Then the slow work of becoming someone who is awake. The pillow is warm. The air is not. You\'re somewhere between the two.',
+            ]);
+          } else {
+            // rested/alert alarm wake
+            waking = Timeline.pick([
+              'The alarm and you\'re awake — actually awake, not the usual drag. Your eyes open and the room is just a room. Morning. Your body cooperates for once.',
+              'The alarm. But you were already surfacing, already close to the edge of waking. The sound just tips you over. You open your eyes and the day is right there, ready. So are you, more or less.',
+            ]);
           }
-          return 'You\'re asleep before you finish lying down. ' + hours + ' hours disappear. You wake up like coming up from deep water.';
+        } else if (wakeTime === 'deep_night' || wakeTime === 'night') {
+          // Waking in the dark — the wrong kind of awake
+          if (postEnergy === 'depleted' || postEnergy === 'exhausted') {
+            waking = Timeline.pick([
+              'You surface in the dark. Not morning — not close. The room is black and quiet and your body is a thing that is awake when it shouldn\'t be. Nowhere to go with it. Nothing to do with it.',
+              'Dark. You\'re awake. That\'s wrong — it should be later, should be light. But here you are, eyes open in a room that gives you nothing to look at. Too tired to get up. Too awake to go back.',
+            ]);
+          } else {
+            waking = Timeline.pick([
+              'You come back to yourself in the dark. The room is silent except for the building being a building — pipes, settling, the hum you only notice at night. It\'s the wrong time to be awake. You know this the way you know your own name.',
+              'Dark. Still. You\'re awake and the world isn\'t. The silence has that particular quality — the one that means everyone else is asleep and you\'re on the wrong side of it.',
+              'Your eyes open to nothing. Dark room, dark window. The kind of awake that comes without a reason, just you suddenly here in the middle of the night with no idea what to do about it.',
+            ]);
+          }
+        } else if (wakeTime === 'afternoon' || wakeTime === 'evening') {
+          // Late waking — the disorientation of lost time
+          if (postMood === 'numb' || postMood === 'heavy') {
+            waking = Timeline.pick([
+              'You open your eyes and the light is wrong. Afternoon light — low, coming in at an angle that means the day happened without you. You lie there with that. The weight of it.',
+              'The room is bright in the wrong way. You slept through the morning, through whatever the morning was going to be. The day is mostly over. You\'re mostly not surprised.',
+            ]);
+          } else {
+            waking = Timeline.pick([
+              'You surface and the light says afternoon. The day is already half-gone, already somewhere you\'ll never catch. The room has that overslept feeling — stale air, warm sheets, time you didn\'t spend.',
+              'You come back. The light through the window is angled low and golden, which means it\'s later than it should be. Much later. The morning happened without you. It\'s gone.',
+              'Your eyes open and the sun is wrong — past the middle of the sky, past the part of the day when waking up feels like waking up. This feels like something else. Surfacing.',
+            ]);
+          }
+        } else if (postEnergy === 'depleted' || postEnergy === 'exhausted') {
+          // Still exhausted despite sleeping — not enough
+          waking = Timeline.pick([
+            'You surface. That\'s the only word for it — coming up from somewhere that wasn\'t deep enough, breaking the surface and finding the air no different. Your body is heavy. Your eyes are heavy. Everything is heavy and the room is asking you to be a person in it.',
+            'You wake up, and the first thing you know is that it wasn\'t enough. The sleep, the hours, whatever your body did in the dark — not enough. You\'re here, eyes open, and the distance between this and rested is a distance you can feel.',
+            'Morning, probably. You\'re awake, technically. Your body is a sandbag version of itself — present but dense, uncooperative. The ceiling is up there. You\'re down here. The gap between is everything.',
+          ]);
+        } else if (quality === 'poor') {
+          // Slept but poorly — the gritty surface feeling
+          waking = Timeline.pick([
+            'You wake up feeling like you didn\'t sleep. You did — you must have, because time passed — but your body didn\'t get the memo. Your eyes are gritty, your neck is wrong, everything is slightly off in a way you can\'t fix by stretching.',
+            'You come back. The room. The light. You. Something\'s wrong, or not wrong exactly — just not right. Sleep happened but it didn\'t take. You feel like a rough draft of a person.',
+            'Awake. Or some version of it. Your body did the hours but skipped the rest — you can feel it in your eyes, your joints, the dull headache that isn\'t quite a headache. The room is the same room. You\'re a worse version of who lay down in it.',
+          ]);
+        } else if (postEnergy === 'rested' || postEnergy === 'alert') {
+          // Actually rested — rare clarity
+          if (postMood === 'clear' || postMood === 'present') {
+            waking = Timeline.pick([
+              'You open your eyes and the room is just a room. Not a problem, not a weight — just walls and light and air. Your body is yours. It works. The morning is outside the window doing morning things, and you\'re in here, and that\'s fine. Actually fine.',
+              'You wake up and something is different. It takes a second to place it — the absence of dread. The room is light, the bed is warm, your body cooperated. You\'re just awake. Just here. It feels rare because it is.',
+              'Light through the curtain. Your eyes open and your body doesn\'t argue. No fog, no weight, no negotiation with your own limbs. The room, the morning, you — all present, all accounted for. This is what it\'s supposed to feel like.',
+            ]);
+          } else {
+            waking = Timeline.pick([
+              'You wake up and your body is there — present, functional, not fighting you. The room comes into focus: the light, the shapes, the ordinary evidence of morning. You don\'t feel good, exactly. But you feel like yourself.',
+              'Your eyes open. The ceiling, the light, the quiet. Your body did the thing it was supposed to do for once — slept, recovered, came back to you more or less intact. The day is out there. You can probably meet it.',
+            ]);
+          }
+        } else {
+          // Tired but functional — the middle ground
+          if (postMood === 'heavy' || postMood === 'numb') {
+            waking = Timeline.pick([
+              'You\'re awake. The room, the light. Your body moves when you tell it to, just slowly, just with the particular reluctance of something that would rather not. The day is there, outside the window. It doesn\'t care if you\'re ready.',
+              'You surface slowly. The fog doesn\'t lift so much as thin — you can see through it, but it\'s still there, clinging. The room is a room again. Your body is a body again. Neither feels like a gift.',
+            ]);
+          } else if (wakeTime === 'early_morning' || wakeTime === 'morning') {
+            waking = Timeline.pick([
+              'You wake up. Not sharply, not gently — just the slow fade from not-here to here. The room materializes: the light through the curtain, the shapes of things, the particular silence of early morning. You\'re somewhere between fog and awake. The body moves, but it takes a minute.',
+              'Morning. You know this before you open your eyes — the light, the feel of it. Your body is still negotiating the transition from asleep to not. The room is there when you\'re ready for it. You\'re almost ready for it.',
+              'You surface into morning. The light is thin and pale — early, or early enough. Your body does an inventory without your permission: stiff, slow, but functional. The day hasn\'t started demanding things yet. Give it a minute.',
+            ]);
+          } else {
+            waking = Timeline.pick([
+              'You wake up. The room, the light, the fact of being conscious again. Your body comes back to you in pieces — hands first, then weight, then the specific feeling of a head that was recently asleep. You\'re here.',
+              'Eyes open. The room. You. The slow assembly of a person from the raw material of someone who was just unconscious. It takes a minute. Things come back — where you are, what day it is, what you\'re supposed to be doing. You\'re not sure about the last one.',
+            ]);
+          }
         }
 
-        if (qualityMult < 0.6) {
-          return 'Sleep comes in pieces. You\'re awake, then you\'re not, then you are again and the ceiling is the same. ' + hours + ' hours of something that isn\'t quite rest.';
-        }
-
-        if (hours >= 4) {
-          return 'You sleep. Actually sleep. ' + hours + ' hours that feel like they belonged to you. You wake up and the light has changed.';
-        }
-
-        return 'You close your eyes. Time passes — maybe an hour, maybe more. When you open them the room looks the same, but something shifted.';
+        return asleep + ' ' + waking;
       },
     },
 

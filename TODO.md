@@ -31,7 +31,7 @@ Only "eat from fridge" and "buy cheap meal." No cooking (time + energy + ingredi
 The alarm fires as an event but there's no snooze, no "turn it off and go back to sleep," no choosing not to set one. DESIGN.md describes the alarm as a negotiation between the person who set it and the person who hears it.
 
 ### Sleep prose
-Sleep quality affects energy recovery mechanically but there's no "how you slept" prose on waking. DESIGN.md describes: falling asleep not being instant, duration varying, waking up as a gradient (fog, snooze, not yet a person), oversleeping, not sleeping.
+**Partially implemented.** Sleep prose now has two phases: falling-asleep (how sleep came) and waking-up (the gradient back to consciousness). Waking prose branches on post-sleep energy, sleep quality, alarm vs natural, time of day, and mood — ~40 total variants. Still missing: snooze/alarm negotiation (see "Alarm negotiation" above), insomnia/not-sleeping as a distinct experience, dreaming.
 
 ### Apartment mess as autonomous force
 apartment_mess exists as a state variable but doesn't grow on its own or meaningfully shape prose beyond event notices. DESIGN.md describes entropy that accumulates by itself — the apartment as a mirror of how you're managing.
