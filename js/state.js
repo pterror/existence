@@ -742,6 +742,12 @@ const State = (() => {
   /** @param {number} v @param {number} lo @param {number} hi */
   function clamp(v, lo, hi) { return v < lo ? lo : v > hi ? hi : v; }
 
+  /** Map value to 0–1 between lo and hi, clamped. Building block for continuous prose weights. */
+  /** @param {number} value @param {number} lo @param {number} hi */
+  function lerp01(value, lo, hi) {
+    return clamp((value - lo) / (hi - lo), 0, 1);
+  }
+
   /**
    * Deterministic biological noise — "some days are harder and you can't name why."
    * Two incommensurate sine frequencies with per-system phase seeds.
@@ -1081,5 +1087,6 @@ const State = (() => {
     moneyFidelity,
     perceivedTimeString,
     perceivedMoneyString,
+    lerp01,
   };
 })();

@@ -753,6 +753,29 @@ Mood isn't derived. It isn't a readout of energy plus stress plus hunger. It's i
 
 Mood selects prose variants. The same action, the same location, the same moment — described differently depending on where you are inside.
 
+### Prose-neurochemistry interface
+
+`moodTone()` picks which emotional territory — the trunk. But within that territory, neurochemical values shade the prose continuously. Three layers compose the final text:
+
+1. **Coarse selection** — `moodTone()` picks the mood branch (heavy, flat, numb, etc.). Stays as a discrete selector. This is the right tool for "which pool of texts."
+
+2. **Weighted variant selection** — within a mood branch, individual texts carry weights derived from NT values via `State.lerp01()`. A thought about not being able to start anything gets weight from low dopamine. A sensory-overload thought gets weight from high NE. General texts have weight 1 (always in pool). `Timeline.weightedPick()` replaces `Timeline.pick()` — same single RNG call consumed, no replay impact.
+
+3. **Deterministic modifiers** — short phrases appended based on NT checks (adenosine fog, NE+low-GABA restlessness, cortisol body tension). No RNG consumed — pure conditionals. These add undertone that the weighted selection can't: the fog over everything when adenosine is high, the restless vibration under a quiet room when NE is elevated and GABA is depleted.
+
+**NT dimensions and what they shade:**
+
+| System | Low | High | What it does to prose |
+|--------|-----|------|----------------------|
+| serotonin | darker word choice, hopelessness, the undertow | warmer, more possibility, genuine okayness | overall emotional coloring |
+| dopamine | going-through-motions, can't start, behind glass | engagement, wanting, the pull toward doing | whether the character *cares* |
+| norepinephrine | calm, things not reaching you | hyperalert, sensory detail, tension, scanning | what they *notice* |
+| gaba | unease, things slightly wrong, vibrating underneath | settled, quiet underneath, brakes that work | anxiety undertone |
+| adenosine | sharp, clear perception | fog, heaviness, blurred edges, dissolving thoughts | perceptual clarity |
+| cortisol | no physical tension | tight shoulders, stomach knot, body-as-fist | body stress |
+
+This pattern applies everywhere prose reads state: location descriptions, interaction results, idle thoughts, events. Each site uses whichever layers are appropriate — a description might use only deterministic modifiers (zero RNG), while idle thoughts use all three layers.
+
 ### Observation fidelity
 
 You don't have perfect information about your own life. Time drifts. Money is approximate. This isn't a fog-of-war mechanic — it's the experience of not always knowing exactly what's going on because you're tired and distracted and hungry.

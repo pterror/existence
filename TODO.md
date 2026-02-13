@@ -2,8 +2,24 @@
 
 ## Backlog
 
-### moodTone() is a lossy bottleneck
-28 continuous neurochemical systems get collapsed to one of 8 discrete strings via hard thresholds — "gradients, not binaries" violated at the interface where it matters most. moodTone() is fine as a coarse selector (which sleep passage variant, which idle thought pool), but content.js should read NT values directly for continuous prose shading: how much serotonin colors word choice, how high NE shapes what the character notices, undertones within a primary tone. The 8 tones aren't wrong — they're just not the whole interface. The prose system needs to see the neurochemistry, not just a label.
+### NT prose shading — remaining unconverted call sites
+Three-layer prose shading pattern established (see DESIGN.md "Prose-neurochemistry interface"): moodTone() as coarse selector, weighted variant selection via NT values, deterministic modifiers. Converted: `idleThoughts()`, `apartment_bedroom` description, `lie_there` interaction. ~65 `Timeline.pick()` call sites remain unconverted. Priority order:
+
+**High impact (frequent / atmospheric):**
+- Sleep prose (falling-asleep + waking-up, ~23 pick sites) — seen every cycle, strong mood moment
+- `look_out_window` — high atmosphere, already mood-branched
+- Other location descriptions (kitchen, bathroom, street, bus stop, workplace, corner store)
+- `go_for_walk`, `sit_at_table`, `sit_on_step` — leisure interactions
+
+**Medium impact (periodic):**
+- Work interactions (do_work, work_break, talk_to_coworker)
+- Phone interactions (check_phone, read_messages)
+- Event text generators (street_ambient, apartment_sound, coworker_speaks)
+
+**Low priority (infrequent / already thin):**
+- Shopping interactions (buy_groceries, buy_cheap_meal, browse_store)
+- Utility interactions (shower, eat_food, drink_water, do_dishes)
+- Friend/coworker message generators (4 friend flavors, 3 coworker flavors)
 
 ## Under Consideration
 

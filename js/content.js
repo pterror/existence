@@ -397,36 +397,71 @@ const Content = (() => {
       const mess = State.get('apartment_mess');
       const mood = State.moodTone();
 
+      // NT values for continuous shading (no RNG consumed)
+      const ser = State.get('serotonin');
+      const ne = State.get('norepinephrine');
+      const gaba = State.get('gaba');
+      const aden = State.get('adenosine');
+
       let desc = '';
 
-      // Time-based opening
+      // Time-based opening — NT values shade within mood branches
       if (time === 'early_morning' || time === 'morning') {
         if (energy === 'depleted' || energy === 'exhausted') {
-          desc = 'The room is too bright. Everything about getting up feels like a negotiation with your own body.';
+          if (ser < 30) {
+            desc = 'The room is too bright. The light is an accusation. Everything about getting up feels impossible in a way you can\'t argue with.';
+          } else {
+            desc = 'The room is too bright. Everything about getting up feels like a negotiation with your own body.';
+          }
         } else if (energy === 'tired') {
           desc = 'Morning light pushes through the blinds. You\'re awake, technically.';
         } else {
-          desc = 'Morning. The blinds let in pale light. The day is there, waiting.';
+          if (ser > 55 && gaba > 50) {
+            desc = 'Morning. The blinds let in pale light. The day is there, and for once it\'s not demanding anything yet.';
+          } else {
+            desc = 'Morning. The blinds let in pale light. The day is there, waiting.';
+          }
         }
       } else if (time === 'deep_night' || time === 'night') {
         if (mood === 'numb' || mood === 'hollow') {
-          desc = 'The ceiling is there. It\'s been there. You\'ve been looking at it.';
+          if (ser < 30) {
+            desc = 'The ceiling. It doesn\'t change. You\'ve been watching it not change for a while now. It\'s the most honest thing in the room.';
+          } else {
+            desc = 'The ceiling is there. It\'s been there. You\'ve been looking at it.';
+          }
         } else if (energy === 'depleted') {
           desc = 'The bed has you. Not in a restful way — more like gravity won.';
         } else {
-          desc = 'Your room in the dark. The shapes of things you know are there.';
+          if (ne > 55) {
+            desc = 'Your room in the dark. Every small sound is louder than it should be. You know what\'s there. Your body keeps checking anyway.';
+          } else {
+            desc = 'Your room in the dark. The shapes of things you know are there.';
+          }
         }
       } else if (time === 'evening') {
         if (mood === 'heavy' || mood === 'numb') {
-          desc = 'The room feels smaller in the evening. The walls are close.';
+          if (ser < 35) {
+            desc = 'The room feels smaller in the evening. The walls are close. The light is leaving and you\'re not sure you want it to.';
+          } else {
+            desc = 'The room feels smaller in the evening. The walls are close.';
+          }
         } else {
-          desc = 'Evening light makes the room almost warm. Almost.';
+          if (ne > 50 && gaba < 40) {
+            desc = 'Evening light makes the room almost warm. Almost. There\'s a tension you can\'t place — the day winding down but something in you not winding down with it.';
+          } else {
+            desc = 'Evening light makes the room almost warm. Almost.';
+          }
         }
       } else {
+        // Daytime
         if (mood === 'clear') {
           desc = 'Your bedroom. Familiar, small, yours.';
         } else if (mood === 'hollow' || mood === 'quiet') {
-          desc = 'Your room. The quiet is the loudest thing in it.';
+          if (ser < 35) {
+            desc = 'Your room. The quiet is the loudest thing in it. The walls know something about you that you don\'t say out loud.';
+          } else {
+            desc = 'Your room. The quiet is the loudest thing in it.';
+          }
         } else {
           desc = 'Your bedroom. The bed, the dresser, the window.';
         }
@@ -447,6 +482,14 @@ const Content = (() => {
 
       if (!State.get('dressed') && time !== 'deep_night' && time !== 'night') {
         desc += ' You\'re still in ' + Character.get('sleepwear') + '.';
+      }
+
+      // Deterministic NT modifiers — no RNG consumed, appended as undertones
+      if (aden > 65) {
+        desc += ' The edges of things are soft. Not blurry — just not quite sharp.';
+      }
+      if (ne > 60 && gaba < 35) {
+        desc += ' Something restless underneath the stillness. You can\'t sit with it and you can\'t name it.';
       }
 
       return desc;
@@ -1042,51 +1085,89 @@ const Content = (() => {
         const minutes = Timeline.randomInt(10, 20);
         State.advanceTime(minutes);
 
+        // NT values for continuous prose and mechanical shading
+        const ser = State.get('serotonin');
+        const ne = State.get('norepinephrine');
+        const gaba = State.get('gaba');
+        const aden = State.get('adenosine');
+
+        let text;
+
         if (mood === 'fraying') {
           State.adjustStress(2);
-          return Timeline.pick([
-            'You lie there. The thoughts don\'t stop. They circle — the same three things, faster, tighter. You\'re not resting. You\'re trapped horizontally.',
-            'The ceiling. Your jaw is clenched. You notice it, unclench, and it\'s back thirty seconds later. The bed isn\'t helping.',
-            'You stay in bed. The quiet makes it worse — nothing to drown out what\'s in your head. Your body is still but nothing else is.',
+          text = Timeline.weightedPick([
+            { weight: 1, value: 'You lie there. The thoughts don\'t stop. They circle — the same three things, faster, tighter. You\'re not resting. You\'re trapped horizontally.' },
+            { weight: 1, value: 'The ceiling. Your jaw is clenched. You notice it, unclench, and it\'s back thirty seconds later. The bed isn\'t helping.' },
+            { weight: 1, value: 'You stay in bed. The quiet makes it worse — nothing to drown out what\'s in your head. Your body is still but nothing else is.' },
+            // High NE — sensory overload even horizontal
+            { weight: State.lerp01(ne, 60, 85), value: 'You lie down but the sheets are wrong. The texture. The temperature. Your skin is reading everything at twice the volume.' },
+            // Low GABA — no way to settle
+            { weight: State.lerp01(gaba, 35, 15), value: 'The bed should help. Lying down should help. Nothing is helping. Your body is still but everything underneath is running.' },
           ]);
-        }
-        if (mood === 'numb') {
-          return Timeline.pick([
-            'You lie there. Time passes. You know this because the light changes slightly. That\'s the only evidence.',
-            'The bed. The ceiling. The space between them, with you in it. Nothing moves. Nothing needs to.',
-            'You stay. It\'s not rest and it\'s not not-rest. It\'s just the absence of getting up.',
+        } else if (mood === 'numb') {
+          text = Timeline.weightedPick([
+            { weight: 1, value: 'You lie there. Time passes. You know this because the light changes slightly. That\'s the only evidence.' },
+            { weight: 1, value: 'The bed. The ceiling. The space between them, with you in it. Nothing moves. Nothing needs to.' },
+            { weight: 1, value: 'You stay. It\'s not rest and it\'s not not-rest. It\'s just the absence of getting up.' },
+            // Very low serotonin — numb is deep
+            { weight: State.lerp01(ser, 30, 10), value: 'You lie there. You could be anyone. You could be no one. It wouldn\'t change what the ceiling looks like.' },
           ]);
-        }
-        if (mood === 'heavy') {
+        } else if (mood === 'heavy') {
+          // Mechanical shading: low GABA means anxiety under the heaviness — no relief from lying down
+          if (gaba < 35) {
+            // Heavy + anxious: bed doesn't help, stress stays
+            State.adjustStress(0);
+          } else {
+            State.adjustStress(-1);
+          }
+          text = Timeline.weightedPick([
+            { weight: 1, value: 'You stay in bed. The pressure to be somewhere, do something — it\'s still there, but quieter when you\'re lying down. Barely.' },
+            { weight: 1, value: 'The pillow is warm from your head. You turn it over. The cool side. Small.' },
+            { weight: 1, value: 'You don\'t get up. Nobody is asking you to. That helps, a little, in a way that also doesn\'t help.' },
+            // Low serotonin — heavy and sinking
+            { weight: State.lerp01(ser, 35, 15), value: 'You lie there. The mattress takes your shape and you let it. Getting back out of this shape seems like a problem for someone else.' },
+            // Low GABA — heavy but can't rest
+            { weight: State.lerp01(gaba, 40, 20), value: 'You stay in bed. It doesn\'t help. There\'s a hum underneath the heaviness, a vibration that won\'t let the weight settle into rest.' },
+          ]);
+        } else if (mood === 'hollow' || mood === 'quiet') {
           State.adjustStress(-1);
-          return Timeline.pick([
-            'You stay in bed. The pressure to be somewhere, do something — it\'s still there, but quieter when you\'re lying down. Barely.',
-            'The pillow is warm from your head. You turn it over. The cool side. Small.',
-            'You don\'t get up. Nobody is asking you to. That helps, a little, in a way that also doesn\'t help.',
+          text = Timeline.weightedPick([
+            { weight: 1, value: 'You lie there. The room is quiet. You\'re quiet. The two of you have an understanding.' },
+            { weight: 1, value: 'Just being. The bed, the air, the sound of nothing in particular. It\'s not peace. But it\'s not war.' },
+            { weight: 1, value: 'You stay. The quiet settles. Not comfortable exactly — but not uncomfortable either. Just still.' },
+            // Higher serotonin — quiet tips toward gentle
+            { weight: State.lerp01(ser, 45, 65), value: 'You lie there. The quiet isn\'t asking anything. Neither are you. Something about that is almost okay.' },
+            // High NE — quiet but wired
+            { weight: State.lerp01(ne, 45, 70), value: 'You stay still. The quiet should be restful but you\'re listening for something. You don\'t know what. The listening doesn\'t stop.' },
           ]);
-        }
-        if (mood === 'hollow' || mood === 'quiet') {
-          State.adjustStress(-1);
-          return Timeline.pick([
-            'You lie there. The room is quiet. You\'re quiet. The two of you have an understanding.',
-            'Just being. The bed, the air, the sound of nothing in particular. It\'s not peace. But it\'s not war.',
-            'You stay. The quiet settles. Not comfortable exactly — but not uncomfortable either. Just still.',
-          ]);
-        }
-        if (mood === 'clear' || mood === 'present') {
+        } else if (mood === 'clear' || mood === 'present') {
           State.adjustStress(-2);
-          return Timeline.pick([
-            'You lie still. Actually still — not the holding-still of trying to sleep, just the stillness of not needing to move. Your breath slows. Something loosens.',
-            'The sheets, the light, the quiet. You\'re lying here because you can. That\'s the whole reason. It\'s enough.',
-            'You stay in bed. Not sleeping, not trying to. Just being horizontal in a room that asks nothing of you. Something settles.',
+          text = Timeline.weightedPick([
+            { weight: 1, value: 'You lie still. Actually still — not the holding-still of trying to sleep, just the stillness of not needing to move. Your breath slows. Something loosens.' },
+            { weight: 1, value: 'The sheets, the light, the quiet. You\'re lying here because you can. That\'s the whole reason. It\'s enough.' },
+            { weight: 1, value: 'You stay in bed. Not sleeping, not trying to. Just being horizontal in a room that asks nothing of you. Something settles.' },
+            // High serotonin — genuinely warm
+            { weight: State.lerp01(ser, 60, 80), value: 'You lie there and your body is quiet. Not tired-quiet. Just — at ease. The kind of still that\'s chosen, not collapsed into.' },
+          ]);
+        } else {
+          // flat
+          text = Timeline.weightedPick([
+            { weight: 1, value: 'You lie there for a while. The ceiling doesn\'t change. Neither do you. Eventually you shift, but that\'s about it.' },
+            { weight: 1, value: 'Time passes. You\'re in bed. These are the facts. Nothing else happens.' },
+            { weight: 1, value: 'You stay. Not resting, not thinking, not anything in particular. Just lying there because you\'re already lying there.' },
+            // Low serotonin — flat has an undertow
+            { weight: State.lerp01(ser, 42, 25), value: 'You lie there. It should be nothing. It is nothing. But the nothing has a color to it and the color isn\'t good.' },
+            // High NE — flat but restless
+            { weight: State.lerp01(ne, 45, 65), value: 'You lie there. Your foot moves. Your hand adjusts the sheet. Small things that aren\'t rest and aren\'t decisions. Just the body fidgeting with itself.' },
           ]);
         }
-        // flat
-        return Timeline.pick([
-          'You lie there for a while. The ceiling doesn\'t change. Neither do you. Eventually you shift, but that\'s about it.',
-          'Time passes. You\'re in bed. These are the facts. Nothing else happens.',
-          'You stay. Not resting, not thinking, not anything in particular. Just lying there because you\'re already lying there.',
-        ]);
+
+        // Deterministic modifiers — no RNG consumed
+        if (aden > 70) {
+          text += ' Everything is soft at the edges. The kind of tired that blurs.';
+        }
+
+        return text;
       },
     },
 
@@ -2085,111 +2166,170 @@ const Content = (() => {
     const social = State.socialTier();
     const location = World.getLocationId();
 
+    // NT values for continuous prose shading
+    const ser = State.get('serotonin');
+    const dop = State.get('dopamine');
+    const ne = State.get('norepinephrine');
+    const gaba = State.get('gaba');
+    const aden = State.get('adenosine');
+
+    // Helper: wrap a plain string as a weight-1 item
+    const w1 = (/** @type {string} */ s) => ({ weight: 1, value: s });
+
+    /** @type {{ weight: number, value: string }[]} */
     const thoughts = [];
 
-    // Mood-based
+    // Mood-based — general texts at weight 1, NT-shaded variants with continuous weights
     if (mood === 'numb') {
       thoughts.push(
-        'You\'re here. That\'s the whole thought.',
-        'Time is passing. You know this because things are slightly different than before.',
-        'There\'s a blankness that isn\'t peace and isn\'t pain. Just absence of the energy for either.',
-        'You look at your hands. They\'re your hands. That\'s all you\'ve got.',
-        'Something should be happening. Nothing is. That\'s the thing about nothing — it keeps going.',
-        'Your eyes are open. That counts as being awake, technically.',
-        'You\'re aware of the room. The room is not aware of you. Fair enough.',
+        w1('You\'re here. That\'s the whole thought.'),
+        w1('Time is passing. You know this because things are slightly different than before.'),
+        w1('There\'s a blankness that isn\'t peace and isn\'t pain. Just absence of the energy for either.'),
+        w1('You look at your hands. They\'re your hands. That\'s all you\'ve got.'),
+        w1('Something should be happening. Nothing is. That\'s the thing about nothing — it keeps going.'),
+        w1('Your eyes are open. That counts as being awake, technically.'),
+        w1('You\'re aware of the room. The room is not aware of you. Fair enough.'),
+        // Low serotonin deepens the numbness toward despair
+        { weight: State.lerp01(ser, 35, 15), value: 'There was a feeling here once. You can\'t remember what it was shaped like.' },
+        { weight: State.lerp01(ser, 35, 15), value: 'You try to care about something. Anything. The effort folds in on itself.' },
+        // High adenosine — the numbness is also fog
+        { weight: State.lerp01(aden, 50, 80), value: 'Your thoughts don\'t finish. They start and then they\'re somewhere else. Or nowhere.' },
+        { weight: State.lerp01(aden, 50, 80), value: 'The edges of the room are soft. Not comforting. Just indistinct.' },
       );
     } else if (mood === 'hollow') {
       const friend1 = Character.get('friend1');
       thoughts.push(
-        `You think about calling ${friend1.name}. You don't pick up the phone.`,
-        'What would you do if you could do anything. The question doesn\'t even finish forming.',
-        'The silence has texture. You\'re learning its patterns.',
-        'You had a thought a minute ago. It\'s gone now. It wasn\'t important. Probably.',
-        'There\'s a shape where something used to matter. You can feel the outline of it.',
-        'You open your mouth to say something, then realize there\'s no one to say it to. And nothing to say.',
-        'A memory tries to surface. You let it sink back down.',
+        w1(`You think about calling ${friend1.name}. You don't pick up the phone.`),
+        w1('What would you do if you could do anything. The question doesn\'t even finish forming.'),
+        w1('The silence has texture. You\'re learning its patterns.'),
+        w1('You had a thought a minute ago. It\'s gone now. It wasn\'t important. Probably.'),
+        w1('There\'s a shape where something used to matter. You can feel the outline of it.'),
+        w1('You open your mouth to say something, then realize there\'s no one to say it to. And nothing to say.'),
+        w1('A memory tries to surface. You let it sink back down.'),
+        // Low serotonin — hollow tips toward hopeless
+        { weight: State.lerp01(ser, 40, 20), value: 'The distance between you and everyone else isn\'t measured in miles. It\'s measured in something you can\'t close.' },
+        // Low dopamine — can't even want connection
+        { weight: State.lerp01(dop, 40, 20), value: 'You could reach out. The thought is there. It doesn\'t connect to anything that would make your hand move.' },
+        // High NE — hollow but wired
+        { weight: State.lerp01(ne, 45, 70), value: 'The quiet isn\'t peaceful. There\'s something underneath it, humming. You can\'t name it but your body knows.' },
       );
     } else if (mood === 'heavy') {
       thoughts.push(
-        'Everything takes more than it should. Even thinking about doing things.',
-        'You stand still for a moment, not deciding. Just not moving yet.',
-        'Gravity is personal today. It\'s working harder on you specifically.',
-        'You breathe. That\'s happening. You notice it like you notice weather.',
-        'The next thing. There\'s always a next thing. You look at it from a distance.',
-        'Your body wants to be horizontal. Your life requires you to be vertical. The negotiation continues.',
-        'You shift your weight from one foot to the other. That\'s the most you\'ve done in a while.',
-        'The thought of doing something and the doing of it — there\'s a gap there. It\'s wider than usual.',
+        w1('Everything takes more than it should. Even thinking about doing things.'),
+        w1('You stand still for a moment, not deciding. Just not moving yet.'),
+        w1('Gravity is personal today. It\'s working harder on you specifically.'),
+        w1('You breathe. That\'s happening. You notice it like you notice weather.'),
+        w1('The next thing. There\'s always a next thing. You look at it from a distance.'),
+        w1('Your body wants to be horizontal. Your life requires you to be vertical. The negotiation continues.'),
+        w1('You shift your weight from one foot to the other. That\'s the most you\'ve done in a while.'),
+        w1('The thought of doing something and the doing of it — there\'s a gap there. It\'s wider than usual.'),
+        // Low serotonin — heavy tilts darker
+        { weight: State.lerp01(ser, 40, 20), value: 'It\'s not that you can\'t. It\'s that the part of you that would want to is somewhere you can\'t reach.' },
+        { weight: State.lerp01(ser, 40, 20), value: 'Your hands are in your lap. They could do things. They don\'t feel like your hands.' },
+        // Low GABA — heavy with anxiety underneath
+        { weight: State.lerp01(gaba, 45, 25), value: 'The heaviness has a tremor in it. Not visible. Internal. The weight is there and something under it is vibrating.' },
+        // Low dopamine — can't start anything
+        { weight: State.lerp01(dop, 40, 20), value: 'You look at the room. There are things you could do. The list exists somewhere outside you, behind glass.' },
       );
     } else if (mood === 'fraying') {
       thoughts.push(
-        'Your jaw is clenched. When did that start.',
-        'There\'s a tightness behind your eyes. Not a headache. Just proximity to one.',
-        'Something small would set you off. You can feel the edge of it.',
-        'You catch yourself holding your breath. You let it out. It doesn\'t help much.',
-        'Everything is a little too loud. A little too close.',
-        'Your shoulders are up near your ears. You force them down. They\'ll be back.',
-        'A sound from somewhere. You flinch. It was nothing.',
-        'The inside of your skin feels too small for what\'s in there.',
+        w1('Your jaw is clenched. When did that start.'),
+        w1('There\'s a tightness behind your eyes. Not a headache. Just proximity to one.'),
+        w1('Something small would set you off. You can feel the edge of it.'),
+        w1('You catch yourself holding your breath. You let it out. It doesn\'t help much.'),
+        w1('Everything is a little too loud. A little too close.'),
+        w1('Your shoulders are up near your ears. You force them down. They\'ll be back.'),
+        w1('A sound from somewhere. You flinch. It was nothing.'),
+        w1('The inside of your skin feels too small for what\'s in there.'),
+        // High NE — sensory overload
+        { weight: State.lerp01(ne, 55, 80), value: 'You can hear the light. The hum of whatever makes electricity work. It\'s in the walls and it won\'t stop.' },
+        { weight: State.lerp01(ne, 55, 80), value: 'The texture of your clothes. You can feel every fiber. When did fabric get this loud.' },
+        // Low GABA — no brakes
+        { weight: State.lerp01(gaba, 40, 20), value: 'The thing about being wound this tight is there\'s nothing to wind down into. No floor. Just tighter.' },
+        // High cortisol — body stress
+        { weight: State.lerp01(State.get('cortisol'), 60, 85), value: 'Your stomach is a fist. It\'s been a fist. You keep forgetting and then noticing again.' },
       );
     } else if (mood === 'quiet') {
       thoughts.push(
-        'It\'s quiet. It\'s been quiet. You\'re used to it, which is different from liking it.',
-        'You exist in the room. The room exists around you. That\'s the arrangement.',
-        'The sound of nothing. It has a frequency, if you listen long enough.',
-        'You\'re here. Not going anywhere. Not coming from anywhere. Just here.',
-        'A thought starts to form and doesn\'t finish. That\'s fine. It wasn\'t going anywhere.',
-        'Somewhere a pipe ticks. Or a wall settles. Something structural, doing what it does.',
-        'You notice yourself noticing the quiet. That\'s a layer you didn\'t need.',
-        'The stillness has a weight to it. Not heavy. Just present.',
+        w1('It\'s quiet. It\'s been quiet. You\'re used to it, which is different from liking it.'),
+        w1('You exist in the room. The room exists around you. That\'s the arrangement.'),
+        w1('The sound of nothing. It has a frequency, if you listen long enough.'),
+        w1('You\'re here. Not going anywhere. Not coming from anywhere. Just here.'),
+        w1('A thought starts to form and doesn\'t finish. That\'s fine. It wasn\'t going anywhere.'),
+        w1('Somewhere a pipe ticks. Or a wall settles. Something structural, doing what it does.'),
+        w1('You notice yourself noticing the quiet. That\'s a layer you didn\'t need.'),
+        w1('The stillness has a weight to it. Not heavy. Just present.'),
+        // Higher serotonin — quiet edges toward something almost peaceful
+        { weight: State.lerp01(ser, 45, 60), value: 'The quiet doesn\'t need filling. You notice that without reaching for a reason.' },
+        // High NE — quiet but watchful
+        { weight: State.lerp01(ne, 45, 65), value: 'Quiet on the outside. Something scanning, underneath. Not anxious exactly. Just — listening for what isn\'t there.' },
+        // Low dopamine — quiet bleeds into apathy
+        { weight: State.lerp01(dop, 40, 20), value: 'The quiet is the loudest thing, and you don\'t mind, because minding takes something you don\'t have.' },
       );
     } else if (mood === 'clear' || mood === 'present') {
       thoughts.push(
-        'Nothing to do. Not in a bad way. Just — nothing.',
-        'The light coming through the window is doing something interesting on the wall. You watch it.',
-        'A breath that feels like it belongs to you. Not many of those today.',
-        'You\'re here. Actually here. Not thinking about being somewhere else.',
-        'Your hands are warm. When did that happen.',
-        'Something close to okay. You don\'t examine it too closely. Just let it be there.',
-        'The ordinary is ordinary. That\'s enough. That\'s more than enough.',
+        w1('Nothing to do. Not in a bad way. Just — nothing.'),
+        w1('The light coming through the window is doing something interesting on the wall. You watch it.'),
+        w1('A breath that feels like it belongs to you. Not many of those today.'),
+        w1('You\'re here. Actually here. Not thinking about being somewhere else.'),
+        w1('Your hands are warm. When did that happen.'),
+        w1('Something close to okay. You don\'t examine it too closely. Just let it be there.'),
+        w1('The ordinary is ordinary. That\'s enough. That\'s more than enough.'),
+        // High serotonin — present tips toward genuine warmth
+        { weight: State.lerp01(ser, 55, 75), value: 'For a second the room is just a room and you\'re just in it and that\'s fine. Actually fine.' },
+        // Moderate NE — present and noticing
+        { weight: State.lerp01(ne, 35, 55), value: 'You notice the dust in the light. The way it moves. Slow, undirected. Like it has time.' },
+        // High dopamine — spark of engagement
+        { weight: State.lerp01(dop, 55, 75), value: 'Something in you wants to do something. Not urgent. Just — the idea of doing has a small pull to it.' },
       );
     } else {
+      // flat
       thoughts.push(
-        'A moment. Nothing happening. Just a moment.',
-        'You wait, though you\'re not sure for what.',
-        'The day has a shape. You\'re somewhere in the middle of it.',
-        'Nothing urgent. Nothing pulling. Just the hum of being somewhere.',
-        'You\'re between things. Not in a hurry to get to the next one.',
-        'The light is different than it was a while ago. Things shift without you deciding.',
-        'You look around. Everything is where you left it.',
+        w1('A moment. Nothing happening. Just a moment.'),
+        w1('You wait, though you\'re not sure for what.'),
+        w1('The day has a shape. You\'re somewhere in the middle of it.'),
+        w1('Nothing urgent. Nothing pulling. Just the hum of being somewhere.'),
+        w1('You\'re between things. Not in a hurry to get to the next one.'),
+        w1('The light is different than it was a while ago. Things shift without you deciding.'),
+        w1('You look around. Everything is where you left it.'),
+        // Low serotonin — flat is darker than it looks
+        { weight: State.lerp01(ser, 45, 25), value: 'Nothing is wrong. You keep checking. Still nothing wrong. The checking is the closest thing to a feeling.' },
+        { weight: State.lerp01(ser, 45, 25), value: 'You\'re fine. That\'s what you\'d say if someone asked. Fine covers a lot of territory.' },
+        // High NE — flat with restless edge
+        { weight: State.lerp01(ne, 45, 65), value: 'You\'re not doing anything but your foot is bouncing. When did it start. You stop it. It starts again.' },
+        // Low dopamine — flat and going through motions
+        { weight: State.lerp01(dop, 42, 25), value: 'The day is happening. You\'re technically in it. Participation is a strong word.' },
+        // High adenosine — flat is also foggy
+        { weight: State.lerp01(aden, 50, 75), value: 'Your thoughts keep softening at the edges. Not drifting. Dissolving. Like sugar in water.' },
       );
     }
 
     // Hunger
     if (hunger === 'starving') {
       thoughts.push(
-        'Your stomach has stopped asking and started insisting.',
-        'The hunger is a dull weight now. Less sharp, more permanent.',
-        'You think about food. Then you think about something else. Then food again.',
-        'Everything you look at, you evaluate whether it\'s food. Nothing is.',
-        'The emptiness in your stomach has its own gravity.',
+        w1('Your stomach has stopped asking and started insisting.'),
+        w1('The hunger is a dull weight now. Less sharp, more permanent.'),
+        w1('You think about food. Then you think about something else. Then food again.'),
+        w1('Everything you look at, you evaluate whether it\'s food. Nothing is.'),
+        w1('The emptiness in your stomach has its own gravity.'),
       );
     } else if (hunger === 'very_hungry') {
       thoughts.push(
-        'Food. The thought comes and goes and comes back.',
-        'You could eat. The thought has an edge to it.',
-        'There\'s a hollowness below your ribs. Not painful. Just insistent.',
-        'You swallow. Your body notices there\'s nothing there.',
+        w1('Food. The thought comes and goes and comes back.'),
+        w1('You could eat. The thought has an edge to it.'),
+        w1('There\'s a hollowness below your ribs. Not painful. Just insistent.'),
+        w1('You swallow. Your body notices there\'s nothing there.'),
       );
     }
 
     // Energy
     if (energy === 'depleted') {
       thoughts.push(
-        'Your eyelids are heavy. Everything is heavy.',
-        'Sitting down sounds like the best idea anyone ever had.',
-        'The distance between you and lying down is a math problem you keep solving.',
-        'You blink and it takes longer than it should. Each one a negotiation to reopen.',
-        'Your thoughts are moving through something thick. They get there. Eventually.',
+        w1('Your eyelids are heavy. Everything is heavy.'),
+        w1('Sitting down sounds like the best idea anyone ever had.'),
+        w1('The distance between you and lying down is a math problem you keep solving.'),
+        w1('You blink and it takes longer than it should. Each one a negotiation to reopen.'),
+        w1('Your thoughts are moving through something thick. They get there. Eventually.'),
       );
     }
 
@@ -2199,13 +2339,13 @@ const Content = (() => {
       const friend2 = Character.get('friend2');
       const f1thoughts = /** @type {(name: string) => string[]} */ (friendIdleThoughts[friend1.flavor])(friend1.name);
       const f2thoughts = /** @type {(name: string) => string[]} */ (friendIdleThoughts[friend2.flavor])(friend2.name);
-      thoughts.push(...f1thoughts, ...f2thoughts);
+      thoughts.push(...f1thoughts.map(w1), ...f2thoughts.map(w1));
     }
 
-    // Filter out recently shown thoughts
-    const fresh = thoughts.filter(t => !recentIdle.includes(t));
+    // Filter out recently shown thoughts (compare .value)
+    const fresh = thoughts.filter(t => !recentIdle.includes(t.value));
     const pool = fresh.length > 0 ? fresh : thoughts;
-    const picked = Timeline.pick(pool);
+    const picked = Timeline.weightedPick(pool);
 
     // Track recency — avoid repeats across consecutive idle periods
     if (picked) {

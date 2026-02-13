@@ -95,6 +95,14 @@ No build step. Plain JS loaded via script tags.
 - The same moment reads differently depending on hidden state
 - Prose leads, simulation follows. If the text needs a phone inbox to feel real, build the inbox. Don't hollow out prose to match a thin simulation — deepen the simulation to support the prose.
 
+**Prose-neurochemistry shading:**
+- `moodTone()` picks the mood branch (coarse selector). Within branches, NT values shade continuously via three layers:
+  1. **Weighted variants** — texts as `{ weight, value }` objects. General texts at weight 1. NT-specific texts weighted by `State.lerp01()`. Use `Timeline.weightedPick()` (same 1 RNG call as `Timeline.pick()`).
+  2. **Deterministic modifiers** — short phrases appended via NT conditionals (no RNG consumed). Adenosine fog, NE tension, cortisol body stress.
+  3. **Mechanical shading** — same action at different NT states produces different mechanical outcomes (e.g. heavy+lowGABA gets no stress relief from lying down).
+- Key dimensions: serotonin (emotional coloring), dopamine (engagement/motivation), NE (alertness/sensory detail), GABA (anxiety undertone), adenosine (perceptual clarity), cortisol (body tension).
+- When converting a `Timeline.pick([...])` site: wrap existing strings as `{ weight: 1, value: str }`, add 1–3 NT-weighted variants per mood branch, replace with `Timeline.weightedPick([...])`. RNG count stays unchanged.
+
 ## Workflow
 
 **Minimize file churn.** When editing a file, read it once, plan all changes, and apply them in one pass. Avoid read-edit-fail-read-fix cycles by thinking through the complete change before starting.
