@@ -720,6 +720,13 @@ const Content = (() => {
         const energyGain = (sleepMinutes / 5) * qualityMult;
 
         State.advanceTime(fallAsleepDelay + sleepMinutes);
+
+        // Phone charges overnight if sleeping at home
+        if (State.get('location') === 'apartment_bedroom') {
+          const chargeHours = (fallAsleepDelay + sleepMinutes) / 60;
+          State.adjustBattery(chargeHours * 30);
+        }
+
         State.adjustEnergy(energyGain);
         State.adjustStress(-sleepMinutes / 20);
         State.set('actions_since_rest', 0);
@@ -836,6 +843,36 @@ const Content = (() => {
       },
     },
 
+    charge_phone: {
+      id: 'charge_phone',
+      label: 'Plug your phone in',
+      location: 'apartment_bedroom',
+      available: () => State.get('has_phone') && State.get('phone_battery') < 80 && !State.get('viewing_phone'),
+      execute: () => {
+        const minutes = Timeline.randomInt(15, 30);
+        const chargeGain = (minutes / 60) * 30;
+        State.advanceTime(minutes);
+        State.adjustBattery(chargeGain);
+
+        const mood = State.moodTone();
+        const battery = State.batteryTier();
+
+        if (battery === 'dead' || battery === 'critical') {
+          if (mood === 'numb' || mood === 'heavy') {
+            return 'You plug it in and wait. The screen stays dark for a while, then the charging icon appears. You watch it like it matters.';
+          }
+          return 'You plug it in. Dead phones take a minute to show signs of life. Eventually the screen lights up with the charging symbol.';
+        }
+        if (mood === 'numb' || mood === 'heavy') {
+          return 'You plug the phone in and sit on the bed while it charges. Time passes. The cable isn\'t long enough to go anywhere.';
+        }
+        if (mood === 'fraying') {
+          return 'You plug it in. Stand there for a minute watching the screen, then make yourself stop.';
+        }
+        return 'You plug the phone in and do nothing for a few minutes while it charges. The cable reaches the nightstand and that\'s about it.';
+      },
+    },
+
     check_phone_bedroom: {
       id: 'check_phone_bedroom',
       label: 'Check your phone',
@@ -843,7 +880,6 @@ const Content = (() => {
       available: () => State.get('has_phone') && State.get('phone_battery') > 0 && !State.get('viewing_phone'),
       execute: () => {
         State.set('viewing_phone', true);
-        State.set('phone_battery', Math.max(0, State.get('phone_battery') - 1));
         State.advanceTime(1);
         Events.record('checked_phone');
         return phoneScreenDescription();
@@ -922,7 +958,6 @@ const Content = (() => {
       available: () => State.get('has_phone') && State.get('phone_battery') > 0 && !State.get('viewing_phone'),
       execute: () => {
         State.set('viewing_phone', true);
-        State.set('phone_battery', Math.max(0, State.get('phone_battery') - 1));
         State.advanceTime(1);
         Events.record('checked_phone');
         return phoneScreenDescription();
@@ -977,7 +1012,6 @@ const Content = (() => {
       available: () => State.get('has_phone') && State.get('phone_battery') > 0 && !State.get('viewing_phone'),
       execute: () => {
         State.set('viewing_phone', true);
-        State.set('phone_battery', Math.max(0, State.get('phone_battery') - 1));
         State.advanceTime(1);
         Events.record('checked_phone');
         return phoneScreenDescription();
@@ -1129,7 +1163,6 @@ const Content = (() => {
       available: () => State.get('has_phone') && State.get('phone_battery') > 0 && !State.get('viewing_phone'),
       execute: () => {
         State.set('viewing_phone', true);
-        State.set('phone_battery', Math.max(0, State.get('phone_battery') - 1));
         State.advanceTime(1);
         Events.record('checked_phone');
         return phoneScreenDescription();
@@ -1235,7 +1268,6 @@ const Content = (() => {
 
         const unread = State.getUnreadMessages();
         State.markMessagesRead();
-        State.set('phone_battery', Math.max(0, State.get('phone_battery') - 1));
         State.advanceTime(2);
 
         const parts = [];
@@ -1381,7 +1413,6 @@ const Content = (() => {
    */
   function phoneScreenDescription() {
     const unread = State.getUnreadMessages();
-    const battery = State.get('phone_battery');
     const mood = State.moodTone();
 
     let desc = '';
@@ -1422,11 +1453,12 @@ const Content = (() => {
       }
     }
 
-    // Battery
-    if (battery < 10) {
-      desc += ' The battery icon is a sliver.';
-    } else if (battery < 20) {
-      desc += ' The battery icon is thin.';
+    // Battery — you notice when it's low, not when it's fine
+    const bt = State.batteryTier();
+    if (bt === 'critical') {
+      desc += ' Battery\'s red.';
+    } else if (bt === 'low') {
+      desc += ' Low battery.';
     }
 
     return desc;

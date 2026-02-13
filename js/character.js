@@ -48,6 +48,9 @@ const Character = (() => {
     State.set('money', startMoney);
     State.set('last_observed_money', startLastMoney);
 
+    // Phone battery — slept at home, charged overnight, but not everyone charges to full
+    State.set('phone_battery', Timeline.charRandomInt(80, 100));
+
     // Job type affects shift times, alarm, and task expectations
     // last_observed_time offset by -20 from alarm → starts at rounded fidelity
     switch (current.job_type) {

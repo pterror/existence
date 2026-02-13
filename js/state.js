@@ -127,8 +127,9 @@ const State = (() => {
       s.stress = Math.min(100, s.stress + hours * 1);
     }
 
-    // Phone battery drains
-    s.phone_battery = Math.max(0, s.phone_battery - hours * 1.5);
+    // Phone battery drains — screen-on vs standby
+    const batteryDrain = s.viewing_phone ? 15 : 1;
+    s.phone_battery = Math.max(0, s.phone_battery - hours * batteryDrain);
 
     // Social isolation increases over time without interaction
     const actionsSinceLastSocial = Timeline.getActionCount() - s.last_social_interaction;
@@ -309,6 +310,13 @@ const State = (() => {
     ]);
   }
 
+  function batteryTier() {
+    if (s.phone_battery <= 0) return 'dead';
+    if (s.phone_battery <= 5) return 'critical';
+    if (s.phone_battery <= 15) return 'low';
+    return 'fine';
+  }
+
   function moneyTier() {
     if (s.money <= 0) return 'broke';
     if (s.money < 5) return 'scraping';
@@ -392,6 +400,11 @@ const State = (() => {
   /** @param {number} amount */
   function adjustJobStanding(amount) {
     s.job_standing = Math.max(0, Math.min(100, s.job_standing + amount));
+  }
+
+  /** @param {number} amount */
+  function adjustBattery(amount) {
+    s.phone_battery = Math.max(0, Math.min(100, s.phone_battery + amount));
   }
 
   /** @param {number} amount */
@@ -580,6 +593,7 @@ const State = (() => {
     hungerTier,
     socialTier,
     jobTier,
+    batteryTier,
     moneyTier,
     timePeriod,
     canFocus,
@@ -590,6 +604,7 @@ const State = (() => {
     adjustSocial,
     adjustMoney,
     adjustJobStanding,
+    adjustBattery,
     spendMoney,
     addPhoneMessage,
     getUnreadMessages,

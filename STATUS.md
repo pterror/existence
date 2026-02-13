@@ -24,7 +24,7 @@ Current state of the codebase. Keep this up to date — see CLAUDE.md workflow r
 dressed, showered, ate_today, at_work_today, called_in, alarm_set, alarm_went_off, work_nagged_today
 
 ### Phone State
-Battery (passive drain), silent mode, inbox (messages accumulate whether or not you look). Message sources: friends (flavor-driven frequency), work nag (30min late), bill notifications (every 7 days).
+Battery (dual-rate drain: 1%/hr standby, 15%/hr screen-on; tiers: dead/critical/low/fine), silent mode, inbox (messages accumulate whether or not you look). Charges at 30%/hr during sleep at home and via charge_phone interaction. Starting battery 80–100% (chargen RNG). Message sources: friends (flavor-driven frequency), work nag (30min late), bill notifications (every 7 days).
 
 ### Apartment State
 fridge_food (integer, depletes on eating, restocked by groceries), apartment_mess (0–100, grows passively)
@@ -39,10 +39,10 @@ apartment_bathroom ──────────┘          corner_store
 
 Travel times: 1min within apartment, 2min apartment↔street, 3min street↔bus_stop, 4min street↔corner_store, 20min bus_stop↔workplace.
 
-## Interactions (28)
+## Interactions (29)
 
-### Bedroom (6)
-sleep, get_dressed, set_alarm, skip_alarm, check_phone_bedroom, (alarm event wakes you)
+### Bedroom (7)
+sleep, get_dressed, set_alarm, skip_alarm, charge_phone, check_phone_bedroom, (alarm event wakes you)
 
 ### Kitchen (4)
 eat_food, drink_water, do_dishes, check_phone_kitchen
