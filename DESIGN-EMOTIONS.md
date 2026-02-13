@@ -259,3 +259,58 @@ Per-character emotional inertia makes mood stickiness personal. Some characters 
 **Legacy compatibility:** Characters without personality (old saves) get 50/50/50 → inertia exactly 1.0 → identical drift behavior.
 
 **Replay safety:** No PRNG consumed. Personality stored in state (restored on load via `loadState()` defaults merge). Drift is deterministic from state values + time delta.
+
+### Layer 2 step: Basic Sentiments (implemented)
+
+The lightest form of directed sentiments — likes and dislikes generated at character creation. Each is a `{target, quality, intensity}` object stored in an array on the character. The same data structure that accumulating sentiments (step 5) and trauma sentiments (step 6) will use later.
+
+**Data structure:** Array of sentiment objects on the character, persisted in the run record, written to state via `applyToState()`:
+```javascript
+sentiments: [
+  { target: 'weather_clear', quality: 'comfort', intensity: 0.7 },
+  { target: 'weather_grey', quality: 'irritation', intensity: 0.4 },
+  { target: 'time_morning', quality: 'comfort', intensity: 0.6 },
+  { target: 'eating', quality: 'comfort', intensity: 0.55 },
+  ...
+]
+```
+
+**Sentiment palette (8 categories, ~15 charRng calls):**
+- Weather like (`weather_{type}`, comfort, 0.05–0.85) and weather dislike (`weather_{other}`, irritation, 0.05–0.6)
+- Time of day (`time_morning` or `time_evening`, comfort, 0.1–0.8)
+- Food comfort (`eating`, comfort, 0.02–0.8)
+- Rain sound (`rain_sound`, comfort, 0.02–0.9)
+- Quiet (`quiet`, comfort 65% / irritation 35%, 0.1–0.7)
+- Being outside (`outside`, comfort, 0.02–0.7)
+- Physical warmth (`warmth`, comfort, 0.02–0.8)
+- Routine (`routine`, comfort 60% / irritation 40%, 0.1–0.6) — dormant, no activation hook yet
+
+Every character gets all 8 categories. Even very low intensity (0.02) is stored — the math handles it.
+
+**Activation model — two patterns:**
+
+1. **Target modifiers** (feed into NT target functions, always active):
+   - Weather → serotonin target: comfort `+intensity * 4`, irritation `-intensity * 3`
+   - Time of day → serotonin target: preferred hours `+intensity * 4`, anti-preferred `-intensity * 3`
+   - Time of day → dopamine target: preferred hours `+intensity * 3`, anti-preferred `-intensity * 2`
+   - Morning person prefers 6–11, anti-prefers 21+. Evening person prefers 18–23, anti-prefers 6–9.
+
+2. **Discrete nudges** (in interaction execute functions):
+   - Food comfort → `adjustNT('serotonin', fc * 3)` on eat_food, `fc * 2` on buy_cheap_meal
+   - Rain sound → `adjustNT('serotonin', rc * 2)` on look_out_window during drizzle; `qualityMult += rc * 0.1` on sleep during drizzle
+   - Outside → `adjustNT('serotonin', oc * 2)` on go_for_walk
+   - Warmth → `adjustStress(-wc * 3)` on shower
+   - Quiet comfort → `adjustNT('serotonin', qc * 2)` on sit_at_table; irritation → `adjustNT('norepinephrine', qi * 2)`
+
+**Effect scale:** All effects are small background forces. Weather serotonin shift max ±3.4 (compare: sleep quality moves target ±20). Discrete nudges max ~2.4 serotonin.
+
+**Prose:** Sentiment-aware `weightedPick` variants added to eat_food, buy_cheap_meal, shower, sit_at_table, go_for_walk, look_out_window, sleep. Existing variants preserved; new entries weighted by sentiment intensity.
+
+**The sentiments array in state is mutable.** Step 3 generates static preferences, but future steps will mutate in-place:
+- Step 4 (sleep processing): overnight attenuation of recent intensity changes
+- Step 5 (accumulating sentiments): repeated interactions build or intensify
+- Step 6 (trauma sentiments): high-intensity, processing-resistant entries
+
+**Legacy compatibility:** Characters without `sentiments` → `applyToState()` writes `[]` → `sentimentIntensity()` returns 0 → zero target modification, zero nudges.
+
+**Replay safety:** Generation uses charRng only, character stored verbatim. Target modifications and discrete nudges are deterministic from state (no PRNG consumed). New `weightedPick` entries follow the same single-RNG-call pattern.

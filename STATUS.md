@@ -47,6 +47,19 @@ Per-character trait controlling how sticky moods are. Only affects the four mood
 
 **"Worse direction" per system:** serotonin falling, dopamine falling, NE rising, GABA falling.
 
+### Basic Sentiments (Layer 2 of DESIGN-EMOTIONS.md)
+Likes and dislikes generated at character creation. Array of `{target, quality, intensity}` objects stored on character and written to state. 8 categories per character:
+- **Weather** — liked weather (comfort) and disliked weather (irritation) → serotonin target modifiers
+- **Time of day** — morning or evening person → serotonin + dopamine target modifiers
+- **Food comfort** — serotonin nudge on eating interactions
+- **Rain sound** — serotonin nudge when viewing rain; sleep quality boost during drizzle
+- **Quiet** — comfort (serotonin) or irritation (NE) when sitting at kitchen table
+- **Being outside** — serotonin nudge on go_for_walk
+- **Physical warmth** — extra stress relief on shower
+- **Routine** — stored but dormant (no activation hook yet)
+
+All effects scale linearly with intensity. Small background forces (max ±3.4 serotonin target shift from weather, vs ±20 from sleep quality). Sentiment-aware prose variants in eat_food, buy_cheap_meal, shower, sit_at_table, go_for_walk, look_out_window, sleep. Legacy saves without sentiments get empty array (zero effect).
+
 ### Derived Systems
 - **Mood tone** — primarily from neurochemistry (serotonin, dopamine, NE, GABA) with physical state overrides → numb / fraying / heavy / hollow / quiet / clear / present / flat. Same 8 tones, now with inertia instead of instant derivation.
 - **Prose-neurochemistry shading** — three-layer pattern: moodTone() as coarse selector, weighted variant selection via `State.lerp01()` + `Timeline.weightedPick()`, deterministic modifiers (adenosine fog, NE+low-GABA restlessness). **All 67 `Timeline.pick` call sites converted.** Covered: idle thoughts, bedroom description, lie_there, sleep prose (23 branches), look_out_window (7 branches), sit_at_table (6 branches), go_for_walk (12 branches), work events (4 branches), ambient events (5 branches), friend messages (4 flavors), coworker chatter (3 flavors), coworker interactions (3 flavors). No `Timeline.pick` calls remain. See DESIGN.md "Prose-neurochemistry interface" for the full pattern.
@@ -156,6 +169,7 @@ Single-screen UI with:
 - Player first/last name (editable, with reroll)
 - Name sampling from weighted US Census + SSA data (100 first names, 100 surnames)
 - Personality parameters: neuroticism, self_esteem, rumination (0–100 each, generated silently, not exposed in UI)
+- Sentiments: 8 categories of likes/dislikes (weather, time, food, rain, quiet, outside, warmth, routine), generated silently from charRng
 
 ## Infrastructure
 

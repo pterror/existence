@@ -141,6 +141,10 @@ const State = (() => {
       // Sunlight exposure → skin synthesis. Deficiency linked to depression.
       calcitriol: 50,
 
+      // Layer 2 — directed sentiments. Array of {target, quality, intensity}.
+      // Generated at chargen, written by Character.applyToState(). Mutable during play.
+      sentiments: /** @type {{ target: string, quality: string, intensity: number }[]} */ ([]),
+
       // Personality — raw values from character, used by emotional inertia.
       // 50/50/50 = neutral (inertia 1.0). Set by Character.applyToState().
       neuroticism: 50,    // 0-100. Higher → negative moods persist longer.
@@ -734,6 +738,17 @@ const State = (() => {
     return 'enough';
   }
 
+  // --- Sentiment helpers ---
+
+  /** Look up a sentiment's intensity by target and quality. Returns 0 if not found. */
+  function sentimentIntensity(target, quality) {
+    if (!s.sentiments || !s.sentiments.length) return 0;
+    for (const sent of s.sentiments) {
+      if (sent.target === target && sent.quality === quality) return sent.intensity;
+    }
+    return 0;
+  }
+
   // --- Neurochemistry drift engine ---
   // Exponential approach to target with asymmetric up/down rates.
   // Biological jitter via incommensurate sine waves (no PRNG consumed).
@@ -764,7 +779,7 @@ const State = (() => {
   // Active systems have target functions fed by current state.
   // Placeholder systems return baseline 50 (will gain feeders as systems are built).
 
-  /** Serotonin target: sleep quality, social connection, hunger (tryptophan availability) */
+  /** Serotonin target: sleep quality, social connection, hunger (tryptophan availability), sentiments */
   function serotoninTarget() {
     let t = 50;
     // Sleep quality is the strongest lever (DESIGN-EMOTIONS.md)
@@ -774,16 +789,49 @@ const State = (() => {
     t += (s.social - 50) * 0.15;
     // Hunger reduces tryptophan availability (competes for blood-brain transport)
     if (s.hunger > 60) t -= (s.hunger - 60) * 0.2;
+
+    // Sentiments: weather preference
+    const wComfort = sentimentIntensity('weather_' + s.weather, 'comfort');
+    const wIrritation = sentimentIntensity('weather_' + s.weather, 'irritation');
+    t += wComfort * 4 - wIrritation * 3;
+
+    // Sentiments: time-of-day preference
+    const hour = Math.floor(timeOfDay() / 60);
+    const mornComfort = sentimentIntensity('time_morning', 'comfort');
+    const eveComfort = sentimentIntensity('time_evening', 'comfort');
+    if (mornComfort > 0) {
+      if (hour >= 6 && hour <= 11) t += mornComfort * 4;
+      else if (hour >= 21) t -= mornComfort * 3;
+    }
+    if (eveComfort > 0) {
+      if (hour >= 18 && hour <= 23) t += eveComfort * 4;
+      else if (hour >= 6 && hour <= 9) t -= eveComfort * 3;
+    }
+
     return clamp(t, 15, 85);
   }
 
-  /** Dopamine target: energy, general vitality */
+  /** Dopamine target: energy, general vitality, sentiments */
   function dopamineTarget() {
     let t = 50;
     // Energy reflects capacity for engagement
     t += (s.energy - 50) * 0.25;
     // Chronic stress depletes dopamine
     if (s.stress > 60) t -= (s.stress - 60) * 0.2;
+
+    // Sentiments: time-of-day preference
+    const hour = Math.floor(timeOfDay() / 60);
+    const mornComfort = sentimentIntensity('time_morning', 'comfort');
+    const eveComfort = sentimentIntensity('time_evening', 'comfort');
+    if (mornComfort > 0) {
+      if (hour >= 6 && hour <= 11) t += mornComfort * 3;
+      else if (hour >= 21) t -= mornComfort * 2;
+    }
+    if (eveComfort > 0) {
+      if (hour >= 18 && hour <= 23) t += eveComfort * 3;
+      else if (hour >= 6 && hour <= 9) t -= eveComfort * 2;
+    }
+
     return clamp(t, 15, 85);
   }
 
@@ -1088,5 +1136,6 @@ const State = (() => {
     perceivedTimeString,
     perceivedMoneyString,
     lerp01,
+    sentimentIntensity,
   };
 })();

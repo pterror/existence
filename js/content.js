@@ -828,6 +828,12 @@ const Content = (() => {
         if (hunger === 'starving') qualityMult *= 0.7;
         else if (hunger === 'very_hungry') qualityMult *= 0.85;
 
+        // Rain sound comfort — sleeping to rain improves quality slightly
+        const rainComfort = State.sentimentIntensity('rain_sound', 'comfort');
+        if (State.get('weather') === 'drizzle' && rainComfort > 0) {
+          qualityMult += rainComfort * 0.1;  // max +0.09 at intensity 0.9
+        }
+
         const energyGain = (sleepMinutes / 5) * qualityMult;
 
         // Neurochemistry: sleep effects
@@ -905,6 +911,8 @@ const Content = (() => {
               { weight: 1, value: 'You settle in. A few minutes of the ceiling, then nothing. Actual sleep.' },
               // Higher serotonin — settling in feels warm
               { weight: State.lerp01(preSleepSer, 50, 70), value: 'Your eyes close and there\'s a warmth to it — the sheets, the dark, your body letting go without being asked. You\'re asleep before you notice.' },
+              // Rain lover during drizzle — the sound helps
+              { weight: State.get('weather') === 'drizzle' && rainComfort > 0 ? rainComfort * 0.8 : 0, value: 'The rain taps the window and your eyes close. The sound fills the dark — steady, patient, asking nothing. Sleep comes with the rain.' },
             ]);
           }
         } else {
@@ -939,6 +947,8 @@ const Content = (() => {
               { weight: 1, value: 'Sleep comes, and it\'s the real kind. Deep, blank, generous.' },
               // Higher serotonin — sleep with warmth
               { weight: State.lerp01(preSleepSer, 50, 70), value: 'Sleep gathers you up. No resistance, no negotiation — just warmth and dark and the easy surrender of a body that\'s been allowed to rest.' },
+              // Rain lover during drizzle — rain carries you under
+              { weight: State.get('weather') === 'drizzle' && rainComfort > 0 ? rainComfort : 0, value: 'Rain on the window. The sound of it — steady, close, the whole room softened. Your eyes close and the rain is the last thing you hear, tapping its patient rhythm on the glass. Sleep takes you gently.' },
             ]);
           } else {
             asleep = Timeline.weightedPick([
@@ -1308,12 +1318,19 @@ const Content = (() => {
         const minutes = Timeline.randomInt(5, 10);
         State.advanceTime(minutes);
 
+        // Rain sound sentiment — serotonin nudge during drizzle
+        const rc = State.sentimentIntensity('rain_sound', 'comfort');
+        if (weather === 'drizzle' && rc > 0) State.adjustNT('serotonin', rc * 2);
+
         // NT values for continuous prose shading
         const ser = State.get('serotonin');
         const ne = State.get('norepinephrine');
         const dopa = State.get('dopamine');
         const gaba = State.get('gaba');
         const aden = State.get('adenosine');
+
+        // Weather sentiment
+        const weatherComfort = State.sentimentIntensity('weather_' + weather, 'comfort');
 
         if (mood === 'numb') {
           return Timeline.weightedPick([
@@ -1350,6 +1367,8 @@ const Content = (() => {
             { weight: 1, value: 'The window. Rain, or the threat of it. The world out there looks exactly like you feel.' },
             // Low GABA — the grey presses in
             { weight: State.lerp01(gaba, 40, 20), value: 'You look out and the grey is everywhere — the sky, the buildings, the flat light on the street. It presses against the glass. You step back without deciding to.' },
+            // Rain lover during drizzle — the sound helps even when fraying
+            { weight: weather === 'drizzle' && rc > 0 ? rc * 0.6 : 0, value: 'You look out. Grey, drizzle, the streaked glass. But the sound of the rain — that steady tapping — is doing something. Somewhere beneath the noise in your head, the rain is a rhythm you can hold onto.' },
           ]);
         }
         if (mood === 'hollow') {
@@ -1369,6 +1388,10 @@ const Content = (() => {
             { weight: 1, value: 'You stand at the window. The world is out there, doing its thing. For a minute you\'re part of it, watching from the inside. Something close to peace.' },
             // High serotonin + NE — vivid and warm
             { weight: State.lerp01(ser, 55, 75) * State.lerp01(ne, 40, 60), value: 'The light is good today. You notice the color of the sky, the way shadows fall on the building opposite, a bird sitting on a wire. Small things, all of them clear, all of them enough. You stay at the window longer than you meant to.' },
+            // Rain lover during drizzle — rain on glass
+            { weight: weather === 'drizzle' && rc > 0 ? rc : 0, value: 'Rain on the glass. You stand at the window and watch it run in lines down the pane. The sound of it — steady, close, the whole world softened by water. Something in you settles. You stay.' },
+            // Weather comfort — the weather itself lands
+            { weight: weatherComfort > 0 ? weatherComfort * 0.7 : 0, value: 'You look out and the weather is right. Not dramatically — just quietly right, the way only your kind of weather can be. The sky, the light, the feel of the air through the cracked window. You stand there and let it reach you.' },
           ]);
         }
         // flat
@@ -1379,6 +1402,8 @@ const Content = (() => {
           { weight: 1, value: 'You watch the street for a few minutes. Nothing in particular. It passes the time.' },
           // High adenosine — the view is soft
           { weight: State.lerp01(aden, 50, 75), value: 'You look out. The view is there but soft — edges blurred, details optional. You watch without really watching. The tiredness makes it all a little far away.' },
+          // Rain lover during drizzle — rain on glass
+          { weight: weather === 'drizzle' && rc > 0 ? rc * 0.7 : 0, value: 'You look out. The rain runs down the glass in slow lines. The sound of it is something you don\'t have a word for, just a feeling. You watch.' },
         ]);
       },
     },
@@ -1397,16 +1422,40 @@ const Content = (() => {
         State.advanceTime(15);
         Events.record('ate', { what: 'fridge_food' });
 
+        // Food comfort sentiment — small serotonin nudge
+        const fc = State.sentimentIntensity('eating', 'comfort');
+        if (fc > 0) State.adjustNT('serotonin', fc * 3);
+
         const hunger = State.hungerTier();
         const mood = State.moodTone();
+        const ser = State.get('serotonin');
+        const aden = State.get('adenosine');
+        const dopa = State.get('dopamine');
 
         if (mood === 'numb') {
-          return 'You eat. It goes in. You don\'t taste much of it, but your body takes it without complaint.';
+          return Timeline.weightedPick([
+            { weight: 1, value: 'You eat. It goes in. You don\'t taste much of it, but your body takes it without complaint.' },
+            { weight: 1, value: 'Food. You put it together, put it in. The motions of eating without the experience of it.' },
+            // Low dopamine — eating is mechanical
+            { weight: State.lerp01(dopa, 40, 15), value: 'You eat because the body requires it. Fork to mouth, chew, swallow. The flavors are there, technically. They don\'t reach you.' },
+          ]);
         }
         if (hunger === 'starving' || hunger === 'very_hungry') {
-          return 'You eat too fast. Standing at the counter, not even sitting down. It helps. It helps a lot, actually.';
+          return Timeline.weightedPick([
+            { weight: 1, value: 'You eat too fast. Standing at the counter, not even sitting down. It helps. It helps a lot, actually.' },
+            { weight: 1, value: 'You eat standing up, barely tasting it. Your body was louder than you realized. The relief is immediate and physical.' },
+            // High food comfort — the eating itself is a release
+            { weight: fc > 0 ? fc : 0, value: 'You eat too fast and it doesn\'t matter — the warmth of it, the taste, the simple animal fact of being fed. Something unwinds. Your body thanks you the only way it knows how.' },
+          ]);
         }
-        return 'You put something together from what\'s there and eat it. Nothing special. It\'s enough.';
+        return Timeline.weightedPick([
+          { weight: 1, value: 'You put something together from what\'s there and eat it. Nothing special. It\'s enough.' },
+          { weight: 1, value: 'Something from the fridge. You eat it at the counter. It\'s food. It does the job.' },
+          // High food comfort — eating is a small pleasure
+          { weight: fc > 0 ? fc : 0, value: 'You make something simple from what\'s there and eat it slowly. The warmth of it, the familiar taste. A small comfort, but a real one.' },
+          // High adenosine — eating through fog
+          { weight: State.lerp01(aden, 55, 75), value: 'You eat something. Standing at the counter, half-awake, chewing without really tasting. The food goes in. Your body processes it somewhere behind the fog.' },
+        ]);
       },
     },
 
@@ -1471,6 +1520,12 @@ const Content = (() => {
         const minutes = Timeline.randomInt(5, 15);
         State.advanceTime(minutes);
 
+        // Quiet sentiment — the kitchen is a quiet space
+        const qc = State.sentimentIntensity('quiet', 'comfort');
+        const qi = State.sentimentIntensity('quiet', 'irritation');
+        if (qc > 0) State.adjustNT('serotonin', qc * 2);
+        if (qi > 0) State.adjustNT('norepinephrine', qi * 2);
+
         // NT values for continuous prose shading
         const ser = State.get('serotonin');
         const ne = State.get('norepinephrine');
@@ -1505,6 +1560,8 @@ const Content = (() => {
             { weight: 1, value: 'You sit. The kitchen has a specific quiet — the fridge, the clock, the tap. It\'s not peaceful. But it\'s not loud.' },
             // Low GABA — can't settle even sitting
             { weight: State.lerp01(gaba, 40, 20), value: 'You sit but your leg bounces. Your fingers drum the table. The kitchen is quiet and the quiet makes room for the thing that won\'t stop running in your chest.' },
+            // Quiet irritation — the silence is wrong
+            { weight: qi > 0 ? qi * 0.8 : 0, value: 'You sit at the table and the quiet presses in. The fridge hum. The clock. The specific silence of a room with nobody in it. Your skin prickles. You need noise, or movement, or something.' },
           ]);
         }
         if (mood === 'hollow') {
@@ -1524,6 +1581,8 @@ const Content = (() => {
             { weight: 1, value: 'You sit. The apartment is still. The fridge hums its one note. For a few minutes, that\'s all there is, and that\'s enough.' },
             // Higher serotonin — warmth settles in
             { weight: State.lerp01(ser, 55, 75), value: 'You sit at the table and the kitchen holds you. The light, the quiet, the smell of the place you live. Your hands are warm. Your chest is easy. You stay because staying feels like the right thing.' },
+            // Quiet comfort — the silence is the point
+            { weight: qc > 0 ? qc : 0, value: 'You sit at the table and the quiet is perfect. Not empty — full of small things. The fridge, the light, the particular stillness of a room you\'re alone in. Something in you expands into the silence. You needed this.' },
           ]);
         }
         // flat / quiet
@@ -1534,6 +1593,8 @@ const Content = (() => {
           { weight: 1, value: 'You sit. It\'s not productive, it\'s not restful, it\'s just sitting in a kitchen. Sometimes that\'s what there is.' },
           // High NE — aware of every small sound
           { weight: State.lerp01(ne, 45, 65), value: 'You sit at the table. The fridge cycles on. A pipe ticks somewhere in the wall. Your body is still but your ears are busy — cataloguing the kitchen\'s small noises like they matter.' },
+          // Quiet irritation — the stillness is wrong
+          { weight: qi > 0 ? qi * 0.5 : 0, value: 'You sit at the table. The quiet is too much. You tap your fingers, shift in the chair. The kitchen hums its one note and you wish it would hum a different one.' },
         ]);
       },
     },
@@ -1551,16 +1612,35 @@ const Content = (() => {
         State.advanceTime(15);
         Events.record('showered');
 
+        // Warmth comfort sentiment — extra stress relief
+        const wc = State.sentimentIntensity('warmth', 'comfort');
+        if (wc > 0) State.adjustStress(-wc * 3);
+
         const mood = State.moodTone();
         const energy = State.energyTier();
 
         if (mood === 'numb' || mood === 'heavy') {
-          return 'The water is warm. You stand in it longer than you need to. The world outside the shower curtain can wait.';
+          return Timeline.weightedPick([
+            { weight: 1, value: 'The water is warm. You stand in it longer than you need to. The world outside the shower curtain can wait.' },
+            { weight: 1, value: 'Hot water. You stand under it. The steam fills the small room. For a few minutes, the world is just this.' },
+            // High warmth comfort — the heat is an anchor
+            { weight: wc > 0 ? wc : 0, value: 'The water is hot and you stand in it and the heat is the only good thing. It seeps through the skin to wherever the cold lives. You stay until the room is all steam and your fingers are wrinkled and the world outside is someone else\'s problem.' },
+          ]);
         }
         if (energy === 'tired' || energy === 'exhausted') {
-          return 'Hot water. It doesn\'t fix anything but it makes the surface of things bearable. You get out when it starts going cold.';
+          return Timeline.weightedPick([
+            { weight: 1, value: 'Hot water. It doesn\'t fix anything but it makes the surface of things bearable. You get out when it starts going cold.' },
+            { weight: 1, value: 'The shower runs hot and you lean into it. Your body is tired enough to just stand there and let the water do something.' },
+            // High warmth comfort — the heat reaches the exhaustion
+            { weight: wc > 0 ? wc : 0, value: 'The hot water hits your shoulders and something lets go. Not everything — but the layer closest to the surface. The warmth finds the tired places. You stay longer than you should.' },
+          ]);
         }
-        return 'A shower. Hot water, steam, the sound of it. You feel more like a person when you step out.';
+        return Timeline.weightedPick([
+          { weight: 1, value: 'A shower. Hot water, steam, the sound of it. You feel more like a person when you step out.' },
+          { weight: 1, value: 'You shower. The water is hot, the bathroom fills with steam. When you step out, you\'re clean. That\'s something.' },
+          // High warmth comfort — the hot water is an old friend
+          { weight: wc > 0 ? wc : 0, value: 'The hot water is an old comfort. You stand in it past the point of clean, just for the heat, just for the sound. When you step out the mirror is fogged and your skin is flushed and something is a little easier than it was.' },
+        ]);
       },
     },
 
@@ -1628,12 +1708,21 @@ const Content = (() => {
         State.advanceTime(minutes);
         State.adjustEnergy(-energyCost);
 
+        // Outside comfort sentiment — serotonin nudge
+        const oc = State.sentimentIntensity('outside', 'comfort');
+        if (oc > 0) State.adjustNT('serotonin', oc * 2);
+
         // NT values for continuous prose shading
         const ser = State.get('serotonin');
         const ne = State.get('norepinephrine');
         const dopa = State.get('dopamine');
         const gaba = State.get('gaba');
         const aden = State.get('adenosine');
+
+        // Rain sound sentiment (for drizzle prose)
+        const rc = State.sentimentIntensity('rain_sound', 'comfort');
+        // Weather sentiment
+        const weatherComfort = State.sentimentIntensity('weather_' + weather, 'comfort');
 
         // Weather modifier — drizzle adds discomfort
         if (weather === 'drizzle') {
@@ -1649,6 +1738,8 @@ const Content = (() => {
               { weight: 1, value: 'Rain on your jacket. Your shoes get damp. But the walking helps — the movement, the air, the world being bigger than a room. It\'s worth it.' },
               // High NE — the rain is vivid
               { weight: State.lerp01(ne, 45, 65), value: 'The rain is on your face and you can feel every drop — distinct, cold, alive. Your feet on the wet pavement. The smell of it. The world in the rain is a specific, sharp thing, and you\'re in it.' },
+              // Rain lover — the drizzle is welcome
+              { weight: rc > 0 ? rc : 0, value: 'You walk in the rain and it\'s good. The sound of it on your jacket, the wet air, the way the street smells different. Something about rain has always been yours. You walk slower than you need to.' },
             ]);
           }
           return Timeline.weightedPick([
@@ -1657,6 +1748,8 @@ const Content = (() => {
             { weight: 1, value: 'You walk until the apartment feels far away. The sky, the street, the sound of your own footsteps. This is what outside is for.' },
             // High serotonin + dopamine — the walk is actually good
             { weight: State.lerp01(ser, 55, 75) * State.lerp01(dopa, 50, 70), value: 'You walk, and the walking is good. Not because anything is happening — just the rhythm, the air, the way your body knows how to do this. The street unfolds. The sky is big. You feel like a person in the world, and it\'s enough.' },
+            // Outside lover — being out is the point
+            { weight: oc > 0 ? oc : 0, value: 'You walk and the outside is enough. The air, the space, the sky that goes on without you. Your body knows this — the way it loosens, the way your breath comes easier. You needed out. This is out.' },
           ]);
         }
         if (mood === 'flat') {
@@ -1667,6 +1760,8 @@ const Content = (() => {
               { weight: 1, value: 'Rain. You walk through it because you\'re already out. It\'s not pleasant but the walking itself does something. Slightly.' },
               // High adenosine — the walk is a slog
               { weight: State.lerp01(aden, 50, 70), value: 'You walk in the rain and your legs are heavy. The dampness seeps into your shoes. Each block takes more than the last. The air helps, barely. You come back tired and wet.' },
+              // Rain lover — the drizzle is okay
+              { weight: rc > 0 ? rc * 0.7 : 0, value: 'You walk in the drizzle and it\'s fine, actually. The sound of rain on your hood. The wet streets. Not everyone likes this. You don\'t mind it.' },
             ]);
           }
           return Timeline.weightedPick([
@@ -1931,12 +2026,26 @@ const Content = (() => {
         State.glanceMoney();
         Events.record('ate', { what: 'cheap_meal' });
 
+        // Food comfort sentiment — weaker than home food
+        const fc = State.sentimentIntensity('eating', 'comfort');
+        if (fc > 0) State.adjustNT('serotonin', fc * 2);
+
         const mood = State.moodTone();
 
         if (mood === 'numb' || mood === 'heavy') {
-          return 'You eat it on the way out. Something wrapped in plastic from a warmer. It\'s food. It does what food does.';
+          return Timeline.weightedPick([
+            { weight: 1, value: 'You eat it on the way out. Something wrapped in plastic from a warmer. It\'s food. It does what food does.' },
+            { weight: 1, value: 'You eat standing by the door. Cheap food in a plastic wrapper. Your body accepts it. That\'s about all.' },
+            // High food comfort — even cheap food can be something
+            { weight: fc > 0 ? fc * 0.7 : 0, value: 'You eat it on the way out. It\'s cheap and wrapped in plastic and warm, and the warmth is something. Not much. But something your body reaches for.' },
+          ]);
         }
-        return 'A sandwich from the cooler. You eat it standing outside the store. It\'s fine. It\'s enough.';
+        return Timeline.weightedPick([
+          { weight: 1, value: 'A sandwich from the cooler. You eat it standing outside the store. It\'s fine. It\'s enough.' },
+          { weight: 1, value: 'You grab something from the counter and eat it outside. Corner store food. It does the job.' },
+          // High food comfort — small pleasure in cheap food
+          { weight: fc > 0 ? fc * 0.7 : 0, value: 'You eat it outside the store. Cheap food, nothing to it, but the taste is good and the eating is a comfort in the simple way it always is.' },
+        ]);
       },
     },
 

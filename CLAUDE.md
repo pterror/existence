@@ -77,6 +77,8 @@ No build step. Plain JS loaded via script tags.
 
 **Emotional inertia is personal.** How sticky moods are varies per character. Neuroticism, self-esteem, and rumination are generated at character creation and stored as raw personality values in state. The drift engine computes `effectiveInertia()` from these each tick — no pre-computed inertia value. Only the four mood-primary systems (serotonin, dopamine, NE, GABA) are affected; physiological rhythms (cortisol, melatonin, etc.) ignore personality. Neuroticism adds extra stickiness in the "toward worse mood" direction only. Sleep deprivation, poor sleep quality, and chronic stress temporarily increase inertia for everyone.
 
+**Sentiments are the emotional landscape.** Characters have likes and dislikes stored as `{target, quality, intensity}` objects in a sentiments array. Generated at chargen on charRng, stored on character, written to state via `applyToState()`. Two activation patterns: **target modifiers** (weather/time preferences feed NT target functions continuously) and **discrete nudges** (food, rain, outside, warmth, quiet trigger in interaction execute functions). Effects scale linearly with intensity — small background forces. The array in state is mutable — future steps will add sleep processing, accumulation, and trauma sentiments. Use `State.sentimentIntensity(target, quality)` to look up intensities. Routine sentiment is stored but dormant.
+
 ## Code Conventions
 
 **RNG discipline:**

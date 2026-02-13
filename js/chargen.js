@@ -205,6 +205,53 @@ const Chargen = (() => {
       rumination: Math.floor(Timeline.charRandom() * 101),
     };
 
+    // Extract latitude before sentiments to preserve existing charRng order
+    const latitude = Timeline.charPick(locationOptions).latitude;
+
+    // Sentiments — likes/dislikes, generated silently (Layer 2 basic sentiments)
+    const sentiments = [];
+
+    // Weather — everyone has preferences
+    const weathers = ['clear', 'overcast', 'grey', 'drizzle'];
+    const likedWeather = Timeline.charPick(weathers);
+    const likedIntensity = 0.05 + Timeline.charRandom() * 0.8;
+    sentiments.push({ target: 'weather_' + likedWeather, quality: 'comfort', intensity: likedIntensity });
+    const dislikedPool = weathers.filter(w => w !== likedWeather);
+    const dislikedWeather = Timeline.charPick(dislikedPool);
+    const dislikedIntensity = 0.05 + Timeline.charRandom() * 0.55;
+    sentiments.push({ target: 'weather_' + dislikedWeather, quality: 'irritation', intensity: dislikedIntensity });
+
+    // Time of day — morning or evening person
+    const timePref = Timeline.charPick(['morning', 'evening']);
+    const timeIntensity = 0.1 + Timeline.charRandom() * 0.7;
+    sentiments.push({ target: 'time_' + timePref, quality: 'comfort', intensity: timeIntensity });
+
+    // Food comfort — some eat for comfort, others eat mechanically
+    const foodIntensity = 0.02 + Timeline.charRandom() * 0.78;
+    sentiments.push({ target: 'eating', quality: 'comfort', intensity: foodIntensity });
+
+    // Rain sound — the sound of rain on windows
+    const rainIntensity = 0.02 + Timeline.charRandom() * 0.88;
+    sentiments.push({ target: 'rain_sound', quality: 'comfort', intensity: rainIntensity });
+
+    // Quiet — comfort or irritation
+    const quietIntensity = 0.1 + Timeline.charRandom() * 0.6;
+    const quietQuality = Timeline.charRandom() > 0.35 ? 'comfort' : 'irritation';
+    sentiments.push({ target: 'quiet', quality: quietQuality, intensity: quietIntensity });
+
+    // Being outside
+    const outsideIntensity = 0.02 + Timeline.charRandom() * 0.68;
+    sentiments.push({ target: 'outside', quality: 'comfort', intensity: outsideIntensity });
+
+    // Physical warmth
+    const warmthIntensity = 0.02 + Timeline.charRandom() * 0.78;
+    sentiments.push({ target: 'warmth', quality: 'comfort', intensity: warmthIntensity });
+
+    // Routine — comfort or irritation
+    const routineIntensity = 0.1 + Timeline.charRandom() * 0.5;
+    const routineQuality = Timeline.charRandom() > 0.4 ? 'comfort' : 'irritation';
+    sentiments.push({ target: 'routine', quality: routineQuality, intensity: routineIntensity });
+
     return /** @type {GameCharacter} */ ({
       first_name: playerName.first,
       last_name: playerName.last,
@@ -218,8 +265,9 @@ const Chargen = (() => {
       job_type: jobType,
       age_stage: age,
       start_timestamp: startTimestamp,
-      latitude: Timeline.charPick(locationOptions).latitude,
+      latitude,
       personality,
+      sentiments,
     });
   }
 

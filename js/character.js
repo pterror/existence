@@ -55,6 +55,9 @@ const Character = (() => {
     State.set('self_esteem', personality.self_esteem);
     State.set('rumination', personality.rumination);
 
+    // Sentiments — Layer 2 basic likes/dislikes. Legacy saves without sentiments → empty array → no effect.
+    State.set('sentiments', current.sentiments || []);
+
     // Phone battery — slept at home, charged overnight, but not everyone charges to full
     State.set('phone_battery', Timeline.charRandomInt(80, 100));
 
