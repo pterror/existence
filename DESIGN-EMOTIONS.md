@@ -382,3 +382,39 @@ This creates the design-intended feedback loop: chronic struggle at work → dre
 **Sleep processing:** Already handles accumulated sentiments correctly. Entries with no character baseline (all six new targets) attenuate toward intensity 0.
 
 **Replay safety:** `adjustSentiment()` is deterministic (no PRNG). Called from execute functions after state changes, before prose generation (where weightedPick consumes RNG). NT target modifiers are deterministic (read state only). New `weightedPick` variants follow existing pattern.
+
+### Layer 2 step: Sentiment Evolution Mechanics (implemented)
+
+Three mechanics that deepen the existing sentiment system before trauma sentiments. Together they create meaningful dynamics: comfort that fades with overuse, negative feelings that dig in, and per-character processing differences.
+
+**Regulation capacity** — `State.regulationCapacity()` in state.js. The inverse of emotional inertia, applied during sleep. Fluid characters (low neuroticism, high self-esteem, low rumination) process emotions more efficiently during sleep; sticky characters process slower. Range 0.5 (very sticky + stressed) to 1.3 (very fluid + rested). At 50/50/50 personality → 1.0 (no change from prior behavior, legacy-safe). State penalties: adenosine > 60 (-0.004/point), stress > 60 (-0.004/point). This means a chronically stressed, sleep-deprived, neurotic character processes emotions dramatically less effectively during sleep.
+
+**Rewritten `processSleepEmotions()`** — now applies three multiplicative modifiers:
+```
+effectiveRate = baseRate * intensityFactor * qualityFactor * regulation
+```
+Where:
+- `baseRate` = 0.4 × qualityMult × durationFactor (unchanged formula)
+- `intensityFactor` = max(0.3, 1 − 0.7 × deviation²) — high-intensity deviations resist processing. A small emotional charge processes quickly; a maxed-out sentiment still processes (floor 0.3) but very slowly. This is the "very high-intensity sentiments are resistant to overnight processing" mechanic from the design doc.
+- `qualityFactor` — per-sentiment-quality rates. Comfort: 1.0 (processes fully). Satisfaction: 0.9. Warmth: 0.85. Dread: 0.6. Irritation: 0.6. Default: 0.8. This is entrenchment: negative sentiments literally process 40% slower than comfort sentiments during the same quality of sleep.
+- `regulation` = `regulationCapacity()` — personality-dependent processing efficiency.
+
+**Steady-state scenarios (neutral personality, 1.0 regulation):**
+- Eating 3×/day, good sleep: comfort equilibrium ~0.477 (4.5% below 0.5 baseline). Subtle.
+- Chronic bad work + good sleep: dread stabilizes ~0.37. Noticeable NT depression at work but manageable.
+- Chronic bad work + bad sleep, neurotic character: dread climbs to max and stays. Feedback loop — only breaking the cycle helps.
+- Daily coworker warmth, good sleep: warmth stabilizes ~0.08. Mild but real.
+
+**Habituation of comfort sentiments** — small negative `adjustSentiment()` calls at 6 existing discrete nudge sites:
+- eat_food: eating/comfort -0.003
+- buy_cheap_meal: eating/comfort -0.002
+- look_out_window (drizzle): rain_sound/comfort -0.002
+- go_for_walk: outside/comfort -0.002
+- shower: warmth/comfort -0.002
+- sit_at_table: quiet/comfort -0.002, quiet/irritation -0.001
+
+Each placed immediately after the existing NT nudge, guarded by the same `if (intensity > 0)` condition. Comfort habituates: the hundredth shower is slightly less comforting than the first. Sleep restores toward character baseline each night, so light use stays stable while heavy use habituates slightly.
+
+**NOT habituated:** Weather prefs and time-of-day prefs (always-on target modifiers = stable traits, not discrete activations). Work/coworker sentiments (have their own accumulation dynamics with separate mechanistic logic).
+
+**Replay safety:** All new code is deterministic — no PRNG consumed. `regulationCapacity()` reads state values only. Habituation calls are in execute functions after existing state changes, before prose generation. Per-quality processing factors are constant. Legacy saves with no personality get regulation = 1.0.

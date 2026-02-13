@@ -1394,9 +1394,12 @@ const Content = (() => {
         const minutes = Timeline.randomInt(5, 10);
         State.advanceTime(minutes);
 
-        // Rain sound sentiment — serotonin nudge during drizzle
+        // Rain sound sentiment — serotonin nudge during drizzle + habituation
         const rc = State.sentimentIntensity('rain_sound', 'comfort');
-        if (weather === 'drizzle' && rc > 0) State.adjustNT('serotonin', rc * 2);
+        if (weather === 'drizzle' && rc > 0) {
+          State.adjustNT('serotonin', rc * 2);
+          State.adjustSentiment('rain_sound', 'comfort', -0.002);
+        }
 
         // NT values for continuous prose shading
         const ser = State.get('serotonin');
@@ -1498,9 +1501,12 @@ const Content = (() => {
         State.advanceTime(15);
         Events.record('ate', { what: 'fridge_food' });
 
-        // Food comfort sentiment — small serotonin nudge
+        // Food comfort sentiment — small serotonin nudge + habituation
         const fc = State.sentimentIntensity('eating', 'comfort');
-        if (fc > 0) State.adjustNT('serotonin', fc * 3);
+        if (fc > 0) {
+          State.adjustNT('serotonin', fc * 3);
+          State.adjustSentiment('eating', 'comfort', -0.003);
+        }
 
         const hunger = State.hungerTier();
         const mood = State.moodTone();
@@ -1596,11 +1602,17 @@ const Content = (() => {
         const minutes = Timeline.randomInt(5, 15);
         State.advanceTime(minutes);
 
-        // Quiet sentiment — the kitchen is a quiet space
+        // Quiet sentiment — the kitchen is a quiet space + habituation
         const qc = State.sentimentIntensity('quiet', 'comfort');
         const qi = State.sentimentIntensity('quiet', 'irritation');
-        if (qc > 0) State.adjustNT('serotonin', qc * 2);
-        if (qi > 0) State.adjustNT('norepinephrine', qi * 2);
+        if (qc > 0) {
+          State.adjustNT('serotonin', qc * 2);
+          State.adjustSentiment('quiet', 'comfort', -0.002);
+        }
+        if (qi > 0) {
+          State.adjustNT('norepinephrine', qi * 2);
+          State.adjustSentiment('quiet', 'irritation', -0.001);
+        }
 
         // NT values for continuous prose shading
         const ser = State.get('serotonin');
@@ -1688,9 +1700,12 @@ const Content = (() => {
         State.advanceTime(15);
         Events.record('showered');
 
-        // Warmth comfort sentiment — extra stress relief
+        // Warmth comfort sentiment — extra stress relief + habituation
         const wc = State.sentimentIntensity('warmth', 'comfort');
-        if (wc > 0) State.adjustStress(-wc * 3);
+        if (wc > 0) {
+          State.adjustStress(-wc * 3);
+          State.adjustSentiment('warmth', 'comfort', -0.002);
+        }
 
         const mood = State.moodTone();
         const energy = State.energyTier();
@@ -1784,9 +1799,12 @@ const Content = (() => {
         State.advanceTime(minutes);
         State.adjustEnergy(-energyCost);
 
-        // Outside comfort sentiment — serotonin nudge
+        // Outside comfort sentiment — serotonin nudge + habituation
         const oc = State.sentimentIntensity('outside', 'comfort');
-        if (oc > 0) State.adjustNT('serotonin', oc * 2);
+        if (oc > 0) {
+          State.adjustNT('serotonin', oc * 2);
+          State.adjustSentiment('outside', 'comfort', -0.002);
+        }
 
         // NT values for continuous prose shading
         const ser = State.get('serotonin');
@@ -2133,9 +2151,12 @@ const Content = (() => {
         State.glanceMoney();
         Events.record('ate', { what: 'cheap_meal' });
 
-        // Food comfort sentiment — weaker than home food
+        // Food comfort sentiment — weaker than home food + habituation
         const fc = State.sentimentIntensity('eating', 'comfort');
-        if (fc > 0) State.adjustNT('serotonin', fc * 2);
+        if (fc > 0) {
+          State.adjustNT('serotonin', fc * 2);
+          State.adjustSentiment('eating', 'comfort', -0.002);
+        }
 
         const mood = State.moodTone();
 

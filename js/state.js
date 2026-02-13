@@ -771,9 +771,24 @@ const State = (() => {
   // Better sleep = more processing. No PRNG consumed — fully deterministic.
   // See DESIGN-EMOTIONS.md Layer 2 step: Sleep Emotional Processing.
 
+  // Per-quality processing factors for sleep emotional processing.
+  // Comfort processes fully (1.0), negative sentiments resist processing (entrenchment).
+  const qualityProcessingFactor = {
+    comfort: 1.0,
+    satisfaction: 0.9,
+    warmth: 0.85,
+    dread: 0.6,
+    irritation: 0.6,
+  };
+  const defaultQualityFactor = 0.8;
+
   /**
    * Sleep emotional processing — attenuate sentiment deviations from baseline.
    * REM sleep strips emotional charge; better sleep = more processing.
+   * Three multiplicative modifiers create meaningful dynamics:
+   *   - intensityFactor: high-intensity deviations resist processing
+   *   - qualityFactor: negative sentiments (dread, irritation) process 40% slower
+   *   - regulation: personality-dependent processing efficiency
    * @param {Array} baseSentiments - character's original sentiments (baseline)
    * @param {number} qualityMult - sleep quality (0-1+)
    * @param {number} sleepMinutes - total sleep duration
@@ -782,7 +797,8 @@ const State = (() => {
     if (!s.sentiments || !s.sentiments.length) return;
 
     const durationFactor = clamp(sleepMinutes / 420, 0.3, 1.0);
-    const processingRate = 0.4 * qualityMult * durationFactor;
+    const baseRate = 0.4 * qualityMult * durationFactor;
+    const regulation = regulationCapacity();
 
     for (const sent of s.sentiments) {
       const base = baseSentiments
@@ -791,7 +807,15 @@ const State = (() => {
       const baseIntensity = base ? base.intensity : 0;
       const deviation = sent.intensity - baseIntensity;
       if (Math.abs(deviation) < 0.001) continue;
-      sent.intensity -= deviation * processingRate;
+
+      // Intensity resistance: high deviations resist processing (squared falloff)
+      const intensityFactor = Math.max(0.3, 1 - 0.7 * deviation * deviation);
+
+      // Entrenchment: negative sentiments process slower than comfort
+      const qf = qualityProcessingFactor[sent.quality] ?? defaultQualityFactor;
+
+      const effectiveRate = baseRate * intensityFactor * qf * regulation;
+      sent.intensity -= deviation * effectiveRate;
     }
   }
 
@@ -1099,6 +1123,37 @@ const State = (() => {
     return inertia;
   }
 
+  // --- Regulation capacity (inverse of inertia for sleep processing) ---
+  // Fluid characters (low neuroticism, high self-esteem, low rumination) process
+  // emotions more efficiently during sleep. Sticky characters process slower.
+  // Range: 0.5 (very sticky + stressed) to 1.3 (very fluid + rested).
+  // At 50/50/50 personality → 1.0 (no change from current behavior, legacy-safe).
+
+  function regulationCapacity() {
+    const n = s.neuroticism / 100;
+    const se = s.self_esteem / 100;
+    const r = s.rumination / 100;
+
+    // Inverse of inertia weighting: low n, high se, low r → high regulation
+    // At 50/50/50 → weighted=0.5 → capacity=1.0
+    // At 0/100/0 → weighted=0 → capacity=1.3 (fluid)
+    // At 100/0/100 → weighted=1 → capacity=0.5 (sticky)
+    const weighted = n * 0.5 + (1 - se) * 0.3 + r * 0.2;
+    let capacity = 1.3 - weighted * 0.8;
+
+    // State penalties — current conditions reduce processing capacity
+    // Sleep deprivation (adenosine > 60): tired brain processes less
+    if (s.adenosine > 60) {
+      capacity -= (s.adenosine - 60) * 0.004;  // up to -0.16 at adenosine=100
+    }
+    // Chronic stress: sustained stress impairs regulation
+    if (s.stress > 60) {
+      capacity -= (s.stress - 60) * 0.004;  // up to -0.16 at stress=100
+    }
+
+    return clamp(capacity, 0.5, 1.3);
+  }
+
   /**
    * Drift all neurochemistry systems toward their targets.
    * Called at end of advanceTime().
@@ -1201,5 +1256,6 @@ const State = (() => {
     sentimentIntensity,
     adjustSentiment,
     processSleepEmotions,
+    regulationCapacity,
   };
 })();
