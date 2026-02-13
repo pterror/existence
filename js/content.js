@@ -1908,6 +1908,10 @@ const Content = (() => {
     return null;
   }
 
+  function resetIdleTracking() {
+    recentIdle.length = 0;
+  }
+
   return {
     locationDescriptions,
     interactions,
@@ -1920,5 +1924,6 @@ const Content = (() => {
     phoneScreenDescription,
     getTimeSource,
     getMoneySource,
+    resetIdleTracking,
   };
 })();

@@ -7,7 +7,7 @@ const Timeline = (() => {
 
   /** @param {number} a @param {number} b @param {number} c @param {number} d */
   function xoshiro128ss(a, b, c, d) {
-    return () => {
+    function next() {
       const t = b << 9;
       let r = a * 5;
       r = ((r << 7) | (r >>> 25)) * 9;
@@ -21,6 +21,11 @@ const Timeline = (() => {
       d = (d << 11) | (d >>> 21);
 
       return (r >>> 0) / 4294967296;
+    }
+    return {
+      next,
+      getState() { return [a, b, c, d]; },
+      setState(/** @type {number[]} */ s) { [a, b, c, d] = s; },
     };
   }
 
@@ -49,9 +54,9 @@ const Timeline = (() => {
   let seed = 0;
   /** @type {ActionEntry[]} */
   let actions = [];
-  /** @type {(() => number) | null} */
+  /** @type {{ next: () => number, getState: () => number[], setState: (s: number[]) => void } | null} */
   let rng = null;       // game PRNG stream
-  /** @type {(() => number) | null} */
+  /** @type {{ next: () => number, getState: () => number[], setState: (s: number[]) => void } | null} */
   let charRng = null;   // character generation PRNG stream (separate)
   /** @type {GameCharacter | null} */
   let character = null;  // stored character data
@@ -92,7 +97,7 @@ const Timeline = (() => {
   // Get next random number [0, 1)
   function random() {
     rngCallCount++;
-    return /** @type {() => number} */ (rng)();
+    return /** @type {{ next: () => number }} */ (rng).next();
   }
 
   // Random integer in [min, max] inclusive
@@ -136,7 +141,7 @@ const Timeline = (() => {
   // --- Character PRNG (chargen only, separate stream) ---
 
   function charRandom() {
-    return /** @type {() => number} */ (charRng)();
+    return /** @type {{ next: () => number }} */ (charRng).next();
   }
 
   /** @param {number} min @param {number} max */
@@ -234,6 +239,15 @@ const Timeline = (() => {
     return seed;
   }
 
+  function getRngState() {
+    return /** @type {{ getState: () => number[] }} */ (rng).getState();
+  }
+
+  /** @param {number[]} state */
+  function setRngState(state) {
+    /** @type {{ setState: (s: number[]) => void }} */ (rng).setState(state);
+  }
+
   return {
     init,
     random,
@@ -255,6 +269,8 @@ const Timeline = (() => {
     setActiveRunId,
     getActiveRunId,
     restoreFrom,
-    getSeed
+    getSeed,
+    getRngState,
+    setRngState,
   };
 })();

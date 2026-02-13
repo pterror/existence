@@ -56,5 +56,10 @@ const Events = (() => {
     return log.slice();
   }
 
-  return { init, record, last, since, count, daysSinceLast, all };
+  /** @param {{ time: number, type: string, data: object }[]} savedLog */
+  function restoreLog(savedLog) {
+    log = structuredClone(savedLog);
+  }
+
+  return { init, record, last, since, count, daysSinceLast, all, restoreLog };
 })();

@@ -101,6 +101,11 @@ const State = (() => {
     s = { ...defaults(), ...saved };
   }
 
+  /** @param {ReturnType<typeof defaults>} snapshot */
+  function restoreSnapshot(snapshot) {
+    s = structuredClone(snapshot);
+  }
+
   // --- Time ---
 
   /** @param {number} minutes */
@@ -555,6 +560,7 @@ const State = (() => {
     set,
     getAll,
     loadState,
+    restoreSnapshot,
     advanceTime,
     timeOfDay,
     getHour,

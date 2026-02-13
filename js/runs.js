@@ -71,7 +71,7 @@ const Runs = (() => {
         status: 'active',
         createdAt: now,
         lastPlayed: now,
-        version: 1,
+        version: 2,
       };
 
       const tx = /** @type {IDBDatabase} */ (db).transaction(['runs', 'meta'], 'readwrite');
@@ -225,6 +225,7 @@ const Runs = (() => {
               : 'Unknown',
             jobType: record.character ? record.character.job_type : '',
             ageStage: record.character ? record.character.age_stage : '',
+            version: record.version || 0,
           });
           cursor.continue();
         } else {
@@ -261,6 +262,21 @@ const Runs = (() => {
     });
   }
 
+  /**
+   * Delete a run permanently.
+   * @param {string} id
+   * @returns {Promise<void>}
+   */
+  function deleteRun(id) {
+    return new Promise((resolve, reject) => {
+      const tx = /** @type {IDBDatabase} */ (db).transaction('runs', 'readwrite');
+      tx.objectStore('runs').delete(id);
+
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+    });
+  }
+
   return {
     open,
     createRun,
@@ -271,5 +287,6 @@ const Runs = (() => {
     flush,
     listRuns,
     finishRun,
+    deleteRun,
   };
 })();
