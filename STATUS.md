@@ -96,7 +96,7 @@ Three mechanics deepening how sentiments change over time:
 Friends who reach out and get silence back generate guilt over time. Per-friend contact timestamps track last message engagement.
 
 **Mechanics:**
-- `last_friend1_contact` / `last_friend2_contact` — game time of last engagement (reading a friend's message)
+- `friend_contact` — map of slot → game time of last engagement (reading a friend's message)
 - Grace period: 1.5 days. After that, guilt accumulates each sleep cycle
 - Growth rate: ~0.005–0.008 per night, scaling with absence duration (cap 1.6x at 14+ days)
 - Unread messages from the ignored friend intensify guilt by 40%

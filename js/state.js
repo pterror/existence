@@ -193,8 +193,7 @@ const State = (() => {
       times_late_this_week: 0,
       consecutive_meals_skipped: 0,
       last_social_interaction: 0, // action count at last interaction
-      last_friend1_contact: 0,    // game time of last friend1 engagement (0 = never/legacy)
-      last_friend2_contact: 0,    // game time of last friend2 engagement (0 = never/legacy)
+      friend_contact: /** @type {Record<string, number>} */ ({}), // slot → game time of last engagement (absent = never/legacy)
 
       // Event surfacing — tracks how many times state-condition events have appeared.
       // After cap, they go silent and let tier-based prose carry the weight.
@@ -836,14 +835,14 @@ const State = (() => {
   function processAbsenceEffects() {
     const now = s.time;
     const inbox = s.phone_inbox;
+    if (!s.friend_contact) s.friend_contact = {};
 
     for (const slot of ['friend1', 'friend2']) {
-      const contactKey = slot === 'friend1' ? 'last_friend1_contact' : 'last_friend2_contact';
-      let lastContact = s[contactKey];
+      let lastContact = s.friend_contact[slot];
 
       // Legacy/new: initialize contact time on first sleep, skip guilt
-      if (lastContact === 0) {
-        s[contactKey] = now;
+      if (lastContact === undefined || lastContact === 0) {
+        s.friend_contact[slot] = now;
         continue;
       }
 

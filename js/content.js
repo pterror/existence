@@ -2263,8 +2263,8 @@ const Content = (() => {
             State.adjustSocial(3);
             // Reading a friend's message = contact. Reset timer, reduce guilt.
             if (msg.source) {
-              const contactKey = msg.source === 'friend1' ? 'last_friend1_contact' : 'last_friend2_contact';
-              State.set(contactKey, State.get('time'));
+              const fc = State.get('friend_contact');
+              fc[msg.source] = State.get('time');
               State.adjustSentiment(msg.source, 'guilt', -0.02);
             }
           }
