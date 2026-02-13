@@ -49,7 +49,7 @@ Per-character trait controlling how sticky moods are. Only affects the four mood
 
 ### Derived Systems
 - **Mood tone** — primarily from neurochemistry (serotonin, dopamine, NE, GABA) with physical state overrides → numb / fraying / heavy / hollow / quiet / clear / present / flat. Same 8 tones, now with inertia instead of instant derivation.
-- **Prose-neurochemistry shading** — three-layer pattern: moodTone() as coarse selector, weighted variant selection via `State.lerp01()` + `Timeline.weightedPick()`, deterministic modifiers (adenosine fog, NE+low-GABA restlessness). Converted in 3 sites: idle thoughts, bedroom description, lie_there interaction. ~65 call sites remaining. See DESIGN.md "Prose-neurochemistry interface" for the full pattern.
+- **Prose-neurochemistry shading** — three-layer pattern: moodTone() as coarse selector, weighted variant selection via `State.lerp01()` + `Timeline.weightedPick()`, deterministic modifiers (adenosine fog, NE+low-GABA restlessness). Converted in 5 sites: idle thoughts, bedroom description, lie_there, sleep prose (23 branches), look_out_window (7 branches). ~35 call sites remaining. See DESIGN.md "Prose-neurochemistry interface" for the full pattern.
 - **Time period** — deep_night / early_morning / morning / late_morning / midday / afternoon / evening / night
 - **Observation fidelity** — time and money awareness degrade with distance from last check (exact → rounded → vague → sensory/qualitative)
 - **Season** — derived from latitude + start_timestamp. Tropical: wet/dry. Temperate: four seasons. Hemisphere from sign.
@@ -138,7 +138,7 @@ Each has: workplace description (dynamic), do_work prose (6 variants), work_brea
 Dynamic generation based on mood (8 categories × ~7 general variants + 2–4 NT-weighted variants each), hunger (starving/very_hungry), energy (depleted), social isolation (friend-specific thoughts). NT values (serotonin, dopamine, NE, GABA, adenosine, cortisol) continuously weight variant selection via `State.lerp01()` and `Timeline.weightedPick()`. Recency tracking avoids repeats.
 
 ### Sleep Prose
-Two-phase system: falling-asleep (how sleep came) + waking-up (the gradient back to consciousness). Falling-asleep branches on pre-sleep energy, stress, quality, and duration (~14 variants). Waking-up branches on post-sleep energy, sleep quality, alarm vs natural wake, time of day (dark/late/morning), and mood (~28 variants). Composed together as a single passage. No numeric hour counts — all qualitative.
+Two-phase system: falling-asleep (how sleep came) + waking-up (the gradient back to consciousness). Falling-asleep branches on pre-sleep energy, stress, quality, and duration, with NT shading: adenosine→crash depth, GABA→can't-settle anxiety, NE→hyper-alertness, serotonin→warmth of surrender (~22 variants). Waking-up branches on post-sleep energy, sleep quality, alarm vs natural wake, time of day (dark/late/morning), and mood, with NT shading: adenosine→sleep inertia, serotonin→dread-vs-ease, NE→sharp edges, GABA→night dread (~38 variants). Composed together as a single passage. No numeric hour counts — all qualitative.
 
 ### Outfit Prose
 6 outfit sets, each with 3 variants: default / low_mood / messy. 6 sleepwear options. All complete prose sentences.

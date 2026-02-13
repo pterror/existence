@@ -710,6 +710,12 @@ const Content = (() => {
         const stress = State.stressTier();
         const hunger = State.hungerTier();
 
+        // Pre-sleep NT values for falling-asleep prose shading
+        const preSleepAden = State.get('adenosine');
+        const preSleepGaba = State.get('gaba');
+        const preSleepNE = State.get('norepinephrine');
+        const preSleepSer = State.get('serotonin');
+
         // Falling-asleep delay — stress and racing thoughts keep you up
         let fallAsleepDelay;
         if (energy === 'depleted') {
@@ -804,54 +810,80 @@ const Content = (() => {
         const postMood = State.moodTone();
         const wakeTime = State.timePeriod();
 
+        // Post-sleep NT values for waking prose shading
+        const postSer = State.get('serotonin');
+        const postNE = State.get('norepinephrine');
+        const postGaba = State.get('gaba');
+        const postAden = State.get('adenosine');
+
         // --- Falling asleep ---
         let asleep;
         if (wokeByAlarm) {
           if (energy === 'depleted') {
-            asleep = Timeline.pick([
-              'You\'re gone before your head settles. The kind of sleep that takes you — no transition, no drift, just off.',
-              'Your body gives out. Not falling asleep so much as shutting down. One breath you\'re lying there, the next you\'re nowhere.',
+            asleep = Timeline.weightedPick([
+              { weight: 1, value: 'You\'re gone before your head settles. The kind of sleep that takes you — no transition, no drift, just off.' },
+              { weight: 1, value: 'Your body gives out. Not falling asleep so much as shutting down. One breath you\'re lying there, the next you\'re nowhere.' },
+              // High adenosine — consciousness collapses
+              { weight: State.lerp01(preSleepAden, 60, 90), value: 'You don\'t fall asleep. You drop. Like someone pulled a plug — one moment the ceiling, the next nothing, not even the nothing.' },
             ]);
           } else if (stress === 'overwhelmed' || stress === 'strained') {
-            asleep = Timeline.pick([
-              'Sleep comes late. You lie there turning the same thoughts over, the same knots, until exhaustion wins. It\'s not rest. It\'s surrender.',
-              'You stare at the dark for a long time. The thoughts don\'t stop — they just blur, eventually, into something close enough to unconsciousness.',
-              'It takes a while. You lie still and your head won\'t stop. Eventually the gap between thoughts gets wide enough and you slip through.',
+            asleep = Timeline.weightedPick([
+              { weight: 1, value: 'Sleep comes late. You lie there turning the same thoughts over, the same knots, until exhaustion wins. It\'s not rest. It\'s surrender.' },
+              { weight: 1, value: 'You stare at the dark for a long time. The thoughts don\'t stop — they just blur, eventually, into something close enough to unconsciousness.' },
+              { weight: 1, value: 'It takes a while. You lie still and your head won\'t stop. Eventually the gap between thoughts gets wide enough and you slip through.' },
+              // Low GABA — the mind won't release
+              { weight: State.lerp01(preSleepGaba, 40, 15), value: 'Your body is exhausted but your head won\'t let go. Every time you get close to the edge, something yanks you back — a thought, a fear, your own pulse. Sleep has to fight for it.' },
+              // High NE — hyper-alert in the dark
+              { weight: State.lerp01(preSleepNE, 55, 80), value: 'Every sound is too loud. The building settling, the fridge, your own breathing. You lie rigid in the dark, listening to everything, and the listening is what keeps you awake.' },
             ]);
           } else {
-            asleep = Timeline.pick([
-              'You close your eyes and the day lets go of you. Sleep comes — not instantly, but without a fight.',
-              'The pillow, the dark, the quiet. You drift. Somewhere between one thought and the next you stop being awake.',
-              'You settle in. A few minutes of the ceiling, then nothing. Actual sleep.',
+            asleep = Timeline.weightedPick([
+              { weight: 1, value: 'You close your eyes and the day lets go of you. Sleep comes — not instantly, but without a fight.' },
+              { weight: 1, value: 'The pillow, the dark, the quiet. You drift. Somewhere between one thought and the next you stop being awake.' },
+              { weight: 1, value: 'You settle in. A few minutes of the ceiling, then nothing. Actual sleep.' },
+              // Higher serotonin — settling in feels warm
+              { weight: State.lerp01(preSleepSer, 50, 70), value: 'Your eyes close and there\'s a warmth to it — the sheets, the dark, your body letting go without being asked. You\'re asleep before you notice.' },
             ]);
           }
         } else {
           if (energy === 'depleted' && quality === 'poor') {
-            asleep = Timeline.pick([
-              'You lie down and something gives way. Not quite sleep. More like your body collecting a debt it\'s owed.',
-              'Your body folds into the mattress. Sleep takes you, but roughly — dragging you under before you\'re ready.',
+            asleep = Timeline.weightedPick([
+              { weight: 1, value: 'You lie down and something gives way. Not quite sleep. More like your body collecting a debt it\'s owed.' },
+              { weight: 1, value: 'Your body folds into the mattress. Sleep takes you, but roughly — dragging you under before you\'re ready.' },
+              // High NE — body won't unclench even in exhaustion
+              { weight: State.lerp01(preSleepNE, 50, 75), value: 'You collapse more than lie down. Sleep takes you but your jaw stays clenched, your shoulders stay locked. Even unconscious, something in you is bracing.' },
             ]);
           } else if (energy === 'depleted') {
-            asleep = Timeline.pick([
-              'You\'re asleep before you finish lying down. Gone. The kind of unconsciousness that doesn\'t feel like rest because you weren\'t awake enough to notice the transition.',
-              'Your body doesn\'t ask. It takes. You\'re horizontal and then you\'re nowhere, instantly, like a switch thrown.',
+            asleep = Timeline.weightedPick([
+              { weight: 1, value: 'You\'re asleep before you finish lying down. Gone. The kind of unconsciousness that doesn\'t feel like rest because you weren\'t awake enough to notice the transition.' },
+              { weight: 1, value: 'Your body doesn\'t ask. It takes. You\'re horizontal and then you\'re nowhere, instantly, like a switch thrown.' },
+              // Very high adenosine — past crash, into oblivion
+              { weight: State.lerp01(preSleepAden, 70, 95), value: 'You don\'t remember lying down. Between standing and unconscious there was nothing — no transition, no last thought, just the world switching off.' },
             ]);
           } else if (quality === 'poor') {
-            asleep = Timeline.pick([
-              'Sleep comes in pieces. You\'re awake, then you\'re not, then you are again and the ceiling is the same.',
-              'You drift, surface, drift again. Every time you almost get there, something pulls you back — a thought, a sound, your own body shifting.',
-              'Not really sleeping. More like visiting unconsciousness in short trips and coming back each time with less to show for it.',
+            asleep = Timeline.weightedPick([
+              { weight: 1, value: 'Sleep comes in pieces. You\'re awake, then you\'re not, then you are again and the ceiling is the same.' },
+              { weight: 1, value: 'You drift, surface, drift again. Every time you almost get there, something pulls you back — a thought, a sound, your own body shifting.' },
+              { weight: 1, value: 'Not really sleeping. More like visiting unconsciousness in short trips and coming back each time with less to show for it.' },
+              // Low GABA — anxiety keeps breaking through
+              { weight: State.lerp01(preSleepGaba, 40, 15), value: 'You sink, then your chest tightens and you\'re back. Sink again. Tighten. Back. Your body wants sleep but something underneath keeps tripping the wire.' },
+              // High NE — startling awake
+              { weight: State.lerp01(preSleepNE, 50, 75), value: 'You jolt awake. You were asleep — you think — but now you\'re staring at the ceiling with your heart going. Nothing happened. You lie there until it slows, then try again.' },
             ]);
           } else if (sleepMinutes >= 240) {
-            asleep = Timeline.pick([
-              'You sleep. Actually sleep. The kind that takes you somewhere and brings you back changed.',
-              'You close your eyes and the world does the decent thing and goes away for a while.',
-              'Sleep comes, and it\'s the real kind. Deep, blank, generous.',
+            asleep = Timeline.weightedPick([
+              { weight: 1, value: 'You sleep. Actually sleep. The kind that takes you somewhere and brings you back changed.' },
+              { weight: 1, value: 'You close your eyes and the world does the decent thing and goes away for a while.' },
+              { weight: 1, value: 'Sleep comes, and it\'s the real kind. Deep, blank, generous.' },
+              // Higher serotonin — sleep with warmth
+              { weight: State.lerp01(preSleepSer, 50, 70), value: 'Sleep gathers you up. No resistance, no negotiation — just warmth and dark and the easy surrender of a body that\'s been allowed to rest.' },
             ]);
           } else {
-            asleep = Timeline.pick([
-              'You close your eyes. Something between sleep and not — the body resting even if the mind doesn\'t fully let go.',
-              'You drift. Not deep, not long, but your body takes what it can get.',
+            asleep = Timeline.weightedPick([
+              { weight: 1, value: 'You close your eyes. Something between sleep and not — the body resting even if the mind doesn\'t fully let go.' },
+              { weight: 1, value: 'You drift. Not deep, not long, but your body takes what it can get.' },
+              // High adenosine — drift is heavier than expected
+              { weight: State.lerp01(preSleepAden, 55, 75), value: 'You meant to just close your eyes. The tiredness was deeper than you realized — you\'re under before you can reconsider.' },
             ]);
           }
         }
@@ -861,102 +893,134 @@ const Content = (() => {
         if (wokeByAlarm) {
           // Alarm waking — the specific fog of being pulled out
           if (postEnergy === 'depleted' || postEnergy === 'exhausted') {
-            waking = Timeline.pick([
-              'The alarm. It comes from far away and then it\'s right there, inside your skull. Your hand finds it somehow. The silence after is worse — now you have to be a person. Your body says no. Every part of you says no.',
-              'Sound. Your arm moves before you\'re awake. The alarm stops. You lie in the sudden quiet and your eyelids weigh more than anything has ever weighed. Not enough. It wasn\'t enough.',
-              'The alarm drags you up from somewhere deep. You kill it and lie there in the aftermath, not yet a person, not yet anything. The room is dark, or bright, or something. You can\'t make it matter yet.',
+            waking = Timeline.weightedPick([
+              { weight: 1, value: 'The alarm. It comes from far away and then it\'s right there, inside your skull. Your hand finds it somehow. The silence after is worse — now you have to be a person. Your body says no. Every part of you says no.' },
+              { weight: 1, value: 'Sound. Your arm moves before you\'re awake. The alarm stops. You lie in the sudden quiet and your eyelids weigh more than anything has ever weighed. Not enough. It wasn\'t enough.' },
+              { weight: 1, value: 'The alarm drags you up from somewhere deep. You kill it and lie there in the aftermath, not yet a person, not yet anything. The room is dark, or bright, or something. You can\'t make it matter yet.' },
+              // High adenosine — can barely surface
+              { weight: State.lerp01(postAden, 30, 55), value: 'The alarm is somewhere. Far away and getting closer, or maybe it was always close and you\'re the one who was far. Your hand moves through something thick. Finds the phone. Silence. Your eyes won\'t open. They genuinely won\'t open.' },
+              // Low serotonin — waking into dread
+              { weight: State.lerp01(postSer, 35, 15), value: 'The alarm, and before you\'re even awake, the feeling is already there — not a thought, not yet, just weight. The day waiting on the other side of your eyelids, and you already know what it\'s going to be.' },
             ]);
           } else if (quality === 'poor') {
-            waking = Timeline.pick([
-              'The alarm. You were already half-awake anyway, floating in that grey zone between sleep and not. The sound just makes it official. Your eyes feel like they\'ve been open for days.',
-              'Sound cuts through the thin sleep you had. You turn it off. The room comes back — same room, same light, same you. Except grittier, like something\'s been rubbed raw.',
+            waking = Timeline.weightedPick([
+              { weight: 1, value: 'The alarm. You were already half-awake anyway, floating in that grey zone between sleep and not. The sound just makes it official. Your eyes feel like they\'ve been open for days.' },
+              { weight: 1, value: 'Sound cuts through the thin sleep you had. You turn it off. The room comes back — same room, same light, same you. Except grittier, like something\'s been rubbed raw.' },
+              // High NE — edges too sharp
+              { weight: State.lerp01(postNE, 50, 70), value: 'The alarm is an assault. Not loud — it\'s always this loud — but every frequency is a needle. You slap it quiet and the silence rings. Your skin feels too thin for the morning.' },
             ]);
           } else if (postEnergy === 'tired' || postEnergy === 'okay') {
-            waking = Timeline.pick([
-              'The alarm. You were actually sleeping — deeply enough that the sound takes a second to become a sound and not just part of whatever you were dreaming. You reach for the phone. The room assembles itself around you: walls, ceiling, the light saying morning.',
-              'The alarm goes off and you\'re not yet a person. A hand hits the phone. Silence. You lie there while the fog lifts in layers — first you know where you are, then when, then why it matters. A minute passes before any of it feels real.',
-              'Noise. Then not noise. Then the slow work of becoming someone who is awake. The pillow is warm. The air is not. You\'re somewhere between the two.',
+            waking = Timeline.weightedPick([
+              { weight: 1, value: 'The alarm. You were actually sleeping — deeply enough that the sound takes a second to become a sound and not just part of whatever you were dreaming. You reach for the phone. The room assembles itself around you: walls, ceiling, the light saying morning.' },
+              { weight: 1, value: 'The alarm goes off and you\'re not yet a person. A hand hits the phone. Silence. You lie there while the fog lifts in layers — first you know where you are, then when, then why it matters. A minute passes before any of it feels real.' },
+              { weight: 1, value: 'Noise. Then not noise. Then the slow work of becoming someone who is awake. The pillow is warm. The air is not. You\'re somewhere between the two.' },
+              // High adenosine residual — thicker fog
+              { weight: State.lerp01(postAden, 25, 45), value: 'The alarm. You hear it for a long time before it becomes an alarm — just sound, formless, part of something you were already in. Your hand knows what to do before you do. The silence after is cotton. You float in it, not yet here.' },
             ]);
           } else {
             // rested/alert alarm wake
-            waking = Timeline.pick([
-              'The alarm and you\'re awake — actually awake, not the usual drag. Your eyes open and the room is just a room. Morning. Your body cooperates for once.',
-              'The alarm. But you were already surfacing, already close to the edge of waking. The sound just tips you over. You open your eyes and the day is right there, ready. So are you, more or less.',
+            waking = Timeline.weightedPick([
+              { weight: 1, value: 'The alarm and you\'re awake — actually awake, not the usual drag. Your eyes open and the room is just a room. Morning. Your body cooperates for once.' },
+              { weight: 1, value: 'The alarm. But you were already surfacing, already close to the edge of waking. The sound just tips you over. You open your eyes and the day is right there, ready. So are you, more or less.' },
+              // Higher serotonin — morning feels possible
+              { weight: State.lerp01(postSer, 55, 75), value: 'The alarm, and you\'re already there. Eyes open, body present, the room making sense on the first try. Something in you cooperated overnight. The morning is just morning.' },
             ]);
           }
         } else if (wakeTime === 'deep_night' || wakeTime === 'night') {
           // Waking in the dark — the wrong kind of awake
           if (postEnergy === 'depleted' || postEnergy === 'exhausted') {
-            waking = Timeline.pick([
-              'You surface in the dark. Not morning — not close. The room is black and quiet and your body is a thing that is awake when it shouldn\'t be. Nowhere to go with it. Nothing to do with it.',
-              'Dark. You\'re awake. That\'s wrong — it should be later, should be light. But here you are, eyes open in a room that gives you nothing to look at. Too tired to get up. Too awake to go back.',
+            waking = Timeline.weightedPick([
+              { weight: 1, value: 'You surface in the dark. Not morning — not close. The room is black and quiet and your body is a thing that is awake when it shouldn\'t be. Nowhere to go with it. Nothing to do with it.' },
+              { weight: 1, value: 'Dark. You\'re awake. That\'s wrong — it should be later, should be light. But here you are, eyes open in a room that gives you nothing to look at. Too tired to get up. Too awake to go back.' },
+              // Low GABA — night anxiety, the 3am dread
+              { weight: State.lerp01(postGaba, 40, 15), value: 'You\'re awake and it\'s dark and the first thing that arrives is the dread. Not of anything specific — just the particular terror of being conscious at the wrong hour with a body too tired to do anything about it.' },
             ]);
           } else {
-            waking = Timeline.pick([
-              'You come back to yourself in the dark. The room is silent except for the building being a building — pipes, settling, the hum you only notice at night. It\'s the wrong time to be awake. You know this the way you know your own name.',
-              'Dark. Still. You\'re awake and the world isn\'t. The silence has that particular quality — the one that means everyone else is asleep and you\'re on the wrong side of it.',
-              'Your eyes open to nothing. Dark room, dark window. The kind of awake that comes without a reason, just you suddenly here in the middle of the night with no idea what to do about it.',
+            waking = Timeline.weightedPick([
+              { weight: 1, value: 'You come back to yourself in the dark. The room is silent except for the building being a building — pipes, settling, the hum you only notice at night. It\'s the wrong time to be awake. You know this the way you know your own name.' },
+              { weight: 1, value: 'Dark. Still. You\'re awake and the world isn\'t. The silence has that particular quality — the one that means everyone else is asleep and you\'re on the wrong side of it.' },
+              { weight: 1, value: 'Your eyes open to nothing. Dark room, dark window. The kind of awake that comes without a reason, just you suddenly here in the middle of the night with no idea what to do about it.' },
+              // High NE — hyper-aware in the dark
+              { weight: State.lerp01(postNE, 45, 70), value: 'You\'re awake, and every sound is a fact. The pipes. A car outside. Someone\'s footsteps above you, or below. The dark is full of information you didn\'t ask for, and you can\'t stop receiving it.' },
             ]);
           }
         } else if (wakeTime === 'afternoon' || wakeTime === 'evening') {
           // Late waking — the disorientation of lost time
           if (postMood === 'numb' || postMood === 'heavy') {
-            waking = Timeline.pick([
-              'You open your eyes and the light is wrong. Afternoon light — low, coming in at an angle that means the day happened without you. You lie there with that. The weight of it.',
-              'The room is bright in the wrong way. You slept through the morning, through whatever the morning was going to be. The day is mostly over. You\'re mostly not surprised.',
+            waking = Timeline.weightedPick([
+              { weight: 1, value: 'You open your eyes and the light is wrong. Afternoon light — low, coming in at an angle that means the day happened without you. You lie there with that. The weight of it.' },
+              { weight: 1, value: 'The room is bright in the wrong way. You slept through the morning, through whatever the morning was going to be. The day is mostly over. You\'re mostly not surprised.' },
+              // Low serotonin — the lost time has gravity
+              { weight: State.lerp01(postSer, 35, 15), value: 'Afternoon. The day already gone. Some part of you chose this, the long sleep, the missed hours. It doesn\'t feel like a choice. It feels like the only thing that was going to happen.' },
             ]);
           } else {
-            waking = Timeline.pick([
-              'You surface and the light says afternoon. The day is already half-gone, already somewhere you\'ll never catch. The room has that overslept feeling — stale air, warm sheets, time you didn\'t spend.',
-              'You come back. The light through the window is angled low and golden, which means it\'s later than it should be. Much later. The morning happened without you. It\'s gone.',
-              'Your eyes open and the sun is wrong — past the middle of the sky, past the part of the day when waking up feels like waking up. This feels like something else. Surfacing.',
+            waking = Timeline.weightedPick([
+              { weight: 1, value: 'You surface and the light says afternoon. The day is already half-gone, already somewhere you\'ll never catch. The room has that overslept feeling — stale air, warm sheets, time you didn\'t spend.' },
+              { weight: 1, value: 'You come back. The light through the window is angled low and golden, which means it\'s later than it should be. Much later. The morning happened without you. It\'s gone.' },
+              { weight: 1, value: 'Your eyes open and the sun is wrong — past the middle of the sky, past the part of the day when waking up feels like waking up. This feels like something else. Surfacing.' },
+              // High adenosine residual — sluggish re-entry
+              { weight: State.lerp01(postAden, 25, 45), value: 'The light is wrong and so is your head. Thick, slow, like waking up underwater. Afternoon. The day has been happening without you, and getting back to it feels like swimming through something.' },
             ]);
           }
         } else if (postEnergy === 'depleted' || postEnergy === 'exhausted') {
           // Still exhausted despite sleeping — not enough
-          waking = Timeline.pick([
-            'You surface. That\'s the only word for it — coming up from somewhere that wasn\'t deep enough, breaking the surface and finding the air no different. Your body is heavy. Your eyes are heavy. Everything is heavy and the room is asking you to be a person in it.',
-            'You wake up, and the first thing you know is that it wasn\'t enough. The sleep, the hours, whatever your body did in the dark — not enough. You\'re here, eyes open, and the distance between this and rested is a distance you can feel.',
-            'Morning, probably. You\'re awake, technically. Your body is a sandbag version of itself — present but dense, uncooperative. The ceiling is up there. You\'re down here. The gap between is everything.',
+          waking = Timeline.weightedPick([
+            { weight: 1, value: 'You surface. That\'s the only word for it — coming up from somewhere that wasn\'t deep enough, breaking the surface and finding the air no different. Your body is heavy. Your eyes are heavy. Everything is heavy and the room is asking you to be a person in it.' },
+            { weight: 1, value: 'You wake up, and the first thing you know is that it wasn\'t enough. The sleep, the hours, whatever your body did in the dark — not enough. You\'re here, eyes open, and the distance between this and rested is a distance you can feel.' },
+            { weight: 1, value: 'Morning, probably. You\'re awake, technically. Your body is a sandbag version of itself — present but dense, uncooperative. The ceiling is up there. You\'re down here. The gap between is everything.' },
+            // Low serotonin — the not-enough has a color
+            { weight: State.lerp01(postSer, 35, 15), value: 'You surface and the first thing waiting is the knowledge that this is it. This is all the rest you\'re getting. Your body is heavy. Your thoughts are heavy. The room is the same room, and you\'re worse for having opened your eyes.' },
           ]);
         } else if (quality === 'poor') {
           // Slept but poorly — the gritty surface feeling
-          waking = Timeline.pick([
-            'You wake up feeling like you didn\'t sleep. You did — you must have, because time passed — but your body didn\'t get the memo. Your eyes are gritty, your neck is wrong, everything is slightly off in a way you can\'t fix by stretching.',
-            'You come back. The room. The light. You. Something\'s wrong, or not wrong exactly — just not right. Sleep happened but it didn\'t take. You feel like a rough draft of a person.',
-            'Awake. Or some version of it. Your body did the hours but skipped the rest — you can feel it in your eyes, your joints, the dull headache that isn\'t quite a headache. The room is the same room. You\'re a worse version of who lay down in it.',
+          waking = Timeline.weightedPick([
+            { weight: 1, value: 'You wake up feeling like you didn\'t sleep. You did — you must have, because time passed — but your body didn\'t get the memo. Your eyes are gritty, your neck is wrong, everything is slightly off in a way you can\'t fix by stretching.' },
+            { weight: 1, value: 'You come back. The room. The light. You. Something\'s wrong, or not wrong exactly — just not right. Sleep happened but it didn\'t take. You feel like a rough draft of a person.' },
+            { weight: 1, value: 'Awake. Or some version of it. Your body did the hours but skipped the rest — you can feel it in your eyes, your joints, the dull headache that isn\'t quite a headache. The room is the same room. You\'re a worse version of who lay down in it.' },
+            // High NE — sleep didn't clear the charge
+            { weight: State.lerp01(postNE, 50, 70), value: 'You wake up tight. Your jaw, your shoulders, your hands — clenched around something that wasn\'t there when you went to sleep, or was and didn\'t leave. The sleep didn\'t clear it. You can feel the charge in your teeth.' },
           ]);
         } else if (postEnergy === 'rested' || postEnergy === 'alert') {
           // Actually rested — rare clarity
           if (postMood === 'clear' || postMood === 'present') {
-            waking = Timeline.pick([
-              'You open your eyes and the room is just a room. Not a problem, not a weight — just walls and light and air. Your body is yours. It works. The morning is outside the window doing morning things, and you\'re in here, and that\'s fine. Actually fine.',
-              'You wake up and something is different. It takes a second to place it — the absence of dread. The room is light, the bed is warm, your body cooperated. You\'re just awake. Just here. It feels rare because it is.',
-              'Light through the curtain. Your eyes open and your body doesn\'t argue. No fog, no weight, no negotiation with your own limbs. The room, the morning, you — all present, all accounted for. This is what it\'s supposed to feel like.',
+            waking = Timeline.weightedPick([
+              { weight: 1, value: 'You open your eyes and the room is just a room. Not a problem, not a weight — just walls and light and air. Your body is yours. It works. The morning is outside the window doing morning things, and you\'re in here, and that\'s fine. Actually fine.' },
+              { weight: 1, value: 'You wake up and something is different. It takes a second to place it — the absence of dread. The room is light, the bed is warm, your body cooperated. You\'re just awake. Just here. It feels rare because it is.' },
+              { weight: 1, value: 'Light through the curtain. Your eyes open and your body doesn\'t argue. No fog, no weight, no negotiation with your own limbs. The room, the morning, you — all present, all accounted for. This is what it\'s supposed to feel like.' },
+              // High serotonin — actually warm
+              { weight: State.lerp01(postSer, 60, 80), value: 'You wake up and the world is gentle. That\'s the word — gentle. The light, the air, the fact of being alive in a bed. Your body is easy in itself. You lie there for a moment just because you can, and the moment is good.' },
             ]);
           } else {
-            waking = Timeline.pick([
-              'You wake up and your body is there — present, functional, not fighting you. The room comes into focus: the light, the shapes, the ordinary evidence of morning. You don\'t feel good, exactly. But you feel like yourself.',
-              'Your eyes open. The ceiling, the light, the quiet. Your body did the thing it was supposed to do for once — slept, recovered, came back to you more or less intact. The day is out there. You can probably meet it.',
+            waking = Timeline.weightedPick([
+              { weight: 1, value: 'You wake up and your body is there — present, functional, not fighting you. The room comes into focus: the light, the shapes, the ordinary evidence of morning. You don\'t feel good, exactly. But you feel like yourself.' },
+              { weight: 1, value: 'Your eyes open. The ceiling, the light, the quiet. Your body did the thing it was supposed to do for once — slept, recovered, came back to you more or less intact. The day is out there. You can probably meet it.' },
+              // Low GABA despite rest — body rested but mind already running
+              { weight: State.lerp01(postGaba, 45, 25), value: 'Your body is rested — you can feel that, the energy is there. But your mind is already going, already making lists, already three steps into a day that hasn\'t started. You\'re functional. Just not calm.' },
             ]);
           }
         } else {
           // Tired but functional — the middle ground
           if (postMood === 'heavy' || postMood === 'numb') {
-            waking = Timeline.pick([
-              'You\'re awake. The room, the light. Your body moves when you tell it to, just slowly, just with the particular reluctance of something that would rather not. The day is there, outside the window. It doesn\'t care if you\'re ready.',
-              'You surface slowly. The fog doesn\'t lift so much as thin — you can see through it, but it\'s still there, clinging. The room is a room again. Your body is a body again. Neither feels like a gift.',
+            waking = Timeline.weightedPick([
+              { weight: 1, value: 'You\'re awake. The room, the light. Your body moves when you tell it to, just slowly, just with the particular reluctance of something that would rather not. The day is there, outside the window. It doesn\'t care if you\'re ready.' },
+              { weight: 1, value: 'You surface slowly. The fog doesn\'t lift so much as thin — you can see through it, but it\'s still there, clinging. The room is a room again. Your body is a body again. Neither feels like a gift.' },
+              // Low serotonin — the heaviness has weight
+              { weight: State.lerp01(postSer, 35, 15), value: 'You\'re awake, and the first thing you feel is the cost of it. Being conscious takes something from you, some toll paid at the door. The room is there. The day is there. That\'s already too much.' },
             ]);
           } else if (wakeTime === 'early_morning' || wakeTime === 'morning') {
-            waking = Timeline.pick([
-              'You wake up. Not sharply, not gently — just the slow fade from not-here to here. The room materializes: the light through the curtain, the shapes of things, the particular silence of early morning. You\'re somewhere between fog and awake. The body moves, but it takes a minute.',
-              'Morning. You know this before you open your eyes — the light, the feel of it. Your body is still negotiating the transition from asleep to not. The room is there when you\'re ready for it. You\'re almost ready for it.',
-              'You surface into morning. The light is thin and pale — early, or early enough. Your body does an inventory without your permission: stiff, slow, but functional. The day hasn\'t started demanding things yet. Give it a minute.',
+            waking = Timeline.weightedPick([
+              { weight: 1, value: 'You wake up. Not sharply, not gently — just the slow fade from not-here to here. The room materializes: the light through the curtain, the shapes of things, the particular silence of early morning. You\'re somewhere between fog and awake. The body moves, but it takes a minute.' },
+              { weight: 1, value: 'Morning. You know this before you open your eyes — the light, the feel of it. Your body is still negotiating the transition from asleep to not. The room is there when you\'re ready for it. You\'re almost ready for it.' },
+              { weight: 1, value: 'You surface into morning. The light is thin and pale — early, or early enough. Your body does an inventory without your permission: stiff, slow, but functional. The day hasn\'t started demanding things yet. Give it a minute.' },
+              // High NE — sharper morning than expected
+              { weight: State.lerp01(postNE, 45, 65), value: 'You wake up and the room is immediately all there — every edge, every sound, the light too precise for how early it is. Your body is already cataloguing: the temperature, the stiffness in your back, the air. Too awake for how tired you are.' },
             ]);
           } else {
-            waking = Timeline.pick([
-              'You wake up. The room, the light, the fact of being conscious again. Your body comes back to you in pieces — hands first, then weight, then the specific feeling of a head that was recently asleep. You\'re here.',
-              'Eyes open. The room. You. The slow assembly of a person from the raw material of someone who was just unconscious. It takes a minute. Things come back — where you are, what day it is, what you\'re supposed to be doing. You\'re not sure about the last one.',
+            waking = Timeline.weightedPick([
+              { weight: 1, value: 'You wake up. The room, the light, the fact of being conscious again. Your body comes back to you in pieces — hands first, then weight, then the specific feeling of a head that was recently asleep. You\'re here.' },
+              { weight: 1, value: 'Eyes open. The room. You. The slow assembly of a person from the raw material of someone who was just unconscious. It takes a minute. Things come back — where you are, what day it is, what you\'re supposed to be doing. You\'re not sure about the last one.' },
+              // High adenosine residual — foggy edges
+              { weight: State.lerp01(postAden, 25, 40), value: 'You come back slowly. The room is there but soft, like looking through gauze. Your thoughts are shapes, not words yet. It takes a while for the edges to sharpen — for the room to become a room and not just light and surfaces.' },
             ]);
           }
         }
@@ -1182,56 +1246,77 @@ const Content = (() => {
         const minutes = Timeline.randomInt(5, 10);
         State.advanceTime(minutes);
 
+        // NT values for continuous prose shading
+        const ser = State.get('serotonin');
+        const ne = State.get('norepinephrine');
+        const dopa = State.get('dopamine');
+        const gaba = State.get('gaba');
+        const aden = State.get('adenosine');
+
         if (mood === 'numb') {
-          return Timeline.pick([
-            'You look out the window. The street is there. People, cars, the sky. You see all of it. None of it registers.',
-            'The window. The world on the other side of the glass. You watch it like it\'s on a screen — present, visible, not quite real.',
-            'Outside exists. You can see it. Knowing that doesn\'t do anything, but you look anyway.',
+          return Timeline.weightedPick([
+            { weight: 1, value: 'You look out the window. The street is there. People, cars, the sky. You see all of it. None of it registers.' },
+            { weight: 1, value: 'The window. The world on the other side of the glass. You watch it like it\'s on a screen — present, visible, not quite real.' },
+            { weight: 1, value: 'Outside exists. You can see it. Knowing that doesn\'t do anything, but you look anyway.' },
+            // Low dopamine — nothing catches
+            { weight: State.lerp01(dopa, 40, 15), value: 'You look out. Things move — a person, a car, a bird. Your eyes follow without your permission. None of it reaches the part of you that would care.' },
           ]);
         }
         if (mood === 'heavy') {
-          return Timeline.pick([
-            'The world outside. People going places. You\'re in here. The glass between you and that is thin but it might as well be a wall.',
-            'You look out. Trees, if there are trees. Sky. The distance between you and all of it feels wider than the window.',
-            'Outside is happening. You watch it from the bed. The effort of being out there — even thinking about it is a lot.',
+          return Timeline.weightedPick([
+            { weight: 1, value: 'The world outside. People going places. You\'re in here. The glass between you and that is thin but it might as well be a wall.' },
+            { weight: 1, value: 'You look out. Trees, if there are trees. Sky. The distance between you and all of it feels wider than the window.' },
+            { weight: 1, value: 'Outside is happening. You watch it from the bed. The effort of being out there — even thinking about it is a lot.' },
+            // Low serotonin — the distance is heavier
+            { weight: State.lerp01(ser, 35, 15), value: 'You look out and the world is right there, close enough to touch if you opened the window. You won\'t. The distance isn\'t the glass. It\'s everything between you and being a person who goes outside.' },
           ]);
         }
         if (mood === 'fraying') {
           if (weather === 'clear') {
             State.adjustStress(-2);
-            return Timeline.pick([
-              'You look out. Clear sky. The light is doing something good today — something open. Your shoulders drop half an inch. It helps.',
-              'The window. Blue out there, or close to it. Your eyes rest on the sky because it\'s the only thing not asking anything of you.',
-              'Clear outside. The light comes in and touches the floor. You stand in it for a minute. Something loosens, slightly.',
+            return Timeline.weightedPick([
+              { weight: 1, value: 'You look out. Clear sky. The light is doing something good today — something open. Your shoulders drop half an inch. It helps.' },
+              { weight: 1, value: 'The window. Blue out there, or close to it. Your eyes rest on the sky because it\'s the only thing not asking anything of you.' },
+              { weight: 1, value: 'Clear outside. The light comes in and touches the floor. You stand in it for a minute. Something loosens, slightly.' },
+              // Higher serotonin — the light actually reaches you
+              { weight: State.lerp01(ser, 40, 60), value: 'The sky is clear and the light comes in and for a second it\'s just light — not an accusation, not a reminder. Just warmth on your face. Your shoulders come down. Your breath comes easier.' },
             ]);
           }
-          return Timeline.pick([
-            'You look out the window. Grey. The same grey as the inside of your head. It doesn\'t help.',
-            'Outside is flat and overcast. You were hoping for something — you\'re not sure what. This isn\'t it.',
-            'The window. Rain, or the threat of it. The world out there looks exactly like you feel.',
+          return Timeline.weightedPick([
+            { weight: 1, value: 'You look out the window. Grey. The same grey as the inside of your head. It doesn\'t help.' },
+            { weight: 1, value: 'Outside is flat and overcast. You were hoping for something — you\'re not sure what. This isn\'t it.' },
+            { weight: 1, value: 'The window. Rain, or the threat of it. The world out there looks exactly like you feel.' },
+            // Low GABA — the grey presses in
+            { weight: State.lerp01(gaba, 40, 20), value: 'You look out and the grey is everywhere — the sky, the buildings, the flat light on the street. It presses against the glass. You step back without deciding to.' },
           ]);
         }
         if (mood === 'hollow') {
-          return Timeline.pick([
-            'You look out. Someone\'s walking a dog. Someone else is carrying groceries. People with destinations. You watch.',
-            'The window shows the usual. The street, the building opposite. A life-sized diorama of people going somewhere.',
-            'Outside. People. Movement. The glass keeps the sound out. You watch like it\'s an aquarium.',
+          return Timeline.weightedPick([
+            { weight: 1, value: 'You look out. Someone\'s walking a dog. Someone else is carrying groceries. People with destinations. You watch.' },
+            { weight: 1, value: 'The window shows the usual. The street, the building opposite. A life-sized diorama of people going somewhere.' },
+            { weight: 1, value: 'Outside. People. Movement. The glass keeps the sound out. You watch like it\'s an aquarium.' },
+            // Low dopamine — watching without any pull to join
+            { weight: State.lerp01(dopa, 40, 20), value: 'Someone crosses the street. Someone else waits at the corner. You watch them the way you\'d watch a screensaver — movement without meaning, pattern without pull.' },
           ]);
         }
         if (mood === 'clear' || mood === 'present') {
           State.adjustStress(-3);
-          return Timeline.pick([
-            'You look out the window. The light, the sky, the ordinary scene below — it\'s actually nice. The kind of nice you can feel today.',
-            'The view. Nothing special — rooftops, sky, a tree if you lean. But you\'re seeing it. Actually seeing it. That\'s different.',
-            'You stand at the window. The world is out there, doing its thing. For a minute you\'re part of it, watching from the inside. Something close to peace.',
+          return Timeline.weightedPick([
+            { weight: 1, value: 'You look out the window. The light, the sky, the ordinary scene below — it\'s actually nice. The kind of nice you can feel today.' },
+            { weight: 1, value: 'The view. Nothing special — rooftops, sky, a tree if you lean. But you\'re seeing it. Actually seeing it. That\'s different.' },
+            { weight: 1, value: 'You stand at the window. The world is out there, doing its thing. For a minute you\'re part of it, watching from the inside. Something close to peace.' },
+            // High serotonin + NE — vivid and warm
+            { weight: State.lerp01(ser, 55, 75) * State.lerp01(ne, 40, 60), value: 'The light is good today. You notice the color of the sky, the way shadows fall on the building opposite, a bird sitting on a wire. Small things, all of them clear, all of them enough. You stay at the window longer than you meant to.' },
           ]);
         }
         // flat
         State.adjustStress(-1);
-        return Timeline.pick([
-          'You look out. The usual view. It\'s something to look at that isn\'t the room.',
-          'The window. Outside. Not much happening, but you look for a while anyway.',
-          'You watch the street for a few minutes. Nothing in particular. It passes the time.',
+        return Timeline.weightedPick([
+          { weight: 1, value: 'You look out. The usual view. It\'s something to look at that isn\'t the room.' },
+          { weight: 1, value: 'The window. Outside. Not much happening, but you look for a while anyway.' },
+          { weight: 1, value: 'You watch the street for a few minutes. Nothing in particular. It passes the time.' },
+          // High adenosine — the view is soft
+          { weight: State.lerp01(aden, 50, 75), value: 'You look out. The view is there but soft — edges blurred, details optional. You watch without really watching. The tiredness makes it all a little far away.' },
         ]);
       },
     },
