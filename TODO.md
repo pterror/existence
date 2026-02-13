@@ -3,7 +3,7 @@
 ## Backlog
 
 ### NT prose shading — remaining unconverted call sites
-Three-layer prose shading pattern established (see DESIGN.md "Prose-neurochemistry interface"): moodTone() as coarse selector, weighted variant selection via NT values, deterministic modifiers. Converted: `idleThoughts()`, `apartment_bedroom` description, `lie_there` interaction, sleep prose (23 sites), `look_out_window` (7 sites). ~19 `Timeline.pick()` call sites remain unconverted. Priority order:
+Three-layer prose shading pattern established (see DESIGN.md "Prose-neurochemistry interface"): moodTone() as coarse selector, weighted variant selection via NT values, deterministic modifiers. Converted: `idleThoughts()`, `apartment_bedroom` description, `lie_there` interaction, sleep prose (23 sites), `look_out_window` (7 sites). ~10 `Timeline.pick()` call sites remain unconverted (all friend/coworker messages). Priority order:
 
 **High impact (frequent / atmospheric):**
 - ~~Sleep prose (falling-asleep + waking-up, ~23 pick sites)~~ — **DONE.** Pre-sleep NTs (adenosine, GABA, NE, serotonin) shade falling-asleep; post-sleep NTs (serotonin, NE, GABA, adenosine) shade waking. Key dimensions: adenosine→sleep inertia/crash, GABA→night anxiety/can't-settle, NE→hyper-alertness/sharp edges, serotonin→dread-vs-warmth.
@@ -13,9 +13,10 @@ Three-layer prose shading pattern established (see DESIGN.md "Prose-neurochemist
 - Other location descriptions (kitchen, bathroom, street, bus stop, workplace, corner store)
 
 **Medium impact (periodic):**
-- Work interactions (do_work, work_break, talk_to_coworker)
-- Phone interactions (check_phone, read_messages)
-- Event text generators (street_ambient, apartment_sound, coworker_speaks)
+- ~~Work event text (work_task_appears, break_room_noise)~~ — **DONE.** NE→demand sharpness, adenosine→sound blur.
+- ~~Event text generators (street_ambient, apartment_sound, someone_passes)~~ — **DONE.** NE→sensory detail/hyper-awareness, serotonin→social distance.
+- Work interactions (do_work, work_break, talk_to_coworker) — no Timeline.pick sites, already single-string
+- Phone interactions (check_phone, read_messages) — no Timeline.pick sites
 
 **Low priority (infrequent / already thin):**
 - Shopping interactions (buy_groceries, buy_cheap_meal, browse_store)

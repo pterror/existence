@@ -348,18 +348,24 @@ const Content = (() => {
     },
     retail: () => {
       State.adjustStress(3);
-      return Timeline.pick([
-        'The walkie crackles. Someone needs help in aisle six.',
-        'A customer is waiting at the counter. Has been for a while, apparently.',
-        'A delivery showed up. Boxes in the back that need to be somewhere else.',
+      const ne = State.get('norepinephrine');
+      return Timeline.weightedPick([
+        { weight: 1, value: 'The walkie crackles. Someone needs help in aisle six.' },
+        { weight: 1, value: 'A customer is waiting at the counter. Has been for a while, apparently.' },
+        { weight: 1, value: 'A delivery showed up. Boxes in the back that need to be somewhere else.' },
+        // High NE — the demand cuts sharper
+        { weight: State.lerp01(ne, 55, 75), value: 'The walkie crackles and the sound goes through you. Another voice, another task, another thing that needs you now. Your jaw tightens before you can stop it.' },
       ]);
     },
     food_service: () => {
       State.adjustStress(3);
-      return Timeline.pick([
-        'The ticket printer rattles. Another order. The paper curls off the end.',
-        'Someone calls out an order correction. You adjust. Again.',
-        'The timer beeps. Something needs to come out of the fryer now.',
+      const ne = State.get('norepinephrine');
+      return Timeline.weightedPick([
+        { weight: 1, value: 'The ticket printer rattles. Another order. The paper curls off the end.' },
+        { weight: 1, value: 'Someone calls out an order correction. You adjust. Again.' },
+        { weight: 1, value: 'The timer beeps. Something needs to come out of the fryer now.' },
+        // High NE — sounds compound
+        { weight: State.lerp01(ne, 55, 75), value: 'The ticket printer, the timer, someone shouting behind you — all at once, all urgent, all aimed at you. The kitchen is a machine and you\'re a part that\'s running hot.' },
       ]);
     },
   };
@@ -372,17 +378,23 @@ const Content = (() => {
       return 'Laughter from the break room. You\'re not sure about what. It drifts and fades.';
     },
     retail: () => {
-      return Timeline.pick([
-        'The overhead music changes to a song you know. You wish it hadn\'t.',
-        'The automatic doors open and close. Open and close.',
-        'A child is crying somewhere in the store. The sound carries.',
+      const aden = State.get('adenosine');
+      return Timeline.weightedPick([
+        { weight: 1, value: 'The overhead music changes to a song you know. You wish it hadn\'t.' },
+        { weight: 1, value: 'The automatic doors open and close. Open and close.' },
+        { weight: 1, value: 'A child is crying somewhere in the store. The sound carries.' },
+        // High adenosine — everything blurs together
+        { weight: State.lerp01(aden, 50, 70), value: 'The store sounds blur into a single hum — registers, music, voices, the hiss of the HVAC. You\'re standing in it. It\'s hard to pick anything apart.' },
       ]);
     },
     food_service: () => {
-      return Timeline.pick([
-        'The exhaust fan changes pitch for a second, then settles.',
-        'Someone drops a pan in the back. The clatter hangs in the air.',
-        'The drive-through speaker crackles with a voice you can\'t quite make out.',
+      const aden = State.get('adenosine');
+      return Timeline.weightedPick([
+        { weight: 1, value: 'The exhaust fan changes pitch for a second, then settles.' },
+        { weight: 1, value: 'Someone drops a pan in the back. The clatter hangs in the air.' },
+        { weight: 1, value: 'The drive-through speaker crackles with a voice you can\'t quite make out.' },
+        // High adenosine — the kitchen noise is a wall
+        { weight: State.lerp01(aden, 50, 70), value: 'The kitchen noise is a wall of sound and you\'re behind it. Hood fans, fryer, someone talking — it\'s all one texture. You move through it without separating the parts.' },
       ]);
     },
   };
@@ -2223,20 +2235,23 @@ const Content = (() => {
 
     apartment_sound: () => {
       const time = State.timePeriod();
+      const ne = State.get('norepinephrine');
       if (time === 'deep_night' || time === 'night') {
-        const sounds = [
-          'A pipe knocks somewhere in the wall. The building talking to itself.',
-          'The fridge hums louder for a moment, then settles.',
-          'Footsteps above you. Someone else awake.',
-        ];
-        return Timeline.pick(sounds);
+        return Timeline.weightedPick([
+          { weight: 1, value: 'A pipe knocks somewhere in the wall. The building talking to itself.' },
+          { weight: 1, value: 'The fridge hums louder for a moment, then settles.' },
+          { weight: 1, value: 'Footsteps above you. Someone else awake.' },
+          // High NE at night — sounds are louder, more present
+          { weight: State.lerp01(ne, 45, 70), value: 'A sound. You freeze. The building settles — a creak, a tick, something in the walls. It\'s nothing. You know it\'s nothing. You\'re still listening.' },
+        ]);
       }
-      const sounds = [
-        'A door shuts somewhere else in the building.',
-        'Muffled TV from next door. Voices that aren\'t talking to you.',
-        'The radiator clicks.',
-      ];
-      return Timeline.pick(sounds);
+      return Timeline.weightedPick([
+        { weight: 1, value: 'A door shuts somewhere else in the building.' },
+        { weight: 1, value: 'Muffled TV from next door. Voices that aren\'t talking to you.' },
+        { weight: 1, value: 'The radiator clicks.' },
+        // High NE during day — hyper-aware of building sounds
+        { weight: State.lerp01(ne, 50, 70), value: 'Water running through the pipes — upstairs, you think. You track the sound through the wall without meaning to. Your building full of people, all of them doing things.' },
+      ]);
     },
 
     apartment_notice: () => {
@@ -2261,18 +2276,23 @@ const Content = (() => {
     street_ambient: () => {
       const time = State.timePeriod();
       const weather = State.get('weather');
+      const ne = State.get('norepinephrine');
       if (weather === 'drizzle') {
         return 'Car tires on wet road. That specific hiss.';
       }
       if (time === 'morning') {
-        return Timeline.pick([
-          'A bus goes past, full of people who look like they\'re still waking up.',
-          'Someone walks a dog. The dog is more enthusiastic about it than they are.',
+        return Timeline.weightedPick([
+          { weight: 1, value: 'A bus goes past, full of people who look like they\'re still waking up.' },
+          { weight: 1, value: 'Someone walks a dog. The dog is more enthusiastic about it than they are.' },
+          // High NE — the morning is sharp
+          { weight: State.lerp01(ne, 45, 65), value: 'The morning traffic is louder than it should be. Brakes, engines, a horn somewhere. Each sound is a separate thing hitting you.' },
         ]);
       }
-      return Timeline.pick([
-        'Traffic. The city sound that stops being a sound if you live here long enough.',
-        'A siren, far off. Moving away from you.',
+      return Timeline.weightedPick([
+        { weight: 1, value: 'Traffic. The city sound that stops being a sound if you live here long enough.' },
+        { weight: 1, value: 'A siren, far off. Moving away from you.' },
+        // High NE — street sounds register individually
+        { weight: State.lerp01(ne, 45, 65), value: 'A car door. Footsteps. Someone\'s bass through a window. The street is a catalog of sounds and you\'re taking inventory whether you want to or not.' },
       ]);
     },
 
@@ -2281,10 +2301,13 @@ const Content = (() => {
       if (social === 'isolated') {
         return 'Someone walks past. They don\'t see you. You\'re part of the scenery.';
       }
-      return Timeline.pick([
-        'Someone passes, talking on their phone. Fragments of someone else\'s life.',
-        'A person walks by quickly, somewhere to be.',
-        'An older woman passes and nods. You nod back. That\'s enough.',
+      const ser = State.get('serotonin');
+      return Timeline.weightedPick([
+        { weight: 1, value: 'Someone passes, talking on their phone. Fragments of someone else\'s life.' },
+        { weight: 1, value: 'A person walks by quickly, somewhere to be.' },
+        { weight: 1, value: 'An older woman passes and nods. You nod back. That\'s enough.' },
+        // Low serotonin — other people feel far away
+        { weight: State.lerp01(ser, 40, 20), value: 'Someone passes. You watch them go. They have a life — somewhere to be, someone to see. The distance between you and that is a thing you can feel.' },
       ]);
     },
   };
