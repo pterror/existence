@@ -111,9 +111,14 @@ The bus ride is 20 minutes of transition text. Could be its own texture — the 
 ### Night shifts and non-standard schedules
 All three jobs are day shifts. DESIGN.md doesn't prescribe this. Being awake at 3 AM when the world is asleep is a specific texture.
 
-### Potential issues with existing systems
-- No recovery from broke state (money hits $0, what then?)
-- Job standing only decays, no positive events or recovery
-- Phone battery drain might be too aggressive (-1.5%/hr passive, -1% per check)
-- Idle timer stops after 2 thoughts — silence vs atmosphere
-- Event surfacing caps (2 per type) might make systems feel like they go quiet
+### Existing systems that need deepening
+
+**Money is a one-way drain.** No income, no bills, no financial cycle. Money only decreases from purchases. At $0, food interactions vanish and nothing replaces them — that's the simulation running out of content, not modeling reality. The fix is the full financial cycle (income, bills, the collision between them) *and* a continuous gradient of what money buys at every level. The experience of money also depends on the person — origin, habits, what scarcity means to someone who grew up with it vs someone who didn't. See "Gradients, not binaries" in DESIGN.md.
+
+**Job standing is mechanical, not social.** Currently: late > 15min = -5 standing. No recovery, no social dynamics, no variation by job type. Standing should be relational — shaped by coworker relationships, patterns (not single events), what the specific job values, whether someone saw you, whether someone covered for you. Being friendly with people at work should matter. Standing should be able to improve, not just decay. See the expanded Work section in DESIGN.md.
+
+**Phone battery drains with no way to charge.** -1.5%/hr passive, -1% per check. That's a dead phone in ~67 hours. The issue isn't the drain rate — phones die, that's real. The issue is there's no charging interaction. Charging should be a thing you do or forget to do, not a battery management minigame. Plugging in at home, at work. The phone dying because you forgot to charge it — that's texture. The phone dying because the simulation has no charger — that's a bug.
+
+**Idle timer goes silent after 2 thoughts.** Fires at 30s, then 60s, then nothing. Is the silence a problem or a feature? The mind doesn't stop — but the game leaving you alone when you stop engaging could be powerful. Or it could feel like the game broke. This is a design question: should prolonged inaction produce more thoughts (the mind spiraling, the ceiling, the weight of not starting), or should the silence itself be the experience? Probably depends on mood — numb silence feels different from anxious silence.
+
+**Event surfacing caps may silence systems too early.** Hunger, exhaustion, lateness, and mess events cap at 2 per type, then stop surfacing. Intent: avoid spam. Effect: hunger at 90 stops being mentioned because you already got two pangs. In real life, hunger doesn't stop reminding you — it changes character. The first pang is a reminder. The third is your body insisting. The fifth is all you can think about. The cap shouldn't stop events — it should change their nature. Same for exhaustion, same for mess.

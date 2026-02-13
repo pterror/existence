@@ -513,9 +513,26 @@ Work is the thing you have to do whether or not you can. The specific shape depe
 
 ### The daily grind (formal employment)
 
-You have a shift. You're expected to be there. Being late has consequences (job standing drops). Being there means doing tasks — the number expected depends on the job. Tasks cost energy and time. Breaks exist. Coworkers exist. The supervisor exists as a presence whether or not they speak.
+You have a shift. You're expected to be there. Being there means doing tasks — the number expected depends on the job. Tasks cost energy and time. Breaks exist. Coworkers exist. The supervisor exists as a presence whether or not they speak.
 
 The experience of work isn't "complete tasks, earn points." It's: you're here, the clock moves, you do what you can, some days you can focus and some days you can't. Inability to focus doesn't mean you chose not to — it means the energy or stress or hunger wouldn't let you. The game doesn't distinguish between "won't" and "can't."
+
+### Standing at work
+
+Standing isn't a score. It's a social reality — the sum of how people at work experience you. It's relational, not mechanical.
+
+**What shapes it:**
+- **Showing up** — being there, on time, consistently. But "on time" means different things. Two minutes late at an office where nobody's watching is nothing. Two minutes late at food service when the rush is hitting and someone's been covering your station is a different thing entirely. Whether you called ahead matters. Whether someone saw you come in matters.
+- **Patterns, not instances.** One late day is noise. Three late days this week is a story people tell about you. The simulation should track patterns, not punish each event independently.
+- **Doing the work** — but also: what "doing the work" means varies by job. Food service cares about presence and speed. Office might care more about output. Retail cares about the floor being covered.
+- **The social layer** — being pleasant to be around, talking to people, not causing friction. This isn't separate from standing — it *is* standing, for most jobs. A coworker who likes you covers your late arrival. One who doesn't mentions it to the supervisor.
+
+**What standing isn't:**
+- A number that ticks down from lateness and never recovers
+- Separate from your relationships with the people you work with
+- The same across all job types
+
+Standing should be able to improve — showing up, doing your tasks, being decent to people around you. It should also be able to decline from more than just lateness — being absent socially, not pulling weight, friction with coworkers. The gradient runs in both directions.
 
 ### Coworkers
 
@@ -525,6 +542,8 @@ Two coworkers, each with a personality flavor:
 - **stressed_out** — their own problems, visible and leaking. Sometimes solidarity, sometimes exhausting.
 
 Talking to a coworker is a social interaction. It costs energy but reduces stress and improves social state. The prose varies by their flavor and your mood — the same coworker reads differently when you're fraying versus when you're clear.
+
+But coworker relationships aren't just a stress valve — they have consequences. A coworker you've been warm with is a buffer. One you've ignored is neutral at best. These relationships shape how lateness lands, whether someone covers for you, whether a bad day at work stays quiet or gets noticed.
 
 ### Employment types
 

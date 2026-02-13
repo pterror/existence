@@ -92,6 +92,8 @@ No build step. Plain JS loaded via script tags.
 
 **Keep STATUS.md current.** Before every commit, check whether the work changes what's implemented — a new interaction, a new state variable, a new system, a structural change. If it does, update STATUS.md to match. STATUS.md is the ground truth for what the codebase actually does right now.
 
+**Keep DESIGN.md and CLAUDE.md current.** When a conversation clarifies design direction, corrects a simplification, or adds nuance to how a system should work — capture it in DESIGN.md (full explanation) and CLAUDE.md (short rule) before committing. Design understanding evolves during implementation. Don't let the documents fall behind the thinking.
+
 ## Commit Convention
 
 Use conventional commits: `type(scope): message`
