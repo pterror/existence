@@ -25,6 +25,125 @@ const State = (() => {
       // sign → hemisphere, |lat| < 23.5 → tropical, |lat| 23.5-66.5 → temperate
       latitude: 42,
 
+      // --- Neurochemistry (0-100 scales, hidden) ---
+      // Layer 1 of emotional architecture (DESIGN-EMOTIONS.md).
+      // These drift toward targets via exponential approach, giving mood inertia.
+      // References: RESEARCH-HORMONES.md, REFERENCE-HORMONES.md
+
+      // Neurotransmitters
+      // Serotonin: tonic mood regulator. Half-life days. Fed by sleep quality, social, tryptophan/hunger.
+      // Low serotonin → depressed mood, irritability. SSRIs block reuptake.
+      // Ref: estradiol upregulates synthesis (RESEARCH-HORMONES.md Part 1)
+      serotonin: 50,
+      // Dopamine: reward, motivation, energy. Half-life ~12-24h.
+      // Fed by energy, achievement. Depleted by chronic stress.
+      // Ref: substantia nigra, D1/D2 receptors (REFERENCE-HORMONES.md)
+      dopamine: 50,
+      // Norepinephrine: arousal, alertness, fight-or-flight. Half-life hours.
+      // Fed by stress, poor sleep quality. Adrenal medulla + locus coeruleus.
+      // REM sleep occurs in NE-free environment (DESIGN-EMOTIONS.md Layer 1)
+      norepinephrine: 40,
+      // GABA: primary inhibitory NT. Half-life ~12-24h.
+      // Chronic stress slowly depletes. ALLO is a GABA-A modulator.
+      // Ref: ALLO/GABA-A withdrawal mechanism (RESEARCH-HORMONES.md Part 1)
+      gaba: 55,
+      // Glutamate: primary excitatory NT. Half-life days. Placeholder.
+      // Ketamine targets NMDA glutamate receptors.
+      glutamate: 50,
+      // Beta-endorphin: endogenous opioid. Half-life ~12-24h. Placeholder.
+      // Released by exercise, bonding, pain. Opioids target mu-opioid receptor.
+      endorphin: 45,
+      // Acetylcholine: attention, memory, neuromuscular. Half-life ~12h. Placeholder.
+      // Nicotine is an acetylcholine receptor agonist.
+      acetylcholine: 50,
+      // Endocannabinoid (anandamide + 2-AG): mood regulation, stress buffering. Half-life ~12-24h. Placeholder.
+      // Released by exercise and stress. Cannabis targets CB1/CB2 receptors.
+      endocannabinoid: 50,
+      // Histamine: wakefulness, arousal. Half-life hours. Diurnal — high during waking.
+      // Antihistamines cause drowsiness by blocking H1 receptors.
+      histamine: 50,
+
+      // Stress axis
+      // Cortisol: primary stress hormone. Diurnal rhythm (peaks AM, nadir PM).
+      // CRH → ACTH → cortisol chain modeled as single output.
+      // Chronic stress flattens diurnal rhythm (DESIGN-EMOTIONS.md).
+      // Ref: dual hormone hypothesis — high cortisol suppresses testosterone behavioral effects (RESEARCH-HORMONES.md Part 4)
+      cortisol: 50,
+
+      // Circadian
+      // Melatonin: sleep/wake regulator. Diurnal — rises in darkness, suppressed by light.
+      // Pineal gland, derived from tryptophan via serotonin.
+      // Ref: REFERENCE-HORMONES.md #2
+      melatonin: 20,
+      // Adenosine: sleep pressure. Accumulates during wakefulness, cleared by sleep.
+      // Caffeine blocks adenosine receptors (A1, A2A).
+      adenosine: 20,
+
+      // Sex/reproductive hormones
+      // Testosterone: diurnal rhythm (peaks 5:30-8AM, nadir ~7-8PM). 25-50% amplitude in young adults.
+      // Ref: amygdala reactivity + reduced PFC coupling (RESEARCH-HORMONES.md Part 4)
+      testosterone: 50,
+      // DHT (dihydrotestosterone): converted from testosterone by 5α-reductase. Placeholder.
+      // More potent androgen receptor agonist than testosterone.
+      dht: 50,
+      // Estradiol (E2): primary estrogen. Placeholder. Menstrual cycle / HRT later.
+      // Upregulates serotonin synthesis, increases 5-HT2A density, reduces reuptake.
+      // Ref: estradiol-serotonin link (RESEARCH-HORMONES.md Part 1)
+      estradiol: 50,
+      // Progesterone: placeholder. Menstrual cycle / pregnancy later.
+      // Converts to allopregnanolone via 5α-reductase → 3α-HSD.
+      // Ref: ALLO pathway (RESEARCH-HORMONES.md Part 1)
+      progesterone: 50,
+      // Allopregnanolone (ALLO): derived from progesterone. GABA-A positive allosteric modulator.
+      // Placeholder. PMS/PMDD mechanism — withdrawal causes GABAergic deficit.
+      // Ref: ALLO/GABA-A withdrawal (RESEARCH-HORMONES.md Part 1)
+      allopregnanolone: 50,
+      // LH (luteinizing hormone): placeholder. Drives sex hormone production.
+      // Pre-ovulatory surge triggers ovulation.
+      lh: 50,
+      // FSH (follicle-stimulating hormone): placeholder. Follicle development.
+      fsh: 50,
+
+      // Bonding hormones
+      // Oxytocin: social bonding, trust, anxiolytic. Placeholder.
+      // Released by touch, social interaction, suckling.
+      // Ref: oxytocin pulses during breastfeeding (RESEARCH-HORMONES.md Part 3)
+      oxytocin: 45,
+      // Prolactin: promotes well-being, calmness. Inverse relationship with dopamine. Placeholder.
+      // Elevated during lactation. Suppresses HPA axis.
+      // Ref: prolactin mood effects (RESEARCH-HORMONES.md Part 3)
+      prolactin: 50,
+
+      // Metabolic hormones
+      // Thyroid (T3/T4 composite): metabolic rate regulator. Very slow dynamics. Placeholder.
+      // Hypothyroidism → fatigue, depression, weight gain. Hyperthyroidism → anxiety, irritability.
+      // Ref: REFERENCE-HORMONES.md #4, #5
+      thyroid: 50,
+      // Insulin: blood sugar regulation. Placeholder. Diabetes later.
+      // Ref: REFERENCE-HORMONES.md polypeptide section
+      insulin: 50,
+      // Leptin: long-term satiety signal from adipose tissue. Placeholder.
+      // High body fat → high leptin (but leptin resistance possible).
+      leptin: 50,
+      // Ghrelin: hunger hormone. Active — maps to hunger state.
+      // Stomach produces when empty. Rises before meals, drops after eating.
+      ghrelin: 40,
+
+      // Other
+      // DHEA (dehydroepiandrosterone): anti-cortisol, precursor to sex hormones. Placeholder.
+      // Adrenal gland. Declines with age.
+      dhea: 50,
+      // hCG (human chorionic gonadotropin): pregnancy marker. Default 0.
+      // Stimulates thyroid weakly (nausea in first trimester).
+      // Ref: hCG/thyroid interaction (RESEARCH-HORMONES.md Part 2)
+      hcg: 0,
+      // Calcitriol (active vitamin D): mood effects from deficiency. Placeholder.
+      // Sunlight exposure → skin synthesis. Deficiency linked to depression.
+      calcitriol: 50,
+
+      // Sleep tracking for neurochemistry
+      last_sleep_quality: 0.8,  // 0-1 quality multiplier from most recent sleep
+
       // Flags and soft state
       alarm_time: 6 * 60 + 30,  // Minutes since midnight. When the alarm fires.
       alarm_set: true,
@@ -142,6 +261,9 @@ const State = (() => {
 
     // Actions since rest
     s.actions_since_rest++;
+
+    // Neurochemistry drift — levels approach targets with inertia
+    driftNeurochemistry(hours);
   }
 
   // --- Time of day / calendar ---
@@ -347,19 +469,44 @@ const State = (() => {
   }
 
   function moodTone() {
-    // Returns a general tone for prose selection
+    // Returns a general tone for prose selection.
+    // Primary: neurochemistry (serotonin, dopamine, NE, GABA).
+    // Override: extreme physical conditions can break through.
+    // Same 8 tones as before — all ~27 content.js callsites unchanged.
+
+    const ser = s.serotonin;
+    const dop = s.dopamine;
+    const ne = s.norepinephrine;
+    const ga = s.gaba;
     const e = s.energy;
     const st = s.stress;
-    const h = s.hunger;
     const so = s.social;
 
-    if (e <= 15 && st > 60) return 'numb';
-    if (st > 75) return 'fraying';
-    if (e <= 25) return 'heavy';
-    if (so <= 20 && st > 40) return 'hollow';
-    if (so <= 20) return 'quiet';
-    if (e > 60 && st < 30) return 'clear';
-    if (e > 40 && st < 50) return 'present';
+    // Physical overrides — the body breaking through neurochemistry
+    if (st > 75) return 'fraying';        // acute stress overwhelms everything
+    if (e <= 15 && st > 60) return 'numb'; // depleted + stressed = shutdown
+
+    // Neurochemical fraying — NE high + GABA low = system overloaded
+    if (ne > 65 && ga < 35) return 'fraying';
+
+    // Neurochemical numb — serotonin + dopamine both very low = emotional shutdown
+    if (ser < 25 && dop < 25) return 'numb';
+
+    // Heavy — low energy + lowered serotonin, or sustained low serotonin + dopamine
+    if ((e <= 25 && ser < 40) || (ser < 35 && dop < 35)) return 'heavy';
+
+    // Hollow — low serotonin + social isolation
+    if (ser < 40 && so <= 20) return 'hollow';
+
+    // Quiet — low social engagement + moderate NE (withdrawn but not in pain)
+    if (so <= 20 && ne > 35) return 'quiet';
+
+    // Clear — serotonin high + dopamine high + NE moderate + GABA adequate (rare, earned)
+    if (ser > 65 && dop > 65 && ne > 30 && ne < 60 && ga > 45) return 'clear';
+
+    // Present — serotonin and dopamine above baseline
+    if (ser > 45 && dop > 42) return 'present';
+
     return 'flat';
   }
 
@@ -405,6 +552,14 @@ const State = (() => {
   /** @param {number} amount */
   function adjustBattery(amount) {
     s.phone_battery = Math.max(0, Math.min(100, s.phone_battery + amount));
+  }
+
+  /** Nudge a neurochemistry value by amount, clamped 0-100.
+   * @param {string} key @param {number} amount */
+  function adjustNT(key, amount) {
+    if (typeof s[key] === 'number') {
+      s[key] = clamp(s[key] + amount, 0, 100);
+    }
   }
 
   /** @param {number} amount */
@@ -567,6 +722,233 @@ const State = (() => {
     return 'enough';
   }
 
+  // --- Neurochemistry drift engine ---
+  // Exponential approach to target with asymmetric up/down rates.
+  // Biological jitter via incommensurate sine waves (no PRNG consumed).
+  // See DESIGN-EMOTIONS.md Layer 1.
+
+  /** @param {number} v @param {number} lo @param {number} hi */
+  function clamp(v, lo, hi) { return v < lo ? lo : v > hi ? hi : v; }
+
+  /**
+   * Deterministic biological noise — "some days are harder and you can't name why."
+   * Two incommensurate sine frequencies with per-system phase seeds.
+   * Range ±3.5. No PRNG consumed — safe for forward-compatibility.
+   * @param {number} timeHours - total game hours
+   * @param {number} seed - unique per system
+   */
+  function biologicalJitter(timeHours, seed) {
+    return Math.sin(timeHours * 0.017 + seed) * 2 +
+           Math.sin(timeHours * 0.0073 + seed * 1.7) * 1.5;
+  }
+
+  // --- Target functions ---
+  // Active systems have target functions fed by current state.
+  // Placeholder systems return baseline 50 (will gain feeders as systems are built).
+
+  /** Serotonin target: sleep quality, social connection, hunger (tryptophan availability) */
+  function serotoninTarget() {
+    let t = 50;
+    // Sleep quality is the strongest lever (DESIGN-EMOTIONS.md)
+    const sq = s.last_sleep_quality;
+    t += (sq - 0.7) * 20;  // good sleep pushes up, poor sleep pushes down
+    // Social connection
+    t += (s.social - 50) * 0.15;
+    // Hunger reduces tryptophan availability (competes for blood-brain transport)
+    if (s.hunger > 60) t -= (s.hunger - 60) * 0.2;
+    return clamp(t, 15, 85);
+  }
+
+  /** Dopamine target: energy, general vitality */
+  function dopamineTarget() {
+    let t = 50;
+    // Energy reflects capacity for engagement
+    t += (s.energy - 50) * 0.25;
+    // Chronic stress depletes dopamine
+    if (s.stress > 60) t -= (s.stress - 60) * 0.2;
+    return clamp(t, 15, 85);
+  }
+
+  /** Norepinephrine target: stress, sleep quality.
+   *  REM sleep occurs in NE-free environment — good sleep lowers NE. */
+  function norepinephrineTarget() {
+    let t = 40;
+    // Stress is the primary driver
+    t += (s.stress - 30) * 0.3;
+    // Poor sleep elevates NE (unprocessed emotional charge)
+    const sq = s.last_sleep_quality;
+    t -= (sq - 0.5) * 15;  // good sleep lowers, poor sleep raises
+    return clamp(t, 10, 90);
+  }
+
+  /** GABA target: chronic stress slowly erodes. ALLO crosslink (placeholder). */
+  function gabaTarget() {
+    let t = 55;
+    // Chronic stress depletes GABA (slow mechanism)
+    if (s.stress > 50) t -= (s.stress - 50) * 0.15;
+    // ALLO modulates GABA-A — when implemented, allopregnanolone will feed here
+    return clamp(t, 20, 80);
+  }
+
+  /** Cortisol target: diurnal rhythm + stress.
+   *  Peaks at ~8AM (Cortisol Awakening Response), nadir at ~midnight.
+   *  Ref: RESEARCH-HORMONES.md Part 4 (dual hormone hypothesis) */
+  function cortisolTarget() {
+    const tod = timeOfDay();
+    const hourFrac = tod / 60;
+    // Diurnal curve: peak at 8, nadir at 0/24
+    // Using cosine shifted so peak=8AM: cos((hour - 8) * pi/12)
+    const diurnal = Math.cos((hourFrac - 8) * Math.PI / 12);
+    // Map diurnal [-1,1] to [25,65]
+    let t = 45 + diurnal * 20;
+    // Stress pushes cortisol above rhythm
+    if (s.stress > 40) t += (s.stress - 40) * 0.3;
+    return clamp(t, 10, 95);
+  }
+
+  /** Melatonin target: rises in darkness, suppressed by light/activity.
+   *  Peaks ~2-3AM, suppressed during daylight hours. */
+  function melatoninTarget() {
+    const tod = timeOfDay();
+    const hourFrac = tod / 60;
+    // Inverse of light: high at night (peak ~3AM), low during day
+    // cos((hour - 3) * pi/12) peaks at 3AM
+    const nocturnal = Math.cos((hourFrac - 3) * Math.PI / 12);
+    // Map to [5,80]: fully suppressed during day, high at night
+    return clamp(42.5 + nocturnal * 37.5, 5, 80);
+  }
+
+  /** Ghrelin target: maps directly to hunger state.
+   *  Stomach produces ghrelin when empty, suppressed after eating. */
+  function ghrelinTarget() {
+    // Hunger 0-100 maps to ghrelin 15-85
+    return 15 + (s.hunger / 100) * 70;
+  }
+
+  /** Histamine target: wakefulness signal. High during day, low at night.
+   *  Ref: REFERENCE-HORMONES.md #2 (antihistamines cause drowsiness) */
+  function histamineTarget() {
+    const tod = timeOfDay();
+    const hourFrac = tod / 60;
+    // Follows wakefulness: peaks midday (~14:00), low at night
+    const wake = Math.cos((hourFrac - 14) * Math.PI / 12);
+    return clamp(50 + wake * 30, 10, 80);
+  }
+
+  /** Testosterone target: diurnal rhythm.
+   *  Peaks 5:30-8AM, nadir ~7-8PM. 25-50% amplitude.
+   *  Ref: RESEARCH-HORMONES.md Part 4 */
+  function testosteroneTarget() {
+    const tod = timeOfDay();
+    const hourFrac = tod / 60;
+    // Peaks at ~7AM: cos((hour - 7) * pi/12)
+    const diurnal = Math.cos((hourFrac - 7) * Math.PI / 12);
+    // ~25% amplitude around baseline: [37, 63]
+    return clamp(50 + diurnal * 13, 30, 70);
+  }
+
+  // --- Rate constants ---
+  // Per-system up/down rates (per hour) derived from biological half-lives.
+  // Asymmetric: most systems fall faster than they rise.
+  // rate = ln(2) / halflife_hours, scaled to give meaningful drift on 0-100 scale.
+
+  const ntRates = {
+    // key:        [upRate,  downRate]  — per-hour exponential approach rates
+    serotonin:     [0.015,   0.025],    // days half-life — very slow
+    dopamine:      [0.04,    0.06],     // ~12-24h half-life
+    norepinephrine:[0.08,    0.12],     // hours half-life — responds quickly
+    gaba:          [0.03,    0.05],     // ~12-24h, chronic stress mechanism is slow
+    glutamate:     [0.015,   0.02],     // days half-life, placeholder
+    endorphin:     [0.04,    0.06],     // ~12-24h
+    acetylcholine: [0.05,    0.07],     // ~12h
+    endocannabinoid:[0.04,   0.06],     // ~12-24h
+    histamine:     [0.08,    0.12],     // hours — tracks wakefulness quickly
+    cortisol:      [0.1,     0.15],     // diurnal — needs to follow rhythm
+    melatonin:     [0.12,    0.18],     // diurnal — rises and falls with darkness
+    testosterone:  [0.06,    0.08],     // diurnal rhythm, moderate speed
+    dht:           [0.03,    0.04],     // slow, placeholder
+    estradiol:     [0.01,    0.015],    // very slow, placeholder (cycle later)
+    progesterone:  [0.01,    0.015],    // very slow, placeholder
+    allopregnanolone:[0.02,  0.03],     // derived from progesterone
+    lh:            [0.02,    0.03],     // placeholder
+    fsh:           [0.01,    0.015],    // placeholder
+    oxytocin:      [0.06,    0.1],      // short bursts, decays faster
+    prolactin:     [0.03,    0.05],     // placeholder
+    thyroid:       [0.005,   0.005],    // very slow — weeks timescale
+    insulin:       [0.15,    0.2],      // fast — meal-responsive (placeholder)
+    leptin:        [0.005,   0.008],    // very slow — body composition
+    ghrelin:       [0.1,     0.15],     // fast — tracks hunger
+    dhea:          [0.008,   0.01],     // slow, placeholder
+    hcg:           [0.001,   0.001],    // pregnancy only, near-static
+    calcitriol:    [0.005,   0.008],    // very slow — sunlight/diet
+  };
+
+  // Phase seeds for biological jitter — each system gets a unique offset
+  // so their noise patterns don't correlate
+  const ntPhaseSeed = {
+    serotonin: 1.0, dopamine: 2.3, norepinephrine: 3.7, gaba: 4.1,
+    glutamate: 5.9, endorphin: 6.4, acetylcholine: 7.2, endocannabinoid: 8.8,
+    histamine: 9.3, cortisol: 10.6, melatonin: 11.1, testosterone: 12.5,
+    dht: 13.2, estradiol: 14.7, progesterone: 15.3, allopregnanolone: 16.9,
+    lh: 17.4, fsh: 18.0, oxytocin: 19.6, prolactin: 20.1,
+    thyroid: 21.8, insulin: 22.3, leptin: 23.7, ghrelin: 24.2,
+    dhea: 25.5, hcg: 26.1, calcitriol: 27.8,
+  };
+
+  // Target functions by key. Systems without active feeders use baseline 50.
+  const ntTargetFns = {
+    serotonin: serotoninTarget,
+    dopamine: dopamineTarget,
+    norepinephrine: norepinephrineTarget,
+    gaba: gabaTarget,
+    cortisol: cortisolTarget,
+    melatonin: melatoninTarget,
+    ghrelin: ghrelinTarget,
+    histamine: histamineTarget,
+    testosterone: testosteroneTarget,
+  };
+
+  /** Placeholder target for inactive systems — returns baseline with jitter */
+  function placeholderTarget() { return 50; }
+
+  /**
+   * Drift all neurochemistry systems toward their targets.
+   * Called at end of advanceTime().
+   *
+   * Mechanic: exponential approach (drift)
+   *   target = targetFunction() + biologicalJitter()
+   *   rate = (level > target) ? downRate : upRate
+   *   decay = exp(-rate * hours)
+   *   level = clamp(target + (level - target) * decay, 0, 100)
+   *
+   * Adenosine is special: accumulates linearly during wakefulness,
+   * cleared proportionally by sleep (handled in content.js sleep interaction).
+   *
+   * @param {number} hours
+   */
+  function driftNeurochemistry(hours) {
+    if (hours <= 0) return;
+
+    const timeHours = s.time / 60;
+
+    // Adenosine: linear accumulation during wakefulness
+    // (cleared proportionally by sleep in content.js)
+    s.adenosine = clamp(s.adenosine + hours * 4, 0, 100);
+
+    // All other systems: exponential drift toward target
+    for (const key of Object.keys(ntRates)) {
+      const targetFn = ntTargetFns[key] || placeholderTarget;
+      const jitter = biologicalJitter(timeHours, ntPhaseSeed[key]);
+      const target = clamp(targetFn() + jitter, 0, 100);
+
+      const rates = ntRates[key];
+      const rate = (s[key] > target) ? rates[1] : rates[0];
+      const decay = Math.exp(-rate * hours);
+
+      s[key] = clamp(target + (s[key] - target) * decay, 0, 100);
+    }
+  }
+
   return {
     init,
     get,
@@ -605,6 +987,7 @@ const State = (() => {
     adjustMoney,
     adjustJobStanding,
     adjustBattery,
+    adjustNT,
     spendMoney,
     addPhoneMessage,
     getUnreadMessages,

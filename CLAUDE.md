@@ -73,6 +73,8 @@ No build step. Plain JS loaded via script tags.
 
 **Effects depend on internal state.** The same action at different moods produces different mechanical outcomes, not just different prose. Going for a walk doesn't always reduce stress. Lying in bed doesn't always help. The simulation is honest about when things help and when they don't — relief requires the internal conditions for relief.
 
+**Neurochemistry has inertia.** Mood emerges from neurochemical levels that drift toward targets, not from instant state derivation. Eating a sandwich doesn't snap your mood — serotonin target shifts, and the actual level follows over hours. Drift uses exponential approach with asymmetric rates (falls faster than rises). Biological jitter uses deterministic sine waves (no PRNG) so adding systems later doesn't break replay. Sleep is the strongest lever on mood — quality affects serotonin synthesis and NE clearance.
+
 ## Code Conventions
 
 **RNG discipline:**

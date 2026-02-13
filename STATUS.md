@@ -13,8 +13,30 @@ Current state of the codebase. Keep this up to date — see CLAUDE.md workflow r
 - **money** (float) — tiers: broke / scraping / tight / careful / okay / comfortable
 - **time** — continuous minutes since game start, never resets
 
+### Neurochemistry (Layer 1 of DESIGN-EMOTIONS.md)
+28 neurochemical systems modeled as hidden state variables (0–100 scale). Each drifts toward a target value via exponential approach with asymmetric up/down rates (biological half-lives). Deterministic biological jitter (incommensurate sine waves, no PRNG consumed) creates "some days are harder" variability.
+
+**Active systems (8)** — have target functions fed by current game state:
+- **serotonin** — fed by sleep quality, social, hunger/tryptophan. Days half-life.
+- **dopamine** — fed by energy, stress depletion. ~12-24h half-life.
+- **norepinephrine** — fed by stress, sleep quality. Hours half-life.
+- **gaba** — fed by chronic stress (slow). ~12-24h half-life.
+- **cortisol** — diurnal rhythm (peaks 8AM, nadir midnight) + stress. Fast response.
+- **melatonin** — diurnal (rises in darkness, suppressed by light).
+- **ghrelin** — maps to hunger state.
+- **histamine** — diurnal wakefulness signal.
+- **testosterone** — diurnal rhythm (peaks 7AM, nadir evening).
+
+**Accumulation system (1):**
+- **adenosine** — linear accumulation during wakefulness (~4/hr), cleared proportionally by sleep.
+
+**Placeholder systems (18)** — initialized at baseline 50, drift toward 50 with jitter. Will gain active feeders as their game systems are built:
+glutamate, endorphin, acetylcholine, endocannabinoid, dht, estradiol, progesterone, allopregnanolone, lh, fsh, oxytocin, prolactin, thyroid, insulin, leptin, dhea, hcg (default 0), calcitriol.
+
+**Sleep neurochemistry effects:** sleep interaction stores quality, clears adenosine proportionally, nudges serotonin (good sleep +3, poor -2) and norepinephrine (good sleep -4, poor +3).
+
 ### Derived Systems
-- **Mood tone** — compound of energy + stress + hunger + social → numb / fraying / heavy / hollow / quiet / clear / present / flat
+- **Mood tone** — primarily from neurochemistry (serotonin, dopamine, NE, GABA) with physical state overrides → numb / fraying / heavy / hollow / quiet / clear / present / flat. Same 8 tones, now with inertia instead of instant derivation.
 - **Time period** — deep_night / early_morning / morning / late_morning / midday / afternoon / evening / night
 - **Observation fidelity** — time and money awareness degrade with distance from last check (exact → rounded → vague → sensory/qualitative)
 - **Season** — derived from latitude + start_timestamp. Tropical: wet/dry. Temperate: four seasons. Hemisphere from sign.

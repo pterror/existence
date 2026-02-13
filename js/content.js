@@ -719,6 +719,18 @@ const Content = (() => {
 
         const energyGain = (sleepMinutes / 5) * qualityMult;
 
+        // Neurochemistry: sleep effects
+        // Store sleep quality for serotonin/NE target functions
+        State.set('last_sleep_quality', qualityMult);
+        // Adenosine: cleared proportional to sleep duration (sleep pressure reset)
+        const adenosineClear = -(sleepMinutes / 480) * State.get('adenosine') * 0.9;
+        State.adjustNT('adenosine', adenosineClear);
+        // Serotonin: good sleep promotes synthesis, poor sleep impairs
+        State.adjustNT('serotonin', qualityMult >= 0.9 ? 3 : qualityMult < 0.6 ? -2 : 0);
+        // Norepinephrine: REM sleep occurs in NE-free environment
+        // Good sleep lowers NE (emotional charge processed). Poor sleep preserves it.
+        State.adjustNT('norepinephrine', qualityMult >= 0.9 ? -4 : qualityMult < 0.6 ? 3 : 0);
+
         State.advanceTime(fallAsleepDelay + sleepMinutes);
 
         // Phone charges overnight if sleeping at home

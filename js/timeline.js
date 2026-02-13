@@ -173,7 +173,7 @@ const Timeline = (() => {
 
   /** @param {{ type: string; id?: string; destination?: string }} action */
   function recordAction(action) {
-    actions.push({ action, timestamp: actions.length });
+    actions.push({ action, timestamp: State.get('time') });
     save();
   }
 

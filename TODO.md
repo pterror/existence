@@ -7,13 +7,15 @@
 Everything below is drawn from the gap between DESIGN.md and what's built. Not committed to — just visible.
 
 ### Mood as its own system
-Currently mood tone is derived from state (energy + stress + hunger + social). Full emotional architecture designed in [DESIGN-EMOTIONS.md](DESIGN-EMOTIONS.md). Three layers: neurochemical baseline (ambient mood with inertia), directed sentiments (emotions attached to specific targets — people, concepts, objects, traits), surface mood (emergent from both + physical state + context). Implementation path:
-1. **Mood as stored value with inertia** — single value drifting toward state-derived target. Asymmetric rates, deterministic jitter. Replaces instant derivation.
+Full emotional architecture designed in [DESIGN-EMOTIONS.md](DESIGN-EMOTIONS.md). Three layers: neurochemical baseline (ambient mood with inertia), directed sentiments (emotions attached to specific targets — people, concepts, objects, traits), surface mood (emergent from both + physical state + context). Implementation path:
+1. ~~**Neurochemical baseline with inertia**~~ — **IMPLEMENTED.** 28 neurochemical systems with exponential drift, asymmetric rates, biological jitter. moodTone() now reads from serotonin/dopamine/NE/GABA. Sleep, stress, hunger, social feed active systems. Mood has inertia — no more instant-snap.
 2. **Emotional inertia as character trait** — per-character, modifiable by state. Controls how fast mood moves.
 3. **Basic sentiments** — likes/dislikes from chargen. Comfort foods, weather preferences. Small nudges.
 4. **Sleep emotional processing** — overnight attenuation. Better sleep = more reset.
 5. **Accumulating sentiments** — coworker resentment, job dread, built from repeated experience.
 6. **Trauma sentiments** — high-intensity, processing-resistant. Connected to trauma system.
+
+**Neurochemistry incompleteness:** 28 of ~76+ human hormones modeled. See [REFERENCE-HORMONES.md](REFERENCE-HORMONES.md). Missing: CRH, ACTH, GnRH, aldosterone, estrone, estriol, androstenedione, NPY, substance P, orexins, CCK, enkephalin, adrenaline, and others. Add as their relevant game systems are built.
 
 ### Social initiation
 Currently friends only send messages to you. No way to text back, call, or initiate contact. Relationships are one-directional. DESIGN.md describes friends who respond differently to your withdrawal and engagement.

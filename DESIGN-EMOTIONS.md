@@ -205,3 +205,32 @@ This document describes the target architecture. Implementation should be increm
 6. **Trauma sentiments** — high-intensity, processing-resistant. Connected to the trauma system described in DESIGN.md.
 
 Each step builds on the previous. The first step can be implemented now. The later steps require systems that don't exist yet (richer character generation, event systems, relationship depth).
+
+## Implementation Notes
+
+### Layer 1: Neurochemical Baseline (implemented)
+
+The neurochemical baseline is realized as 28 hidden state variables in `js/state.js`, each on a 0–100 scale. The core mechanic is **exponential drift toward target**:
+
+```
+target = targetFunction() + biologicalJitter()
+rate = (level > target) ? downRate : upRate   // asymmetric
+decay = exp(-rate * hours)
+level = clamp(target + (level - target) * decay, 0, 100)
+```
+
+**Active feeders (9 systems):** serotonin (sleep quality, social, hunger), dopamine (energy, stress), norepinephrine (stress, sleep quality), GABA (chronic stress), cortisol (diurnal + stress), melatonin (diurnal), ghrelin (hunger), histamine (diurnal wakefulness), testosterone (diurnal). Each has biologically-derived rate constants (per-hour, from half-lives).
+
+**Adenosine** uses linear accumulation during wakefulness, cleared by sleep.
+
+**Biological jitter:** two incommensurate sine frequencies per system with unique phase seeds. Produces ±3.5 range noise. No PRNG consumed — deterministic from game time alone. This makes "some days harder" without coupling to action sequence.
+
+**PRNG safety:** drift is called from `advanceTime()`, which runs during both live play and replay with the same time deltas. Target functions use deterministic Math.sin jitter, not PRNG. Adding new systems later won't shift the PRNG sequence.
+
+**`moodTone()` rewrite:** primary inputs are now serotonin, dopamine, norepinephrine, GABA. Physical state (stress, energy) still acts as override for extreme conditions. Same 8 tone strings, all content.js callsites unchanged. Mood now has inertia — eating a sandwich doesn't instantly change your mood.
+
+**Sleep effects:** sleep interaction stores `last_sleep_quality`, clears adenosine proportionally, and applies discrete serotonin/NE nudges based on quality.
+
+**Placeholder systems (18):** initialized at baseline 50, drift toward 50 with jitter. Will gain feeders as their game systems are built (menstrual cycle, HRT, substances, etc.).
+
+**Reference material:** `RESEARCH-HORMONES.md` (research summaries), `REFERENCE-HORMONES.md` (full human hormone list).
