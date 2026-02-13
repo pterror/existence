@@ -44,6 +44,7 @@ No build step. Plain JS loaded via script tags.
 ## Core Rules
 
 - **Note things down immediately:** problems, tech debt, or issues spotted MUST be added to TODO.md backlog
+- **Capture fundamental principles.** When a design principle is discovered, clarified, or corrected — whether in conversation or during implementation — write it into CLAUDE.md (short rule) and DESIGN.md (full explanation) immediately. Principles are more important than code. Don't let them live only in chat history.
 - **Do the work properly.** Don't leave workarounds or hacks undocumented.
 
 ## Design Principles
@@ -65,6 +66,10 @@ No build step. Plain JS loaded via script tags.
 **Deterministic replay.** All RNG through seeded PRNG (`Timeline.random`). No `Math.random`, no `Date.now` in simulation. Given the same seed and action sequence, the game produces the exact same world state.
 
 **The world is real.** The simulation models real-world mechanics. Derive behavior from parameters, don't hardcode assumptions. Geography derives from latitude: sign gives hemisphere, magnitude gives climate zone (tropical < 23.5°, temperate 23.5–66.5°), day length varies accordingly. Seasons depend on hemisphere and climate. Store latitude, derive everything else. The initial focus is surviving in a generic culture, but the simulation's bones should be honest about how the world works.
+
+**Handle absence, don't patch symptoms.** The game runs in a browser tab. If the player walks away, the game shouldn't generate content into nothing. Handle absence properly (step-away, auto-pause, tab detection) and downstream problems like event accumulation dissolve. Deliberate inaction — the player choosing not to act — is a different thing entirely and should be a real, supported experience.
+
+**No text reuse as a bandaid.** Seeing the same text twice is the game breaking the fiction. Text reuse is only acceptable when the repetition is genuinely realistic — a recurring sound, a repeated routine. Never to fill space, never because the pool ran out, never as a substitute for writing more content.
 
 ## Code Conventions
 
