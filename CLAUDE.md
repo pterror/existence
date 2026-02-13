@@ -52,6 +52,8 @@ No build step. Plain JS loaded via script tags.
 
 **Opaque constraints.** The player never sees the full action space or why things aren't available. Things just aren't there when they can't be.
 
+**Gradients, not binaries.** State shapes experience continuously. Nothing switches on or off at a threshold. There's always something you can do at every point along every spectrum — it just changes in character, cost, and texture. The simulation never dead-ends at an extreme.
+
 **Text carries everything.** Prose tone, word choice, what's mentioned and what isn't = the "UI". The same moment reads differently depending on hidden state.
 
 **Structure serves the moment.** Sometimes choices, sometimes description, sometimes events happening to you. Not locked to one interaction pattern.
