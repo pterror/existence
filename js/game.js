@@ -83,6 +83,7 @@ const Game = (() => {
     UI.showAwareness();
     UI.updateAwareness();
     showStepAway();
+    showLookBack();
 
     // Restore last idle thought so it doesn't vanish on refresh
     if (lastIdleThought) {
@@ -107,6 +108,7 @@ const Game = (() => {
     UI.stopIdleTimer();
     UI.hideAwareness();
     hideStepAway();
+    hideLookBack();
 
     Chargen.startCreation().then(character => {
       // Character is set and saved by chargen.
@@ -126,6 +128,7 @@ const Game = (() => {
       UI.showAwareness();
       UI.updateAwareness();
       showStepAway();
+      showLookBack();
 
       if (eventTexts.length > 0) {
         const firstText = /** @type {string} */ (eventTexts[0]);
@@ -151,6 +154,7 @@ const Game = (() => {
     UI.stopIdleTimer();
     UI.hideAwareness();
     hideStepAway();
+    hideLookBack();
 
     const passageEl = /** @type {HTMLElement} */ (document.getElementById('passage'));
     const actionsEl = /** @type {HTMLElement} */ (document.getElementById('actions'));
@@ -171,25 +175,14 @@ const Game = (() => {
       passageEl.classList.add('visible');
 
       setTimeout(() => {
-        // Active runs first, then finished, then incompatible
         const compatible = runs.filter(r => r.version >= 2);
         const incompatible = runs.filter(r => !r.version || r.version < 2);
-        const active = compatible.filter(r => r.status === 'active');
-        const finished = compatible.filter(r => r.status === 'finished');
 
-        for (const run of active) {
+        for (const run of compatible) {
           const btn = document.createElement('button');
           btn.className = 'action';
           btn.textContent = thresholdLabel(run);
           btn.addEventListener('click', () => pickRun(run.id));
-          actionsEl.appendChild(btn);
-        }
-
-        for (const run of finished) {
-          const btn = document.createElement('button');
-          btn.className = 'action threshold-finished';
-          btn.textContent = thresholdLabel(run);
-          btn.addEventListener('click', () => replayFinishedRun(run.id));
           actionsEl.appendChild(btn);
         }
 
@@ -217,10 +210,7 @@ const Game = (() => {
   function thresholdLabel(run) {
     const name = run.characterName || 'Someone';
     const age = run.ageStage || '';
-    if (run.status === 'active') {
-      return `${name}, ${age}. Still going.`;
-    }
-    return `${name}, ${age}. That one's over.`;
+    return `${name}, ${age}.`;
   }
 
   /** @param {string} id */
@@ -586,30 +576,13 @@ const Game = (() => {
     ctx.putImageData(imageData, 0, 0);
   }
 
-  /** @param {string} id */
-  async function replayFinishedRun(id) {
-    const runData = await Runs.loadRun(id);
-    if (!runData) return;
-
-    // Version check
-    if (!runData.version || runData.version < 2) {
-      return;
-    }
-
-    // Initialize UI for replay
-    UI.init({
-      onAction: handleAction,
-      onMove: handleMove,
-      onIdle: handleIdle,
-      onFocusTime: handleFocusTime,
-      onFocusMoney: handleFocusMoney,
-      onStepAway: handleStepAway,
-    });
-
+  /** @param {RunRecord} runData */
+  function enterReplay(runData) {
     isReplaying = true;
     UI.stopIdleTimer();
     UI.hideAwareness();
     hideStepAway();
+    hideLookBack();
 
     // Restore seed/character/PRNG
     const saved = Timeline.restoreFrom(runData);
@@ -716,6 +689,17 @@ const Game = (() => {
       document.removeEventListener('keydown', handleReplayKeydown);
       const replayControls = document.getElementById('replay-controls');
       if (replayControls) replayControls.classList.add('hidden');
+
+      // Restore live game by reloading the run from IDB and replaying
+      const activeId = Timeline.getActiveRunId();
+      if (activeId) {
+        const freshRun = await Runs.loadRun(activeId);
+        if (freshRun) {
+          await resumeRun(freshRun);
+          return;
+        }
+      }
+      // Fallback: go to threshold
       const runs = await Runs.listRuns();
       showThreshold(runs);
     };
@@ -802,6 +786,38 @@ const Game = (() => {
     }
   }
 
+  // --- Look back (in-game replay entry) ---
+
+  function showLookBack() {
+    const el = document.getElementById('look-back');
+    if (el) {
+      el.classList.remove('hidden');
+      el.classList.add('arriving');
+      el.textContent = 'look back';
+      el.onclick = handleLookBack;
+      el.addEventListener('animationend', () => el.classList.remove('arriving'), { once: true });
+    }
+  }
+
+  function hideLookBack() {
+    const el = document.getElementById('look-back');
+    if (el) {
+      el.classList.add('hidden');
+      el.onclick = null;
+    }
+  }
+
+  async function handleLookBack() {
+    Runs.flush();
+    const activeId = Timeline.getActiveRunId();
+    if (!activeId) return;
+    const runData = await Runs.loadRun(activeId);
+    if (!runData) return;
+
+    hideLookBack();
+    enterReplay(runData);
+  }
+
   async function handleStepAway() {
     // Flush any pending save
     Runs.flush();
@@ -819,6 +835,7 @@ const Game = (() => {
     UI.stopIdleTimer();
     UI.hideAwareness();
     hideStepAway();
+    hideLookBack();
 
     setTimeout(async () => {
       const runs = await Runs.listRuns();

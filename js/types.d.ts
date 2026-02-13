@@ -113,7 +113,7 @@ interface RunRecord {
   seed: number;
   character: GameCharacter;
   actions: ActionEntry[];
-  status: 'active' | 'finished';
+  status: 'active';
   createdAt: number;
   lastPlayed: number;
   version: number;
@@ -121,7 +121,7 @@ interface RunRecord {
 
 interface RunSummary {
   id: string;
-  status: 'active' | 'finished';
+  status: 'active';
   createdAt: number;
   lastPlayed: number;
   actionCount: number;

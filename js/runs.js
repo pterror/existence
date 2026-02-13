@@ -238,31 +238,6 @@ const Runs = (() => {
   }
 
   /**
-   * Mark a run as finished.
-   * @param {string} id
-   * @returns {Promise<void>}
-   */
-  function finishRun(id) {
-    return new Promise((resolve, reject) => {
-      const tx = /** @type {IDBDatabase} */ (db).transaction('runs', 'readwrite');
-      const store = tx.objectStore('runs');
-      const request = store.get(id);
-
-      request.onsuccess = () => {
-        const record = request.result;
-        if (record) {
-          record.status = 'finished';
-          record.lastPlayed = Date.now();
-          store.put(record);
-        }
-        resolve();
-      };
-
-      request.onerror = () => reject(request.error);
-    });
-  }
-
-  /**
    * Delete a run permanently.
    * @param {string} id
    * @returns {Promise<void>}
@@ -286,7 +261,6 @@ const Runs = (() => {
     saveActions,
     flush,
     listRuns,
-    finishRun,
     deleteRun,
   };
 })();
