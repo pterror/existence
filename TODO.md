@@ -22,7 +22,7 @@ Only formal employment exists (office, retail, food_service). DESIGN.md describe
 Runs never finish. No mechanism for a life ending or the game concluding. What triggers an ending? What does "finished" mean for a game with no win/fail state?
 
 ### Leisure and downtime interactions
-No TV, music, reading, sitting around, staring at the ceiling, mindless phone scrolling, going for a walk. The daily loop has work and maintenance but no texture of how people actually spend unstructured time. Inaction itself should be an option — not rest, just... not starting anything.
+**Partially implemented.** Four interactions added: lie_there (stay in bed, bedroom), look_out_window (bedroom), sit_at_table (kitchen), go_for_walk (street). All have mood-dependent effects — the same action produces different mechanical outcomes depending on internal state. Still missing: TV, music, reading, mindless phone scrolling — the media/distraction layer. Also no sitting on the couch (no living room), no aimless browsing, no "do nothing" as a distinct street/bus-stop option.
 
 ### Cooking and food variety
 Only "eat from fridge" and "buy cheap meal." No cooking (time + energy + ingredients), no meals that feel different, no dietary texture. DESIGN.md describes food as deeply personal — comfort food, cultural food, what's in the fridge vs what you need.

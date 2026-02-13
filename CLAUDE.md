@@ -71,6 +71,8 @@ No build step. Plain JS loaded via script tags.
 
 **No text reuse as a bandaid.** Seeing the same text twice is the game breaking the fiction. Text reuse is only acceptable when the repetition is genuinely realistic — a recurring sound, a repeated routine. Never to fill space, never because the pool ran out, never as a substitute for writing more content.
 
+**Effects depend on internal state.** The same action at different moods produces different mechanical outcomes, not just different prose. Going for a walk doesn't always reduce stress. Lying in bed doesn't always help. The simulation is honest about when things help and when they don't — relief requires the internal conditions for relief.
+
 ## Code Conventions
 
 **RNG discipline:**

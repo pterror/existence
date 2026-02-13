@@ -62,6 +62,10 @@ You wake up with whatever sleep gave you. Everything costs energy. Some things c
 
 Tiers: depleted → exhausted → tired → okay → rested → alert. Most of the game lives in the tired-to-exhausted range. "Alert" is rare and fleeting. "Depleted" means even thinking about doing things takes more than you have.
 
+**Energy ceiling** — not everyone starts at 100. Chronic conditions, disability, pregnancy, chronic pain — the maximum energy available isn't always the same. A bad flare day might cap you at 40. A good day might reach 70. The ceiling is the body's budget, and some bodies have less to spend. This interacts with everything — fewer interactions available, more things that cost too much, the prose carrying the weight of a body that starts the day closer to empty.
+
+**Passive energy drains** — the current flat `hours × 3` drain doesn't capture what the body is actually doing. Standing all shift (retail, food service) is a different energy cost than sitting at a desk (office). Pregnancy is a constant background drain. Chronic pain. Carrying extra weight. The body taxes you differently depending on what it's dealing with, and those taxes compound with hunger and stress. Not implemented yet — the architecture should expect per-body drain rates rather than a universal constant.
+
 ### Hunger
 
 Hunger builds over time. Eating resets it. Not eating makes everything harder — energy drains faster, focus drops, the prose gets shorter and more distracted. The fridge might be empty. The store costs money. Eating might mean standing at the counter shoveling food too fast because your body stopped asking and started insisting.

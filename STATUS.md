@@ -39,19 +39,19 @@ apartment_bathroom ──────────┘          corner_store
 
 Travel times: 1min within apartment, 2min apartment↔street, 3min street↔bus_stop, 4min street↔corner_store, 20min bus_stop↔workplace.
 
-## Interactions (29)
+## Interactions (33)
 
-### Bedroom (7)
-sleep, get_dressed, set_alarm, skip_alarm, charge_phone, check_phone_bedroom, (alarm event wakes you)
+### Bedroom (9)
+sleep, get_dressed, set_alarm, skip_alarm, charge_phone, check_phone_bedroom, lie_there, look_out_window, (alarm event wakes you)
 
-### Kitchen (4)
-eat_food, drink_water, do_dishes, check_phone_kitchen
+### Kitchen (5)
+eat_food, drink_water, do_dishes, check_phone_kitchen, sit_at_table
 
 ### Bathroom (2)
 shower, use_sink
 
-### Street (2)
-check_phone_street, sit_on_step
+### Street (3)
+check_phone_street, sit_on_step, go_for_walk
 
 ### Bus Stop (1)
 wait_for_bus

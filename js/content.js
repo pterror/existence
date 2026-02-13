@@ -886,6 +886,129 @@ const Content = (() => {
       },
     },
 
+    lie_there: {
+      id: 'lie_there',
+      label: 'Stay in bed',
+      location: 'apartment_bedroom',
+      available: () => true,
+      execute: () => {
+        const mood = State.moodTone();
+        const minutes = Timeline.randomInt(10, 20);
+        State.advanceTime(minutes);
+
+        if (mood === 'fraying') {
+          State.adjustStress(2);
+          return Timeline.pick([
+            'You lie there. The thoughts don\'t stop. They circle — the same three things, faster, tighter. You\'re not resting. You\'re trapped horizontally.',
+            'The ceiling. Your jaw is clenched. You notice it, unclench, and it\'s back thirty seconds later. The bed isn\'t helping.',
+            'You stay in bed. The quiet makes it worse — nothing to drown out what\'s in your head. Your body is still but nothing else is.',
+          ]);
+        }
+        if (mood === 'numb') {
+          return Timeline.pick([
+            'You lie there. Time passes. You know this because the light changes slightly. That\'s the only evidence.',
+            'The bed. The ceiling. The space between them, with you in it. Nothing moves. Nothing needs to.',
+            'You stay. It\'s not rest and it\'s not not-rest. It\'s just the absence of getting up.',
+          ]);
+        }
+        if (mood === 'heavy') {
+          State.adjustStress(-1);
+          return Timeline.pick([
+            'You stay in bed. The pressure to be somewhere, do something — it\'s still there, but quieter when you\'re lying down. Barely.',
+            'The pillow is warm from your head. You turn it over. The cool side. Small.',
+            'You don\'t get up. Nobody is asking you to. That helps, a little, in a way that also doesn\'t help.',
+          ]);
+        }
+        if (mood === 'hollow' || mood === 'quiet') {
+          State.adjustStress(-1);
+          return Timeline.pick([
+            'You lie there. The room is quiet. You\'re quiet. The two of you have an understanding.',
+            'Just being. The bed, the air, the sound of nothing in particular. It\'s not peace. But it\'s not war.',
+            'You stay. The quiet settles. Not comfortable exactly — but not uncomfortable either. Just still.',
+          ]);
+        }
+        if (mood === 'clear' || mood === 'present') {
+          State.adjustStress(-2);
+          return Timeline.pick([
+            'You lie still. Actually still — not the holding-still of trying to sleep, just the stillness of not needing to move. Your breath slows. Something loosens.',
+            'The sheets, the light, the quiet. You\'re lying here because you can. That\'s the whole reason. It\'s enough.',
+            'You stay in bed. Not sleeping, not trying to. Just being horizontal in a room that asks nothing of you. Something settles.',
+          ]);
+        }
+        // flat
+        return Timeline.pick([
+          'You lie there for a while. The ceiling doesn\'t change. Neither do you. Eventually you shift, but that\'s about it.',
+          'Time passes. You\'re in bed. These are the facts. Nothing else happens.',
+          'You stay. Not resting, not thinking, not anything in particular. Just lying there because you\'re already lying there.',
+        ]);
+      },
+    },
+
+    look_out_window: {
+      id: 'look_out_window',
+      label: 'Look out the window',
+      location: 'apartment_bedroom',
+      available: () => true,
+      execute: () => {
+        const mood = State.moodTone();
+        const weather = State.get('weather');
+        const minutes = Timeline.randomInt(5, 10);
+        State.advanceTime(minutes);
+
+        if (mood === 'numb') {
+          return Timeline.pick([
+            'You look out the window. The street is there. People, cars, the sky. You see all of it. None of it registers.',
+            'The window. The world on the other side of the glass. You watch it like it\'s on a screen — present, visible, not quite real.',
+            'Outside exists. You can see it. Knowing that doesn\'t do anything, but you look anyway.',
+          ]);
+        }
+        if (mood === 'heavy') {
+          return Timeline.pick([
+            'The world outside. People going places. You\'re in here. The glass between you and that is thin but it might as well be a wall.',
+            'You look out. Trees, if there are trees. Sky. The distance between you and all of it feels wider than the window.',
+            'Outside is happening. You watch it from the bed. The effort of being out there — even thinking about it is a lot.',
+          ]);
+        }
+        if (mood === 'fraying') {
+          if (weather === 'clear') {
+            State.adjustStress(-2);
+            return Timeline.pick([
+              'You look out. Clear sky. The light is doing something good today — something open. Your shoulders drop half an inch. It helps.',
+              'The window. Blue out there, or close to it. Your eyes rest on the sky because it\'s the only thing not asking anything of you.',
+              'Clear outside. The light comes in and touches the floor. You stand in it for a minute. Something loosens, slightly.',
+            ]);
+          }
+          return Timeline.pick([
+            'You look out the window. Grey. The same grey as the inside of your head. It doesn\'t help.',
+            'Outside is flat and overcast. You were hoping for something — you\'re not sure what. This isn\'t it.',
+            'The window. Rain, or the threat of it. The world out there looks exactly like you feel.',
+          ]);
+        }
+        if (mood === 'hollow') {
+          return Timeline.pick([
+            'You look out. Someone\'s walking a dog. Someone else is carrying groceries. People with destinations. You watch.',
+            'The window shows the usual. The street, the building opposite. A life-sized diorama of people going somewhere.',
+            'Outside. People. Movement. The glass keeps the sound out. You watch like it\'s an aquarium.',
+          ]);
+        }
+        if (mood === 'clear' || mood === 'present') {
+          State.adjustStress(-3);
+          return Timeline.pick([
+            'You look out the window. The light, the sky, the ordinary scene below — it\'s actually nice. The kind of nice you can feel today.',
+            'The view. Nothing special — rooftops, sky, a tree if you lean. But you\'re seeing it. Actually seeing it. That\'s different.',
+            'You stand at the window. The world is out there, doing its thing. For a minute you\'re part of it, watching from the inside. Something close to peace.',
+          ]);
+        }
+        // flat
+        State.adjustStress(-1);
+        return Timeline.pick([
+          'You look out. The usual view. It\'s something to look at that isn\'t the room.',
+          'The window. Outside. Not much happening, but you look for a while anyway.',
+          'You watch the street for a few minutes. Nothing in particular. It passes the time.',
+        ]);
+      },
+    },
+
     // === KITCHEN ===
     eat_food: {
       id: 'eat_food',
@@ -964,6 +1087,64 @@ const Content = (() => {
       },
     },
 
+    sit_at_table: {
+      id: 'sit_at_table',
+      label: 'Sit at the table',
+      location: 'apartment_kitchen',
+      available: () => true,
+      execute: () => {
+        const mood = State.moodTone();
+        const minutes = Timeline.randomInt(5, 15);
+        State.advanceTime(minutes);
+
+        if (mood === 'numb') {
+          return Timeline.pick([
+            'You sit at the table. The surface is cool under your hands. You sit there. That\'s it.',
+            'The kitchen table. You\'re at it. The fridge hums. Minutes pass. You don\'t move.',
+            'Sitting. The table, the chair, the quiet kitchen. You\'re here. That\'s the whole event.',
+          ]);
+        }
+        if (mood === 'heavy') {
+          State.adjustEnergy(1);
+          return Timeline.pick([
+            'You sit. The chair takes your weight. Not standing is something. Not much, but something.',
+            'The kitchen table. You put your arms on it and lean forward. The not-standing helps. Your body is grateful for small mercies.',
+            'You sit down. The effort of being upright transfers to the chair. Your back says thank you in its own way.',
+          ]);
+        }
+        if (mood === 'fraying') {
+          State.adjustStress(-1);
+          return Timeline.pick([
+            'You sit at the table. The kitchen is quieter than the rest of your head. Barely, but it\'s something.',
+            'The table. Your hands on it. The solidity of a flat surface. The fridge hum. For a minute the noise inside dims, slightly.',
+            'You sit. The kitchen has a specific quiet — the fridge, the clock, the tap. It\'s not peaceful. But it\'s not loud.',
+          ]);
+        }
+        if (mood === 'hollow') {
+          return Timeline.pick([
+            'You sit at the kitchen table. The chair. The surface. The quiet. You\'re sitting because you walked in here and this is what\'s here.',
+            'The table. You sit at it. Not eating, not doing anything. Just occupying a chair in a room where chairs exist.',
+            'You sit. The kitchen is empty in the way it always is. You\'re in it. The clock ticks, or doesn\'t. Hard to tell.',
+          ]);
+        }
+        if (mood === 'clear' || mood === 'present') {
+          State.adjustStress(-2);
+          return Timeline.pick([
+            'You sit at the table. The kitchen is quiet. Your hands are warm. Something close to comfort — the kind you don\'t notice until you\'re in it.',
+            'The kitchen table. The light from the window. You sit and it\'s fine — actually fine, not the word you say when nothing is. Just sitting, in a room, and it\'s okay.',
+            'You sit. The apartment is still. The fridge hums its one note. For a few minutes, that\'s all there is, and that\'s enough.',
+          ]);
+        }
+        // flat / quiet
+        State.adjustStress(-1);
+        return Timeline.pick([
+          'You sit at the table for a while. Not doing anything. The kitchen is the kitchen. Time passes.',
+          'The table. You sit at it. The microwave clock changes. That\'s the most interesting thing that happens.',
+          'You sit. It\'s not productive, it\'s not restful, it\'s just sitting in a kitchen. Sometimes that\'s what there is.',
+        ]);
+      },
+    },
+
     // === BATHROOM ===
     shower: {
       id: 'shower',
@@ -1037,6 +1218,112 @@ const Content = (() => {
           return 'You sit. Watch people. They\'re all going places. You\'re sitting. Both of these things are fine.';
         }
         return 'You sit on the step. Just for a minute. The air is better than inside.';
+      },
+    },
+
+    go_for_walk: {
+      id: 'go_for_walk',
+      label: 'Walk for a while',
+      location: 'street',
+      available: () => State.get('energy') > 15,
+      execute: () => {
+        const mood = State.moodTone();
+        const weather = State.get('weather');
+        const minutes = Timeline.randomInt(15, 30);
+        const energyCost = Timeline.randomInt(5, 8);
+
+        State.advanceTime(minutes);
+        State.adjustEnergy(-energyCost);
+
+        // Weather modifier — drizzle adds discomfort
+        if (weather === 'drizzle') {
+          State.adjustStress(2);
+        }
+
+        // Stress effect depends on mood
+        if (mood === 'clear' || mood === 'present') {
+          State.adjustStress(-8);
+          if (weather === 'drizzle') {
+            return Timeline.pick([
+              'You walk. The drizzle is cold on your face but the air is good. Your legs find a rhythm. The wet doesn\'t ruin it — just changes the texture.',
+              'Rain on your jacket. Your shoes get damp. But the walking helps — the movement, the air, the world being bigger than a room. It\'s worth it.',
+            ]);
+          }
+          return Timeline.pick([
+            'You walk. No destination, just movement. The air is different from inside — wider, cooler, real. Your thoughts spread out. Something loosens in your chest.',
+            'A walk. Around the block, then further because it feels good to keep going. Your legs know what to do. Your head quiets down. The world passes at a human speed.',
+            'You walk until the apartment feels far away. The sky, the street, the sound of your own footsteps. This is what outside is for.',
+          ]);
+        }
+        if (mood === 'flat') {
+          State.adjustStress(-4);
+          if (weather === 'drizzle') {
+            return Timeline.pick([
+              'You walk in the drizzle. Your jacket darkens at the shoulders. The movement helps some — not a lot, but some. You come back damp.',
+              'Rain. You walk through it because you\'re already out. It\'s not pleasant but the walking itself does something. Slightly.',
+            ]);
+          }
+          return Timeline.pick([
+            'You walk. It\'s not transformative. But the air is different and your legs are moving and that\'s better than not.',
+            'A walk. The neighborhood. You\'ve seen it before. But moving through it is different from being inside looking at walls. It helps, some.',
+            'You walk for a while. It doesn\'t fix anything. But the blood moves and the air gets in and when you stop you feel slightly less like you were cemented to the floor.',
+          ]);
+        }
+        if (mood === 'heavy') {
+          State.adjustStress(-2);
+          if (weather === 'drizzle') {
+            return Timeline.pick([
+              'You walk in the rain. Every step costs something. The wet gets into your shoes. But the air — the air is different from inside. That\'s something.',
+              'Drizzle. You walk through it slowly. The world is grey and wet and you\'re in it. The effort is real. So is the fact that you went outside.',
+            ]);
+          }
+          return Timeline.pick([
+            'You walk. Slowly. The effort of being outside is real — the bodies, the noise, the fact of being vertical and moving. But the air changes things, slightly.',
+            'A walk. Your body does it reluctantly. The street, the sounds, the sky that\'s bigger than any ceiling. By the end something has shifted — not much, but it\'s there.',
+            'You make yourself walk. Each block is a small negotiation. But the air is different out here and by the time you turn back, something in your chest is a fraction looser.',
+          ]);
+        }
+        if (mood === 'fraying') {
+          // No stress relief — the thoughts follow you
+          if (weather === 'drizzle') {
+            return Timeline.pick([
+              'You walk. The rain gets in your collar. Your thoughts are exactly as loud out here as they were inside, plus now you\'re wet.',
+              'Drizzle. You walk through it fast, shoulders hunched. The thoughts don\'t care about the scenery. They came with you. Now you\'re tired and damp.',
+            ]);
+          }
+          return Timeline.pick([
+            'You walk. Fast, tight, shoulders up. The thoughts come with you — they don\'t care about the change of scenery. You burn energy. That\'s what you accomplish.',
+            'A walk. You thought it would help. The air is fine. The sky is there. The thing in your chest is exactly the same, just outside now instead of inside.',
+            'You walk until your legs notice. The thoughts follow you the whole way — across the street, around the block, back again. Walking didn\'t help. But you walked.',
+          ]);
+        }
+        if (mood === 'numb') {
+          // No stress relief — nothing registers
+          if (weather === 'drizzle') {
+            return Timeline.pick([
+              'You walk in the rain. You get wet. You walk back. The rain happened to you. That\'s about all you can say about it.',
+              'Drizzle. You walk through it. Your body moves through space. You come back damp. Nothing changed except your socks.',
+            ]);
+          }
+          return Timeline.pick([
+            'You walk. The street, the air, the people. You move through all of it like water through a pipe. You were out. Now you\'re back. That happened.',
+            'A walk. You went, you returned. The scenery was there. You were there. The two of you didn\'t really connect.',
+            'You walk. Your legs do it. The air touches your face. People pass. None of it reaches whatever part of you would need to be reached. You come back.',
+          ]);
+        }
+        // hollow
+        State.adjustStress(-1);
+        if (weather === 'drizzle') {
+          return Timeline.pick([
+            'You walk in the drizzle. The world exists. You were in it, briefly, getting rained on. It\'s something.',
+            'Rain on the street. You walk through it. Cars pass. People with umbrellas. You\'re out here. That\'s a fact about your life right now.',
+          ]);
+        }
+        return Timeline.pick([
+          'You walk. The world exists and you\'re in it, briefly. People going places. Cars. The sky. You were part of the scene for a few minutes. Then you came back.',
+          'A walk. The street, the air, the feeling of being a body among other bodies. It doesn\'t fill the hollow, but it proves the world is still out there.',
+          'You walk for a while. Past the store, past the bus stop, past people you\'ll never see again. The world is there. You were in it.',
+        ]);
       },
     },
 
