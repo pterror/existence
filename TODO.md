@@ -12,7 +12,7 @@ Everything below is drawn from the gap between DESIGN.md and what's built. Not c
 ### Mood as its own system
 Full emotional architecture designed in [DESIGN-EMOTIONS.md](DESIGN-EMOTIONS.md). Three layers: neurochemical baseline (ambient mood with inertia), directed sentiments (emotions attached to specific targets — people, concepts, objects, traits), surface mood (emergent from both + physical state + context). Implementation path:
 1. ~~**Neurochemical baseline with inertia**~~ — **IMPLEMENTED.** 28 neurochemical systems with exponential drift, asymmetric rates, biological jitter. moodTone() now reads from serotonin/dopamine/NE/GABA. Sleep, stress, hunger, social feed active systems. Mood has inertia — no more instant-snap.
-2. **Emotional inertia as character trait** — per-character, modifiable by state. Controls how fast mood moves.
+2. ~~**Emotional inertia as character trait**~~ — **IMPLEMENTED.** Personality params (neuroticism, self_esteem, rumination) generated at chargen, stored in state. `effectiveInertia()` modifies drift rate for mood-primary systems only. Neuroticism adds asymmetric negative stickiness. State modifiers (sleep deprivation, poor sleep, chronic stress) increase inertia for everyone.
 3. **Basic sentiments** — likes/dislikes from chargen. Comfort foods, weather preferences. Small nudges.
 4. **Sleep emotional processing** — overnight attenuation. Better sleep = more reset.
 5. **Accumulating sentiments** — coworker resentment, job dread, built from repeated experience.

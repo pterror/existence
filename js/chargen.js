@@ -198,6 +198,13 @@ const Chargen = (() => {
     const baseDateMinutes = 28401120; // 2024-01-01 00:00 UTC
     const dayOffset = Timeline.charRandomInt(0, 364);
     const startTimestamp = baseDateMinutes + dayOffset * 1440;
+    // Personality — generated silently, never shown in chargen UI
+    const personality = {
+      neuroticism: Math.floor(Timeline.charRandom() * 101),
+      self_esteem: Math.floor(Timeline.charRandom() * 101),
+      rumination: Math.floor(Timeline.charRandom() * 101),
+    };
+
     return /** @type {GameCharacter} */ ({
       first_name: playerName.first,
       last_name: playerName.last,
@@ -212,6 +219,7 @@ const Chargen = (() => {
       age_stage: age,
       start_timestamp: startTimestamp,
       latitude: Timeline.charPick(locationOptions).latitude,
+      personality,
     });
   }
 

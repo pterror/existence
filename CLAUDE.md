@@ -75,6 +75,8 @@ No build step. Plain JS loaded via script tags.
 
 **Neurochemistry has inertia.** Mood emerges from neurochemical levels that drift toward targets, not from instant state derivation. Eating a sandwich doesn't snap your mood — serotonin target shifts, and the actual level follows over hours. Drift uses exponential approach with asymmetric rates (falls faster than rises). Biological jitter uses deterministic sine waves (no PRNG) so adding systems later doesn't break replay. Sleep is the strongest lever on mood — quality affects serotonin synthesis and NE clearance.
 
+**Emotional inertia is personal.** How sticky moods are varies per character. Neuroticism, self-esteem, and rumination are generated at character creation and stored as raw personality values in state. The drift engine computes `effectiveInertia()` from these each tick — no pre-computed inertia value. Only the four mood-primary systems (serotonin, dopamine, NE, GABA) are affected; physiological rhythms (cortisol, melatonin, etc.) ignore personality. Neuroticism adds extra stickiness in the "toward worse mood" direction only. Sleep deprivation, poor sleep quality, and chronic stress temporarily increase inertia for everyone.
+
 ## Code Conventions
 
 **RNG discipline:**

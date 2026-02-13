@@ -35,6 +35,18 @@ glutamate, endorphin, acetylcholine, endocannabinoid, dht, estradiol, progestero
 
 **Sleep neurochemistry effects:** sleep interaction stores quality, clears adenosine proportionally, nudges serotonin (good sleep +3, poor -2) and norepinephrine (good sleep -4, poor +3).
 
+### Emotional Inertia (Layer 2 of DESIGN-EMOTIONS.md)
+Per-character trait controlling how sticky moods are. Only affects the four mood-primary systems (serotonin, dopamine, NE, GABA) — physiological rhythms are unaffected by personality.
+
+**Personality parameters** (generated at character creation, stored in state):
+- **neuroticism** (0–100) — strongest predictor of inertia. Adds extra stickiness in "toward worse mood" direction only.
+- **self_esteem** (0–100) — low self-esteem increases inertia in all directions.
+- **rumination** (0–100) — high rumination increases inertia in all directions.
+
+**Inertia formula:** `rate = baseRate / effectiveInertia(system, isNegative)`. Base inertia range 0.6 (fluid) to 1.4 (sticky), plus up to +0.2 from neuroticism negative bonus, plus state modifiers (adenosine > 60, poor sleep quality, stress > 60). At personality 50/50/50 → inertia 1.0 → identical to pre-inertia behavior (legacy save compatibility).
+
+**"Worse direction" per system:** serotonin falling, dopamine falling, NE rising, GABA falling.
+
 ### Derived Systems
 - **Mood tone** — primarily from neurochemistry (serotonin, dopamine, NE, GABA) with physical state overrides → numb / fraying / heavy / hollow / quiet / clear / present / flat. Same 8 tones, now with inertia instead of instant derivation.
 - **Time period** — deep_night / early_morning / morning / late_morning / midday / afternoon / evening / night
@@ -142,6 +154,7 @@ Single-screen UI with:
 - Friend/coworker/supervisor names (editable, with reroll)
 - Player first/last name (editable, with reroll)
 - Name sampling from weighted US Census + SSA data (100 first names, 100 surnames)
+- Personality parameters: neuroticism, self_esteem, rumination (0–100 each, generated silently, not exposed in UI)
 
 ## Infrastructure
 

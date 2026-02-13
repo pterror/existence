@@ -11,6 +11,12 @@ declare const NameData: {
 
 // --- Character ---
 
+interface PersonalityParams {
+  neuroticism: number;    // 0-100
+  self_esteem: number;    // 0-100
+  rumination: number;     // 0-100
+}
+
 interface RelationshipPerson {
   name: string;
   flavor: string;
@@ -34,6 +40,7 @@ interface GameCharacter {
   supervisor: SupervisorPerson;
   job_type: string;
   age_stage: number | string;
+  personality?: PersonalityParams;
 }
 
 interface OutfitSet {

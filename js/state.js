@@ -141,6 +141,12 @@ const State = (() => {
       // Sunlight exposure → skin synthesis. Deficiency linked to depression.
       calcitriol: 50,
 
+      // Personality — raw values from character, used by emotional inertia.
+      // 50/50/50 = neutral (inertia 1.0). Set by Character.applyToState().
+      neuroticism: 50,    // 0-100. Higher → negative moods persist longer.
+      self_esteem: 50,    // 0-100. Lower → all moods stickier.
+      rumination: 50,     // 0-100. Higher → all moods stickier.
+
       // Sleep tracking for neurochemistry
       last_sleep_quality: 0.8,  // 0-1 quality multiplier from most recent sleep
 
@@ -917,6 +923,66 @@ const State = (() => {
   /** Placeholder target for inactive systems — returns baseline with jitter */
   function placeholderTarget() { return 50; }
 
+  // --- Emotional inertia (Layer 2 of DESIGN-EMOTIONS.md) ---
+  // Per-character trait: how sticky moods are. Affects only the four mood-primary
+  // systems (serotonin, dopamine, NE, GABA). Physiological rhythms (cortisol,
+  // melatonin, etc.) are unaffected — personality doesn't change your cortisol cycle.
+  //
+  // Higher inertia → rate divided by more → slower drift → mood sticks.
+  // Range ~0.6 (fluid) to ~1.6 (very sticky).
+
+  // "Worse direction" per mood-primary system — the direction that represents
+  // mood degradation. Neuroticism adds extra stickiness in this direction only.
+  // true = falling is worse, false = rising is worse.
+  const moodWorseWhenFalling = {
+    serotonin: true,       // low = depressed
+    dopamine: true,        // low = anhedonia
+    norepinephrine: false,  // high = agitation
+    gaba: true,            // low = anxiety
+  };
+
+  /**
+   * Compute effective emotional inertia for a mood-primary system.
+   * @param {string} _system - system name (unused for now; signature supports per-system formulas)
+   * @param {boolean} isNegativeDirection - true if drifting toward "worse" mood
+   * @returns {number} inertia multiplier (>1 = stickier, <1 = more fluid)
+   */
+  function effectiveInertia(_system, isNegativeDirection) {
+    // Normalize personality to 0-1
+    const n = s.neuroticism / 100;
+    const seInv = 1 - (s.self_esteem / 100);  // inverted: low SE → high inertia
+    const r = s.rumination / 100;
+
+    // Base inertia: weighted combination of personality traits
+    // At 50/50/50 → n=0.5, seInv=0.5, r=0.5 → weighted=0.5 → base=1.0
+    // At 0/100/0 → n=0, seInv=0, r=0 → weighted=0 → base=0.6 (fluid)
+    // At 100/0/100 → n=1, seInv=1, r=1 → weighted=1 → base=1.4 (sticky)
+    const weighted = n * 0.5 + seInv * 0.3 + r * 0.2;
+    let inertia = 0.6 + weighted * 0.8;
+
+    // Neuroticism negative-direction bonus: negative moods stick harder
+    // for neurotic characters. Up to +0.2 at neuroticism=100.
+    if (isNegativeDirection) {
+      inertia += n * 0.2;
+    }
+
+    // State modifiers — current conditions can increase inertia.
+    // Sleep deprivation (adenosine > 60): tired brain processes mood slower.
+    if (s.adenosine > 60) {
+      inertia += (s.adenosine - 60) * 0.005;  // up to +0.2 at adenosine=100
+    }
+    // Poor sleep quality: emotional processing was impaired.
+    if (s.last_sleep_quality < 0.5) {
+      inertia += (0.5 - s.last_sleep_quality) * 0.3;  // up to +0.15 at quality=0
+    }
+    // Chronic stress: sustained stress makes mood changes harder.
+    if (s.stress > 60) {
+      inertia += (s.stress - 60) * 0.005;  // up to +0.2 at stress=100
+    }
+
+    return inertia;
+  }
+
   /**
    * Drift all neurochemistry systems toward their targets.
    * Called at end of advanceTime().
@@ -948,9 +1014,17 @@ const State = (() => {
       const target = clamp(targetFn() + jitter, 0, 100);
 
       const rates = ntRates[key];
-      const rate = (s[key] > target) ? rates[1] : rates[0];
-      const decay = Math.exp(-rate * hours);
+      let rate = (s[key] > target) ? rates[1] : rates[0];
 
+      // Emotional inertia: mood-primary systems have personality-dependent rate
+      if (key in moodWorseWhenFalling) {
+        const falling = s[key] > target;
+        const worseWhenFalling = moodWorseWhenFalling[key];
+        const isNegative = falling === worseWhenFalling;
+        rate = rate / effectiveInertia(key, isNegative);
+      }
+
+      const decay = Math.exp(-rate * hours);
       s[key] = clamp(target + (s[key] - target) * decay, 0, 100);
     }
   }

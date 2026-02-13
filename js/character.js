@@ -48,6 +48,13 @@ const Character = (() => {
     State.set('money', startMoney);
     State.set('last_observed_money', startLastMoney);
 
+    // Personality — raw values stored in state for drift engine to read.
+    // Legacy saves without personality get 50/50/50 → inertia exactly 1.0 → no change.
+    const personality = current.personality || { neuroticism: 50, self_esteem: 50, rumination: 50 };
+    State.set('neuroticism', personality.neuroticism);
+    State.set('self_esteem', personality.self_esteem);
+    State.set('rumination', personality.rumination);
+
     // Phone battery — slept at home, charged overnight, but not everyone charges to full
     State.set('phone_battery', Timeline.charRandomInt(80, 100));
 

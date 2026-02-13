@@ -234,3 +234,28 @@ level = clamp(target + (level - target) * decay, 0, 100)
 **Placeholder systems (18):** initialized at baseline 50, drift toward 50 with jitter. Will gain feeders as their game systems are built (menstrual cycle, HRT, substances, etc.).
 
 **Reference material:** `RESEARCH-HORMONES.md` (research summaries), `REFERENCE-HORMONES.md` (full human hormone list).
+
+### Layer 2 step: Emotional Inertia as Character Trait (implemented)
+
+Per-character emotional inertia makes mood stickiness personal. Some characters are emotionally fluid (moods shift quickly), others get stuck (moods persist). This is the "individual variation" described in Layer 1 above.
+
+**Which systems:** Only the four mood-primary systems read by `moodTone()`: serotonin, dopamine, norepinephrine, GABA. Physiological rhythms (cortisol, melatonin, histamine, etc.) are unaffected — personality doesn't change your cortisol cycle.
+
+**Personality parameters:** Three raw values generated at character creation and stored in state (not pre-computed inertia):
+- `neuroticism` (0–100) — strongest predictor. Adds extra stickiness in the "toward worse mood" direction only.
+- `self_esteem` (0–100) — low self-esteem increases inertia across all directions.
+- `rumination` (0–100) — high rumination increases inertia across all directions.
+
+**How inertia applies:** `rate = baseRate / effectiveInertia(system, isNegative)`. The `effectiveInertia()` function computes from raw personality each tick — no lossy pre-computation. The `system` parameter is unused for now (all four systems get the same formula) but the signature supports per-system differentiation as a formula edit, not a refactor.
+
+**Inertia range:**
+- Base: 0.6 (fluid, all traits at 0/100/0) to 1.4 (sticky, all traits at 100/0/100)
+- Neuroticism negative bonus: up to +0.2 when drifting toward worse mood
+- State modifiers: adenosine > 60 (sleep deprivation), last_sleep_quality < 0.5 (poor sleep), stress > 60 (chronic stress) — each adds up to ~+0.2
+- A fluid character's mood shifts ~67% faster than default; a very sticky character's ~40% slower
+
+**"Worse direction" per system:** serotonin falling (low = depressed), dopamine falling (low = anhedonia), NE rising (high = agitation), GABA falling (low = anxiety).
+
+**Legacy compatibility:** Characters without personality (old saves) get 50/50/50 → inertia exactly 1.0 → identical drift behavior.
+
+**Replay safety:** No PRNG consumed. Personality stored in state (restored on load via `loadState()` defaults merge). Drift is deterministic from state values + time delta.
