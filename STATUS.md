@@ -111,6 +111,53 @@ Friends who reach out and get silence back generate guilt over time. Per-friend 
 
 **Friend messages tagged with source** — `phone_inbox` entries from friends carry `source: 'friend1'|'friend2'` for contact tracking.
 
+### Life History / Backstory Generation
+Characters have compressed life histories generated at chargen. Two-phase: broad strokes (charRng, ~4 calls) then fine-grained simulation (post-finalization, deterministic).
+
+**Generated parameters:**
+- `economic_origin` — precarious / modest / comfortable / secure (where you started)
+- `career_stability` — 0.0–1.0 (how steady adult life has been)
+- `life_events` — 0–2 events with multi-dimensional impacts (medical_crisis, job_loss, family_help, small_inheritance, accident, legal_trouble, relationship_end)
+
+**Financial outputs (from fine-grained simulation):**
+- `starting_money` — integral of years working × accumulation rate + event impacts. Range: $0 (22yo precarious) to $40,000+ (48yo secure).
+- `pay_rate` — biweekly take-home by job type (food_service $480, retail $520, office $600)
+- `rent_amount` — monthly, from origin bracket × stability ($400–950)
+
+**Non-financial outputs:**
+- Financial anxiety sentiment (intensity from origin + stability + negative events)
+- Personality adjustments (neuroticism, self_esteem nudges from life events)
+- Work sentiment from career stability (dread if unstable, satisfaction if stable)
+- Job standing from career stability (55–75 range)
+- Life event sentiments (health anxiety, authority dread, family guilt)
+
+**Bill day offsets:** paycheck_day_offset, rent_day_offset, utility_day_offset, phone_bill_day_offset — all generated at chargen, stored on character. Each character has their own financial rhythm.
+
+### Financial Cycle
+Closed-loop financial system: income, obligations, and the collision between them.
+
+**Income:** Biweekly paycheck = `pay_rate * min(days_worked, 10) / 10`. Missing work reduces pay. Arrives as phone deposit notification. Small anxiety relief when paycheck arrives while broke.
+
+**Bills (4, monthly on character-specific offsets):**
+- Rent — from backstory
+- Utilities — $65 (approximation)
+- Phone — $45 (approximation)
+- Auto-deducted. Success → notification with perceived balance. Failure → money → $0, "declined" notification, +8 stress, +0.03 financial anxiety.
+
+**Work attendance tracking:** `days_worked_this_period` increments on workplace arrival (guarded by !at_work_today), resets on payday. Calling in sick reduces next paycheck.
+
+**Money tiers (updated for larger balances):** broke ≤ $0 / scraping < $50 / tight < $200 / careful < $600 / okay < $1500 / comfortable < $5000 / cushioned ≥ $5000.
+
+### Financial Anxiety (NT Integration)
+Financial anxiety sentiment connects to neurochemistry:
+- At home: `money_anxiety * 4` reduces serotonin target
+- At work: `money_anxiety * 2` reduces dopamine target
+- Money < $200: serotonin penalty scaling with deficit
+- Money < $50: cortisol spike (+3)
+- Accumulates from failed bills (+0.03), relief from paycheck when broke (-0.01)
+- Sleep processing factor 0.6 (entrenches like dread)
+- 5 money-anxiety idle thoughts, weighted by anxiety intensity
+
 ### Derived Systems
 - **Mood tone** — primarily from neurochemistry (serotonin, dopamine, NE, GABA) with physical state overrides → numb / fraying / heavy / hollow / quiet / clear / present / flat. Same 8 tones, now with inertia instead of instant derivation.
 - **Prose-neurochemistry shading** — three-layer pattern: moodTone() as coarse selector, weighted variant selection via `State.lerp01()` + `Timeline.weightedPick()`, deterministic modifiers (adenosine fog, NE+low-GABA restlessness). **All 67 `Timeline.pick` call sites converted.** Covered: idle thoughts, bedroom description, lie_there, sleep prose (23 branches), look_out_window (7 branches), sit_at_table (6 branches), go_for_walk (12 branches), work events (4 branches), ambient events (5 branches), friend messages (4 flavors), coworker chatter (3 flavors), coworker interactions (3 flavors). No `Timeline.pick` calls remain. See DESIGN.md "Prose-neurochemistry interface" for the full pattern.
@@ -123,7 +170,7 @@ Friends who reach out and get silence back generate guilt over time. Per-friend 
 dressed, showered, ate_today, at_work_today, called_in, alarm_set, alarm_went_off, work_nagged_today
 
 ### Phone State
-Battery (dual-rate drain: 1%/hr standby, 15%/hr screen-on; tiers: dead/critical/low/fine), silent mode, inbox (messages accumulate whether or not you look). Charges at 30%/hr during sleep at home and via charge_phone interaction. Starting battery 80–100% (chargen RNG). Message sources: friends (flavor-driven frequency), work nag (30min late), bill notifications (every 7 days).
+Battery (dual-rate drain: 1%/hr standby, 15%/hr screen-on; tiers: dead/critical/low/fine), silent mode, inbox (messages accumulate whether or not you look). Charges at 30%/hr during sleep at home and via charge_phone interaction. Starting battery 80–100% (chargen RNG). Message sources: friends (flavor-driven frequency), work nag (30min late), paycheck deposits (biweekly), bill auto-pay notifications (rent/utilities/phone, monthly).
 
 ### Apartment State
 fridge_food (integer, depletes on eating, restocked by groceries), apartment_mess (0–100, grows passively)
@@ -221,6 +268,9 @@ Single-screen UI with:
 - Name sampling from weighted US Census + SSA data (100 first names, 100 surnames)
 - Personality parameters: neuroticism, self_esteem, rumination (0–100 each, generated silently, not exposed in UI)
 - Sentiments: 8 categories of likes/dislikes (weather, time, food, rain, quiet, outside, warmth, routine), generated silently from charRng
+- Life history backstory: economic_origin, career_stability, 0–2 life_events (generated silently from charRng)
+- Financial simulation: starting_money, pay_rate, rent_amount, financial_anxiety, personality adjustments, work sentiments, job standing (computed post-finalization)
+- Bill day offsets: paycheck, rent, utility, phone bill (generated silently from charRng)
 
 ## Infrastructure
 

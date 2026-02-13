@@ -569,21 +569,55 @@ Money is a number the player only vaguely knows. Like time, financial awareness 
 
 Every purchase is a decision the player feels. Groceries cost $8-14. A cheap meal costs $3-5. These aren't big numbers but they're most of what you have. The interaction is available if you can afford it; if you can't, it's just not there (opaque constraints — you don't see "insufficient funds," the option is simply absent).
 
-### Income
+### Life history (implemented)
 
-(See Income & Financial Insecurity section — irregular income, the stress of gaps between payments, the difference between a paycheck and a hope.)
+Financial position at any age is the integral of everything that happened: family origin, career stability, life events. The game generates this backstory — compressed, like Dwarf Fortress legends — and derives financial parameters from it.
 
-### Bills and obligations
+**Nothing is arbitrary.** The ideal end state is a simulation where every parameter has a reason. Pay rate from job type. Rent from housing quality from income bracket. Starting money from years of accumulation minus crises. Personality shaped by events. As the backstory system grows, arbitrary chargen parameters become derived ones.
 
-(See Income & Financial Insecurity section — bills arrive on schedule, the collision with irregular income.)
+**Two-phase generation:**
+1. **Broad strokes** (charRng, ~4 calls) — economic origin, career stability, 0–2 life events. The story the player could see.
+2. **Fine-grained simulation** (post-finalization, deterministic) — year-by-year accumulation producing exact starting money, pay rate, rent amount, financial anxiety, personality adjustments, work sentiments, job standing.
+
+**Economic origin** — where you started: precarious (grew up poor), modest (lower-middle), comfortable (middle class), secure (upper-middle). Determines accumulation rate, event pool, rent bracket, and whether life events cause lasting damage or temporary setbacks.
+
+**Career stability** — how steady adult life has been (0.0–1.0). Low = gaps, disruptions, restarts. High = continuity, accumulation. Shapes starting savings, work sentiment, job standing.
+
+**Life events** — 0–2 events that happened along the way. Each affects finances AND other dimensions: medical crisis (money drain + health anxiety), job loss (money drain + work dread + self-esteem damage), family help (money boost + guilt), relationship end (money drain + self-esteem hit). Secure origins cushion impacts (family safety net). Personality adjustments are additive nudges, not overrides.
+
+### Income (implemented)
+
+Paychecks arrive every 14 days on a character-specific offset. Amount = `pay_rate * days_worked / 10`. Pay rate comes from job type (food service $480, retail $520, office $600 biweekly). Missing work reduces the next paycheck proportionally.
+
+### Bills and obligations (implemented)
+
+Four bills on rotating 30-day cycles, each with a character-specific offset:
+- **Rent** — from backstory (origin bracket × stability, range $400–950)
+- **Utilities** — $65/month (approximation — should eventually derive from season, apartment, usage)
+- **Phone** — $45/month (approximation — should eventually depend on plan type)
+
+Auto-deducted. If money is sufficient: deducts, notification with perceived balance. If insufficient: money → $0, bill fails, "declined" notification, +8 stress, +0.03 financial anxiety.
+
+### Financial anxiety (implemented)
+
+A sentiment (`{target: 'money', quality: 'anxiety'}`) that connects to the neurochemistry engine:
+- At home: lowers serotonin target (the weight of bills you haven't checked)
+- At work: lowers dopamine target (working for money you'll never keep)
+- Accumulates from failed bills (+0.03), small relief from paycheck when broke (-0.01)
+- Sleep processing factor 0.6 (entrenches like dread)
+- Chargen baseline from backstory — precarious origins start with higher financial anxiety
+
+Direct money level also affects NT targets: low balance → serotonin penalty, very low → cortisol spike.
 
 ### Financial thresholds
 
 Financial anxiety isn't linear. Crossing thresholds changes the texture:
-- Comfortable → tight: you start checking the bank app
-- Tight → worried: you start doing math in your head at the store
-- Worried → broke: you know the number without checking. It's always there.
-- Broke → crisis: which bill do you skip this month
+- Cushioned → comfortable: background awareness, no pressure
+- Comfortable → okay: you notice prices
+- Okay → careful: you start checking the bank app
+- Careful → tight: you start doing math in your head at the store
+- Tight → scraping: you know the number without checking. It's always there.
+- Scraping → broke: which bill fails this month
 
 ## People
 

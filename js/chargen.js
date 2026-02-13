@@ -161,6 +161,195 @@ const Chargen = (() => {
     return Math.floor(d.getTime() / 60000);
   }
 
+  // --- Life history generation ---
+  // Compressed backstory like Dwarf Fortress legends — broad strokes explaining
+  // who this person is. Financial position, personality adjustments, work sentiments
+  // are all derived outputs. Uses charRng so rerolling produces different lives.
+
+  const economicOrigins = ['precarious', 'modest', 'comfortable', 'secure'];
+
+  // Life event types and their multi-dimensional impacts
+  const lifeEventDefs = {
+    medical_crisis:    { financial: [-8000, -2000], neuroticism_adj: 3, sentiment: { target: 'health', quality: 'anxiety', intensity: 0.1 } },
+    job_loss:          { financial: [-3000, -1000], self_esteem_adj: -3, sentiment: { target: 'work', quality: 'dread', intensity: 0.05 } },
+    family_help:       { financial: [1000, 5000], sentiment: { target: 'family', quality: 'guilt', intensity: 0.05 } },
+    small_inheritance: { financial: [2000, 8000] },
+    accident:          { financial: [-5000, -1000], neuroticism_adj: 2 },
+    legal_trouble:     { financial: [-4000, -500], sentiment: { target: 'authority', quality: 'dread', intensity: 0.08 } },
+    relationship_end:  { financial: [-2000, -500], self_esteem_adj: -3 },
+  };
+
+  // Which events are available depends on origin — secure people have different crises
+  const eventPoolByOrigin = {
+    precarious:  ['medical_crisis', 'job_loss', 'legal_trouble', 'relationship_end', 'family_help'],
+    modest:      ['medical_crisis', 'job_loss', 'relationship_end', 'family_help', 'small_inheritance'],
+    comfortable: ['medical_crisis', 'job_loss', 'relationship_end', 'small_inheritance', 'accident'],
+    secure:      ['medical_crisis', 'relationship_end', 'small_inheritance', 'accident', 'legal_trouble'],
+  };
+
+  /**
+   * Generate life history backstory on charRng stream.
+   * ~4 charRng calls. Produces broad strokes — the story of this person.
+   * @param {number} age
+   * @returns {{ economic_origin: string, career_stability: number, life_events: Array<{ type: string, financial_impact: number }> }}
+   */
+  function generateBackstory(age) {
+    // 1. Economic origin (1 charRng call)
+    const economic_origin = Timeline.charPick(economicOrigins);
+
+    // 2. Career stability 0-1 (1 charRng call)
+    const career_stability = Timeline.charRandom();
+
+    // 3. Life events — 0-2 events (1 charRng call for count, 0-2 for selection)
+    const yearsAdult = Math.max(0, age - 18);
+    // More years = more chance of events. 0-2 events.
+    const eventChance = Math.min(0.9, yearsAdult / 30);
+    const eventRoll = Timeline.charRandom();
+    let numEvents = 0;
+    if (eventRoll < eventChance * 0.5) numEvents = 2;
+    else if (eventRoll < eventChance) numEvents = 1;
+
+    const life_events = [];
+    const pool = eventPoolByOrigin[economic_origin];
+    for (let i = 0; i < numEvents; i++) {
+      const type = Timeline.charPick(pool);
+      const def = lifeEventDefs[type];
+      // Financial impact interpolated by charRandom
+      const t = Timeline.charRandom();
+      const financial_impact = Math.round(def.financial[0] + (def.financial[1] - def.financial[0]) * t);
+      life_events.push({ type, financial_impact });
+    }
+
+    return { economic_origin, career_stability, life_events };
+  }
+
+  // --- Fine-grained financial simulation ---
+  // Runs once per character after finalization. Year-by-year accumulation
+  // from age 18 to current age, producing exact starting money, rent, pay rate,
+  // financial sentiments, personality adjustments, and job standing.
+
+  // Accumulation rates by origin ($/year range [low, high])
+  const accumulationRate = {
+    precarious:  [-50, 100],
+    modest:      [100, 500],
+    comfortable: [500, 2000],
+    secure:      [1000, 5000],
+  };
+
+  // Pay rates by job type (biweekly take-home)
+  const payRates = { food_service: 480, retail: 520, office: 600 };
+
+  // Rent ranges by origin bracket (monthly)
+  const rentRanges = {
+    precarious:  [400, 550],
+    modest:      [500, 650],
+    comfortable: [600, 800],
+    secure:      [700, 950],
+  };
+
+  /**
+   * Run the fine-grained financial simulation.
+   * Deterministic from backstory params — no PRNG consumed.
+   * @param {{ economic_origin: string, career_stability: number, life_events: Array<{ type: string, financial_impact: number }> }} backstory
+   * @param {number} age
+   * @param {string} job_type
+   * @returns {{ starting_money: number, pay_rate: number, rent_amount: number, financial_anxiety: number, personality_adjustments: { neuroticism: number, self_esteem: number }, work_sentiment: { quality: string, intensity: number }, job_standing_start: number }}
+   */
+  function simulateFinancialHistory(backstory, age, job_type) {
+    const { economic_origin, career_stability, life_events } = backstory;
+
+    // Year-by-year accumulation
+    const yearsWorking = Math.max(0, age - 18);
+    const [lo, hi] = accumulationRate[economic_origin];
+    const yearlyRate = lo + (hi - lo) * career_stability;
+    let savings = yearsWorking * yearlyRate;
+
+    // Apply life event financial impacts
+    let totalEventImpact = 0;
+    for (const evt of life_events) {
+      totalEventImpact += evt.financial_impact;
+    }
+    savings += totalEventImpact;
+
+    // Secure origins cushion losses; precarious origins amplify them
+    if (totalEventImpact < 0 && economic_origin === 'secure') {
+      savings -= totalEventImpact * 0.3; // recover 30% of losses (family safety net)
+    }
+
+    const starting_money = Math.max(0, Math.round(savings * 100) / 100);
+
+    // Pay rate from job type
+    const pay_rate = payRates[job_type] || 520;
+
+    // Rent from origin bracket — interpolated by career stability
+    const [rLo, rHi] = rentRanges[economic_origin];
+    const rent_amount = Math.round(rLo + (rHi - rLo) * career_stability);
+
+    // Financial anxiety — from origin + stability + negative events
+    let financial_anxiety = 0;
+    if (economic_origin === 'precarious') financial_anxiety += 0.25;
+    else if (economic_origin === 'modest') financial_anxiety += 0.1;
+    financial_anxiety += (1 - career_stability) * 0.15;
+    for (const evt of life_events) {
+      if (evt.financial_impact < 0) financial_anxiety += 0.05;
+    }
+    financial_anxiety = Math.min(0.8, financial_anxiety);
+
+    // Personality adjustments from life events (small nudges)
+    let neuroticismAdj = 0;
+    let selfEsteemAdj = 0;
+    for (const evt of life_events) {
+      const def = lifeEventDefs[evt.type];
+      if (def.neuroticism_adj) neuroticismAdj += def.neuroticism_adj;
+      if (def.self_esteem_adj) selfEsteemAdj += def.self_esteem_adj;
+    }
+    // Secure origin cushions personality damage
+    if (economic_origin === 'secure') {
+      if (neuroticismAdj > 0) neuroticismAdj = Math.round(neuroticismAdj * 0.5);
+      if (selfEsteemAdj < 0) selfEsteemAdj = Math.round(selfEsteemAdj * 0.5);
+    }
+
+    // Work sentiment from career stability
+    let work_sentiment;
+    if (career_stability < 0.3) {
+      work_sentiment = { quality: 'dread', intensity: 0.05 + (0.3 - career_stability) * 0.33 };
+    } else if (career_stability > 0.7) {
+      work_sentiment = { quality: 'satisfaction', intensity: 0.05 + (career_stability - 0.7) * 0.17 };
+    } else {
+      work_sentiment = { quality: 'satisfaction', intensity: 0 };
+    }
+    // Life events can add work dread
+    for (const evt of life_events) {
+      if (evt.type === 'job_loss' && work_sentiment.quality === 'dread') {
+        work_sentiment.intensity = Math.min(0.15, work_sentiment.intensity + 0.05);
+      }
+    }
+
+    // Job standing from career stability
+    let job_standing_start;
+    if (career_stability > 0.7) {
+      job_standing_start = 70 + Math.round((career_stability - 0.7) * 17);
+    } else if (career_stability < 0.3) {
+      job_standing_start = 55 + Math.round(career_stability * 17);
+    } else {
+      job_standing_start = 60 + Math.round((career_stability - 0.3) * 25);
+    }
+    // Job loss events scar standing
+    for (const evt of life_events) {
+      if (evt.type === 'job_loss') job_standing_start = Math.max(50, job_standing_start - 5);
+    }
+
+    return {
+      starting_money,
+      pay_rate,
+      rent_amount,
+      financial_anxiety,
+      personality_adjustments: { neuroticism: neuroticismAdj, self_esteem: selfEsteemAdj },
+      work_sentiment,
+      job_standing_start,
+    };
+  }
+
   // --- Random character generation ---
 
   function generateRandom() {
@@ -252,6 +441,15 @@ const Chargen = (() => {
     const routineQuality = Timeline.charRandom() > 0.4 ? 'comfort' : 'irritation';
     sentiments.push({ target: 'routine', quality: routineQuality, intensity: routineIntensity });
 
+    // Life history — backstory generation (charRng stream)
+    const backstory = generateBackstory(age);
+
+    // Bill day offsets — deterministic per character (charRng)
+    const paycheck_day_offset = Timeline.charRandomInt(0, 13);
+    const rent_day_offset = Timeline.charRandomInt(0, 29);
+    const utility_day_offset = Timeline.charRandomInt(0, 29);
+    const phone_bill_day_offset = Timeline.charRandomInt(0, 29);
+
     return /** @type {GameCharacter} */ ({
       first_name: playerName.first,
       last_name: playerName.last,
@@ -268,6 +466,11 @@ const Chargen = (() => {
       latitude,
       personality,
       sentiments,
+      backstory,
+      paycheck_day_offset,
+      rent_day_offset,
+      utility_day_offset,
+      phone_bill_day_offset,
     });
   }
 
@@ -698,6 +901,13 @@ const Chargen = (() => {
 
   /** @param {GameCharacter} char */
   async function finishCreation(char) {
+    // Run fine-grained financial simulation — once per character, after finalization.
+    // Produces exact starting_money, pay_rate, rent, sentiments, personality adjustments.
+    if (char.backstory) {
+      const sim = simulateFinancialHistory(char.backstory, char.age_stage, char.job_type);
+      char.financial_sim = sim;
+    }
+
     Timeline.setCharacter(char);
     Character.set(char);
 
@@ -716,5 +926,6 @@ const Chargen = (() => {
     startCreation,
     outfitSets,
     sleepwearOptions,
+    simulateFinancialHistory,
   };
 })();

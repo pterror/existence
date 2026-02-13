@@ -91,6 +91,12 @@ No build step. Plain JS loaded via script tags.
 
 **Regulation capacity is personal.** `State.regulationCapacity()` — the inverse of emotional inertia, applied during sleep. Fluid characters (low neuroticism, high self-esteem, low rumination) process emotions more efficiently overnight; sticky characters process slower. Range 0.5–1.3. At 50/50/50 → 1.0 (legacy-safe). State penalties: adenosine > 60 and stress > 60 each reduce capacity. A chronically stressed, neurotic, sleep-deprived character processes emotions dramatically less effectively — the simulation models why some people can't "just sleep it off."
 
+**Nothing arbitrary.** Every parameter should have a reason — derived from real relationships between systems, not set by formula. Pay rate from job type from career from education from origin. Rent from housing from income from career. Personality from upbringing and events. The backstory system is the mechanism: as it grows, arbitrary parameters become derived ones. When a parameter must be approximated (because upstream systems don't exist yet), document the approximation explicitly and note what should feed it.
+
+**Characters have histories.** Financial position, personality, sentiments, relationships — all are consequences of a generated life history. The chargen backstory produces broad strokes (cheap PRNG); post-finalization simulation produces exact numbers (runs once). As more systems are built (family, health, identity), they feed into the history and replace approximations with derived values.
+
+**Money is derived, not primary.** The checking balance is a surface over economic flows: income from employment, obligations from housing/bills, spending from player choices, starting position from life history. Financial anxiety is a sentiment that connects to the neurochemistry engine. The same dollar amount creates different experiences depending on the character's relationship with money.
+
 ## Code Conventions
 
 **RNG discipline:**

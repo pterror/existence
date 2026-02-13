@@ -2268,7 +2268,18 @@ const Content = (() => {
               State.adjustSentiment(msg.source, 'guilt', -0.02);
             }
           }
-          else if (msg.type === 'bill') State.adjustStress(5);
+          else if (msg.type === 'paycheck') {
+            State.adjustStress(-3);
+            State.glanceMoney();
+          }
+          else if (msg.type === 'bill') {
+            if (msg.paid === false) {
+              State.adjustStress(8);
+            } else {
+              State.adjustStress(3);
+            }
+            State.glanceMoney();
+          }
           else if (msg.type === 'bank') State.glanceMoney();
           else if (msg.type === 'work') State.adjustStress(3);
         }
@@ -2389,15 +2400,58 @@ const Content = (() => {
       added = true;
     }
 
-    // --- Bill notification (deterministic trigger, no RNG) ---
+    // --- Financial cycle triggers (deterministic, no RNG) ---
+    // Paycheck, rent, utilities, phone bill — all on character-specific schedules.
+    // Amounts and offsets derive from character backstory.
     const day = State.getDay();
-    if (day % 7 === 3 && State.get('last_bill_day') !== day) {
-      State.set('last_bill_day', day);
-      State.addPhoneMessage({
-        type: 'bill',
-        text: 'A notification from the electric company. The amount is higher than last month.',
-        read: false,
-      });
+
+    // Paycheck — every 14 days, offset by character's paycheck_day_offset
+    const paycheckOffset = Character.get('paycheck_day_offset') ?? 7;
+    if (day > 1 && day % 14 === paycheckOffset % 14 && State.get('last_paycheck_day') !== day) {
+      State.set('last_paycheck_day', day);
+      const payRate = State.get('pay_rate');
+      const daysWorked = State.get('days_worked_this_period');
+      const pay = Math.round(payRate * Math.min(daysWorked, 10) / 10 * 100) / 100;
+      const wasBroke = State.moneyTier() === 'broke' || State.moneyTier() === 'scraping';
+
+      if (pay > 0) {
+        const shortPay = daysWorked < 10;
+        const text = shortPay
+          ? 'Direct deposit. Less than usual.'
+          : 'Direct deposit.';
+        State.receiveMoney(pay, 'paycheck', text);
+        added = true;
+        // Paycheck when broke gives tiny anxiety relief
+        if (wasBroke) {
+          State.adjustSentiment('money', 'anxiety', -0.01);
+        }
+      }
+      State.set('days_worked_this_period', 0);
+    }
+
+    // Rent — every 30 days, offset by character's rent_day_offset
+    const rentOffset = Character.get('rent_day_offset') ?? 1;
+    if (day > 1 && day % 30 === rentOffset % 30 && State.get('last_rent_day') !== day) {
+      State.set('last_rent_day', day);
+      State.deductBill(State.get('rent_amount'), 'rent');
+      added = true;
+    }
+
+    // Utilities — every 30 days, offset by character's utility_day_offset
+    // TODO: derive from actual usage (lights, heating/cooling, season, apartment size)
+    const utilityOffset = Character.get('utility_day_offset') ?? 15;
+    if (day > 1 && day % 30 === utilityOffset % 30 && State.get('last_utility_day') !== day) {
+      State.set('last_utility_day', day);
+      State.deductBill(65, 'utilities');
+      added = true;
+    }
+
+    // Phone bill — every 30 days, offset by character's phone_bill_day_offset
+    // TODO: derive from plan type (prepaid vs contract, data usage)
+    const phoneOffset = Character.get('phone_bill_day_offset') ?? 20;
+    if (day > 1 && day % 30 === phoneOffset % 30 && State.get('last_phone_bill_day') !== day) {
+      State.set('last_phone_bill_day', day);
+      State.deductBill(45, 'phone');
       added = true;
     }
 
@@ -2440,6 +2494,8 @@ const Content = (() => {
           senders.push('something from work');
         } else if (msg.type === 'bank') {
           senders.push('a bank notification');
+        } else if (msg.type === 'paycheck') {
+          senders.push('a bank deposit');
         } else if (msg.type === 'bill') {
           senders.push('a bill notification');
         }
@@ -2872,6 +2928,24 @@ const Content = (() => {
       if (g2 > 0.03) {
         const gThoughts = /** @type {(name: string) => string[]} */ (friendGuiltThoughts[f2.flavor])(f2.name);
         thoughts.push(...gThoughts.map(t => ({ weight: g2 * 8, value: t })));
+      }
+    }
+
+    // Financial anxiety
+    {
+      const moneyAnx = State.sentimentIntensity('money', 'anxiety');
+      if (moneyAnx > 0.05) {
+        thoughts.push(
+          { weight: moneyAnx * 6, value: 'The bills. You don\'t do the math. You already know the math.' },
+          { weight: moneyAnx * 6, value: 'There\'s a number in your head. It\'s not the right number, but it\'s close enough to make your stomach tighten.' },
+          { weight: moneyAnx * 4, value: 'Rent is due. Or was due. Or will be. The due dates blur together after a while.' },
+        );
+      }
+      if (moneyAnx > 0.2) {
+        thoughts.push(
+          { weight: moneyAnx * 5, value: 'You think about the account balance without checking. The not-checking is its own kind of checking.' },
+          { weight: moneyAnx * 5, value: 'Every purchase is a small negotiation. Not with anyone. Just with the feeling in your chest.' },
+        );
       }
     }
 

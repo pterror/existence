@@ -44,8 +44,23 @@ Full emotional architecture designed in [DESIGN-EMOTIONS.md](DESIGN-EMOTIONS.md)
 ### Social initiation
 Currently friends only send messages to you. No way to text back, call, or initiate contact. Relationships are one-directional. DESIGN.md describes friends who respond differently to your withdrawal and engagement.
 
-### Bills and financial cycle
-Money currently only decreases from purchases. No rent, utilities, phone bill, or income. DESIGN.md describes bills arriving on schedule, irregular income for some employment types, and the collision between fixed obligations and variable income. Paycheck deposits. The overdraft. Which bill to skip this month.
+### Financial cycle — remaining depth
+~~Basic financial cycle (paycheck, rent, utilities, phone)~~ — **IMPLEMENTED.** Life history backstory generates starting money, pay rate, rent. Bills auto-deduct monthly. Paycheck varies with attendance.
+
+**Still arbitrary (should become derived):**
+- Utilities ($65 flat) — should derive from season, apartment size, actual usage
+- Phone bill ($45 flat) — should derive from plan type, data usage
+- Rent bracket — should derive from housing type (apartment/room/family), not just origin
+- Personality parameters — currently random 0–100, should partially derive from upbringing events
+- Friend flavors — currently random, should connect to backstory (who stays after life events?)
+
+**Not yet implemented:**
+- Debt mechanics (negative balance, overdraft fees)
+- "Choose which bill to skip" interaction
+- Eviction / disconnection consequences for repeated failed bills
+- Spending habits shaped by personality/origin (automatic spending)
+- Variable pay rates by age/experience
+- Non-formal income patterns (gig work, cash, irregular)
 
 ### More employment types
 Only formal employment exists (office, retail, food_service). DESIGN.md describes: freelance/commissions (irregular work, irregular pay), gig work (apps, deliveries), informal work (cash, no records), unemployed (looking or not), can't work (disability, caregiving, age). Each reshapes what "work" means.
@@ -145,7 +160,7 @@ All three jobs are day shifts. DESIGN.md doesn't prescribe this. Being awake at 
 
 ### Existing systems that need deepening
 
-**Money is a one-way drain.** No income, no bills, no financial cycle. Money only decreases from purchases. At $0, food interactions vanish and nothing replaces them — that's the simulation running out of content, not modeling reality. The fix is the full financial cycle (income, bills, the collision between them) *and* a continuous gradient of what money buys at every level. The experience of money also depends on the person — origin, habits, what scarcity means to someone who grew up with it vs someone who didn't. See "Gradients, not binaries" in DESIGN.md.
+~~**Money is a one-way drain.**~~ — **FIXED.** Financial cycle implemented: paychecks (biweekly, attendance-based), rent/utilities/phone (monthly auto-deduct), life history backstory. Still needs: at $0 food interactions still vanish — the gradient of what money buys at every level isn't yet continuous. Need food bank, asking to borrow, eating at work, the desperation options that exist when money is gone.
 
 **Job standing is mechanical, not social.** Currently: late > 15min = -5 standing. No recovery, no social dynamics, no variation by job type. Standing should be relational — shaped by coworker relationships, patterns (not single events), what the specific job values, whether someone saw you, whether someone covered for you. Being friendly with people at work should matter. Standing should be able to improve, not just decay. See the expanded Work section in DESIGN.md.
 

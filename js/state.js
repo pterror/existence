@@ -181,12 +181,19 @@ const State = (() => {
       work_tasks_expected: 4,
 
       // Phone inbox and mode
-      phone_inbox: /** @type {{ type: string, text: string, read: boolean, source?: string }[]} */ ([]),
+      phone_inbox: /** @type {{ type: string, text: string, read: boolean, source?: string, paid?: boolean }[]} */ ([]),
       phone_silent: false,
       viewing_phone: false,
       last_msg_gen_time: 0,     // game time of last generateIncomingMessages call
       work_nagged_today: false, // reset on wake
-      last_bill_day: 0,         // last game-day a bill notification arrived
+      // Financial cycle
+      pay_rate: 0,              // biweekly take-home, set from character backstory
+      rent_amount: 0,           // monthly rent, from character backstory
+      days_worked_this_period: 0, // tracks attendance for variable pay
+      last_paycheck_day: 0,     // guard: game day of last paycheck
+      last_rent_day: 0,         // guard: game day of last rent deduction
+      last_utility_day: 0,      // guard: game day of last utility deduction
+      last_phone_bill_day: 0,   // guard: game day of last phone bill deduction
 
       // Internal counters the player never sees
       actions_since_rest: 0,
@@ -452,11 +459,12 @@ const State = (() => {
 
   function moneyTier() {
     if (s.money <= 0) return 'broke';
-    if (s.money < 5) return 'scraping';
-    if (s.money < 15) return 'tight';
-    if (s.money < 40) return 'careful';
-    if (s.money < 80) return 'okay';
-    return 'comfortable';
+    if (s.money < 50) return 'scraping';
+    if (s.money < 200) return 'tight';
+    if (s.money < 600) return 'careful';
+    if (s.money < 1500) return 'okay';
+    if (s.money < 5000) return 'comfortable';
+    return 'cushioned';
   }
 
   function timePeriod() {
@@ -601,9 +609,61 @@ const State = (() => {
     return false;
   }
 
+  // --- Financial cycle helpers ---
+
+  /**
+   * Receive money (paycheck, etc). Adds amount, generates bank notification.
+   * @param {number} amount
+   * @param {string} source — 'paycheck' or other identifier
+   * @param {string} [extraText] — optional additional note text
+   */
+  function receiveMoney(amount, source, extraText) {
+    adjustMoney(amount);
+    const balStr = perceivedMoneyString();
+    let text;
+    if (source === 'paycheck') {
+      text = 'Direct deposit. Balance: ' + balStr + '.';
+      if (extraText) text = extraText + ' Balance: ' + balStr + '.';
+    } else {
+      text = 'Deposit. Balance: ' + balStr + '.';
+    }
+    addPhoneMessage({ type: 'paycheck', text, read: false });
+  }
+
+  /**
+   * Auto-deduct a bill. Handles insufficient funds.
+   * @param {number} amount
+   * @param {string} billName — 'rent', 'utilities', 'phone'
+   * @returns {boolean} whether payment succeeded
+   */
+  function deductBill(amount, billName) {
+    if (s.money >= amount) {
+      adjustMoney(-amount);
+      const balStr = perceivedMoneyString();
+      addPhoneMessage({
+        type: 'bill',
+        text: 'Autopay \u2014 ' + billName + '. ' + balStr + ' remaining.',
+        read: false,
+        paid: true,
+      });
+      return true;
+    }
+    // Insufficient funds — drain to zero, bill fails
+    s.money = 0;
+    addPhoneMessage({
+      type: 'bill',
+      text: 'Payment declined \u2014 ' + billName + '. Insufficient funds.',
+      read: false,
+      paid: false,
+    });
+    adjustStress(8);
+    adjustSentiment('money', 'anxiety', 0.03);
+    return false;
+  }
+
   // --- Phone inbox helpers ---
 
-  /** @param {{ type: string, text: string, read: boolean, source?: string }} msg */
+  /** @param {{ type: string, text: string, read: boolean, source?: string, paid?: boolean }} msg */
   function addPhoneMessage(msg) {
     s.phone_inbox.push(msg);
   }
@@ -716,17 +776,26 @@ const State = (() => {
   }
 
   function approximateMoneyString() {
-    // Round to nearest $5
-    const rounded = Math.round(s.money / 5) * 5;
-    return 'around $' + rounded;
+    const m = s.money;
+    if (m < 100) {
+      const rounded = Math.round(m / 5) * 5;
+      return 'around $' + rounded;
+    }
+    if (m < 1000) {
+      const rounded = Math.round(m / 10) * 10;
+      return 'around $' + rounded;
+    }
+    const rounded = Math.round(m / 100) * 100;
+    return 'around $' + rounded.toLocaleString();
   }
 
   function roughMoneyString() {
     const m = s.money;
     if (m < 10) return 'not much — under ten dollars, maybe';
-    if (m < 20) return 'maybe ten, fifteen dollars';
-    const tens = Math.floor(m / 10) * 10;
-    return 'maybe $' + tens + '-something';
+    if (m < 100) return 'maybe $' + (Math.floor(m / 10) * 10) + '-something';
+    if (m < 1000) return 'a few hundred, maybe';
+    if (m < 5000) return 'a few thousand';
+    return 'several thousand';
   }
 
   function qualitativeMoneyString() {
@@ -736,6 +805,7 @@ const State = (() => {
     if (mt === 'tight') return 'not much';
     if (mt === 'careful') return 'some, but not a lot';
     if (mt === 'okay') return 'enough for now';
+    if (mt === 'cushioned') return 'more than enough';
     return 'enough';
   }
 
@@ -779,6 +849,7 @@ const State = (() => {
     satisfaction: 0.9,
     warmth: 0.85,
     guilt: 0.7,
+    anxiety: 0.6,       // financial anxiety entrenches like dread
     dread: 0.6,
     irritation: 0.6,
   };
@@ -939,6 +1010,19 @@ const State = (() => {
       t -= (g1 + g2) * 3;   // max ~6 points at extreme guilt toward both friends
     }
 
+    // Financial anxiety at home — the weight of bills you haven't checked
+    if (s.location && s.location.startsWith('apartment')) {
+      const moneyAnx = sentimentIntensity('money', 'anxiety');
+      t -= moneyAnx * 4;    // max ~3.2 at high anxiety
+    }
+
+    // Direct money level effects — being broke hurts regardless of anxiety
+    const mt = moneyTier();
+    if (mt === 'tight' || mt === 'scraping' || mt === 'broke') {
+      // Scale: tight → -1, scraping → -2.5, broke → -3.75
+      if (s.money < 200) t -= (200 - s.money) * 0.019;
+    }
+
     return clamp(t, 15, 85);
   }
 
@@ -969,6 +1053,10 @@ const State = (() => {
       const workSat = sentimentIntensity('work', 'satisfaction');
       t -= workDread * 5;    // dread kills motivation
       t += workSat * 4;      // satisfaction supports engagement
+
+      // Financial anxiety at work — working for money you'll never keep
+      const moneyAnx = sentimentIntensity('money', 'anxiety');
+      t -= moneyAnx * 2;
     }
 
     return clamp(t, 15, 85);
@@ -1008,6 +1096,8 @@ const State = (() => {
     let t = 45 + diurnal * 20;
     // Stress pushes cortisol above rhythm
     if (s.stress > 40) t += (s.stress - 40) * 0.3;
+    // Very low money — financial stress adds cortisol
+    if (s.money < 50) t += 3;
     return clamp(t, 10, 95);
   }
 
@@ -1293,6 +1383,8 @@ const State = (() => {
     adjustBattery,
     adjustNT,
     spendMoney,
+    receiveMoney,
+    deductBill,
     addPhoneMessage,
     getUnreadMessages,
     hasUnreadMessages,

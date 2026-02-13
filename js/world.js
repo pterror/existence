@@ -131,6 +131,8 @@ const World = (() => {
     if (destId === 'workplace') {
       if (!State.get('at_work_today')) {
         State.set('at_work_today', true);
+        // Track attendance for paycheck calculation
+        State.set('days_worked_this_period', State.get('days_worked_this_period') + 1);
         const tod = State.timeOfDay();
         if (tod > State.get('work_shift_start') + 15) {
           State.set('times_late_this_week', State.get('times_late_this_week') + 1);
