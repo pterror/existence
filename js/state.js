@@ -749,6 +749,23 @@ const State = (() => {
     return 0;
   }
 
+  /** Adjust a sentiment's intensity by amount. Finds existing or creates new entry.
+   *  Entries at intensity 0 remain (sleep processing needs them). Clamped [0, 1].
+   *  No PRNG consumed — deterministic and replay-safe.
+   *  @param {string} target @param {string} quality @param {number} amount */
+  function adjustSentiment(target, quality, amount) {
+    if (!s.sentiments) s.sentiments = [];
+    let found = null;
+    for (const sent of s.sentiments) {
+      if (sent.target === target && sent.quality === quality) { found = sent; break; }
+    }
+    if (!found) {
+      found = { target, quality, intensity: 0 };
+      s.sentiments.push(found);
+    }
+    found.intensity = clamp(found.intensity + amount, 0, 1);
+  }
+
   // --- Sleep emotional processing ---
   // REM sleep attenuates sentiment deviations from character baseline.
   // Better sleep = more processing. No PRNG consumed — fully deterministic.
@@ -837,6 +854,14 @@ const State = (() => {
       else if (hour >= 6 && hour <= 9) t -= eveComfort * 3;
     }
 
+    // Accumulating sentiments: work dread/satisfaction at workplace
+    if (s.location === 'workplace') {
+      const workDread = sentimentIntensity('work', 'dread');
+      const workSat = sentimentIntensity('work', 'satisfaction');
+      t -= workDread * 6;    // dread lowers serotonin target at work
+      t += workSat * 3;      // satisfaction gives a small lift
+    }
+
     return clamp(t, 15, 85);
   }
 
@@ -859,6 +884,14 @@ const State = (() => {
     if (eveComfort > 0) {
       if (hour >= 18 && hour <= 23) t += eveComfort * 3;
       else if (hour >= 6 && hour <= 9) t -= eveComfort * 2;
+    }
+
+    // Accumulating sentiments: work dread/satisfaction at workplace
+    if (s.location === 'workplace') {
+      const workDread = sentimentIntensity('work', 'dread');
+      const workSat = sentimentIntensity('work', 'satisfaction');
+      t -= workDread * 5;    // dread kills motivation
+      t += workSat * 4;      // satisfaction supports engagement
     }
 
     return clamp(t, 15, 85);
@@ -1166,6 +1199,7 @@ const State = (() => {
     perceivedMoneyString,
     lerp01,
     sentimentIntensity,
+    adjustSentiment,
     processSleepEmotions,
   };
 })();

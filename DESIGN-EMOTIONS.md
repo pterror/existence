@@ -343,3 +343,42 @@ For each sentiment in state:
 **Current effect:** Zero. All sentiments are at their chargen baseline, so deviations are zero. The mechanism is in place for step 5 (accumulating sentiments) to push intensities above baseline, at which point sleep will partially reset them.
 
 **Replay safety:** No PRNG consumed. Processing is deterministic from state values + sleep parameters. On replay, `applyToState()` writes original sentiments, then sleep interactions re-process them identically.
+
+### Layer 2 step: Accumulating Sentiments (implemented)
+
+Sentiments that build from repeated experience. The first dynamic sentiments: work dread/satisfaction and per-coworker warmth/irritation. These are the feelings you don't choose — they accumulate from dozens of small moments until the prose changes and the mechanics shift.
+
+**New sentiment targets:**
+- `{target: 'work', quality: 'dread'}` — friction, struggle, can't-focus days
+- `{target: 'work', quality: 'satisfaction'}` — competence, tasks completed, flow
+- `{target: 'coworker1', quality: 'warmth'}` / `{target: 'coworker1', quality: 'irritation'}`
+- `{target: 'coworker2', quality: 'warmth'}` / `{target: 'coworker2', quality: 'irritation'}`
+
+Dread and satisfaction are independent — ambivalence is real. A job you're good at but that grinds you down. Same for coworker warmth and irritation.
+
+**`State.adjustSentiment(target, quality, amount)`** — finds-or-creates a sentiment entry, adjusts intensity, clamps to [0, 1]. Entries at intensity 0 remain in the array (sleep processing needs them). No PRNG consumed.
+
+**Accumulation triggers:**
+- `do_work`: can-focus → satisfaction +0.015, dread -0.01. Can't-focus → dread +0.02, satisfaction -0.005.
+- `work_break`: if stress > 40 → dread +0.005. The need to escape is itself a signal.
+- `talk_to_coworker`: good mood/low stress → warmth +0.02. Bad mood/high stress → irritation +0.015. Also affects mechanical outcomes: high warmth → extra social bonus (+2); high irritation → stress cost (+2 instead of -3).
+- `coworker_speaks` event: bad mood → irritation +0.01. Neutral/good → warmth +0.008. Smaller than chosen interaction (involuntary exposure).
+
+**Steady-state analysis** (dread at +0.02 per can't-focus, ~5/day on bad days = +0.10/day):
+- Good sleep (40% processing): stabilizes at ~0.28 intensity after a week of bad days
+- Poor sleep (17% processing): climbs to ~0.65 over weeks
+- One good day (-0.05 dread from focus) + good sleep: drops 0.30 → 0.15
+
+Coworker irritation at +0.01 per bad-mood event (~2-3/day): meaningful only after 2-3 weeks of chronic bad mood at work. "Dozens of small interactions."
+
+**NT target modifiers** (only at workplace):
+- `serotoninTarget()`: dread -6, satisfaction +3
+- `dopamineTarget()`: dread -5, satisfaction +4
+
+This creates the design-intended feedback loop: chronic struggle at work → dread builds → lower serotonin/dopamine at work → harder to focus → more dread. Good sleep partially resets each night. If accumulation rate exceeds sleep processing rate (bad days + bad sleep), dread grows. Good days + good sleep can reverse it.
+
+**Prose variants:** Work-dread and work-satisfaction weighted variants in `doWorkProse` (2 per job type — can't-focus and normal branches). Coworker warmth and irritation weighted variants in `coworkerChatter` and `coworkerInteraction` (1-2 per flavor). All follow the existing `weightedPick` pattern — same 1 RNG call.
+
+**Sleep processing:** Already handles accumulated sentiments correctly. Entries with no character baseline (all six new targets) attenuate toward intensity 0.
+
+**Replay safety:** `adjustSentiment()` is deterministic (no PRNG). Called from execute functions after state changes, before prose generation (where weightedPick consumes RNG). NT target modifiers are deterministic (read state only). New `weightedPick` variants follow existing pattern.

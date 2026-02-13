@@ -93,9 +93,21 @@ const Content = (() => {
   // --- Coworker prose tables ---
 
   /** @type {Record<string, (name: string) => string | undefined>} */
+  // Coworker sentiment lookup — called from chatter/interaction functions.
+  // Requires the slot ('coworker1'/'coworker2') to be passed, but the chatter
+  // tables are keyed by flavor and only receive name. So we read both slots and
+  // match by name — imperfect but correct since names are unique per character.
+  function coworkerSlotByName(name) {
+    const c1 = Character.get('coworker1');
+    if (c1 && c1.name === name) return 'coworker1';
+    return 'coworker2';
+  }
+
   const coworkerChatter = {
     warm_quiet: (name) => {
       const ser = State.get('serotonin');
+      const slot = coworkerSlotByName(name);
+      const irr = State.sentimentIntensity(slot, 'irritation');
       return Timeline.weightedPick([
         { weight: 1, value: `"Long day, huh?" ${name}, not really expecting an answer. Never does.` },
         { weight: 1, value: `"You want coffee?" ${name}, already walking to the machine, asking over a shoulder.` },
@@ -103,10 +115,15 @@ const Content = (() => {
         { weight: 1, value: `${name} sets a cup of water near you without a word. Small.` },
         // Higher serotonin — the small gesture lands
         { weight: State.lerp01(ser, 45, 65), value: `${name} looks over. Half-smile. Something about it — the lack of expectation, the ease — actually reaches you. A small warm thing that doesn't ask anything back.` },
+        // Accumulated irritation — even quiet warmth grates
+        { weight: irr * 1.5, value: `${name} glances over. The half-smile. The quiet gesture. It shouldn't bother you — it's kind, you know it's kind — but something about the ease of it lands wrong today.` },
       ]);
     },
     mundane_talker: (name) => {
       const ne = State.get('norepinephrine');
+      const slot = coworkerSlotByName(name);
+      const irr = State.sentimentIntensity(slot, 'irritation');
+      const wrm = State.sentimentIntensity(slot, 'warmth');
       return Timeline.weightedPick([
         { weight: 1, value: `${name} mentions something about the weather. You say something back. The ritual of it.` },
         { weight: 1, value: `${name} is talking about a show from last night. You nod in the right places.` },
@@ -114,10 +131,16 @@ const Content = (() => {
         { weight: 1, value: `${name} says something about traffic this morning. You make a sound of agreement.` },
         // High NE — the chatter grates
         { weight: State.lerp01(ne, 55, 75), value: `${name} is talking. About what, you've lost track — the words arrive one at a time, each one landing on the last nerve you have. You nod. You can't stop nodding.` },
+        // Accumulated irritation — the voice itself is the problem
+        { weight: irr * 1.5, value: `${name} starts talking and you feel your jaw tighten before the first sentence lands. The voice. The cadence. You've heard it so many times that the sound itself carries weight.` },
+        // Accumulated warmth — the ritual has ease
+        { weight: wrm * 1.2, value: `${name} says something about nothing in particular. You say something back. There's a shorthand to it now — the rhythm of two people who've had this exchange enough times that it doesn't need to mean anything to matter.` },
       ]);
     },
     stressed_out: (name) => {
       const gaba = State.get('gaba');
+      const slot = coworkerSlotByName(name);
+      const irr = State.sentimentIntensity(slot, 'irritation');
       return Timeline.weightedPick([
         { weight: 1, value: `${name} mutters something under their breath. Screen-related, probably.` },
         { weight: 1, value: `${name} is on the phone again, voice tighter than it needs to be.` },
@@ -125,6 +148,8 @@ const Content = (() => {
         { weight: 1, value: `${name} exhales through teeth. Something happened. Something always happens.` },
         // Low GABA — their stress is contagious
         { weight: State.lerp01(gaba, 40, 20), value: `${name} is tense — you can feel it from here. The tight voice, the sharp movements. Your own shoulders climb in response. Other people's stress is a frequency and you're tuned to it.` },
+        // Accumulated irritation — their stress is a personal offense now
+        { weight: irr * 1.5, value: `${name} is stressed again. Of course ${name} is stressed. ${name} is always stressed, and somehow it always becomes your problem — the sighing, the muttering, the tight little sounds that land in your space like they own it.` },
       ]);
     },
   };
@@ -133,32 +158,47 @@ const Content = (() => {
   const coworkerInteraction = {
     warm_quiet: (name) => {
       const ser = State.get('serotonin');
+      const slot = coworkerSlotByName(name);
+      const wrm = State.sentimentIntensity(slot, 'warmth');
       return Timeline.weightedPick([
         { weight: 1, value: `"Hey." ${name} looks up. "Hey." That's it. That's the whole exchange. But it happened.` },
         { weight: 1, value: `${name}'s talking about a restaurant from the weekend. You ask which one. An almost-smile while describing it.` },
         { weight: 1, value: `You say something to ${name}. Something small. The response is warm and brief. Enough.` },
         // Higher serotonin — the exchange has warmth
         { weight: State.lerp01(ser, 45, 65), value: `You and ${name} exchange a few words. Nothing important. But the rhythm of it — the easy back and forth, the pauses that aren't awkward — is like a small door opening.` },
+        // Accumulated warmth — there's history in the ease
+        { weight: wrm * 1.5, value: `You and ${name} talk for a minute. The ease of it — knowing what they'll say, knowing they won't ask too much — has the texture of something built from a lot of small moments. Recognition, not performance.` },
       ]);
     },
     mundane_talker: (name) => {
       const aden = State.get('adenosine');
+      const slot = coworkerSlotByName(name);
+      const wrm = State.sentimentIntensity(slot, 'warmth');
+      const irr = State.sentimentIntensity(slot, 'irritation');
       return Timeline.weightedPick([
         { weight: 1, value: `You ask ${name} about the coffee. Same as yesterday. You nod. It's small. It's something.` },
         { weight: 1, value: `${name} tells you about a sale somewhere. You listen. It's easier than not listening.` },
         { weight: 1, value: `You mention the weather to ${name}. The conversation goes exactly where you'd expect. It's fine.` },
         // High adenosine — you drift through the interaction
         { weight: State.lerp01(aden, 50, 70), value: `${name} is saying something. You catch every third word — enough to nod, enough to make the right face. The rest dissolves. You're here but the fog is doing most of the work.` },
+        // Accumulated irritation — everything they say costs you
+        { weight: irr * 1.5, value: `You say something to ${name}. They respond at length. You knew they would. You always know they will. Every word takes something from you that you can't name.` },
+        // Accumulated warmth — the mundane has become familiar
+        { weight: wrm * 1.2, value: `${name} tells you something you've heard before. But there's something in the telling — the unselfconsciousness of it, the assumption that you're listening — that's become its own kind of comfort.` },
       ]);
     },
     stressed_out: (name) => {
       const ne = State.get('norepinephrine');
+      const slot = coworkerSlotByName(name);
+      const irr = State.sentimentIntensity(slot, 'irritation');
       return Timeline.weightedPick([
         { weight: 1, value: `You ask ${name} how it's going. The answer involves a deadline. It always involves a deadline.` },
         { weight: 1, value: `${name} vents for thirty seconds about something that happened. You listen. That's what's needed.` },
         { weight: 1, value: `"Don't even ask," ${name} says, before you ask. So you don't.` },
         // High NE — the tension is catching
         { weight: State.lerp01(ne, 50, 70), value: `${name} starts talking and the tension in their voice does something to yours. By the time they finish, your jaw has been clenched the whole time. Their stress is a frequency and you're receiving it.` },
+        // Accumulated irritation — you brace before they even speak
+        { weight: irr * 1.5, value: `You approach ${name} and feel yourself brace. The venting will come — it always comes — and you'll absorb it because that's what you do. What you've always done. You're tired of doing it.` },
       ]);
     },
   };
@@ -305,11 +345,19 @@ const Content = (() => {
   /** @type {Record<string, (canFocus: boolean, energy: string, stress: string) => string>} */
   const doWorkProse = {
     office: (canFocus, energy, stress) => {
+      const dread = State.sentimentIntensity('work', 'dread');
+      const sat = State.sentimentIntensity('work', 'satisfaction');
       if (!canFocus && energy === 'depleted') {
-        return 'You stare at the screen. Words move but they don\'t mean anything. Time passes anyway. You\'re not sure what you accomplished.';
+        return Timeline.weightedPick([
+          { weight: 1, value: 'You stare at the screen. Words move but they don\'t mean anything. Time passes anyway. You\'re not sure what you accomplished.' },
+          { weight: dread * 2, value: 'The task list. The same task list. You open it like opening a wound. The screen swims. Nothing sticks. Nothing has stuck for a while.' },
+        ]);
       }
       if (!canFocus) {
-        return 'You try to focus. It\'s like pushing through water. Things get done, maybe, but you couldn\'t say what exactly.';
+        return Timeline.weightedPick([
+          { weight: 1, value: 'You try to focus. It\'s like pushing through water. Things get done, maybe, but you couldn\'t say what exactly.' },
+          { weight: dread * 2, value: 'You try. The screen is right there. The work is right there. But there\'s something between you and it now — a heaviness that wasn\'t always this heavy.' },
+        ]);
       }
       if (stress === 'overwhelmed') {
         return 'You work through it. Each task is a small wall you have to climb. You climb them because that\'s what\'s there.';
@@ -317,15 +365,26 @@ const Content = (() => {
       if (energy === 'tired') {
         return 'You work. Slowly, but it happens. One thing, then the next. The clock moves.';
       }
-      return 'You settle into it. The work is the work — it\'s not interesting, but your hands know what to do. Something gets finished.';
+      return Timeline.weightedPick([
+        { weight: 1, value: 'You settle into it. The work is the work — it\'s not interesting, but your hands know what to do. Something gets finished.' },
+        { weight: sat * 2, value: 'You settle into it and the work cooperates. There\'s a rhythm here — not exciting, but competent. Something gets done, and you know it got done right.' },
+      ]);
     },
 
     retail: (canFocus, energy, stress) => {
+      const dread = State.sentimentIntensity('work', 'dread');
+      const sat = State.sentimentIntensity('work', 'satisfaction');
       if (!canFocus && energy === 'depleted') {
-        return 'You stand at the register. Scan, bag, repeat. Your body does it. Your mind is somewhere behind glass.';
+        return Timeline.weightedPick([
+          { weight: 1, value: 'You stand at the register. Scan, bag, repeat. Your body does it. Your mind is somewhere behind glass.' },
+          { weight: dread * 2, value: 'Scan. Bag. The beep of the register is a sound you hear in your sleep now. Your body does the job. The rest of you left a while ago.' },
+        ]);
       }
       if (!canFocus) {
-        return 'Restock, face the shelves, help someone find something. The motions happen. Whether you\'re in them is another question.';
+        return Timeline.weightedPick([
+          { weight: 1, value: 'Restock, face the shelves, help someone find something. The motions happen. Whether you\'re in them is another question.' },
+          { weight: dread * 2, value: 'Shelves need facing. Customers need helping. You do it because the alternative is standing still, and standing still here is worse.' },
+        ]);
       }
       if (stress === 'overwhelmed') {
         return '"Excuse me, do you work here?" You do. You help them. Another one. Another one after that.';
@@ -333,15 +392,26 @@ const Content = (() => {
       if (energy === 'tired') {
         return 'Shelves. Register. Customer. Shelves again. Your feet have their own opinion about all of this.';
       }
-      return 'You work the floor. Straighten things, ring people up, answer the same three questions. It fills the time.';
+      return Timeline.weightedPick([
+        { weight: 1, value: 'You work the floor. Straighten things, ring people up, answer the same three questions. It fills the time.' },
+        { weight: sat * 2, value: 'You work the floor. Someone can\'t find what they need and you know exactly where it is. Small competence. It\'s something.' },
+      ]);
     },
 
     food_service: (canFocus, energy, stress) => {
+      const dread = State.sentimentIntensity('work', 'dread');
+      const sat = State.sentimentIntensity('work', 'satisfaction');
       if (!canFocus && energy === 'depleted') {
-        return 'The ticket says what to do. Your hands do it. There\'s a gap between you and the work that\'s getting wider.';
+        return Timeline.weightedPick([
+          { weight: 1, value: 'The ticket says what to do. Your hands do it. There\'s a gap between you and the work that\'s getting wider.' },
+          { weight: dread * 2, value: 'Ticket after ticket. The kitchen is too hot and too loud and the gap between you and the work is a chasm now. Your hands keep going. They don\'t need you for this.' },
+        ]);
       }
       if (!canFocus) {
-        return 'Orders come in. You make them. The fryer beeps and you pull the basket. It\'s not focus, it\'s muscle memory.';
+        return Timeline.weightedPick([
+          { weight: 1, value: 'Orders come in. You make them. The fryer beeps and you pull the basket. It\'s not focus, it\'s muscle memory.' },
+          { weight: dread * 2, value: 'More orders. The fryer beeps. You pull the basket. Every shift is the same shift and your body knows it before you walk in the door.' },
+        ]);
       }
       if (stress === 'overwhelmed') {
         return 'Three tickets at once. The timer. Someone needs more fries. You work through it because stopping isn\'t one of the options.';
@@ -349,7 +419,10 @@ const Content = (() => {
       if (energy === 'tired') {
         return 'You work the line. Plate, garnish, slide. Your back has a suggestion about when to stop. You ignore it.';
       }
-      return 'The rhythm of it. Ticket comes, you make it, it goes out. When it\'s flowing like this, the time actually moves.';
+      return Timeline.weightedPick([
+        { weight: 1, value: 'The rhythm of it. Ticket comes, you make it, it goes out. When it\'s flowing like this, the time actually moves.' },
+        { weight: sat * 2, value: 'The rhythm catches and holds. Ticket, prep, plate — your hands know the sequence and the sequence knows your hands. When it flows like this, you almost don\'t mind being here.' },
+      ]);
     },
   };
 
@@ -1910,6 +1983,16 @@ const Content = (() => {
 
         State.adjustEnergy(energyCost);
         State.adjustStress(stressEffect);
+
+        // Accumulating sentiments: work builds dread or satisfaction
+        if (canFocus) {
+          State.adjustSentiment('work', 'satisfaction', 0.015);
+          State.adjustSentiment('work', 'dread', -0.01);
+        } else {
+          State.adjustSentiment('work', 'dread', 0.02);
+          State.adjustSentiment('work', 'satisfaction', -0.005);
+        }
+
         State.advanceTime(timeCost);
 
         const jobType = Character.get('job_type');
@@ -1926,6 +2009,12 @@ const Content = (() => {
       execute: () => {
         State.adjustEnergy(5);
         State.adjustStress(-5);
+
+        // The need to escape is itself a signal
+        if (State.get('stress') > 40) {
+          State.adjustSentiment('work', 'dread', 0.005);
+        }
+
         State.advanceTime(10);
 
         const mood = State.moodTone();
@@ -1941,17 +2030,32 @@ const Content = (() => {
       location: 'workplace',
       available: () => State.get('social') < 70 && State.get('energy') > 10 && State.isWorkHours(),
       execute: () => {
-        State.adjustSocial(8);
-        State.adjustStress(-3);
+        const mood = State.moodTone();
+
+        // Coworker sentiment affects mechanical outcomes
+        const isFirst = Timeline.chance(0.5);
+        const slot = isFirst ? 'coworker1' : 'coworker2';
+        const coworker = Character.get(slot);
+
+        const warmth = State.sentimentIntensity(slot, 'warmth');
+        const irritation = State.sentimentIntensity(slot, 'irritation');
+
+        // Base social/stress effects, modified by accumulated sentiment
+        const socialBonus = 8 + (warmth > 0.3 ? 2 : 0);
+        const stressEffect = irritation > 0.4 ? 2 : -3;
+        State.adjustSocial(socialBonus);
+        State.adjustStress(stressEffect);
+
+        // Accumulate coworker sentiments based on mood
+        if (mood === 'present' || mood === 'clear' || State.get('stress') < 35) {
+          State.adjustSentiment(slot, 'warmth', 0.02);
+        } else if (mood === 'fraying' || mood === 'heavy' || mood === 'numb' || State.get('stress') > 60) {
+          State.adjustSentiment(slot, 'irritation', 0.015);
+        }
+
         State.advanceTime(5);
 
         const social = State.socialTier();
-        const mood = State.moodTone();
-
-        // Pick a coworker
-        const coworker = Timeline.chance(0.5)
-          ? Character.get('coworker1')
-          : Character.get('coworker2');
 
         Events.record('talked_to_coworker', { name: coworker.name, flavor: coworker.flavor });
 
@@ -2377,9 +2481,18 @@ const Content = (() => {
 
     coworker_speaks: () => {
       State.adjustSocial(3);
-      const coworker = Timeline.chance(0.5)
-        ? Character.get('coworker1')
-        : Character.get('coworker2');
+      const isFirst = Timeline.chance(0.5);
+      const slot = isFirst ? 'coworker1' : 'coworker2';
+      const coworker = Character.get(slot);
+
+      // Involuntary exposure builds smaller sentiment than chosen interaction
+      const mood = State.moodTone();
+      if (mood === 'fraying' || mood === 'numb' || mood === 'heavy') {
+        State.adjustSentiment(slot, 'irritation', 0.01);
+      } else {
+        State.adjustSentiment(slot, 'warmth', 0.008);
+      }
+
       return /** @type {(name: string) => string | undefined} */ (coworkerChatter[coworker.flavor])(coworker.name);
     },
 
