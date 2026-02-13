@@ -1,0 +1,207 @@
+# Emotional Architecture
+
+How emotions work in the simulation. This document describes the mechanics underneath the mood system described in DESIGN.md. None of this is visible to the player. The player sees prose.
+
+## The Problem with Derived Mood
+
+The current implementation computes mood from state variables every time it's asked: low energy + high stress = numb, good energy + low stress = clear. Mood snaps instantly to match conditions. Eat a sandwich and your mood changes. This is wrong in every way that matters.
+
+Real mood has inertia. Real mood is shaped by history, not just current conditions. Real emotions point at things — you don't just "feel resentful," you resent *someone* or *something*. And real emotional processing varies between people in ways that aren't reducible to demographics.
+
+The emotional system has three layers.
+
+## Layer 1: Neurochemical Baseline
+
+The ambient floor. What mood is doing when nothing in particular is happening. This is the "some days are just harder and you can't name why" layer.
+
+### What it is
+
+Tonic neurotransmitter levels — serotonin, dopamine, norepinephrine — creating a background emotional climate. Not a single number. More like the weather system underneath the weather: the pressure system that determines whether today is grey or clear, independent of any specific event.
+
+### What feeds it
+
+- **Sleep quality** — the strongest lever. REM sleep strips emotional charge from memories in a norepinephrine-free neurochemical environment. The amygdala is literally depotentiated overnight. Good sleep genuinely resets emotional reactivity. Poor sleep preserves yesterday's emotions — the charge doesn't process, the reactivity stays amplified. Sleep-deprived people show ~60% greater amygdala reactivity to negative stimuli. This is the best-supported finding in mood science.
+
+- **Hormonal state** — hormones don't raise or lower "mood level" directly. They change how emotional regulation works.
+  - High progesterone: intrusive memories surface more readily, reappraisal strategies work less well, negative material sticks harder. Not "being moody" — a shift in processing style.
+  - Low estradiol: negative information encoded more strongly. High estradiol: better top-down regulation, rumination less costly.
+  - Testosterone: higher emotional reactivity AND reduced prefrontal regulation. Things hit harder, brakes work less.
+  - Individual sensitivity varies enormously. Some people are highly hormone-sensitive; others barely notice cycle effects.
+
+- **Cortisol rhythm** — cortisol peaks in the morning. Chronic stress flattens the rhythm. The body's chemical stress response isn't the same as the feeling of stress — you can feel calm and be chemically stressed, feel anxious with normal cortisol. The simulation models the chemical layer as an influence on mood, not as the mood itself.
+
+- **Air pressure and light** — barometric pressure affects mood in roughly half of people. The mechanism involves serotonin turnover. The effect is subtle — a nudge, not an override. Sunlight exposure matters on longer timescales (seasonal, circadian). Both are per-character sensitivities, not universal.
+
+- **Substances** — chemical mood alteration that bypasses the normal processing path. Described fully in DESIGN.md (Substances section). The key point: substances push on the baseline directly, and the cost is that the baseline shifts to accommodate them. The mood you had before the substance isn't there anymore.
+
+- **Chronic stress, chronic conditions** — sustained pressure erodes the baseline over weeks. This operates on the slowest timescale — the trajectory that SSRIs take weeks to shift because the change requires downstream neuroplastic adaptation, not just a neurotransmitter adjustment.
+
+### Timescales
+
+The baseline operates on multiple nested timescales simultaneously:
+
+- **Hours** — the current day's mood. Influenced by sleep quality, what happened this morning, tonic neurotransmitter levels. This is the layer that makes today feel different from yesterday even when the circumstances are the same.
+
+- **Days to weeks** — the trajectory. Whether things are generally getting better or worse. Chronic stress pushes it down slowly. Consistent sleep, connection, and stability push it up slowly. A single good day doesn't fix a bad week. A single bad event doesn't ruin a stable period (though it registers).
+
+- **Weeks to months** — the deep baseline. Where the body has settled. This is what shifts in clinical depression, what medication targets, what takes a long time to move in either direction.
+
+A good analogy: ocean currents (deep baseline) underneath weather systems (trajectory) underneath today's weather (current mood). They interact but operate on different timescales, and the surface weather doesn't tell you much about the deep current.
+
+### Individual variation
+
+Not everyone's baseline moves the same way. Emotional inertia — how sticky moods are — is a per-character trait, not a demographic constant.
+
+What predicts emotional inertia:
+
+- **Neuroticism** — the strongest predictor. Higher neuroticism means negative moods persist longer. Linked to weaker prefrontal-amygdala connectivity — less effective top-down regulation.
+- **Self-esteem** — low self-esteem increases emotional inertia across all emotion types, not just negative ones.
+- **Depression** — depressed individuals show higher emotional inertia during daily life. This is both symptom and mechanism — the stickiness is part of what makes depression depression.
+- **Rumination tendency** — brooding and reflection both predict increased stress inertia. Individual variation within each sex is vastly larger than between-sex differences (effect sizes d=0.17-0.28 for sex differences in rumination — the distributions overlap almost completely).
+- **Current state** — effective inertia changes with conditions. Sleep deprivation increases inertia. Acute threat temporarily decreases it (the system mobilizes even when normally sluggish).
+
+The honest model: emotional inertia is a continuous per-character trait shaped by personality, self-concept, and current state. Not a demographic binary. The simulation generates this trait per character from their personality parameters, then modifies it based on current sleep quality, hormonal state, chronic stress level, and whether they're in crisis.
+
+## Layer 2: Directed Sentiments
+
+Emotions point at things. You don't just "feel resentful" — you resent your coworker, or your job, or yourself. You don't just "feel comfort" — you find comfort in a specific food, in rain, in a particular friend's voice. The emotional landscape is relational, not ambient.
+
+### What a sentiment is
+
+A sentiment is an emotional attachment between the character and a target:
+
+- **Target** — what the feeling is directed at. A person (friend, coworker, parent, self). A concept (work, money, the future). An object (a food, rain, the phone). A trait (your body, your ability to focus, your voice). A place (the kitchen, the bus stop, the apartment). A time (mornings, the hour your shift starts).
+
+- **Quality** — the emotional character of the attachment. Not just positive/negative but specific: warmth, resentment, dread, comfort, shame, guilt, grief, anxiety, pride, disgust, tenderness, irritation, longing. Each quality interacts differently with mood and has different dynamics — resentment builds slowly and resists resolution; dread intensifies as the target approaches; comfort attenuates with overuse; grief doesn't attenuate at all, it just changes shape.
+
+- **Intensity** — how strong the attachment is. Continuous, not binary. Ranges from background coloring (slight preference for one food over another) to dominant force (the grief that rewrites every moment).
+
+### How sentiments activate
+
+A sentiment is dormant until its target is present in the current context. When you encounter the target — enter the location, interact with the person, do the activity, see the object — the sentiment activates and pushes on your current emotional state.
+
+The same kitchen reads differently depending on what sentiments are attached to it:
+- (kitchen, dread, moderate) — because of the dishes, or because of what happened there, or because cooking means deciding and deciding is too much today
+- (cooking, comfort, strong) — the act itself is soothing, the kitchen is a good place
+- (kitchen, neutral) — it's just a room
+
+Multiple sentiments can activate simultaneously. Eating ramen when ramen carries comfort AND when the kitchen carries dread: both are present, both push, the surface mood reflects the combination. The prose carries the tension — the comfort of the food and the wrongness of the place.
+
+### Where sentiments come from
+
+- **Character generation** — personality-driven preferences and aversions. A character who finds comfort in specific foods, who dreads mornings, who has warmth toward rain. These are the baseline emotional landscape the character starts with. Not random — derived from personality parameters, upbringing, cultural context.
+
+- **Accumulation during play** — repeated experiences build sentiments. A coworker who's consistently annoying doesn't trigger a "resentment event" — resentment accumulates from dozens of small interactions until the sentiment exists. The player doesn't see the counter. They notice that the prose around this coworker has changed, that something is tighter, that the interaction costs more than it used to.
+
+- **Events** — some experiences create or intensify sentiments directly. Being yelled at by a boss. A friend who came through when things were bad. The first time a bill overdrafts. These attach emotional weight to their targets immediately, not gradually.
+
+- **Trauma** — described in DESIGN.md's Trauma section. Trauma is a specific kind of sentiment: high-intensity, resistant to attenuation, often attached to targets that are orthogonal to the apparent source. The coworker who's genuinely kind but whose voice carries weight because of someone else. The time of day that's loaded. Trauma sentiments don't attenuate through normal processing — they're the ones sleep can't fully strip.
+
+### How sentiments evolve
+
+Sentiments are not static. They change over time through several mechanisms:
+
+- **Sleep processing** — REM sleep attenuates the emotional charge of recent experiences. A bad interaction today stings. After sleep, the memory remains but the charge is reduced. This is the mechanism behind "sleep on it." Sentiments with moderate intensity are partially processed each night. Very high-intensity sentiments (trauma, deep grief) are resistant to overnight processing — they require many cycles, or they don't fully process at all.
+
+- **Repetition** — repeated activation without new input can either habituate (the annoyance fades because you're used to it) or entrench (the resentment deepens because it's confirmed daily). Which one depends on the quality of the sentiment and whether each activation adds new evidence or just repeats old evidence. Comfort habituates — the same food is slightly less comforting the hundredth time. Resentment entrenches — each small slight adds to the pile.
+
+- **Contradictory experience** — a sentiment can be challenged by experiences that contradict it. Dread of work that's reduced by a genuinely good day. Warmth toward a friend that's complicated by a betrayal. The new experience doesn't replace the old sentiment — it creates tension. Both can coexist. The friend you love and resent. The job you dread and take pride in. Ambivalence is real and the model should hold it.
+
+- **Absence** — not interacting with a target for a long time doesn't erase the sentiment, but it does change its character. The friend you haven't talked to: warmth doesn't disappear, but guilt accumulates alongside it. The job you left: the dread fades but the resentment might not. Absence changes the proportions without clearing the slate.
+
+- **Regulation** — the character's ability to process and modulate their own emotional responses. This isn't a conscious choice the player makes — it's a character property that affects how quickly sentiments change. High regulation capacity (good sleep, stable baseline, low chronic stress) means sentiments are more responsive to new evidence. Low regulation capacity (sleep-deprived, depressed, hormonally disrupted) means sentiments are stickier and less responsive.
+
+### Likes and dislikes
+
+The lightest form of sentiment. A food you enjoy. A weather you prefer. A time of day that suits you. These are low-intensity sentiments with comfort or irritation quality. They affect prose — eating a food you like reads differently than eating whatever's available — and they provide small mood nudges when activated. They're not dramatic. They're the texture of having preferences, of being a specific person rather than a generic one.
+
+Likes and dislikes are generated at character creation from personality and cultural parameters. They can shift during play but mostly don't — they're stable parts of who the character is.
+
+## Layer 3: Surface Mood
+
+What the character is experiencing right now. This is what the prose system reads. This is what `moodTone()` returns.
+
+Surface mood emerges from the interaction of:
+
+1. **Neurochemical baseline** — the ambient floor. Where today sits on the slow timescale.
+2. **Active sentiments** — which emotional attachments are currently triggered by context. The sum of their pushes.
+3. **Physical state** — energy, hunger, stress, social connection. The body's current condition.
+4. **Current context** — where you are, what's around you, what time it is, what the weather is doing.
+
+### The eight tones
+
+Surface mood collapses into eight qualitative tones for prose selection. These aren't a spectrum — they're a landscape. The same "low" mood reads differently depending on what's driving it:
+
+- **numb** — past the point of feeling. Not sad, not stressed — absent. The emotional system has shut down because there's nothing left to run it on. Deep baseline erosion + depletion.
+- **fraying** — the edge. Everything too loud, too close, too much. High tension, active stress sentiments, the system overloaded. Can break through at any baseline level — you can be generally okay and still fray under acute pressure.
+- **heavy** — gravity is personal. The body is a weight. Low baseline + physical depletion. Not dramatic, just hard. Everything takes more than you have.
+- **hollow** — the shape where connection used to be. Low baseline + active disconnection/absence sentiments. Isolated, but it's not about being alone — it's about the quality of the absence.
+- **quiet** — withdrawn but not in pain. The distance is familiar. Low social engagement without acute distress. Can be protective or can be the numbness before numb.
+- **flat** — getting through it. The most common state. The baseline is neutral, nothing strongly activated, nothing strongly absent. Not good, not bad. Just here.
+- **present** — actually here. Baseline elevated enough that engagement is possible without effort. Things register. Food has taste. The world has texture.
+- **clear** — rare. Baseline high, active comfort sentiments, physical state good. The moment when you notice you feel okay and that noticing is itself unusual. You got here the slow way.
+
+### How tones are selected
+
+The tone isn't determined by a single axis. It's selected by the dominant emotional force in the current moment:
+
+- If the emotional system is overloaded (acute stress sentiments dominate, regardless of baseline) → **fraying**
+- If the baseline is deeply eroded and depletion is present → **numb**
+- If the baseline is low and the body is the primary constraint → **heavy**
+- If the baseline is low and disconnection sentiments dominate → **hollow**
+- If social engagement is absent but distress isn't acute → **quiet**
+- If the baseline is moderately elevated and engagement is natural → **present**
+- If the baseline is high and sustained, with comfort sentiments active → **clear**
+- Otherwise → **flat**
+
+Multiple forces can be present. The tone reflects the dominant one, but the prose can carry the undertone — "flat, but with tension underneath" or "present, but the grief is still there." The tone selects the primary prose variant; the secondary emotional forces shape individual word choices and what the character notices.
+
+## How This Connects to Existing Systems
+
+### Substances (DESIGN.md)
+
+Substances push on Layer 1 (the baseline) directly, bypassing normal processing:
+- Acute effect: override or modulate the baseline for the duration
+- Comedown: the baseline drops below where it was
+- Tolerance: the override narrows
+- Withdrawal: an autonomous drag on the baseline
+- Baseline shift: long-term use changes where "normal" is
+
+Substances also generate sentiments: the comfort of the ritual, the dread of withdrawal, the craving that's an attachment to the substance itself.
+
+### Endocrine system (DESIGN.md)
+
+Hormonal state modifies Layer 1 mechanics: how fast the baseline moves, how effectively regulation works, whether intrusive sentiments are suppressed or amplified. The endocrine system doesn't create emotions — it changes the processing environment in which emotions happen.
+
+### Trauma (DESIGN.md)
+
+Trauma is a specific configuration of Layer 2 sentiments: high-intensity, resistant to sleep processing, attached to targets that may be non-obvious. Trauma sentiments activate when triggers are present and push strongly on surface mood. The resistance to processing means they don't attenuate normally — they persist across nights, across weeks, requiring many processing cycles or active therapeutic work (not yet modeled) to reduce.
+
+### Identity and performance (DESIGN.md)
+
+Masking, code-switching, the closet, body management — these are ongoing energy drains that feed into Layer 1 (chronic baseline erosion) and generate Layer 2 sentiments (the resentment of having to perform, the relief of spaces where you don't, the dread of contexts that demand the most performance).
+
+### Health conditions (DESIGN.md)
+
+Physical and mental health conditions modify all three layers:
+- Layer 1: depression erodes the baseline directly, chronic pain creates sustained negative pressure, medication affects neurotransmitter dynamics
+- Layer 2: conditions generate sentiments (dread of flare days, grief for lost capacity, resentment of limitations)
+- Layer 3: conditions change how surface mood is selected (depression makes the lower tones stickier, anxiety makes fraying more accessible)
+
+## What This Means for Implementation
+
+This document describes the target architecture. Implementation should be incremental:
+
+1. **Mood as stored value with inertia** — the simplest version of Layer 1. A single value that drifts toward a target derived from physical state, with asymmetric rates (falls faster than rises) and deterministic jitter for biological weather. This alone replaces the current instant-derivation and gives mood the inertia DESIGN.md calls for.
+
+2. **Emotional inertia as character trait** — generated at character creation, modifiable by current state. Controls how fast mood moves. Some characters are emotionally sticky, others are more fluid.
+
+3. **Basic sentiments** — likes and dislikes generated at character creation. Comfort foods, weather preferences, time-of-day preferences. Small mood nudges when activated. The lightest version of Layer 2.
+
+4. **Sleep emotional processing** — overnight attenuation of recent emotional charge. Better sleep = more processing. This connects Layer 1 dynamics to the existing sleep system.
+
+5. **Accumulating sentiments** — sentiments that build from repeated experience. Coworker relationships that develop emotional weight. The job that becomes dreadful through daily friction. Layer 2 becoming dynamic rather than static.
+
+6. **Trauma sentiments** — high-intensity, processing-resistant. Connected to the trauma system described in DESIGN.md.
+
+Each step builds on the previous. The first step can be implemented now. The later steps require systems that don't exist yet (richer character generation, event systems, relationship depth).

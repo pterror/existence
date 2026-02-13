@@ -7,7 +7,13 @@
 Everything below is drawn from the gap between DESIGN.md and what's built. Not committed to — just visible.
 
 ### Mood as its own system
-Currently mood tone is derived from state (energy + stress + hunger + social). DESIGN.md describes mood as independent with inertia — it doesn't snap to match conditions. Mood should have its own value that drifts under pressure from state, endocrine rhythms, weather, substances, actions, and inaction. "You can be rested and fed and still heavy."
+Currently mood tone is derived from state (energy + stress + hunger + social). Full emotional architecture designed in [DESIGN-EMOTIONS.md](DESIGN-EMOTIONS.md). Three layers: neurochemical baseline (ambient mood with inertia), directed sentiments (emotions attached to specific targets — people, concepts, objects, traits), surface mood (emergent from both + physical state + context). Implementation path:
+1. **Mood as stored value with inertia** — single value drifting toward state-derived target. Asymmetric rates, deterministic jitter. Replaces instant derivation.
+2. **Emotional inertia as character trait** — per-character, modifiable by state. Controls how fast mood moves.
+3. **Basic sentiments** — likes/dislikes from chargen. Comfort foods, weather preferences. Small nudges.
+4. **Sleep emotional processing** — overnight attenuation. Better sleep = more reset.
+5. **Accumulating sentiments** — coworker resentment, job dread, built from repeated experience.
+6. **Trauma sentiments** — high-intensity, processing-resistant. Connected to trauma system.
 
 ### Social initiation
 Currently friends only send messages to you. No way to text back, call, or initiate contact. Relationships are one-directional. DESIGN.md describes friends who respond differently to your withdrawal and engagement.
