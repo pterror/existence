@@ -12,4 +12,6 @@
 - [ ] No run end conditions defined yet. `Runs.finishRun(id)` exists but nothing calls it. Need content-driven endings.
 - [ ] Visual replay of finished runs uses recursive setTimeout chain — very long runs may have performance issues. Consider a skip/fast-forward mechanism.
 - [x] **Bug:** Awareness clicks (checking time/money) are not recorded as actions. On page refresh, `last_observed_time`/`last_observed_money` reset — losing direct observations. Fix: record `observe_time`/`observe_money` as actions so they replay correctly.
+- [ ] Chargen: fold the two creation paths together. "Choose your own" should be the random path with a toggle that makes configurable options visible — not a separate screen. Random generates everything, toggle reveals the knobs.
+- [ ] Chargen: add location picker (latitude-based). Atmospheric options that imply latitude range. For tropical latitudes, season picker should show wet/dry instead of four seasons. Currently sandbox defaults to latitude 42 (NH temperate).
 - [x] Step-away link ("...") may be too subtle. Players may not discover it. Consider clearer affordance or tutorial mention.

@@ -570,6 +570,18 @@ Two friends, each with a personality flavor that determines how they relate to y
 
 **earnest** — less frequent, more weight. Texts when they mean it. A message from an earnest friend lands differently than a meme from a sends_things friend.
 
+### Distance and absence
+
+Not everyone in your life is nearby. Some people exist only on the phone — the friend who moved, the relative across the country, the person you've never met in person but who knows you better than most.
+
+**Online friends** — real relationships that live in text. The friend you met in a forum, a game, a group chat. They've never seen your apartment but they know when you're not okay. The conversation that picks up at 2 AM because they're in a different timezone. The friendship the people around you don't understand because "you've never even met them." The intimacy is real. The distance is real too — you can't call them to help you move, they can't bring you soup, the support they offer is words on a screen and sometimes that's everything and sometimes it's not enough.
+
+**Long-distance relationships** — the partner, the best friend, the sibling who moved. The phone call that's scheduled because spontaneous doesn't work across timezones. The visit that costs money you might not have. The gap between "we'll see each other soon" and the calendar. The relationship that's maintained through effort, and the effort is invisible to everyone except the two people making it. Some long-distance relationships are stronger than what's nearby. Some are slowly dying and neither person says so.
+
+**Sick people, remotely** — the parent with cancer three states away. The friend whose messages changed and you don't know why until they tell you. The grandparent in the hospital and you can't afford the flight. The phone becomes a different object — every notification could be an update, and updates aren't always what you want. The helplessness of caring about someone you can't reach. The guilt of not being there, which is different from choosing not to be there. The call you put off because you don't know what to say, and the longer you wait the harder it gets.
+
+**The phone as bridge** — for distant relationships, the phone isn't a convenience. It's the relationship's entire infrastructure. A dead phone battery isn't an annoyance — it's a severed connection. Not checking messages isn't avoidance — it might be the distance winning. The weight of an unanswered text from someone far away is different from an unanswered text from someone down the street.
+
 ### Social decay
 
 Isolation builds over time without interaction. It's not a punishment — it's physics. You don't talk to people, the distance grows, everything feels further away. Friends respond differently to your withdrawal (checks_in escalates, sends_things stays constant, dry_humor doesn't notice, earnest worries silently).
