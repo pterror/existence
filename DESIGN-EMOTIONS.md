@@ -418,3 +418,30 @@ Each placed immediately after the existing NT nudge, guarded by the same `if (in
 **NOT habituated:** Weather prefs and time-of-day prefs (always-on target modifiers = stable traits, not discrete activations). Work/coworker sentiments (have their own accumulation dynamics with separate mechanistic logic).
 
 **Replay safety:** All new code is deterministic — no PRNG consumed. `regulationCapacity()` reads state values only. Habituation calls are in execute functions after existing state changes, before prose generation. Per-quality processing factors are constant. Legacy saves with no personality get regulation = 1.0.
+
+### Layer 2 step: Contradictory Experience (implemented)
+
+Experiences that contradict an existing sentiment gently challenge it. This is the "contradictory experience" mechanic from the sentiment evolution section above: "A sentiment can be challenged by experiences that contradict it... The new experience doesn't replace the old sentiment — it creates tension."
+
+**Pattern:** When accumulating a sentiment, apply a smaller cross-reduction (~30–40% of primary amount) to the contradictory quality on the same target. Explicit per-site, not a generic helper — different contexts warrant different magnitudes.
+
+**Coworker sentiments — `talk_to_coworker`:**
+- Good mood: warmth +0.02, irritation -0.008 (40% cross-reduction)
+- Bad mood: irritation +0.015, warmth -0.005 (33% cross-reduction)
+
+**Coworker sentiments — `coworker_speaks` event:**
+- Bad mood: irritation +0.01, warmth -0.003 (30% cross-reduction)
+- Good mood: warmth +0.008, irritation -0.003 (38% cross-reduction)
+
+**Work dread — `work_break`:**
+- Stressed (stress > 40): dread +0.005 (unchanged)
+- Relaxed (stress ≤ 30 and existing dread > 0): dread -0.005 (new — a calm break challenges dread)
+
+Note: `do_work` already had cross-reduction (focused work: satisfaction +0.015, dread -0.01; can't-focus: dread +0.02, satisfaction -0.005). The new changes extend the pattern to coworker interactions and work breaks.
+
+**Steady-state effects:**
+- Mixed coworker day (2 bad speaks, 1 good speaks, 1 good talk): net irritation +0.009/day (was +0.02), net warmth +0.022/day. Both grow, but irritation grows 55% slower. Ambivalence emerges naturally.
+- Purely good coworker day (3 good speaks, 1 good talk): net irritation -0.017/day. Existing irritation of ~0.19 would halve in ~11 good days.
+- Relaxed work break: -0.005 dread/day alongside focused-work reduction (-0.01/task). Dread gets challenged from two directions when things are going well.
+
+**Replay safety:** `adjustSentiment()` is deterministic (no PRNG consumed). Cross-reduction calls placed immediately after primary accumulation calls, before `advanceTime()` and prose generation.

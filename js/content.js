@@ -2031,6 +2031,9 @@ const Content = (() => {
         // The need to escape is itself a signal
         if (State.get('stress') > 40) {
           State.adjustSentiment('work', 'dread', 0.005);
+        } else if (State.sentimentIntensity('work', 'dread') > 0 && State.get('stress') <= 30) {
+          // A relaxed break at work gently challenges dread
+          State.adjustSentiment('work', 'dread', -0.005);
         }
 
         State.advanceTime(10);
@@ -2065,10 +2068,13 @@ const Content = (() => {
         State.adjustStress(stressEffect);
 
         // Accumulate coworker sentiments based on mood
+        // Cross-reduction: good interactions gently challenge irritation, bad ones challenge warmth
         if (mood === 'present' || mood === 'clear' || State.get('stress') < 35) {
           State.adjustSentiment(slot, 'warmth', 0.02);
+          State.adjustSentiment(slot, 'irritation', -0.008);
         } else if (mood === 'fraying' || mood === 'heavy' || mood === 'numb' || State.get('stress') > 60) {
           State.adjustSentiment(slot, 'irritation', 0.015);
+          State.adjustSentiment(slot, 'warmth', -0.005);
         }
 
         State.advanceTime(5);
@@ -2507,11 +2513,14 @@ const Content = (() => {
       const coworker = Character.get(slot);
 
       // Involuntary exposure builds smaller sentiment than chosen interaction
+      // Cross-reduction: even involuntary good moments gently challenge irritation, and vice versa
       const mood = State.moodTone();
       if (mood === 'fraying' || mood === 'numb' || mood === 'heavy') {
         State.adjustSentiment(slot, 'irritation', 0.01);
+        State.adjustSentiment(slot, 'warmth', -0.003);
       } else {
         State.adjustSentiment(slot, 'warmth', 0.008);
+        State.adjustSentiment(slot, 'irritation', -0.003);
       }
 
       return /** @type {(name: string) => string | undefined} */ (coworkerChatter[coworker.flavor])(coworker.name);
