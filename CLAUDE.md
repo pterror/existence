@@ -10,16 +10,25 @@ Text-based HTML5 game. "Power anti-fantasy" — constrained agency without judgm
 
 ```
 js/
-  timeline.js   # Seeded PRNG (xoshiro128**), action log, localStorage autosave, deterministic replay
+  names.js      # Generated name frequency data (US Census + SSA). Built by scripts/build-names.js
+  runs.js       # IndexedDB storage layer for multi-run support
+  timeline.js   # Seeded PRNG (xoshiro128**), dual streams, action log, delegates save to Runs
+  events.js     # In-memory event history (record/query semantic events, reconstructed during replay)
   state.js      # Hidden state engine: energy, money, stress, hunger, time, social, job_standing
+  character.js  # Character schema, Character.get() accessor, applyToState()
   world.js      # Location graph, movement with time cost, event triggers
   content.js    # All prose, interaction definitions, event text, idle thoughts
+  chargen.js    # Random generation, sandbox UI flow, name sampling
   ui.js         # DOM rendering, fade transitions, idle timer
-  game.js       # Orchestration, replay, action/move/idle handlers
+  game.js       # Async init, threshold screen, step-away, look-back, orchestration
 css/
   style.css     # Typography, layout, atmosphere
 index.html      # Single page, minimal markup
 serve.js        # Bun static file server
+scripts/
+  download-names.sh  # Downloads raw Census + SSA data into vendor/
+  build-names.js     # Processes raw data into js/names.js
+DESIGN.md       # Full simulation design vision — what exists and what's planned
 ```
 
 ## Development
@@ -77,6 +86,8 @@ No build step. Plain JS loaded via script tags.
 **Minimize file churn.** When editing a file, read it once, plan all changes, and apply them in one pass. Avoid read-edit-fail-read-fix cycles by thinking through the complete change before starting.
 
 **Always commit when done.** When you finish a task, commit the work. Don't leave changes uncommitted. If a task has multiple logical pieces, commit each piece separately.
+
+**Keep DESIGN.md current.** Before every commit, check whether the work you're committing changes the scope of what's implemented relative to DESIGN.md. If it does — a new system, a new interaction category, a structural change to how something works — update DESIGN.md to reflect the current reality. DESIGN.md is the source of truth for the game's design vision and should always describe both what exists and what's planned. Don't let implementation drift from documentation.
 
 ## Commit Convention
 
