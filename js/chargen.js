@@ -84,6 +84,18 @@ const Chargen = (() => {
     autumn: 'Grey light. Days getting shorter.',
   };
 
+  const tropicalSeasonLabels = {
+    wet: 'The air is thick, rain every afternoon.',
+    dry: 'Dry heat. Dust on everything.',
+  };
+
+  const locationOptions = [
+    { label: 'Somewhere the heat never quite lets go.', value: 'tropical', latitude: 10 },
+    { label: 'A place where the seasons still bother to change.', value: 'nh_temperate', latitude: 42 },
+    { label: 'Far enough north the cold has opinions.', value: 'nh_cold', latitude: 58 },
+    { label: 'South of the equator. Everything\u2019s the same, but reversed.', value: 'sh_temperate', latitude: -35 },
+  ];
+
   const jobLabels = {
     office: 'An office',
     retail: 'A store',
@@ -96,13 +108,24 @@ const Chargen = (() => {
    */
   function deriveSeasonFromTimestamp(startTimestamp, latitude) {
     const d = new Date(startTimestamp * 60000);
-    let month = d.getUTCMonth(); // 0-11
-    if (latitude < 0) {
-      month = (month + 6) % 12;
+    const month = d.getUTCMonth(); // 0-11
+
+    // Tropical — wet/dry
+    if (Math.abs(latitude) < 23.5) {
+      if (latitude >= 0) {
+        return (month >= 4 && month <= 9) ? 'wet' : 'dry';
+      }
+      return (month >= 10 || month <= 3) ? 'wet' : 'dry';
     }
-    if (month >= 2 && month <= 4) return 'spring';
-    if (month >= 5 && month <= 7) return 'summer';
-    if (month >= 8 && month <= 10) return 'autumn';
+
+    // Temperate — four seasons
+    let m = month;
+    if (latitude < 0) {
+      m = (month + 6) % 12;
+    }
+    if (m >= 2 && m <= 4) return 'spring';
+    if (m >= 5 && m <= 7) return 'summer';
+    if (m >= 8 && m <= 10) return 'autumn';
     return 'winter';
   }
 
@@ -112,8 +135,21 @@ const Chargen = (() => {
    * Accounts for hemisphere by flipping months for southern latitudes.
    */
   function timestampForSeason(seasonName, latitude) {
-    const baseDateMinutes = 28401120; // 2024-01-01 00:00 UTC
-    // Target NH month ranges for each season
+    // Tropical wet/dry
+    if (seasonName === 'wet' || seasonName === 'dry') {
+      // NH tropical: wet = May–Oct, dry = Nov–Apr
+      // SH tropical: wet = Oct–Mar, dry = Apr–Sep
+      let targetMonth;
+      if (latitude >= 0) {
+        targetMonth = seasonName === 'wet' ? 6 : 0; // Jul or Jan
+      } else {
+        targetMonth = seasonName === 'wet' ? 0 : 6; // Jan or Jul
+      }
+      const d = new Date(Date.UTC(2024, targetMonth, 15));
+      return Math.floor(d.getTime() / 60000);
+    }
+
+    // Temperate four seasons
     const seasonMonthStarts = { spring: 2, summer: 5, autumn: 8, winter: 11 };
     let targetMonth = seasonMonthStarts[seasonName];
     // For SH, flip by 6 months so the calendar date produces the right derived season
@@ -175,7 +211,7 @@ const Chargen = (() => {
       job_type: jobType,
       age_stage: age,
       start_timestamp: startTimestamp,
-      latitude: Timeline.charRandomInt(-55, 55),
+      latitude: Timeline.charPick(locationOptions).latitude,
     });
   }
 
@@ -354,20 +390,52 @@ const Chargen = (() => {
       ageP.append('.');
       passageEl.appendChild(ageP);
 
-      // --- Season ---
-      const currentSeason = deriveSeasonFromTimestamp(char.start_timestamp, char.latitude);
+      // --- Location ---
+      const closestLocation = locationOptions.reduce((best, opt) =>
+        Math.abs(opt.latitude - char.latitude) < Math.abs(best.latitude - char.latitude) ? opt : best
+      );
 
-      const seasonDropdown = createDropdown(
-        Object.entries(seasonLabels).map(([value, label]) => ({ label, value })),
-        currentSeason,
+      const locationDropdown = createDropdown(
+        locationOptions.map(o => ({ label: o.label, value: o.value })),
+        closestLocation.value,
         (v) => {
-          char.start_timestamp = timestampForSeason(v, char.latitude);
+          const loc = locationOptions.find(o => o.value === v);
+          char.latitude = loc.latitude;
+          rebuildSeasonDropdown();
         }
       );
 
+      const locationP = document.createElement('p');
+      locationP.append('You live \u2014 ', locationDropdown.element);
+      passageEl.appendChild(locationP);
+
+      // --- Season ---
       const seasonP = document.createElement('p');
-      seasonP.append('Outside \u2014 ', seasonDropdown.element);
       passageEl.appendChild(seasonP);
+
+      function rebuildSeasonDropdown() {
+        const isTropical = Math.abs(char.latitude) < 23.5;
+        const labels = isTropical ? tropicalSeasonLabels : seasonLabels;
+        const currentSeason = deriveSeasonFromTimestamp(char.start_timestamp, char.latitude);
+        // If current season isn't valid for the new climate, pick the first option
+        const validSeason = labels[currentSeason] ? currentSeason : Object.keys(labels)[0];
+        if (validSeason !== currentSeason) {
+          char.start_timestamp = timestampForSeason(validSeason, char.latitude);
+        }
+
+        const dropdown = createDropdown(
+          Object.entries(labels).map(([value, label]) => ({ label, value })),
+          validSeason,
+          (v) => {
+            char.start_timestamp = timestampForSeason(v, char.latitude);
+          }
+        );
+
+        seasonP.textContent = '';
+        seasonP.append('Outside \u2014 ', dropdown.element);
+      }
+
+      rebuildSeasonDropdown();
 
       // --- Wardrobe ---
       const currentOutfitIndex = outfitSets.findIndex(o => o.outfit_default === char.outfit_default);
