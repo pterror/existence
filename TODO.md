@@ -3,13 +3,14 @@
 ## Backlog
 
 ### NT prose shading — remaining unconverted call sites
-Three-layer prose shading pattern established (see DESIGN.md "Prose-neurochemistry interface"): moodTone() as coarse selector, weighted variant selection via NT values, deterministic modifiers. Converted: `idleThoughts()`, `apartment_bedroom` description, `lie_there` interaction, sleep prose (23 sites), `look_out_window` (7 sites). ~35 `Timeline.pick()` call sites remain unconverted. Priority order:
+Three-layer prose shading pattern established (see DESIGN.md "Prose-neurochemistry interface"): moodTone() as coarse selector, weighted variant selection via NT values, deterministic modifiers. Converted: `idleThoughts()`, `apartment_bedroom` description, `lie_there` interaction, sleep prose (23 sites), `look_out_window` (7 sites). ~19 `Timeline.pick()` call sites remain unconverted. Priority order:
 
 **High impact (frequent / atmospheric):**
 - ~~Sleep prose (falling-asleep + waking-up, ~23 pick sites)~~ — **DONE.** Pre-sleep NTs (adenosine, GABA, NE, serotonin) shade falling-asleep; post-sleep NTs (serotonin, NE, GABA, adenosine) shade waking. Key dimensions: adenosine→sleep inertia/crash, GABA→night anxiety/can't-settle, NE→hyper-alertness/sharp edges, serotonin→dread-vs-warmth.
 - ~~`look_out_window`~~ — **DONE.** Dopamine→engagement with the scene, serotonin→emotional distance, GABA→oppressive weather, NE→sensory vividness, adenosine→soft focus.
+- ~~`sit_at_table`~~ — **DONE.** Dopamine→nothing to reach for, serotonin→weight-vs-warmth, GABA→can't-settle, adenosine→heavy sitting, NE→sound awareness.
+- ~~`go_for_walk`~~ — **DONE.** 12 branches (6 mood × 2 weather). Serotonin/dopamine→engagement, NE→sensory vividness/irritation, GABA→anxiety-walks-with-you, adenosine→body drag.
 - Other location descriptions (kitchen, bathroom, street, bus stop, workplace, corner store)
-- `go_for_walk`, `sit_at_table`, `sit_on_step` — leisure interactions
 
 **Medium impact (periodic):**
 - Work interactions (do_work, work_break, talk_to_coworker)

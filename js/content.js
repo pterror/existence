@@ -1409,50 +1409,69 @@ const Content = (() => {
         const minutes = Timeline.randomInt(5, 15);
         State.advanceTime(minutes);
 
+        // NT values for continuous prose shading
+        const ser = State.get('serotonin');
+        const ne = State.get('norepinephrine');
+        const dopa = State.get('dopamine');
+        const gaba = State.get('gaba');
+        const aden = State.get('adenosine');
+
         if (mood === 'numb') {
-          return Timeline.pick([
-            'You sit at the table. The surface is cool under your hands. You sit there. That\'s it.',
-            'The kitchen table. You\'re at it. The fridge hums. Minutes pass. You don\'t move.',
-            'Sitting. The table, the chair, the quiet kitchen. You\'re here. That\'s the whole event.',
+          return Timeline.weightedPick([
+            { weight: 1, value: 'You sit at the table. The surface is cool under your hands. You sit there. That\'s it.' },
+            { weight: 1, value: 'The kitchen table. You\'re at it. The fridge hums. Minutes pass. You don\'t move.' },
+            { weight: 1, value: 'Sitting. The table, the chair, the quiet kitchen. You\'re here. That\'s the whole event.' },
+            // Low dopamine — nothing to reach for
+            { weight: State.lerp01(dopa, 40, 15), value: 'You sit at the table. Your hands are on the surface. You could get up. You could do something. The thought arrives and lies there, flat, like everything else.' },
           ]);
         }
         if (mood === 'heavy') {
           State.adjustEnergy(1);
-          return Timeline.pick([
-            'You sit. The chair takes your weight. Not standing is something. Not much, but something.',
-            'The kitchen table. You put your arms on it and lean forward. The not-standing helps. Your body is grateful for small mercies.',
-            'You sit down. The effort of being upright transfers to the chair. Your back says thank you in its own way.',
+          return Timeline.weightedPick([
+            { weight: 1, value: 'You sit. The chair takes your weight. Not standing is something. Not much, but something.' },
+            { weight: 1, value: 'The kitchen table. You put your arms on it and lean forward. The not-standing helps. Your body is grateful for small mercies.' },
+            { weight: 1, value: 'You sit down. The effort of being upright transfers to the chair. Your back says thank you in its own way.' },
+            // Low serotonin — sitting doesn't ease the weight
+            { weight: State.lerp01(ser, 35, 15), value: 'You sit. The chair holds you. You put your head on the table and the cool surface is the only good thing. You stay like that for a while, folded over, not resting.' },
           ]);
         }
         if (mood === 'fraying') {
           State.adjustStress(-1);
-          return Timeline.pick([
-            'You sit at the table. The kitchen is quieter than the rest of your head. Barely, but it\'s something.',
-            'The table. Your hands on it. The solidity of a flat surface. The fridge hum. For a minute the noise inside dims, slightly.',
-            'You sit. The kitchen has a specific quiet — the fridge, the clock, the tap. It\'s not peaceful. But it\'s not loud.',
+          return Timeline.weightedPick([
+            { weight: 1, value: 'You sit at the table. The kitchen is quieter than the rest of your head. Barely, but it\'s something.' },
+            { weight: 1, value: 'The table. Your hands on it. The solidity of a flat surface. The fridge hum. For a minute the noise inside dims, slightly.' },
+            { weight: 1, value: 'You sit. The kitchen has a specific quiet — the fridge, the clock, the tap. It\'s not peaceful. But it\'s not loud.' },
+            // Low GABA — can't settle even sitting
+            { weight: State.lerp01(gaba, 40, 20), value: 'You sit but your leg bounces. Your fingers drum the table. The kitchen is quiet and the quiet makes room for the thing that won\'t stop running in your chest.' },
           ]);
         }
         if (mood === 'hollow') {
-          return Timeline.pick([
-            'You sit at the kitchen table. The chair. The surface. The quiet. You\'re sitting because you walked in here and this is what\'s here.',
-            'The table. You sit at it. Not eating, not doing anything. Just occupying a chair in a room where chairs exist.',
-            'You sit. The kitchen is empty in the way it always is. You\'re in it. The clock ticks, or doesn\'t. Hard to tell.',
+          return Timeline.weightedPick([
+            { weight: 1, value: 'You sit at the kitchen table. The chair. The surface. The quiet. You\'re sitting because you walked in here and this is what\'s here.' },
+            { weight: 1, value: 'The table. You sit at it. Not eating, not doing anything. Just occupying a chair in a room where chairs exist.' },
+            { weight: 1, value: 'You sit. The kitchen is empty in the way it always is. You\'re in it. The clock ticks, or doesn\'t. Hard to tell.' },
+            // High adenosine — the sitting is heavy
+            { weight: State.lerp01(aden, 50, 75), value: 'You sit down and your body thanks you by getting heavier. The table is a surface to put your arms on. Your eyelids are interested in closing. The kitchen hums around you, distant.' },
           ]);
         }
         if (mood === 'clear' || mood === 'present') {
           State.adjustStress(-2);
-          return Timeline.pick([
-            'You sit at the table. The kitchen is quiet. Your hands are warm. Something close to comfort — the kind you don\'t notice until you\'re in it.',
-            'The kitchen table. The light from the window. You sit and it\'s fine — actually fine, not the word you say when nothing is. Just sitting, in a room, and it\'s okay.',
-            'You sit. The apartment is still. The fridge hums its one note. For a few minutes, that\'s all there is, and that\'s enough.',
+          return Timeline.weightedPick([
+            { weight: 1, value: 'You sit at the table. The kitchen is quiet. Your hands are warm. Something close to comfort — the kind you don\'t notice until you\'re in it.' },
+            { weight: 1, value: 'The kitchen table. The light from the window. You sit and it\'s fine — actually fine, not the word you say when nothing is. Just sitting, in a room, and it\'s okay.' },
+            { weight: 1, value: 'You sit. The apartment is still. The fridge hums its one note. For a few minutes, that\'s all there is, and that\'s enough.' },
+            // Higher serotonin — warmth settles in
+            { weight: State.lerp01(ser, 55, 75), value: 'You sit at the table and the kitchen holds you. The light, the quiet, the smell of the place you live. Your hands are warm. Your chest is easy. You stay because staying feels like the right thing.' },
           ]);
         }
         // flat / quiet
         State.adjustStress(-1);
-        return Timeline.pick([
-          'You sit at the table for a while. Not doing anything. The kitchen is the kitchen. Time passes.',
-          'The table. You sit at it. The microwave clock changes. That\'s the most interesting thing that happens.',
-          'You sit. It\'s not productive, it\'s not restful, it\'s just sitting in a kitchen. Sometimes that\'s what there is.',
+        return Timeline.weightedPick([
+          { weight: 1, value: 'You sit at the table for a while. Not doing anything. The kitchen is the kitchen. Time passes.' },
+          { weight: 1, value: 'The table. You sit at it. The microwave clock changes. That\'s the most interesting thing that happens.' },
+          { weight: 1, value: 'You sit. It\'s not productive, it\'s not restful, it\'s just sitting in a kitchen. Sometimes that\'s what there is.' },
+          // High NE — aware of every small sound
+          { weight: State.lerp01(ne, 45, 65), value: 'You sit at the table. The fridge cycles on. A pipe ticks somewhere in the wall. Your body is still but your ears are busy — cataloguing the kitchen\'s small noises like they matter.' },
         ]);
       },
     },
@@ -1547,6 +1566,13 @@ const Content = (() => {
         State.advanceTime(minutes);
         State.adjustEnergy(-energyCost);
 
+        // NT values for continuous prose shading
+        const ser = State.get('serotonin');
+        const ne = State.get('norepinephrine');
+        const dopa = State.get('dopamine');
+        const gaba = State.get('gaba');
+        const aden = State.get('adenosine');
+
         // Weather modifier — drizzle adds discomfort
         if (weather === 'drizzle') {
           State.adjustStress(2);
@@ -1556,85 +1582,109 @@ const Content = (() => {
         if (mood === 'clear' || mood === 'present') {
           State.adjustStress(-8);
           if (weather === 'drizzle') {
-            return Timeline.pick([
-              'You walk. The drizzle is cold on your face but the air is good. Your legs find a rhythm. The wet doesn\'t ruin it — just changes the texture.',
-              'Rain on your jacket. Your shoes get damp. But the walking helps — the movement, the air, the world being bigger than a room. It\'s worth it.',
+            return Timeline.weightedPick([
+              { weight: 1, value: 'You walk. The drizzle is cold on your face but the air is good. Your legs find a rhythm. The wet doesn\'t ruin it — just changes the texture.' },
+              { weight: 1, value: 'Rain on your jacket. Your shoes get damp. But the walking helps — the movement, the air, the world being bigger than a room. It\'s worth it.' },
+              // High NE — the rain is vivid
+              { weight: State.lerp01(ne, 45, 65), value: 'The rain is on your face and you can feel every drop — distinct, cold, alive. Your feet on the wet pavement. The smell of it. The world in the rain is a specific, sharp thing, and you\'re in it.' },
             ]);
           }
-          return Timeline.pick([
-            'You walk. No destination, just movement. The air is different from inside — wider, cooler, real. Your thoughts spread out. Something loosens in your chest.',
-            'A walk. Around the block, then further because it feels good to keep going. Your legs know what to do. Your head quiets down. The world passes at a human speed.',
-            'You walk until the apartment feels far away. The sky, the street, the sound of your own footsteps. This is what outside is for.',
+          return Timeline.weightedPick([
+            { weight: 1, value: 'You walk. No destination, just movement. The air is different from inside — wider, cooler, real. Your thoughts spread out. Something loosens in your chest.' },
+            { weight: 1, value: 'A walk. Around the block, then further because it feels good to keep going. Your legs know what to do. Your head quiets down. The world passes at a human speed.' },
+            { weight: 1, value: 'You walk until the apartment feels far away. The sky, the street, the sound of your own footsteps. This is what outside is for.' },
+            // High serotonin + dopamine — the walk is actually good
+            { weight: State.lerp01(ser, 55, 75) * State.lerp01(dopa, 50, 70), value: 'You walk, and the walking is good. Not because anything is happening — just the rhythm, the air, the way your body knows how to do this. The street unfolds. The sky is big. You feel like a person in the world, and it\'s enough.' },
           ]);
         }
         if (mood === 'flat') {
           State.adjustStress(-4);
           if (weather === 'drizzle') {
-            return Timeline.pick([
-              'You walk in the drizzle. Your jacket darkens at the shoulders. The movement helps some — not a lot, but some. You come back damp.',
-              'Rain. You walk through it because you\'re already out. It\'s not pleasant but the walking itself does something. Slightly.',
+            return Timeline.weightedPick([
+              { weight: 1, value: 'You walk in the drizzle. Your jacket darkens at the shoulders. The movement helps some — not a lot, but some. You come back damp.' },
+              { weight: 1, value: 'Rain. You walk through it because you\'re already out. It\'s not pleasant but the walking itself does something. Slightly.' },
+              // High adenosine — the walk is a slog
+              { weight: State.lerp01(aden, 50, 70), value: 'You walk in the rain and your legs are heavy. The dampness seeps into your shoes. Each block takes more than the last. The air helps, barely. You come back tired and wet.' },
             ]);
           }
-          return Timeline.pick([
-            'You walk. It\'s not transformative. But the air is different and your legs are moving and that\'s better than not.',
-            'A walk. The neighborhood. You\'ve seen it before. But moving through it is different from being inside looking at walls. It helps, some.',
-            'You walk for a while. It doesn\'t fix anything. But the blood moves and the air gets in and when you stop you feel slightly less like you were cemented to the floor.',
+          return Timeline.weightedPick([
+            { weight: 1, value: 'You walk. It\'s not transformative. But the air is different and your legs are moving and that\'s better than not.' },
+            { weight: 1, value: 'A walk. The neighborhood. You\'ve seen it before. But moving through it is different from being inside looking at walls. It helps, some.' },
+            { weight: 1, value: 'You walk for a while. It doesn\'t fix anything. But the blood moves and the air gets in and when you stop you feel slightly less like you were cemented to the floor.' },
+            // Higher NE — details register more than usual
+            { weight: State.lerp01(ne, 40, 60), value: 'You walk. You notice things — the crack in the sidewalk, the color of someone\'s door, a sound from a window. Details that don\'t matter but your brain collects them anyway, like it needed something to do.' },
           ]);
         }
         if (mood === 'heavy') {
           State.adjustStress(-2);
           if (weather === 'drizzle') {
-            return Timeline.pick([
-              'You walk in the rain. Every step costs something. The wet gets into your shoes. But the air — the air is different from inside. That\'s something.',
-              'Drizzle. You walk through it slowly. The world is grey and wet and you\'re in it. The effort is real. So is the fact that you went outside.',
+            return Timeline.weightedPick([
+              { weight: 1, value: 'You walk in the rain. Every step costs something. The wet gets into your shoes. But the air — the air is different from inside. That\'s something.' },
+              { weight: 1, value: 'Drizzle. You walk through it slowly. The world is grey and wet and you\'re in it. The effort is real. So is the fact that you went outside.' },
+              // Low serotonin — the effort is almost too much
+              { weight: State.lerp01(ser, 35, 15), value: 'You walk in the rain and every step asks why. The wet, the cold, the weight of your own legs. You did this to yourself. You chose outside. It\'s unclear what it was supposed to fix.' },
             ]);
           }
-          return Timeline.pick([
-            'You walk. Slowly. The effort of being outside is real — the bodies, the noise, the fact of being vertical and moving. But the air changes things, slightly.',
-            'A walk. Your body does it reluctantly. The street, the sounds, the sky that\'s bigger than any ceiling. By the end something has shifted — not much, but it\'s there.',
-            'You make yourself walk. Each block is a small negotiation. But the air is different out here and by the time you turn back, something in your chest is a fraction looser.',
+          return Timeline.weightedPick([
+            { weight: 1, value: 'You walk. Slowly. The effort of being outside is real — the bodies, the noise, the fact of being vertical and moving. But the air changes things, slightly.' },
+            { weight: 1, value: 'A walk. Your body does it reluctantly. The street, the sounds, the sky that\'s bigger than any ceiling. By the end something has shifted — not much, but it\'s there.' },
+            { weight: 1, value: 'You make yourself walk. Each block is a small negotiation. But the air is different out here and by the time you turn back, something in your chest is a fraction looser.' },
+            // High adenosine — the body drags
+            { weight: State.lerp01(aden, 50, 70), value: 'You walk. Your body is a heavy thing you\'re carrying through space. The legs work but they want you to know they\'re working. By the second block you\'re wondering if this was a mistake. By the third, you don\'t care. You just walk.' },
           ]);
         }
         if (mood === 'fraying') {
           // No stress relief — the thoughts follow you
           if (weather === 'drizzle') {
-            return Timeline.pick([
-              'You walk. The rain gets in your collar. Your thoughts are exactly as loud out here as they were inside, plus now you\'re wet.',
-              'Drizzle. You walk through it fast, shoulders hunched. The thoughts don\'t care about the scenery. They came with you. Now you\'re tired and damp.',
+            return Timeline.weightedPick([
+              { weight: 1, value: 'You walk. The rain gets in your collar. Your thoughts are exactly as loud out here as they were inside, plus now you\'re wet.' },
+              { weight: 1, value: 'Drizzle. You walk through it fast, shoulders hunched. The thoughts don\'t care about the scenery. They came with you. Now you\'re tired and damp.' },
+              // High NE — every drop is an irritant
+              { weight: State.lerp01(ne, 55, 75), value: 'The rain is on your neck and you can feel every drop. Your jacket isn\'t enough. The cold, the wet, the sound of cars on wet road — every sensation is a needle. You walk faster. It doesn\'t help.' },
             ]);
           }
-          return Timeline.pick([
-            'You walk. Fast, tight, shoulders up. The thoughts come with you — they don\'t care about the change of scenery. You burn energy. That\'s what you accomplish.',
-            'A walk. You thought it would help. The air is fine. The sky is there. The thing in your chest is exactly the same, just outside now instead of inside.',
-            'You walk until your legs notice. The thoughts follow you the whole way — across the street, around the block, back again. Walking didn\'t help. But you walked.',
+          return Timeline.weightedPick([
+            { weight: 1, value: 'You walk. Fast, tight, shoulders up. The thoughts come with you — they don\'t care about the change of scenery. You burn energy. That\'s what you accomplish.' },
+            { weight: 1, value: 'A walk. You thought it would help. The air is fine. The sky is there. The thing in your chest is exactly the same, just outside now instead of inside.' },
+            { weight: 1, value: 'You walk until your legs notice. The thoughts follow you the whole way — across the street, around the block, back again. Walking didn\'t help. But you walked.' },
+            // Low GABA — the anxiety walks with you
+            { weight: State.lerp01(gaba, 40, 20), value: 'You walk fast. Too fast. Your breath is shallow and your hands are fists in your pockets. The movement should help. It doesn\'t. The thing inside you has legs too, and it keeps up easily.' },
           ]);
         }
         if (mood === 'numb') {
           // No stress relief — nothing registers
           if (weather === 'drizzle') {
-            return Timeline.pick([
-              'You walk in the rain. You get wet. You walk back. The rain happened to you. That\'s about all you can say about it.',
-              'Drizzle. You walk through it. Your body moves through space. You come back damp. Nothing changed except your socks.',
+            return Timeline.weightedPick([
+              { weight: 1, value: 'You walk in the rain. You get wet. You walk back. The rain happened to you. That\'s about all you can say about it.' },
+              { weight: 1, value: 'Drizzle. You walk through it. Your body moves through space. You come back damp. Nothing changed except your socks.' },
+              // Low serotonin — numb even to discomfort
+              { weight: State.lerp01(ser, 30, 10), value: 'You walk in the rain. It\'s cold. You know it\'s cold because your hands are wet, but the cold doesn\'t bother you the way it should. Nothing does. You walk until walking stops, then you turn around.' },
             ]);
           }
-          return Timeline.pick([
-            'You walk. The street, the air, the people. You move through all of it like water through a pipe. You were out. Now you\'re back. That happened.',
-            'A walk. You went, you returned. The scenery was there. You were there. The two of you didn\'t really connect.',
-            'You walk. Your legs do it. The air touches your face. People pass. None of it reaches whatever part of you would need to be reached. You come back.',
+          return Timeline.weightedPick([
+            { weight: 1, value: 'You walk. The street, the air, the people. You move through all of it like water through a pipe. You were out. Now you\'re back. That happened.' },
+            { weight: 1, value: 'A walk. You went, you returned. The scenery was there. You were there. The two of you didn\'t really connect.' },
+            { weight: 1, value: 'You walk. Your legs do it. The air touches your face. People pass. None of it reaches whatever part of you would need to be reached. You come back.' },
+            // Low dopamine — no engagement with the world
+            { weight: State.lerp01(dopa, 40, 15), value: 'You walk. Trees, buildings, people — the world scrolls past like a feed you\'re not interested in. Your legs carry you through it. At no point do you feel like you\'re in it.' },
           ]);
         }
         // hollow
         State.adjustStress(-1);
         if (weather === 'drizzle') {
-          return Timeline.pick([
-            'You walk in the drizzle. The world exists. You were in it, briefly, getting rained on. It\'s something.',
-            'Rain on the street. You walk through it. Cars pass. People with umbrellas. You\'re out here. That\'s a fact about your life right now.',
+          return Timeline.weightedPick([
+            { weight: 1, value: 'You walk in the drizzle. The world exists. You were in it, briefly, getting rained on. It\'s something.' },
+            { weight: 1, value: 'Rain on the street. You walk through it. Cars pass. People with umbrellas. You\'re out here. That\'s a fact about your life right now.' },
+            // High NE — the rain is oddly present
+            { weight: State.lerp01(ne, 40, 60), value: 'You walk in the drizzle and the rain is on your face, each drop a small fact. Cars hiss past on wet road. Someone\'s umbrella is red. You notice things. You don\'t know what to do with any of them.' },
           ]);
         }
-        return Timeline.pick([
-          'You walk. The world exists and you\'re in it, briefly. People going places. Cars. The sky. You were part of the scene for a few minutes. Then you came back.',
-          'A walk. The street, the air, the feeling of being a body among other bodies. It doesn\'t fill the hollow, but it proves the world is still out there.',
-          'You walk for a while. Past the store, past the bus stop, past people you\'ll never see again. The world is there. You were in it.',
+        return Timeline.weightedPick([
+          { weight: 1, value: 'You walk. The world exists and you\'re in it, briefly. People going places. Cars. The sky. You were part of the scene for a few minutes. Then you came back.' },
+          { weight: 1, value: 'A walk. The street, the air, the feeling of being a body among other bodies. It doesn\'t fill the hollow, but it proves the world is still out there.' },
+          { weight: 1, value: 'You walk for a while. Past the store, past the bus stop, past people you\'ll never see again. The world is there. You were in it.' },
+          // Higher serotonin — the hollow lets some light in
+          { weight: State.lerp01(ser, 40, 55), value: 'You walk. The hollow is still there, but the air moves through it. A tree. A stranger\'s dog. The light on the pavement. Small things that don\'t fix anything but prove the world is wider than the inside of your head.' },
         ]);
       },
     },
