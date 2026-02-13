@@ -20,7 +20,10 @@ const State = (() => {
 
       // Calendar anchor — minutes since Unix epoch. Set once from charRng.
       start_timestamp: 0,
-      start_season: 0,     // 0=winter, 1=spring, 2=summer, 3=autumn
+
+      // Geography — latitude in degrees (-90 to 90). Everything derives from this:
+      // sign → hemisphere, |lat| < 23.5 → tropical, |lat| 23.5-66.5 → temperate
+      latitude: 42,
 
       // Flags and soft state
       alarm_time: 6 * 60 + 30,  // Minutes since midnight. When the alarm fires.
@@ -181,12 +184,27 @@ const State = (() => {
   }
 
   function season() {
-    // Derived from player's starting season + elapsed time.
-    // Hemisphere-agnostic — the player's chargen choice anchors the cycle.
-    const elapsedDays = Math.floor(s.time / 1440);
-    const seasonIndex = Math.floor(elapsedDays / 91) % 4;
-    const seasons = ['winter', 'spring', 'summer', 'autumn'];
-    return seasons[(s.start_season + seasonIndex) % 4];
+    const month = calendarDate().month;
+    const absLat = Math.abs(s.latitude);
+
+    // Tropical — wet/dry, not four seasons
+    if (absLat < 23.5) {
+      // Wet season aligns with the hemisphere's summer
+      if (s.latitude >= 0) {
+        return (month >= 4 && month <= 9) ? 'wet' : 'dry';
+      }
+      return (month >= 10 || month <= 3) ? 'wet' : 'dry';
+    }
+
+    // Temperate / subarctic — four seasons from calendar month
+    let m = month;
+    if (s.latitude < 0) {
+      m = (month + 6) % 12;
+    }
+    if (m >= 2 && m <= 4) return 'spring';
+    if (m >= 5 && m <= 7) return 'summer';
+    if (m >= 8 && m <= 10) return 'autumn';
+    return 'winter';
   }
 
   /** @param {number} eventTime @returns {number} */
