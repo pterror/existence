@@ -749,6 +749,35 @@ const State = (() => {
     return 0;
   }
 
+  // --- Sleep emotional processing ---
+  // REM sleep attenuates sentiment deviations from character baseline.
+  // Better sleep = more processing. No PRNG consumed — fully deterministic.
+  // See DESIGN-EMOTIONS.md Layer 2 step: Sleep Emotional Processing.
+
+  /**
+   * Sleep emotional processing — attenuate sentiment deviations from baseline.
+   * REM sleep strips emotional charge; better sleep = more processing.
+   * @param {Array} baseSentiments - character's original sentiments (baseline)
+   * @param {number} qualityMult - sleep quality (0-1+)
+   * @param {number} sleepMinutes - total sleep duration
+   */
+  function processSleepEmotions(baseSentiments, qualityMult, sleepMinutes) {
+    if (!s.sentiments || !s.sentiments.length) return;
+
+    const durationFactor = clamp(sleepMinutes / 420, 0.3, 1.0);
+    const processingRate = 0.4 * qualityMult * durationFactor;
+
+    for (const sent of s.sentiments) {
+      const base = baseSentiments
+        ? baseSentiments.find(cs => cs.target === sent.target && cs.quality === sent.quality)
+        : null;
+      const baseIntensity = base ? base.intensity : 0;
+      const deviation = sent.intensity - baseIntensity;
+      if (Math.abs(deviation) < 0.001) continue;
+      sent.intensity -= deviation * processingRate;
+    }
+  }
+
   // --- Neurochemistry drift engine ---
   // Exponential approach to target with asymmetric up/down rates.
   // Biological jitter via incommensurate sine waves (no PRNG consumed).
@@ -1137,5 +1166,6 @@ const State = (() => {
     perceivedMoneyString,
     lerp01,
     sentimentIntensity,
+    processSleepEmotions,
   };
 })();

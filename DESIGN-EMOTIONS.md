@@ -314,3 +314,32 @@ Every character gets all 8 categories. Even very low intensity (0.02) is stored 
 **Legacy compatibility:** Characters without `sentiments` → `applyToState()` writes `[]` → `sentimentIntensity()` returns 0 → zero target modification, zero nudges.
 
 **Replay safety:** Generation uses charRng only, character stored verbatim. Target modifications and discrete nudges are deterministic from state (no PRNG consumed). New `weightedPick` entries follow the same single-RNG-call pattern.
+
+### Layer 2 step: Sleep Emotional Processing (implemented)
+
+REM sleep attenuates the emotional charge of recent experiences — "sleep on it" made mechanical. During sleep, each sentiment's intensity drifts back toward its **character baseline** (the chargen-generated value stored on the character object).
+
+**Why character baseline:** The character record already holds the original sentiments verbatim (never regenerated, stored in IndexedDB). This is the natural baseline. Accumulated sentiments (step 5, future) that don't exist on the character have baseline 0 — sleep attenuates them toward absence, which is correct.
+
+**Processing formula:**
+```
+durationFactor = clamp(sleepMinutes / 420, 0.3, 1.0)
+processingRate = 0.4 * qualityMult * durationFactor
+
+For each sentiment in state:
+  baseIntensity = matching character sentiment's intensity, or 0 if no match
+  deviation = intensity - baseIntensity
+  intensity -= deviation * processingRate
+```
+
+**Processing rates by sleep quality:**
+- Good sleep (quality 1.0, 7+ hours): ~40% of deviation processed per night
+- Poor sleep (quality 0.5, 7 hours): ~20%
+- Poor sleep (quality 0.5, 3 hours): ~14%
+- A moderate emotional charge fades over 2–3 good nights
+
+**Timing in sleep execute:** After `advanceTime()` and stress reduction (so NT drift during sleep uses pre-processed sentiments), before fridge decay and `wakeUp()`. The effect manifests in waking hours.
+
+**Current effect:** Zero. All sentiments are at their chargen baseline, so deviations are zero. The mechanism is in place for step 5 (accumulating sentiments) to push intensities above baseline, at which point sleep will partially reset them.
+
+**Replay safety:** No PRNG consumed. Processing is deterministic from state values + sleep parameters. On replay, `applyToState()` writes original sentiments, then sleep interactions re-process them identically.

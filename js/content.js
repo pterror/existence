@@ -860,6 +860,9 @@ const Content = (() => {
         State.adjustStress(-sleepMinutes / 20);
         State.set('actions_since_rest', 0);
 
+        // Sleep emotional processing — attenuate sentiment deviations from baseline
+        State.processSleepEmotions(Character.get().sentiments || [], qualityMult, sleepMinutes);
+
         // Fridge food slowly goes bad overnight
         if (State.get('fridge_food') > 0 && Timeline.chance(0.15)) {
           State.set('fridge_food', Math.max(0, State.get('fridge_food') - 1));
