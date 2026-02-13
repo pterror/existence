@@ -2,6 +2,9 @@
 
 ## Backlog
 
+### moodTone() is a lossy bottleneck
+28 continuous neurochemical systems get collapsed to one of 8 discrete strings via hard thresholds — "gradients, not binaries" violated at the interface where it matters most. moodTone() is fine as a coarse selector (which sleep passage variant, which idle thought pool), but content.js should read NT values directly for continuous prose shading: how much serotonin colors word choice, how high NE shapes what the character notices, undertones within a primary tone. The 8 tones aren't wrong — they're just not the whole interface. The prose system needs to see the neurochemistry, not just a label.
+
 ## Under Consideration
 
 Everything below is drawn from the gap between DESIGN.md and what's built. Not committed to — just visible.

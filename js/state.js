@@ -469,7 +469,13 @@ const State = (() => {
   }
 
   function moodTone() {
-    // Returns a general tone for prose selection.
+    // WARNING: This is a lossy bottleneck. 28 continuous neurochemical systems
+    // collapsed to one of 8 discrete strings — hard thresholds producing the
+    // exact snap the neurochemistry layer exists to prevent. Fine as a coarse
+    // prose-variant selector for now, but content.js should increasingly read
+    // NT values directly for continuous shading. This function must not remain
+    // the primary interface between state and prose.
+    //
     // Primary: neurochemistry (serotonin, dopamine, NE, GABA).
     // Override: extreme physical conditions can break through.
     // Same 8 tones as before — all ~27 content.js callsites unchanged.
