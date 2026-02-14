@@ -43,7 +43,7 @@ Per-character trait controlling how sticky moods are. Only affects the four mood
 - **self_esteem** (0–100) — low self-esteem increases inertia in all directions.
 - **rumination** (0–100) — high rumination increases inertia in all directions.
 
-**Inertia formula:** `rate = baseRate / effectiveInertia(system, isNegative)`. Base inertia range 0.6 (fluid) to 1.4 (sticky), plus up to +0.2 from neuroticism negative bonus, plus state modifiers (adenosine > 60, poor sleep quality, stress > 60). At personality 50/50/50 → inertia 1.0 → identical to pre-inertia behavior (legacy save compatibility).
+**Inertia formula:** `rate = baseRate / effectiveInertia(system, isNegative)`. Base inertia range 0.6 (fluid) to 1.4 (sticky), plus up to +0.2 from neuroticism negative bonus, plus state modifiers (adenosine > 60, poor sleep quality, stress > 60). At personality 50/50/50 → inertia 1.0.
 
 **"Worse direction" per system:** serotonin falling, dopamine falling, NE rising, GABA falling.
 
@@ -58,7 +58,7 @@ Likes and dislikes generated at character creation. Array of `{target, quality, 
 - **Physical warmth** — extra stress relief on shower
 - **Routine** — stored but dormant (no activation hook yet)
 
-All effects scale linearly with intensity. Small background forces (max ±3.4 serotonin target shift from weather, vs ±20 from sleep quality). Sentiment-aware prose variants in eat_food, buy_cheap_meal, shower, sit_at_table, go_for_walk, look_out_window, sleep. Legacy saves without sentiments get empty array (zero effect).
+All effects scale linearly with intensity. Small background forces (max ±3.4 serotonin target shift from weather, vs ±20 from sleep quality). Sentiment-aware prose variants in eat_food, buy_cheap_meal, shower, sit_at_table, go_for_walk, look_out_window, sleep.
 
 ### Sleep Emotional Processing (Layer 2 of DESIGN-EMOTIONS.md)
 During sleep, each sentiment's intensity drifts back toward its character baseline (the chargen-generated value). Processing rate = 0.4 * sleepQuality * clamp(sleepMinutes/420, 0.3, 1.0). Good sleep (quality 1.0, 7+ hours) processes ~40% of deviation per night; poor sleep (quality 0.5, 3 hours) processes ~14%. Accumulated sentiments with no character match attenuate toward intensity 0. Called in the sleep interaction after stress reduction, before wakeUp(). No PRNG consumed.
@@ -86,7 +86,7 @@ Sentiments that build from repeated experience. The first dynamic sentiments —
 ### Sentiment Evolution (Layer 2 of DESIGN-EMOTIONS.md)
 Three mechanics deepening how sentiments change over time:
 
-**Regulation capacity** — `State.regulationCapacity()`. Inverse of emotional inertia, applied during sleep processing. Fluid characters (low neuroticism, high self-esteem, low rumination) process emotions faster; sticky characters process slower. Range 0.5–1.3. At 50/50/50 → 1.0 (legacy-safe). State penalties for adenosine > 60 and stress > 60.
+**Regulation capacity** — `State.regulationCapacity()`. Inverse of emotional inertia, applied during sleep processing. Fluid characters (low neuroticism, high self-esteem, low rumination) process emotions faster; sticky characters process slower. Range 0.5–1.3. At 50/50/50 → 1.0. State penalties for adenosine > 60 and stress > 60.
 
 **Entrenchment + intensity resistance** — rewritten `processSleepEmotions()` applies three multiplicative modifiers: intensity resistance (high-deviation sentiments resist processing, floor 0.3), quality factor (comfort 1.0, satisfaction 0.9, warmth 0.85, dread/irritation 0.6), and regulation capacity. Negative sentiments process 40% slower than comfort. Very strong feelings persist across multiple nights.
 
@@ -107,7 +107,6 @@ Friends who reach out and get silence back generate guilt over time. Per-friend 
 - Friend guilt lowers serotonin target when at home (max ~6 points at extreme guilt toward both friends)
 - Guilt-aware idle thoughts fire based on guilt intensity, independent of social tier (4 thoughts per friend flavor, 16 total)
 - Sleep processing factor 0.7 — between comfort (1.0) and dread/irritation (0.6)
-- Legacy saves: first sleep initializes contact times to current time, no guilt burst
 
 **Friend messages tagged with source** — `phone_inbox` entries from friends carry `source: 'friend1'|'friend2'` for contact tracking.
 

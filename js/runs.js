@@ -225,7 +225,7 @@ const Runs = (() => {
               : 'Unknown',
             jobType: record.character ? record.character.job_type : '',
             ageStage: record.character ? record.character.age_stage : '',
-            version: record.version || 0,
+            version: record.version,
           });
           cursor.continue();
         } else {

@@ -200,7 +200,7 @@ const State = (() => {
       times_late_this_week: 0,
       consecutive_meals_skipped: 0,
       last_social_interaction: 0, // action count at last interaction
-      friend_contact: /** @type {Record<string, number>} */ ({}), // slot → game time of last engagement (absent = never/legacy)
+      friend_contact: /** @type {Record<string, number>} */ ({}), // slot → game time of last engagement
 
       // Event surfacing — tracks how many times state-condition events have appeared.
       // After cap, they go silent and let tier-based prose carry the weight.
@@ -899,7 +899,7 @@ const State = (() => {
 
   /**
    * Process friend absence effects during sleep.
-   * For each friend: if contact time is 0 (legacy/new), initialize to current time.
+   * For each friend: if no contact time yet, initialize to current time.
    * After 1.5 days grace period, guilt accumulates each night.
    * Unread messages from the friend intensify guilt by 40%.
    */
@@ -911,7 +911,7 @@ const State = (() => {
     for (const slot of ['friend1', 'friend2']) {
       let lastContact = s.friend_contact[slot];
 
-      // Legacy/new: initialize contact time on first sleep, skip guilt
+      // First sleep: initialize contact time, skip guilt
       if (lastContact === undefined || lastContact === 0) {
         s.friend_contact[slot] = now;
         continue;
@@ -1270,7 +1270,7 @@ const State = (() => {
   // Fluid characters (low neuroticism, high self-esteem, low rumination) process
   // emotions more efficiently during sleep. Sticky characters process slower.
   // Range: 0.5 (very sticky + stressed) to 1.3 (very fluid + rested).
-  // At 50/50/50 personality → 1.0 (no change from current behavior, legacy-safe).
+  // At 50/50/50 personality → 1.0.
 
   function regulationCapacity() {
     const n = s.neuroticism / 100;

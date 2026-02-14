@@ -397,13 +397,6 @@ body {
   display: none;
 }
 
-.threshold-faded {
-  color: #4a4540;
-  font-style: italic;
-  font-size: 1rem;
-  padding: 0.3em 0;
-}
-
 /* Replay controls — scrubber + heatmap */
 
 #replay-controls {

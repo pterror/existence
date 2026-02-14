@@ -962,7 +962,7 @@ const Content = (() => {
         State.set('actions_since_rest', 0);
 
         // Sleep emotional processing — attenuate sentiment deviations from baseline
-        State.processSleepEmotions(Character.get().sentiments || [], qualityMult, sleepMinutes);
+        State.processSleepEmotions(Character.get().sentiments, qualityMult, sleepMinutes);
 
         // Friend absence — guilt accumulates per night of silence
         State.processAbsenceEffects();

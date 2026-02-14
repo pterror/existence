@@ -27,95 +27,66 @@ const Character = (() => {
     if (!current) return;
 
     // Calendar and geography
-    if (current.start_timestamp) {
-      State.set('start_timestamp', current.start_timestamp);
-    }
-    if (current.latitude !== undefined) {
-      State.set('latitude', current.latitude);
-    }
+    State.set('start_timestamp', current.start_timestamp);
+    State.set('latitude', current.latitude);
 
     // Personality — raw values stored in state for drift engine to read.
     // Set base values first; backstory adjustments are applied below additively.
-    // Legacy saves without personality get 50/50/50 → inertia exactly 1.0 → no change.
-    const personality = current.personality || { neuroticism: 50, self_esteem: 50, rumination: 50 };
-    State.set('neuroticism', personality.neuroticism);
-    State.set('self_esteem', personality.self_esteem);
-    State.set('rumination', personality.rumination);
+    State.set('neuroticism', current.personality.neuroticism);
+    State.set('self_esteem', current.personality.self_esteem);
+    State.set('rumination', current.personality.rumination);
 
     // Sentiments — Layer 2 basic likes/dislikes. Start with chargen sentiments.
-    // Legacy saves without sentiments → empty array → no effect.
-    State.set('sentiments', current.sentiments ? [...current.sentiments] : []);
+    State.set('sentiments', [...current.sentiments]);
 
     // --- Financial parameters from backstory ---
-    // New characters have financial_sim from the fine-grained simulation.
-    // Legacy saves without backstory: derive defaults from job type (modest origin, 0.5 stability).
     const sim = current.financial_sim;
-    if (sim) {
-      State.set('money', sim.starting_money);
-      // Fidelity: approximate awareness of starting balance
-      State.set('last_observed_money', sim.starting_money > 100
-        ? sim.starting_money - 50  // off by ~$50 at larger amounts
-        : Math.max(0, sim.starting_money - 5));
-      State.set('pay_rate', sim.pay_rate);
-      State.set('rent_amount', sim.rent_amount);
-      State.set('job_standing', sim.job_standing_start);
+    State.set('money', sim.starting_money);
+    // Fidelity: approximate awareness of starting balance
+    State.set('last_observed_money', sim.starting_money > 100
+      ? sim.starting_money - 50  // off by ~$50 at larger amounts
+      : Math.max(0, sim.starting_money - 5));
+    State.set('pay_rate', sim.pay_rate);
+    State.set('rent_amount', sim.rent_amount);
+    State.set('job_standing', sim.job_standing_start);
 
-      // Financial anxiety sentiment
-      if (sim.financial_anxiety > 0.01) {
-        State.adjustSentiment('money', 'anxiety', sim.financial_anxiety);
+    // Financial anxiety sentiment
+    if (sim.financial_anxiety > 0.01) {
+      State.adjustSentiment('money', 'anxiety', sim.financial_anxiety);
+    }
+
+    // Work sentiment from career stability
+    if (sim.work_sentiment && sim.work_sentiment.intensity > 0.01) {
+      State.adjustSentiment('work', sim.work_sentiment.quality, sim.work_sentiment.intensity);
+    }
+
+    // Personality adjustments from life events (additive nudges, clamped)
+    if (sim.personality_adjustments) {
+      const adj = sim.personality_adjustments;
+      if (adj.neuroticism) {
+        const n = State.get('neuroticism');
+        State.set('neuroticism', Math.max(0, Math.min(100, n + adj.neuroticism)));
       }
-
-      // Work sentiment from career stability
-      if (sim.work_sentiment && sim.work_sentiment.intensity > 0.01) {
-        State.adjustSentiment('work', sim.work_sentiment.quality, sim.work_sentiment.intensity);
+      if (adj.self_esteem) {
+        const se = State.get('self_esteem');
+        State.set('self_esteem', Math.max(0, Math.min(100, se + adj.self_esteem)));
       }
+    }
 
-      // Personality adjustments from life events (additive nudges, clamped)
-      if (sim.personality_adjustments) {
-        const adj = sim.personality_adjustments;
-        if (adj.neuroticism) {
-          const n = State.get('neuroticism');
-          State.set('neuroticism', Math.max(0, Math.min(100, n + adj.neuroticism)));
-        }
-        if (adj.self_esteem) {
-          const se = State.get('self_esteem');
-          State.set('self_esteem', Math.max(0, Math.min(100, se + adj.self_esteem)));
-        }
-      }
-
-      // Life event sentiments (health anxiety, authority dread, etc.)
-      if (current.backstory && current.backstory.life_events) {
-        const lifeEventDefs = {
-          medical_crisis:    { target: 'health', quality: 'anxiety', intensity: 0.1 },
-          job_loss:          { target: 'work', quality: 'dread', intensity: 0.05 },
-          family_help:       { target: 'family', quality: 'guilt', intensity: 0.05 },
-          legal_trouble:     { target: 'authority', quality: 'dread', intensity: 0.08 },
-        };
-        for (const evt of current.backstory.life_events) {
-          const def = lifeEventDefs[evt.type];
-          if (def) {
-            State.adjustSentiment(def.target, def.quality, def.intensity);
-          }
+    // Life event sentiments (health anxiety, authority dread, etc.)
+    if (current.backstory && current.backstory.life_events) {
+      const lifeEventDefs = {
+        medical_crisis:    { target: 'health', quality: 'anxiety', intensity: 0.1 },
+        job_loss:          { target: 'work', quality: 'dread', intensity: 0.05 },
+        family_help:       { target: 'family', quality: 'guilt', intensity: 0.05 },
+        legal_trouble:     { target: 'authority', quality: 'dread', intensity: 0.08 },
+      };
+      for (const evt of current.backstory.life_events) {
+        const def = lifeEventDefs[evt.type];
+        if (def) {
+          State.adjustSentiment(def.target, def.quality, def.intensity);
         }
       }
-    } else {
-      // Legacy: no backstory. Derive financial params from job type with default assumptions.
-      const payRates = { food_service: 480, retail: 520, office: 600 };
-      State.set('pay_rate', payRates[current.job_type] || 520);
-      State.set('rent_amount', 550); // modest default
-
-      // Legacy starting money — preserve old behavior
-      const age = current.age_stage;
-      let startMoney = 47.50, startLastMoney = 42.50;
-      if (typeof age === 'number') {
-        if (age < 30) { startMoney = 35; startLastMoney = 30; }
-        else if (age >= 40) { startMoney = 55; startLastMoney = 50; }
-      } else {
-        if (age === 'twenties') { startMoney = 35; startLastMoney = 30; }
-        else if (age === 'forties') { startMoney = 55; startLastMoney = 50; }
-      }
-      State.set('money', startMoney);
-      State.set('last_observed_money', startLastMoney);
     }
 
     // Phone battery — slept at home, charged overnight, but not everyone charges to full

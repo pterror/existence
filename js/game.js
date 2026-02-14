@@ -40,13 +40,6 @@ const Game = (() => {
 
   /** @param {RunRecord} runData */
   async function resumeRun(runData) {
-    if (!runData.version || runData.version < 2) {
-      // Incompatible save — go to threshold
-      const runs = await Runs.listRuns();
-      await Runs.setActiveRunId(null);
-      showThreshold(runs);
-      return;
-    }
     const saved = Timeline.restoreFrom(runData);
     Timeline.setActiveRunId(runData.id);
 
@@ -175,23 +168,12 @@ const Game = (() => {
       passageEl.classList.add('visible');
 
       setTimeout(() => {
-        const compatible = runs.filter(r => r.version >= 2);
-        const incompatible = runs.filter(r => !r.version || r.version < 2);
-
-        for (const run of compatible) {
+        for (const run of runs) {
           const btn = document.createElement('button');
           btn.className = 'action';
           btn.textContent = thresholdLabel(run);
           btn.addEventListener('click', () => pickRun(run.id));
           actionsEl.appendChild(btn);
-        }
-
-        for (const run of incompatible) {
-          const el = document.createElement('p');
-          el.className = 'threshold-faded';
-          const name = run.characterName || 'Someone';
-          el.textContent = `${name}. The memory has faded.`;
-          actionsEl.appendChild(el);
         }
 
         // New life option

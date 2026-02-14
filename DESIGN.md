@@ -655,7 +655,7 @@ Responding improves things. Ignoring doesn't make it worse immediately — but t
 
 Friends who reach out and get silence back generate guilt — the specific weight of knowing someone cared and you didn't respond. This is distinct from social isolation (the general state of not talking to people). You can be socially fine and still guilty about a specific friend you've been ignoring.
 
-**Per-friend contact tracking.** `friend_contact` map (keyed by slot name) records the game time of the last message engagement per friend. Scales to any number of friends. Legacy saves initialize on first sleep — no retroactive guilt.
+**Per-friend contact tracking.** `friend_contact` map (keyed by slot name) records the game time of the last message engagement per friend. Scales to any number of friends. First sleep initializes contact times — no retroactive guilt.
 
 **Guilt accumulation during sleep.** After a 1.5-day grace period, guilt builds each night. Growth rate ~0.005 per night, scaling gently with absence duration (up to 1.6x at 14+ days of silence). Unread messages from the ignored friend intensify growth by 40% — the message sitting there, visible, unanswered, makes it worse.
 

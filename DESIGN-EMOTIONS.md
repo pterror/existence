@@ -256,8 +256,6 @@ Per-character emotional inertia makes mood stickiness personal. Some characters 
 
 **"Worse direction" per system:** serotonin falling (low = depressed), dopamine falling (low = anhedonia), NE rising (high = agitation), GABA falling (low = anxiety).
 
-**Legacy compatibility:** Characters without personality (old saves) get 50/50/50 → inertia exactly 1.0 → identical drift behavior.
-
 **Replay safety:** No PRNG consumed. Personality stored in state (restored on load via `loadState()` defaults merge). Drift is deterministic from state values + time delta.
 
 ### Layer 2 step: Basic Sentiments (implemented)
@@ -310,8 +308,6 @@ Every character gets all 8 categories. Even very low intensity (0.02) is stored 
 - Step 4 (sleep processing): overnight attenuation of recent intensity changes
 - Step 5 (accumulating sentiments): repeated interactions build or intensify
 - Step 6 (trauma sentiments): high-intensity, processing-resistant entries
-
-**Legacy compatibility:** Characters without `sentiments` → `applyToState()` writes `[]` → `sentimentIntensity()` returns 0 → zero target modification, zero nudges.
 
 **Replay safety:** Generation uses charRng only, character stored verbatim. Target modifications and discrete nudges are deterministic from state (no PRNG consumed). New `weightedPick` entries follow the same single-RNG-call pattern.
 
@@ -387,7 +383,7 @@ This creates the design-intended feedback loop: chronic struggle at work → dre
 
 Three mechanics that deepen the existing sentiment system before trauma sentiments. Together they create meaningful dynamics: comfort that fades with overuse, negative feelings that dig in, and per-character processing differences.
 
-**Regulation capacity** — `State.regulationCapacity()` in state.js. The inverse of emotional inertia, applied during sleep. Fluid characters (low neuroticism, high self-esteem, low rumination) process emotions more efficiently during sleep; sticky characters process slower. Range 0.5 (very sticky + stressed) to 1.3 (very fluid + rested). At 50/50/50 personality → 1.0 (no change from prior behavior, legacy-safe). State penalties: adenosine > 60 (-0.004/point), stress > 60 (-0.004/point). This means a chronically stressed, sleep-deprived, neurotic character processes emotions dramatically less effectively during sleep.
+**Regulation capacity** — `State.regulationCapacity()` in state.js. The inverse of emotional inertia, applied during sleep. Fluid characters (low neuroticism, high self-esteem, low rumination) process emotions more efficiently during sleep; sticky characters process slower. Range 0.5 (very sticky + stressed) to 1.3 (very fluid + rested). At 50/50/50 personality → 1.0. State penalties: adenosine > 60 (-0.004/point), stress > 60 (-0.004/point). This means a chronically stressed, sleep-deprived, neurotic character processes emotions dramatically less effectively during sleep.
 
 **Rewritten `processSleepEmotions()`** — now applies three multiplicative modifiers:
 ```
@@ -417,7 +413,7 @@ Each placed immediately after the existing NT nudge, guarded by the same `if (in
 
 **NOT habituated:** Weather prefs and time-of-day prefs (always-on target modifiers = stable traits, not discrete activations). Work/coworker sentiments (have their own accumulation dynamics with separate mechanistic logic).
 
-**Replay safety:** All new code is deterministic — no PRNG consumed. `regulationCapacity()` reads state values only. Habituation calls are in execute functions after existing state changes, before prose generation. Per-quality processing factors are constant. Legacy saves with no personality get regulation = 1.0.
+**Replay safety:** All new code is deterministic — no PRNG consumed. `regulationCapacity()` reads state values only. Habituation calls are in execute functions after existing state changes, before prose generation. Per-quality processing factors are constant.
 
 ### Layer 2 step: Contradictory Experience (implemented)
 
