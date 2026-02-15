@@ -1,0 +1,489 @@
+// habits.js — behavioral momentum from observed play
+// The character develops habits. The player interrupts.
+// CART decision trees learn action patterns from features.
+// No RNG consumed — pure state reads + ML.
+
+const Habits = (() => {
+
+  // --- Feature schema ---
+  // Declares whether each feature is continuous or categorical.
+  // Continuous: split on midpoint thresholds between sorted unique values.
+  // Categorical: split on "is this value?" binary tests.
+
+  const CONTINUOUS = 'continuous';
+  const CATEGORICAL = 'categorical';
+
+  /** @type {Record<string, string>} */
+  const featureSchema = {
+    energy: CONTINUOUS,
+    stress: CONTINUOUS,
+    hunger: CONTINUOUS,
+    social: CONTINUOUS,
+    serotonin: CONTINUOUS,
+    dopamine: CONTINUOUS,
+    norepinephrine: CONTINUOUS,
+    gaba: CONTINUOUS,
+    adenosine: CONTINUOUS,
+    cortisol: CONTINUOUS,
+    energy_tier: CATEGORICAL,
+    stress_tier: CATEGORICAL,
+    mood_tone: CATEGORICAL,
+    time_period: CATEGORICAL,
+    hour: CONTINUOUS,
+    location: CATEGORICAL,
+    dressed: CATEGORICAL,
+    showered: CATEGORICAL,
+    ate_today: CATEGORICAL,
+    at_work_today: CATEGORICAL,
+    called_in: CATEGORICAL,
+    weather: CATEGORICAL,
+    fridge_food: CONTINUOUS,
+    phone_battery: CONTINUOUS,
+    viewing_phone: CATEGORICAL,
+    work_dread: CONTINUOUS,
+    work_satisfaction: CONTINUOUS,
+    routine_comfort: CONTINUOUS,
+    routine_irritation: CONTINUOUS,
+    money: CONTINUOUS,
+    money_tier: CATEGORICAL,
+    has_unread: CATEGORICAL,
+    time_since_wake: CONTINUOUS,
+    last_action: CATEGORICAL,
+  };
+
+  const featureNames = Object.keys(featureSchema);
+
+  // --- Training data ---
+
+  /** @type {{ features: Record<string, number|string|boolean>, action: string, time: number }[]} */
+  let trainingData = [];
+
+  /** @type {Record<string, any>} */
+  let trees = {};
+
+  /** @type {Record<string, number>} */
+  let lastTimeFor = {};
+
+  /** @type {number} */
+  let lastWakeTime = 0;
+
+  /** @type {string} */
+  let lastActionId = '';
+
+  /** @type {number} */
+  let examplesSinceTrain = 0;
+
+  // --- Feature extraction ---
+
+  /** @returns {Record<string, number|string|boolean>} */
+  function extractFeatures() {
+    const features = {
+      energy: State.get('energy'),
+      stress: State.get('stress'),
+      hunger: State.get('hunger'),
+      social: State.get('social'),
+      serotonin: State.get('serotonin'),
+      dopamine: State.get('dopamine'),
+      norepinephrine: State.get('norepinephrine'),
+      gaba: State.get('gaba'),
+      adenosine: State.get('adenosine'),
+      cortisol: State.get('cortisol'),
+      energy_tier: State.energyTier(),
+      stress_tier: State.stressTier(),
+      mood_tone: State.moodTone(),
+      time_period: State.timePeriod(),
+      hour: State.getHour(),
+      location: World.getLocationId(),
+      dressed: State.get('dressed'),
+      showered: State.get('showered'),
+      ate_today: State.get('ate_today'),
+      at_work_today: State.get('at_work_today'),
+      called_in: State.get('called_in'),
+      weather: State.get('weather'),
+      fridge_food: State.get('fridge_food'),
+      phone_battery: State.get('phone_battery'),
+      viewing_phone: State.get('viewing_phone'),
+      work_dread: State.sentimentIntensity('work', 'dread'),
+      work_satisfaction: State.sentimentIntensity('work', 'satisfaction'),
+      routine_comfort: State.sentimentIntensity('routine', 'comfort'),
+      routine_irritation: State.sentimentIntensity('routine', 'irritation'),
+      money: State.get('money'),
+      money_tier: State.moneyTier(),
+      has_unread: State.hasUnreadMessages(),
+      time_since_wake: lastWakeTime > 0 ? (State.get('time') - lastWakeTime) : 99999,
+      last_action: lastActionId || 'none',
+    };
+    return features;
+  }
+
+  // --- Training data collection ---
+
+  /**
+   * Record a training example: features snapshot + chosen action.
+   * @param {Record<string, number|string|boolean>} features
+   * @param {string} actionId
+   */
+  function addExample(features, actionId) {
+    const time = State.get('time');
+    trainingData.push({ features, action: actionId, time });
+    lastTimeFor[actionId] = time;
+    lastActionId = actionId;
+    examplesSinceTrain++;
+  }
+
+  /**
+   * Update wake time tracking. Called when wakeUp happens.
+   */
+  function noteWake() {
+    lastWakeTime = State.get('time');
+  }
+
+  /** @returns {boolean} */
+  function shouldRetrain() {
+    return examplesSinceTrain >= 10;
+  }
+
+  // --- CART Decision Tree ---
+
+  /**
+   * Compute Gini impurity for a set of labels.
+   * @param {boolean[]} labels
+   * @param {number[]} weights
+   * @returns {number}
+   */
+  function gini(labels, weights) {
+    let totalWeight = 0;
+    let positiveWeight = 0;
+    for (let i = 0; i < labels.length; i++) {
+      totalWeight += weights[i];
+      if (labels[i]) positiveWeight += weights[i];
+    }
+    if (totalWeight === 0) return 0;
+    const p = positiveWeight / totalWeight;
+    return 2 * p * (1 - p);
+  }
+
+  /**
+   * Find the best split across all features.
+   * @param {Record<string, number|string|boolean>[]} data
+   * @param {boolean[]} labels
+   * @param {number[]} weights
+   * @returns {{ feature: string, threshold: number|null, category: string|boolean|null, gain: number } | null}
+   */
+  function findBestSplit(data, labels, weights) {
+    const parentGini = gini(labels, weights);
+    let bestGain = 0;
+    /** @type {{ feature: string, threshold: number|null, category: string|boolean|null, gain: number } | null} */
+    let bestSplit = null;
+
+    let totalWeight = 0;
+    for (const w of weights) totalWeight += w;
+    if (totalWeight === 0) return null;
+
+    for (const feature of featureNames) {
+      const type = featureSchema[feature];
+
+      if (type === CONTINUOUS) {
+        // Collect unique sorted values
+        /** @type {number[]} */
+        const vals = [];
+        for (const row of data) {
+          const v = /** @type {number} */ (row[feature]);
+          if (typeof v === 'number') vals.push(v);
+        }
+        vals.sort((a, b) => a - b);
+        // Deduplicate
+        const unique = [];
+        for (let i = 0; i < vals.length; i++) {
+          if (i === 0 || vals[i] !== vals[i - 1]) unique.push(vals[i]);
+        }
+        if (unique.length < 2) continue;
+
+        // Try midpoint thresholds
+        for (let i = 0; i < unique.length - 1; i++) {
+          const threshold = (unique[i] + unique[i + 1]) / 2;
+
+          let leftWeight = 0, leftPositive = 0, leftCount = 0;
+          let rightWeight = 0, rightPositive = 0, rightCount = 0;
+
+          for (let j = 0; j < data.length; j++) {
+            const v = /** @type {number} */ (data[j][feature]);
+            if (v <= threshold) {
+              leftWeight += weights[j];
+              if (labels[j]) leftPositive += weights[j];
+              leftCount++;
+            } else {
+              rightWeight += weights[j];
+              if (labels[j]) rightPositive += weights[j];
+              rightCount++;
+            }
+          }
+
+          if (leftCount === 0 || rightCount === 0) continue;
+
+          const leftP = leftWeight > 0 ? leftPositive / leftWeight : 0;
+          const rightP = rightWeight > 0 ? rightPositive / rightWeight : 0;
+          const leftGini = 2 * leftP * (1 - leftP);
+          const rightGini = 2 * rightP * (1 - rightP);
+          const weightedGini = (leftWeight * leftGini + rightWeight * rightGini) / totalWeight;
+          const gain = parentGini - weightedGini;
+
+          if (gain > bestGain) {
+            bestGain = gain;
+            bestSplit = { feature, threshold, category: null, gain };
+          }
+        }
+      } else {
+        // Categorical: try each unique value
+        /** @type {Set<string|boolean>} */
+        const categories = new Set();
+        for (const row of data) {
+          categories.add(/** @type {string|boolean} */ (row[feature]));
+        }
+        if (categories.size < 2) continue;
+
+        for (const cat of categories) {
+          let leftWeight = 0, leftPositive = 0, leftCount = 0;
+          let rightWeight = 0, rightPositive = 0, rightCount = 0;
+
+          for (let j = 0; j < data.length; j++) {
+            if (data[j][feature] === cat) {
+              leftWeight += weights[j];
+              if (labels[j]) leftPositive += weights[j];
+              leftCount++;
+            } else {
+              rightWeight += weights[j];
+              if (labels[j]) rightPositive += weights[j];
+              rightCount++;
+            }
+          }
+
+          if (leftCount === 0 || rightCount === 0) continue;
+
+          const leftP = leftWeight > 0 ? leftPositive / leftWeight : 0;
+          const rightP = rightWeight > 0 ? rightPositive / rightWeight : 0;
+          const leftGini = 2 * leftP * (1 - leftP);
+          const rightGini = 2 * rightP * (1 - rightP);
+          const weightedGini = (leftWeight * leftGini + rightWeight * rightGini) / totalWeight;
+          const gain = parentGini - weightedGini;
+
+          if (gain > bestGain) {
+            bestGain = gain;
+            bestSplit = { feature, threshold: null, category: cat, gain };
+          }
+        }
+      }
+    }
+
+    return bestSplit;
+  }
+
+  /**
+   * Build a binary CART decision tree.
+   * @param {Record<string, number|string|boolean>[]} data
+   * @param {boolean[]} labels
+   * @param {number[]} weights
+   * @param {number} depth
+   * @param {number} maxDepth
+   * @param {number} minSamples
+   * @param {string[]} path
+   * @returns {any}
+   */
+  function buildTree(data, labels, weights, depth, maxDepth, minSamples, path) {
+    // Count positive/negative
+    let posWeight = 0, negWeight = 0, totalWeight = 0;
+    for (let i = 0; i < labels.length; i++) {
+      totalWeight += weights[i];
+      if (labels[i]) posWeight += weights[i];
+      else negWeight += weights[i];
+    }
+
+    const probability = totalWeight > 0 ? posWeight / totalWeight : 0;
+
+    // Leaf conditions
+    if (depth >= maxDepth || data.length < minSamples || posWeight === 0 || negWeight === 0) {
+      return { leaf: true, prediction: probability >= 0.5, probability, count: data.length, path };
+    }
+
+    const split = findBestSplit(data, labels, weights);
+    if (!split || split.gain < 0.001) {
+      return { leaf: true, prediction: probability >= 0.5, probability, count: data.length, path };
+    }
+
+    // Partition data
+    const leftData = [], leftLabels = [], leftWeights = [];
+    const rightData = [], rightLabels = [], rightWeights = [];
+
+    for (let i = 0; i < data.length; i++) {
+      let goLeft;
+      if (split.threshold !== null) {
+        goLeft = /** @type {number} */ (data[i][split.feature]) <= split.threshold;
+      } else {
+        goLeft = data[i][split.feature] === split.category;
+      }
+
+      if (goLeft) {
+        leftData.push(data[i]);
+        leftLabels.push(labels[i]);
+        leftWeights.push(weights[i]);
+      } else {
+        rightData.push(data[i]);
+        rightLabels.push(labels[i]);
+        rightWeights.push(weights[i]);
+      }
+    }
+
+    // Build description for path tracking
+    let desc;
+    if (split.threshold !== null) {
+      desc = split.feature + '<=' + split.threshold.toFixed(1);
+    } else {
+      desc = split.feature + '=' + String(split.category);
+    }
+
+    return {
+      leaf: false,
+      feature: split.feature,
+      threshold: split.threshold,
+      category: split.category,
+      left: buildTree(leftData, leftLabels, leftWeights, depth + 1, maxDepth, minSamples, [...path, desc]),
+      right: buildTree(rightData, rightLabels, rightWeights, depth + 1, maxDepth, minSamples, [...path, '!' + desc]),
+    };
+  }
+
+  /**
+   * Predict using a trained tree.
+   * @param {any} tree
+   * @param {Record<string, number|string|boolean>} features
+   * @returns {{ prediction: boolean, probability: number, path: string[] }}
+   */
+  function predict(tree, features) {
+    if (tree.leaf) {
+      return { prediction: tree.prediction, probability: tree.probability, path: tree.path };
+    }
+
+    let goLeft;
+    if (tree.threshold !== null) {
+      goLeft = /** @type {number} */ (features[tree.feature]) <= tree.threshold;
+    } else {
+      goLeft = features[tree.feature] === tree.category;
+    }
+
+    return predict(goLeft ? tree.left : tree.right, features);
+  }
+
+  // --- Training ---
+
+  /**
+   * Train one-vs-rest binary trees for each action in the training data.
+   * Applies recency weighting — recent examples count more.
+   */
+  function train() {
+    if (trainingData.length < 20) {
+      trees = {};
+      return;
+    }
+
+    // Compute recency weights: exponential decay with half-life ~7 in-game days
+    const halfLifeMinutes = 7 * 1440;
+    const latestTime = trainingData[trainingData.length - 1].time;
+    const weights = trainingData.map(ex => {
+      const age = latestTime - ex.time;
+      return Math.pow(2, -age / halfLifeMinutes);
+    });
+
+    // Count per-action occurrences
+    /** @type {Record<string, number>} */
+    const actionCounts = {};
+    for (const ex of trainingData) {
+      actionCounts[ex.action] = (actionCounts[ex.action] || 0) + 1;
+    }
+
+    const newTrees = {};
+    const data = trainingData.map(ex => ex.features);
+
+    for (const [actionId, count] of Object.entries(actionCounts)) {
+      if (count < 3) continue; // not enough positive examples
+
+      const labels = trainingData.map(ex => ex.action === actionId);
+      newTrees[actionId] = buildTree(data, labels, weights, 0, 5, 3, []);
+    }
+
+    trees = newTrees;
+    examplesSinceTrain = 0;
+  }
+
+  // --- Prediction ---
+
+  /**
+   * Predict the most likely habitual action from available actions.
+   * @param {string[]} availableActionIds
+   * @returns {{ actionId: string, strength: number, path: string[] } | null}
+   */
+  function predictHabit(availableActionIds) {
+    if (Object.keys(trees).length === 0) return null;
+    if (availableActionIds.length === 0) return null;
+
+    const features = extractFeatures();
+
+    // Routine sentiment modulates thresholds
+    const routineComfort = State.sentimentIntensity('routine', 'comfort');
+    const routineIrritation = State.sentimentIntensity('routine', 'irritation');
+    // Comfort lowers threshold (habits form easier), irritation raises it
+    const thresholdAdjust = -routineComfort * 0.1 + routineIrritation * 0.1;
+    const mediumThreshold = 0.5 + thresholdAdjust;
+
+    /** @type {{ actionId: string, probability: number, path: string[] }[]} */
+    const candidates = [];
+
+    for (const actionId of availableActionIds) {
+      const tree = trees[actionId];
+      if (!tree) continue;
+
+      const result = predict(tree, features);
+      if (result.probability >= mediumThreshold) {
+        candidates.push({ actionId, probability: result.probability, path: result.path });
+      }
+    }
+
+    if (candidates.length === 0) return null;
+
+    // Sort by probability descending
+    candidates.sort((a, b) => b.probability - a.probability);
+
+    // Check for competing habits — if top two are close, no suggestion
+    if (candidates.length >= 2) {
+      const gap = candidates[0].probability - candidates[1].probability;
+      if (gap < 0.1) return null; // competing habits
+    }
+
+    const best = candidates[0];
+    return {
+      actionId: best.actionId,
+      strength: best.probability,
+      path: best.path,
+    };
+  }
+
+  /**
+   * Reset all habit data. Called on new game.
+   */
+  function reset() {
+    trainingData = [];
+    trees = {};
+    lastTimeFor = {};
+    lastWakeTime = 0;
+    lastActionId = '';
+    examplesSinceTrain = 0;
+  }
+
+  return {
+    extractFeatures,
+    addExample,
+    noteWake,
+    shouldRetrain,
+    train,
+    predictHabit,
+    reset,
+  };
+})();

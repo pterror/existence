@@ -14,6 +14,7 @@ js/
   runs.js       # IndexedDB storage layer for multi-run support
   timeline.js   # Seeded PRNG (xoshiro128**), dual streams, action log, delegates save to Runs
   events.js     # In-memory event history (record/query semantic events, reconstructed during replay)
+  habits.js     # CART decision tree engine, feature extraction, habit training + prediction
   state.js      # Hidden state engine: energy, money, stress, hunger, time, social, job_standing
   character.js  # Character schema, Character.get() accessor, applyToState()
   world.js      # Location graph, movement with time cost, event triggers
@@ -96,6 +97,8 @@ No build step. Plain JS loaded via script tags.
 **Characters have histories.** Financial position, personality, sentiments, relationships — all are consequences of a generated life history. The chargen backstory produces broad strokes (cheap PRNG); post-finalization simulation produces exact numbers (runs once). As more systems are built (family, health, identity), they feed into the history and replace approximations with derived values.
 
 **Money is derived, not primary.** The checking balance is a surface over economic flows: income from employment, obligations from housing/bills, spending from player choices, starting position from life history. Financial anxiety is a sentiment that connects to the neurochemistry engine. The same dollar amount creates different experiences depending on the character's relationship with money.
+
+**Habits emerge from observed play.** The character develops behavioral momentum — habits are state→action associations learned from player behavior via CART decision trees, not prescribed sequences. Habits are ephemeral (derived from the action log each session, no save format changes) and consume no RNG. Routine comfort/irritation sentiments modulate formation threshold. Medium-strength habits surface as suggested defaults (subtle visual distinction). Auto-advance and prose modulation are deferred. See DESIGN-HABITS.md for the full design.
 
 ## Code Conventions
 

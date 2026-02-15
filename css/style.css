@@ -125,6 +125,10 @@ body {
   display: inline;
 }
 
+.action--suggested {
+  color: #9a9088;
+}
+
 /* Movement — separate from actions, quieter */
 
 #movement {

@@ -285,5 +285,20 @@ Dual PRNG streams (charRng for chargen, rng for gameplay) derived from master se
 ### In-Game Look-Back
 Replay scrubber with significance heatmap. Scene segmentation (by movement). Snapshot system for fast seeking. Autoplay with variable speed. Keyboard navigation (arrows, ctrl+arrows, space).
 
+### Habit System (Phase 1)
+CART decision tree engine learns action patterns from observed play. No RNG consumed — pure state reads + ML. Ephemeral — trained from the action log each session, no save format changes.
+
+**Feature extraction:** ~34 features from current game state — energy/stress/hunger/social (continuous), key NT levels (serotonin, dopamine, NE, GABA, adenosine, cortisol), qualitative tiers and mood tone (categorical), daily flags (dressed, showered, ate, etc.), location, weather, sentiments (work dread, routine comfort), money, phone state, time since wake, last action.
+
+**Training:** One-vs-rest binary trees per action. Recency-weighted (exponential decay, half-life ~7 in-game days). Trained after replay on session load, retrained every 10 actions during live play. Minimum 20 total examples + 3 positive per action to build a tree. Max depth 5.
+
+**Prediction:** For each available action, run its tree on current features. Highest probability above threshold (0.5, modulated by routine sentiment) = suggestion. Competing habits (top two within 0.1) → no suggestion. Movement included in training data (`move:destination`) but not surfaced in UI predictions yet.
+
+**UI:** Suggested default action gets `action--suggested` CSS class — subtly brighter text color. No label, no system voice. The player notices one option feels "closer."
+
+**Character influence:** Routine comfort sentiment lowers habit threshold (habits form easier). Routine irritation raises it (habits resist forming).
+
+**Deferred:** Auto-advance (high-strength habits firing automatically), prose modulation (habit strength → prose density), decision path → prose motivation, routine sentiment activation from habit consistency.
+
 ### UI
 Fade transitions on all text changes. Awareness bar (time + money, clickable to focus). Idle timer (30s → 60s → silent). Phone buzz on new messages. Tab-visibility-aware.

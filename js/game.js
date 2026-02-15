@@ -52,6 +52,7 @@ const Game = (() => {
     State.init();
     Character.applyToState();
     Events.init();
+    Habits.reset();
 
     // Consume same initial RNG as fresh start (opening events + messages)
     const initEvents = World.checkEvents();
@@ -86,6 +87,7 @@ const Game = (() => {
 
   function startFresh() {
     Timeline.init();
+    Habits.reset();
 
     // Initialize UI early (chargen uses the same DOM)
     UI.init({
@@ -832,15 +834,19 @@ const Game = (() => {
     let lastIdleThought;
     for (const entry of actions) {
       const action = entry.action;
+
+      // Snapshot features before action for habit training
+      const habitFeatures = Habits.extractFeatures();
+
       if (action.type === 'interact') {
         replayInteraction(action.id);
-        // Consume the same RNG calls as live play:
-        // checkEvents + event text functions
         consumeEvents();
-        lastIdleThought = undefined; // player acted, clear stale idle
+        Habits.addExample(habitFeatures, action.id);
+        lastIdleThought = undefined;
       } else if (action.type === 'move') {
         replayMove(action.destination);
         consumeEvents();
+        Habits.addExample(habitFeatures, 'move:' + action.destination);
         lastIdleThought = undefined;
       } else if (action.type === 'idle') {
         lastIdleThought = replayIdle();
@@ -850,6 +856,10 @@ const Game = (() => {
         State.observeMoney();
       }
     }
+
+    // Train habit trees from replay data
+    Habits.train();
+
     return { lastIdleThought };
   }
 
@@ -961,11 +971,18 @@ const Game = (() => {
   function handleAction(interaction) {
     if (isReplaying) return;
 
+    // Snapshot features before action for habit training
+    const habitFeatures = Habits.extractFeatures();
+
     // Record the action
     Timeline.recordAction({ type: 'interact', id: interaction.id });
 
     // Execute and get prose response
     const responseText = interaction.execute();
+
+    // Record training example and retrain periodically
+    Habits.addExample(habitFeatures, interaction.id);
+    if (Habits.shouldRetrain()) Habits.train();
 
     // Check for events after action
     const events = World.checkEvents();
@@ -1002,7 +1019,8 @@ const Game = (() => {
     // Re-render actions and movement after a beat
     setTimeout(() => {
       const interactions = Content.getAvailableInteractions();
-      UI.showActions(interactions);
+      const prediction = Habits.predictHabit(interactions.map(i => i.id));
+      UI.showActions(interactions, prediction);
 
       if (State.get('viewing_phone')) {
         UI.showMovement([]);
@@ -1017,6 +1035,9 @@ const Game = (() => {
   function handleMove(destId) {
     if (isReplaying) return;
     if (!World.canTravel(destId)) return;
+
+    // Snapshot features before move for habit training
+    const habitFeatures = Habits.extractFeatures();
 
     // Record the action
     Timeline.recordAction({ type: 'move', destination: destId });
@@ -1043,6 +1064,10 @@ const Game = (() => {
     if (msgArrived && !State.get('phone_silent') && !State.get('viewing_phone')) {
       eventTexts.push('Your phone buzzes.');
     }
+
+    // Record training example and retrain periodically
+    Habits.addExample(habitFeatures, 'move:' + destId);
+    if (Habits.shouldRetrain()) Habits.train();
 
     // Apply focus triggers
     applyMoveFocusTriggers(travel.to);

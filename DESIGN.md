@@ -854,6 +854,18 @@ Not all trauma is dramatic. Some is quiet — the friend who stopped calling, th
 
 Trauma interacts with everything: it shapes narration voice, it modifies available interactions, it affects how relationships feel, it changes what the phone means, it makes certain moments heavier than others. It's not separate from mood or personality — it's underneath them.
 
+### Habits
+
+> Full design: see [DESIGN-HABITS.md](DESIGN-HABITS.md).
+
+The character has habits. The character acts. The player interrupts.
+
+Every day: wake, dress, shower, eat, commute, work, commute, eat, sleep. Clicking the same actions in the same order isn't constrained agency — it's data entry. The answer isn't skipping the routine (that removes the experience) or shortcut buttons (that dodges the problem). The answer is that the character is a person who develops habits, and habits are actions that happen without deciding.
+
+A habit isn't a sequence — it's an association: in this context, I do this thing. Each habit is independent. The system discovers which features of the game state matter from observed play patterns, using CART decision trees trained on (state snapshot, action taken) pairs. No configuration, no declaring routines.
+
+Habit strength is a gradient: low (game notices patterns), medium (suggested default action), high (character acts, player interrupts). Routine comfort/irritation sentiments modulate formation rate. The system is ephemeral — derived from the action log each session, consuming no RNG.
+
 ## Weather
 
 Weather is atmosphere, not a system. It changes slowly (3% chance per action). It affects prose tone — overcast days read differently than clear ones. Rain changes what the street feels like. Weather doesn't gate actions or cause mechanical effects. It's just there, like weather.

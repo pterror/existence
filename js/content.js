@@ -974,6 +974,7 @@ const Content = (() => {
 
         // Reset wake-period flags
         State.wakeUp();
+        Habits.noteWake();
 
         // Record events
         const quality = qualityMult >= 0.9 ? 'good' : qualityMult >= 0.6 ? 'restless' : 'poor';

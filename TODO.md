@@ -41,6 +41,15 @@ Full emotional architecture designed in [DESIGN-EMOTIONS.md](DESIGN-EMOTIONS.md)
 
 **Neurochemistry incompleteness:** 28 of ~76+ human hormones modeled. See [REFERENCE-HORMONES.md](REFERENCE-HORMONES.md). Missing: CRH, ACTH, GnRH, aldosterone, estrone, estriol, androstenedione, NPY, substance P, orexins, CCK, enkephalin, adrenaline, and others. Add as their relevant game systems are built.
 
+### Habit system
+Full design in [DESIGN-HABITS.md](DESIGN-HABITS.md). The character develops behavioral momentum from observed play patterns. Implementation path:
+1. ~~**Decision tree engine + feature extraction + training + prediction**~~ — **IMPLEMENTED.** CART decision trees learn action patterns from ~34 features. One-vs-rest binary trees per action. Recency-weighted training. Trained after replay, retrained every 10 actions.
+2. ~~**Suggested defaults**~~ — **IMPLEMENTED.** Medium-strength habit predictions (>0.5, modulated by routine sentiment) surface as subtle visual distinction on action buttons. Competing habits suppress suggestion.
+3. **Auto-advance** — high-strength habits fire automatically. Needs UI paradigm for interruption, careful prose design.
+4. **Prose modulation** — habit strength modulates prose density (high habit → terse, low habit → full). Needs content variants.
+5. **Decision path → prose motivation** — tree path tells prose system WHY the habit fired (morning routine vs hygiene need). Needs auto-advance prose system.
+6. **Routine sentiment activation** — overall habit consistency feeds routine comfort/irritation NT targets.
+
 ### Social initiation
 Currently friends only send messages to you. No way to text back, call, or initiate contact. Relationships are one-directional. DESIGN.md describes friends who respond differently to your withdrawal and engagement.
 

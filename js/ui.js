@@ -134,8 +134,8 @@ const UI = (() => {
 
   // --- Actions ---
 
-  /** @param {Interaction[]} interactions */
-  function showActions(interactions) {
+  /** @param {Interaction[]} interactions @param {{ actionId: string, strength: number } | null} [prediction] */
+  function showActions(interactions, prediction) {
     actionsEl.innerHTML = '';
     actionsEl.classList.remove('visible');
 
@@ -147,6 +147,9 @@ const UI = (() => {
     for (const interaction of interactions) {
       const btn = document.createElement('button');
       btn.className = 'action';
+      if (prediction && prediction.actionId === interaction.id) {
+        btn.classList.add('action--suggested');
+      }
       btn.textContent = interaction.label;
       btn.addEventListener('click', () => {
         if (onAction) onAction(interaction);
@@ -231,7 +234,8 @@ const UI = (() => {
     showPassage(description);
 
     const interactions = Content.getAvailableInteractions();
-    showActions(interactions);
+    const prediction = Habits.predictHabit(interactions.map(i => i.id));
+    showActions(interactions, prediction);
 
     const connections = World.getConnections();
     showMovement(connections);
