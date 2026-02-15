@@ -55,7 +55,18 @@ const Habits = (() => {
 
   // --- Training data ---
 
-  /** @type {{ features: Record<string, number|string|boolean>, action: string, time: number }[]} */
+  // Source weighting: actions the player chose independently are full weight.
+  // Actions that matched a visible suggestion are downweighted — the player
+  // *might* have chosen them anyway, but the suggestion biases the evidence.
+  // Without this, the system trains on its own suggestions and snowballs
+  // into manufacturing the predictability it's trying to detect.
+  const SOURCE_WEIGHT = {
+    player: 1.0,     // player chose from undifferentiated list
+    suggested: 0.5,  // player confirmed a visible suggestion
+    auto: 0.1,       // auto-advance fired and player didn't interrupt (future)
+  };
+
+  /** @type {{ features: Record<string, number|string|boolean>, action: string, time: number, source: string }[]} */
   let trainingData = [];
 
   /** @type {Record<string, any>} */
@@ -72,6 +83,9 @@ const Habits = (() => {
 
   /** @type {number} */
   let examplesSinceTrain = 0;
+
+  /** @type {string | null} */
+  let lastPredictionId = null;
 
   // --- Feature extraction ---
 
@@ -120,14 +134,19 @@ const Habits = (() => {
 
   /**
    * Record a training example: features snapshot + chosen action.
+   * Source is determined automatically: if the action matches the last
+   * visible prediction, it's 'suggested' (downweighted during training).
+   * Otherwise it's 'player' (full weight).
    * @param {Record<string, number|string|boolean>} features
    * @param {string} actionId
    */
   function addExample(features, actionId) {
     const time = State.get('time');
-    trainingData.push({ features, action: actionId, time });
+    const source = (lastPredictionId && actionId === lastPredictionId) ? 'suggested' : 'player';
+    trainingData.push({ features, action: actionId, time, source });
     lastTimeFor[actionId] = time;
     lastActionId = actionId;
+    lastPredictionId = null; // consumed — next action starts clean
     examplesSinceTrain++;
   }
 
@@ -384,12 +403,17 @@ const Habits = (() => {
       return;
     }
 
-    // Compute recency weights: exponential decay with half-life ~7 in-game days
+    // Compute weights: recency (exponential decay) * source (player vs suggested)
+    // Recency: half-life ~7 in-game days
+    // Source: actions matching a visible suggestion are downweighted to prevent
+    // the system from training on its own predictions and snowballing
     const halfLifeMinutes = 7 * 1440;
     const latestTime = trainingData[trainingData.length - 1].time;
     const weights = trainingData.map(ex => {
       const age = latestTime - ex.time;
-      return Math.pow(2, -age / halfLifeMinutes);
+      const recency = Math.pow(2, -age / halfLifeMinutes);
+      const sourceW = SOURCE_WEIGHT[ex.source] ?? 1.0;
+      return recency * sourceW;
     });
 
     // Count per-action occurrences
@@ -431,7 +455,9 @@ const Habits = (() => {
     const routineIrritation = State.sentimentIntensity('routine', 'irritation');
     // Comfort lowers threshold (habits form easier), irritation raises it
     const thresholdAdjust = -routineComfort * 0.1 + routineIrritation * 0.1;
-    const mediumThreshold = 0.5 + thresholdAdjust;
+    // Base 0.6 (not 0.5) — a weak habit shouldn't look like a habit.
+    // Borderline predictions stay quiet. Only clear patterns surface.
+    const mediumThreshold = 0.6 + thresholdAdjust;
 
     /** @type {{ actionId: string, probability: number, path: string[] }[]} */
     const candidates = [];
@@ -446,7 +472,10 @@ const Habits = (() => {
       }
     }
 
-    if (candidates.length === 0) return null;
+    if (candidates.length === 0) {
+      lastPredictionId = null;
+      return null;
+    }
 
     // Sort by probability descending
     candidates.sort((a, b) => b.probability - a.probability);
@@ -454,10 +483,15 @@ const Habits = (() => {
     // Check for competing habits — if top two are close, no suggestion
     if (candidates.length >= 2) {
       const gap = candidates[0].probability - candidates[1].probability;
-      if (gap < 0.1) return null; // competing habits
+      if (gap < 0.1) {
+        lastPredictionId = null;
+        return null; // competing habits
+      }
     }
 
     const best = candidates[0];
+    // Record what we predicted so addExample can detect suggestion-following
+    lastPredictionId = best.actionId;
     return {
       actionId: best.actionId,
       strength: best.probability,
@@ -475,6 +509,7 @@ const Habits = (() => {
     lastWakeTime = 0;
     lastActionId = '';
     examplesSinceTrain = 0;
+    lastPredictionId = null;
   }
 
   return {

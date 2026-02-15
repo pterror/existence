@@ -298,6 +298,8 @@ CART decision tree engine learns action patterns from observed play. No RNG cons
 
 **Character influence:** Routine comfort sentiment lowers habit threshold (habits form easier). Routine irritation raises it (habits resist forming).
 
+**Anti-snowball:** Training examples carry source tags — `'player'` (weight 1.0) when the action didn't match a visible suggestion, `'suggested'` (weight 0.5) when it did, `'auto'` (weight 0.1, for future auto-advance). Prevents the system from training on its own predictions and manufacturing the predictability it's trying to detect. Base prediction threshold is 0.6 (not 0.5) — borderline predictions stay quiet.
+
 **Deferred:** Auto-advance (high-strength habits firing automatically), prose modulation (habit strength → prose density), decision path → prose motivation, routine sentiment activation from habit consistency.
 
 ### UI

@@ -98,7 +98,9 @@ No build step. Plain JS loaded via script tags.
 
 **Money is derived, not primary.** The checking balance is a surface over economic flows: income from employment, obligations from housing/bills, spending from player choices, starting position from life history. Financial anxiety is a sentiment that connects to the neurochemistry engine. The same dollar amount creates different experiences depending on the character's relationship with money.
 
-**Habits emerge from observed play.** The character develops behavioral momentum — habits are state→action associations learned from player behavior via CART decision trees, not prescribed sequences. Habits are ephemeral (derived from the action log each session, no save format changes) and consume no RNG. Routine comfort/irritation sentiments modulate formation threshold. Medium-strength habits surface as suggested defaults (subtle visual distinction). Auto-advance and prose modulation are deferred. See DESIGN-HABITS.md for the full design.
+**Habits emerge from observed play.** The character develops behavioral momentum — habits are state→action associations learned from player behavior via CART decision trees, not prescribed sequences. Habits are ephemeral (derived from the action log each session, no save format changes) and consume no RNG. Routine comfort/irritation sentiments modulate formation threshold. Medium-strength habits surface as suggested defaults (subtle visual distinction, threshold 0.6 not 0.5). Auto-advance and prose modulation are deferred. See DESIGN-HABITS.md for the full design.
+
+**Habits don't train on their own suggestions.** Each training example carries a source tag: `'player'` (full weight 1.0) when the action didn't match a visible suggestion, `'suggested'` (weight 0.5) when it did, `'auto'` (weight 0.1) for future auto-advance actions. Without this, the system snowballs — suggesting an action makes the player more likely to pick it, which makes the system more confident, which makes it suggest harder. Source-weighted training keeps habit strength grounded in genuine player preference.
 
 ## Code Conventions
 
