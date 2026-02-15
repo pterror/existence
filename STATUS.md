@@ -285,22 +285,32 @@ Dual PRNG streams (charRng for chargen, rng for gameplay) derived from master se
 ### In-Game Look-Back
 Replay scrubber with significance heatmap. Scene segmentation (by movement). Snapshot system for fast seeking. Autoplay with variable speed. Keyboard navigation (arrows, ctrl+arrows, space).
 
-### Habit System (Phase 1)
+### Habit System (Phase 1 + Auto-Advance)
 CART decision tree engine learns action patterns from observed play. No RNG consumed — pure state reads + ML. Ephemeral — trained from the action log each session, no save format changes.
 
 **Feature extraction:** ~34 features from current game state — energy/stress/hunger/social (continuous), key NT levels (serotonin, dopamine, NE, GABA, adenosine, cortisol), qualitative tiers and mood tone (categorical), daily flags (dressed, showered, ate, etc.), location, weather, sentiments (work dread, routine comfort), money, phone state, time since wake, last action.
 
 **Training:** One-vs-rest binary trees per action. Recency-weighted (exponential decay, half-life ~7 in-game days). Trained after replay on session load, retrained every 10 actions during live play. Minimum 20 total examples + 3 positive per action to build a tree. Max depth 5.
 
-**Prediction:** For each available action, run its tree on current features. Highest probability above threshold (0.5, modulated by routine sentiment) = suggestion. Competing habits (top two within 0.1) → no suggestion. Movement included in training data (`move:destination`) but not surfaced in UI predictions yet.
+**Prediction tiers:** For each available action (interactions + movement), run its tree on current features. Two thresholds, both modulated by routine sentiment:
+- `>= 0.6` (suggested) — subtly brighter text, the player notices one option feels "closer"
+- `>= 0.75` (auto) — character acts on their own after a delay
 
-**UI:** Suggested default action gets `action--suggested` CSS class — subtly brighter text color. No label, no system voice. The player notices one option feels "closer."
+Competing habits (top two within 0.1) → no prediction. Movement predictions now surface in UI alongside interaction predictions.
 
-**Character influence:** Routine comfort sentiment lowers habit threshold (habits form easier). Routine irritation raises it (habits resist forming).
+**Auto-advance:** When prediction reaches auto tier, the system shows approaching prose (deterministic, no RNG — mood-toned text like "Clothes." or "You're reaching for your clothes before you've thought about it."), highlights the predicted action with `action--auto` / `movement-link--auto` CSS class, and starts a 2500ms timer. After the delay, the action fires automatically. The player can click any action at any point to interrupt. Auto-advance chains naturally: each auto-fired action re-renders, re-predicts, and chains if the next prediction is also auto-tier. Morning routines flow: get_dressed → shower → eat_food → move:street without the player clicking.
 
-**Anti-snowball:** Training examples carry source tags — `'player'` (weight 1.0) when the action didn't match a visible suggestion, `'suggested'` (weight 0.5) when it did, `'auto'` (weight 0.1, for future auto-advance). Prevents the system from training on its own predictions and manufacturing the predictability it's trying to detect. Base prediction threshold is 0.6 (not 0.5) — borderline predictions stay quiet.
+**Approaching prose:** 30 interaction + 7 movement connection prose functions in `Content.approachingProse`. All deterministic (moodTone + NT conditionals, no RNG consumed). Terse at neutral mood ("Shower."), body-aware when stressed ("Water. You need the water."), colored when low ("The bathroom. Automatic.").
 
-**Deferred:** Auto-advance (high-strength habits firing automatically), prose modulation (habit strength → prose density), decision path → prose motivation, routine sentiment activation from habit consistency.
+**UI classes:** `action--suggested` (medium), `action--auto` (brighter — the character is committed), `movement-link--suggested`, `movement-link--auto`.
+
+**Character influence:** Routine comfort sentiment lowers both thresholds (habits form easier). Routine irritation raises them (habits resist forming).
+
+**Anti-snowball:** Training examples carry source tags — `'player'` (weight 1.0) when the action didn't match a visible prediction, `'suggested'` (weight 0.5) when it matched a suggestion, `'auto'` (weight 0.1) when auto-advance fired. Prevents the system from training on its own predictions and manufacturing the predictability it's trying to detect. Base prediction threshold is 0.6 (not 0.5) — borderline predictions stay quiet.
+
+**Phone mode:** Auto-advance is suppressed while viewing phone — phone interactions are a focused mode.
+
+**Deferred:** Prose modulation (habit strength → prose density), decision path → prose motivation, routine sentiment activation from habit consistency.
 
 ### UI
 Fade transitions on all text changes. Awareness bar (time + money, clickable to focus). Idle timer (30s → 60s → silent). Phone buzz on new messages. Tab-visibility-aware.

@@ -4,6 +4,68 @@ const Game = (() => {
 
   let isReplaying = false;
 
+  // --- Auto-advance state ---
+  /** @type {ReturnType<typeof setTimeout> | null} */
+  let autoAdvanceTimer = null;
+  /** @type {{ type: 'interact' | 'move', id: string, interaction?: Interaction } | null} */
+  let autoAdvanceTarget = null;
+  /** @type {string | null} */
+  let nextActionSource = null;
+
+  const AUTO_DELAY = 2500; // ms before auto-advance fires
+
+  function cancelAutoAdvance() {
+    if (autoAdvanceTimer) {
+      clearTimeout(autoAdvanceTimer);
+      autoAdvanceTimer = null;
+      autoAdvanceTarget = null;
+    }
+  }
+
+  /**
+   * Attempt auto-advance based on habit prediction.
+   * Shows approaching prose, highlights the predicted action, and starts a timer.
+   * @param {{ actionId: string, strength: number, tier: string, path: string[] } | null} prediction
+   * @param {Interaction[]} interactions
+   * @param {ConnectionInfo[]} connections
+   */
+  function tryAutoAdvance(prediction, interactions, connections) {
+    if (!prediction || prediction.tier !== 'auto') return;
+    if (State.get('viewing_phone')) return;
+
+    const actionId = prediction.actionId;
+
+    // Look up approaching prose
+    const proseFn = Content.approachingProse[actionId];
+    if (!proseFn) return;
+
+    const prose = proseFn();
+    if (prose) {
+      UI.appendEventText(prose);
+    }
+
+    if (actionId.startsWith('move:')) {
+      const destId = actionId.slice(5);
+      autoAdvanceTarget = { type: 'move', id: destId };
+      autoAdvanceTimer = setTimeout(() => {
+        autoAdvanceTimer = null;
+        autoAdvanceTarget = null;
+        nextActionSource = 'auto';
+        handleMove(destId);
+      }, AUTO_DELAY);
+    } else {
+      const interaction = interactions.find(i => i.id === actionId);
+      if (!interaction) return;
+      autoAdvanceTarget = { type: 'interact', id: actionId, interaction };
+      autoAdvanceTimer = setTimeout(() => {
+        autoAdvanceTimer = null;
+        autoAdvanceTarget = null;
+        nextActionSource = 'auto';
+        handleAction(interaction);
+      }, AUTO_DELAY);
+    }
+  }
+
   /** @param {string[]} events @param {string[]} eventTexts */
   function generateEventTexts(events, eventTexts) {
     for (const eventId of events) {
@@ -792,6 +854,7 @@ const Game = (() => {
   }
 
   async function handleLookBack() {
+    cancelAutoAdvance();
     Runs.flush();
     const activeId = Timeline.getActiveRunId();
     if (!activeId) return;
@@ -803,6 +866,7 @@ const Game = (() => {
   }
 
   async function handleStepAway() {
+    cancelAutoAdvance();
     // Flush any pending save
     Runs.flush();
     await Runs.setActiveRunId(null);
@@ -970,6 +1034,7 @@ const Game = (() => {
   /** @param {Interaction} interaction */
   function handleAction(interaction) {
     if (isReplaying) return;
+    cancelAutoAdvance();
 
     // Snapshot features before action for habit training
     const habitFeatures = Habits.extractFeatures();
@@ -980,8 +1045,9 @@ const Game = (() => {
     // Execute and get prose response
     const responseText = interaction.execute();
 
-    // Record training example and retrain periodically
-    Habits.addExample(habitFeatures, interaction.id);
+    // Record training example with source tag and retrain periodically
+    Habits.addExample(habitFeatures, interaction.id, nextActionSource || undefined);
+    nextActionSource = null;
     if (Habits.shouldRetrain()) Habits.train();
 
     // Check for events after action
@@ -1016,24 +1082,26 @@ const Game = (() => {
       }
     }
 
-    // Re-render actions and movement after a beat
+    // Re-render actions and movement after a beat, then check auto-advance
     setTimeout(() => {
       const interactions = Content.getAvailableInteractions();
-      const prediction = Habits.predictHabit(interactions.map(i => i.id));
+      const connections = State.get('viewing_phone') ? [] : World.getConnections();
+      const allIds = [
+        ...interactions.map(i => i.id),
+        ...connections.map(c => 'move:' + c.id),
+      ];
+      const prediction = Habits.predictHabit(allIds);
       UI.showActions(interactions, prediction);
+      UI.showMovement(connections, prediction);
 
-      if (State.get('viewing_phone')) {
-        UI.showMovement([]);
-      } else {
-        const connections = World.getConnections();
-        UI.showMovement(connections);
-      }
+      tryAutoAdvance(prediction, interactions, connections);
     }, 800);
   }
 
   /** @param {string} destId */
   function handleMove(destId) {
     if (isReplaying) return;
+    cancelAutoAdvance();
     if (!World.canTravel(destId)) return;
 
     // Snapshot features before move for habit training
@@ -1065,8 +1133,9 @@ const Game = (() => {
       eventTexts.push('Your phone buzzes.');
     }
 
-    // Record training example and retrain periodically
-    Habits.addExample(habitFeatures, 'move:' + destId);
+    // Record training example with source tag and retrain periodically
+    Habits.addExample(habitFeatures, 'move:' + destId, nextActionSource || undefined);
+    nextActionSource = null;
     if (Habits.shouldRetrain()) Habits.train();
 
     // Apply focus triggers
@@ -1075,12 +1144,27 @@ const Game = (() => {
     UI.updateAwareness();
 
     if (transText && transText.trim()) {
-      // Show transition, then location
+      // Show transition, then location + auto-advance check
       UI.showPassage(transText);
 
       setTimeout(() => {
-        UI.render();
+        // Explicit render steps (not UI.render()) so we can check auto-advance
+        const location = World.getLocationId();
+        const descFn = /** @type {Record<string, (() => string) | undefined>} */ (Content.locationDescriptions)[location];
+        UI.showPassage(descFn ? descFn() : '');
+
+        const interactions = Content.getAvailableInteractions();
+        const connections = World.getConnections();
+        const allIds = [
+          ...interactions.map(i => i.id),
+          ...connections.map(c => 'move:' + c.id),
+        ];
+        const prediction = Habits.predictHabit(allIds);
+        UI.showActions(interactions, prediction);
+        UI.showMovement(connections, prediction);
         UI.updateAwareness();
+
+        tryAutoAdvance(prediction, interactions, connections);
 
         if (eventTexts.length > 0) {
           let delay = 1000;
@@ -1092,9 +1176,23 @@ const Game = (() => {
         }
       }, 1500);
     } else {
-      // No transition text — go straight to location
-      UI.render();
+      // No transition text — render location + auto-advance check
+      const location = World.getLocationId();
+      const descFn = /** @type {Record<string, (() => string) | undefined>} */ (Content.locationDescriptions)[location];
+      UI.showPassage(descFn ? descFn() : '');
+
+      const interactions = Content.getAvailableInteractions();
+      const connections = World.getConnections();
+      const allIds = [
+        ...interactions.map(i => i.id),
+        ...connections.map(c => 'move:' + c.id),
+      ];
+      const prediction = Habits.predictHabit(allIds);
+      UI.showActions(interactions, prediction);
+      UI.showMovement(connections, prediction);
       UI.updateAwareness();
+
+      tryAutoAdvance(prediction, interactions, connections);
 
       if (eventTexts.length > 0) {
         let delay = 800;

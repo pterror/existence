@@ -3125,6 +3125,265 @@ const Content = (() => {
     recentIdle.length = 0;
   }
 
+  // --- Approaching prose ---
+  // Shown during auto-advance: the character is about to act on habit.
+  // CRITICAL: No RNG consumed. All selection is deterministic — moodTone()
+  // and NT conditionals only. This fires before handleAction/handleMove,
+  // so consuming RNG would desync replay.
+
+  /** @type {Record<string, () => string>} */
+  const approachingProse = {
+
+    // === BEDROOM ===
+
+    sleep: () => {
+      const mood = State.moodTone();
+      const aden = State.get('adenosine');
+      if (aden > 80) return 'Your body is already deciding.';
+      if (mood === 'numb' || mood === 'heavy') return 'The bed. You\'re moving toward it before you\'ve thought about it.';
+      if (mood === 'fraying') return 'You need to lie down. You need to stop.';
+      return 'Bed.';
+    },
+
+    get_dressed: () => {
+      const mood = State.moodTone();
+      if (mood === 'numb' || mood === 'heavy') return 'You\'re reaching for your clothes before you\'ve thought about it.';
+      if (mood === 'fraying') return 'Your hands find your clothes.';
+      return 'Clothes.';
+    },
+
+    set_alarm: () => {
+      const mood = State.moodTone();
+      if (mood === 'heavy' || mood === 'numb') return 'The alarm. A number for tomorrow.';
+      return 'Alarm.';
+    },
+
+    skip_alarm: () => {
+      return 'No alarm.';
+    },
+
+    charge_phone: () => {
+      return 'The charger.';
+    },
+
+    check_phone_bedroom: () => {
+      const mood = State.moodTone();
+      const cortisol = State.get('cortisol');
+      if (cortisol > 60) return 'Your hand is already on your phone.';
+      if (mood === 'numb') return 'Phone. Screen. Light in the dark.';
+      return 'Your phone.';
+    },
+
+    lie_there: () => {
+      const mood = State.moodTone();
+      const aden = State.get('adenosine');
+      if (aden > 60) return 'You\'re not getting up yet.';
+      if (mood === 'heavy') return 'You stay. The ceiling stays.';
+      if (mood === 'numb') return 'Nothing to get up for. Not yet.';
+      return 'A few more minutes.';
+    },
+
+    look_out_window: () => {
+      const mood = State.moodTone();
+      if (mood === 'hollow') return 'The window. Something outside.';
+      return 'The window.';
+    },
+
+    // === KITCHEN ===
+
+    eat_food: () => {
+      const mood = State.moodTone();
+      const hunger = State.get('hunger');
+      if (hunger > 70) return 'You need to eat something.';
+      if (mood === 'numb') return 'You open the fridge. Standing there.';
+      if (mood === 'heavy') return 'Something from the fridge. Whatever\'s there.';
+      return 'Something from the fridge.';
+    },
+
+    drink_water: () => {
+      const aden = State.get('adenosine');
+      if (aden > 60) return 'Water. Your mouth is dry.';
+      return 'Water.';
+    },
+
+    do_dishes: () => {
+      const mood = State.moodTone();
+      if (mood === 'heavy') return 'The dishes. They\'re still there.';
+      return 'The dishes.';
+    },
+
+    check_phone_kitchen: () => {
+      const mood = State.moodTone();
+      if (mood === 'fraying') return 'Your hand finds your phone again.';
+      return 'Your phone.';
+    },
+
+    sit_at_table: () => {
+      const mood = State.moodTone();
+      if (mood === 'numb' || mood === 'heavy') return 'The chair. You\'re sitting down before you meant to.';
+      if (mood === 'fraying') return 'You sit. Your body made the decision.';
+      return 'The table.';
+    },
+
+    // === BATHROOM ===
+
+    shower: () => {
+      const mood = State.moodTone();
+      if (mood === 'numb') return 'The bathroom. Automatic.';
+      if (mood === 'fraying') return 'Water. You need the water.';
+      if (mood === 'heavy') return 'Shower. Going through the motions.';
+      return 'Shower.';
+    },
+
+    use_sink: () => {
+      return 'The sink.';
+    },
+
+    // === STREET ===
+
+    check_phone_street: () => {
+      return 'Your phone, out of your pocket.';
+    },
+
+    sit_on_step: () => {
+      const mood = State.moodTone();
+      if (mood === 'heavy' || mood === 'numb') return 'You\'re stopping. Sitting.';
+      return 'The step.';
+    },
+
+    go_for_walk: () => {
+      const mood = State.moodTone();
+      const ne = State.get('norepinephrine');
+      if (ne > 60) return 'Moving. You need to be moving.';
+      if (mood === 'heavy') return 'Walking. Not going anywhere, just walking.';
+      return 'A walk.';
+    },
+
+    // === BUS STOP ===
+
+    wait_for_bus: () => {
+      const mood = State.moodTone();
+      if (mood === 'numb') return 'You stand there. The bus will come.';
+      return 'Waiting.';
+    },
+
+    // === WORKPLACE ===
+
+    do_work: () => {
+      const mood = State.moodTone();
+      const dopa = State.get('dopamine');
+      if (dopa < 30) return 'The screen. The work. You\'re starting before you\'re ready.';
+      if (mood === 'flat') return 'Work.';
+      return 'Back to it.';
+    },
+
+    work_break: () => {
+      const mood = State.moodTone();
+      const cortisol = State.get('cortisol');
+      if (cortisol > 55) return 'You need a minute. You\'re taking a minute.';
+      if (mood === 'heavy') return 'A break. Whether it helps or not.';
+      return 'A break.';
+    },
+
+    talk_to_coworker: () => {
+      const mood = State.moodTone();
+      if (mood === 'hollow' || mood === 'numb') return 'Someone\'s there. You\'re turning toward them.';
+      return 'A word with someone.';
+    },
+
+    check_phone_work: () => {
+      return 'Your phone, under the desk.';
+    },
+
+    // === CORNER STORE ===
+
+    buy_groceries: () => {
+      const mood = State.moodTone();
+      if (mood === 'heavy') return 'Groceries. Whatever\'s cheap.';
+      return 'Groceries.';
+    },
+
+    buy_cheap_meal: () => {
+      const hunger = State.get('hunger');
+      if (hunger > 70) return 'Something quick. You\'re hungry.';
+      return 'Something to eat.';
+    },
+
+    browse_store: () => {
+      return 'Looking around.';
+    },
+
+    // === PHONE MODE ===
+
+    read_messages: () => {
+      const mood = State.moodTone();
+      if (mood === 'hollow') return 'The messages. Someone wrote to you.';
+      return 'Messages.';
+    },
+
+    toggle_phone_silent: () => {
+      return State.get('phone_silent') ? 'Sound on.' : 'Silent.';
+    },
+
+    put_phone_away: () => {
+      return 'Phone away.';
+    },
+
+    // === ANYWHERE ===
+
+    call_in: () => {
+      const mood = State.moodTone();
+      if (mood === 'heavy' || mood === 'numb') return 'You\'re not going in. You\'re already not going in.';
+      if (mood === 'fraying') return 'You can\'t do it today. You\'re reaching for the phone.';
+      return 'Calling in.';
+    },
+
+    // === MOVEMENT ===
+
+    'move:apartment_kitchen': () => {
+      const mood = State.moodTone();
+      if (mood === 'heavy') return 'Kitchen. The steps happen.';
+      return 'Kitchen.';
+    },
+
+    'move:apartment_bathroom': () => {
+      return 'Bathroom.';
+    },
+
+    'move:apartment_bedroom': () => {
+      const mood = State.moodTone();
+      const aden = State.get('adenosine');
+      if (aden > 60) return 'Back to the bedroom. Back to the bed.';
+      if (mood === 'heavy') return 'The bedroom.';
+      return 'Bedroom.';
+    },
+
+    'move:street': () => {
+      const mood = State.moodTone();
+      if (mood === 'heavy') return 'Out. You\'re heading out.';
+      if (mood === 'fraying') return 'Door. Air. Outside.';
+      return 'Door.';
+    },
+
+    'move:bus_stop': () => {
+      const mood = State.moodTone();
+      if (mood === 'numb' || mood === 'heavy') return 'The bus stop. Your feet know the way.';
+      return 'Bus stop.';
+    },
+
+    'move:workplace': () => {
+      const mood = State.moodTone();
+      if (mood === 'heavy') return 'Work. The bus, the building, the desk. All of it coming.';
+      return 'Bus.';
+    },
+
+    'move:corner_store': () => {
+      const mood = State.moodTone();
+      if (mood === 'heavy') return 'The store. Walking there.';
+      return 'The store.';
+    },
+  };
+
   return {
     locationDescriptions,
     interactions,
@@ -3138,5 +3397,6 @@ const Content = (() => {
     getTimeSource,
     getMoneySource,
     resetIdleTracking,
+    approachingProse,
   };
 })();

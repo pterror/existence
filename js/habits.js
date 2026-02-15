@@ -63,8 +63,10 @@ const Habits = (() => {
   const SOURCE_WEIGHT = {
     player: 1.0,     // player chose from undifferentiated list
     suggested: 0.5,  // player confirmed a visible suggestion
-    auto: 0.1,       // auto-advance fired and player didn't interrupt (future)
+    auto: 0.1,       // auto-advance fired and player didn't interrupt
   };
+
+  const AUTO_THRESHOLD = 0.75;
 
   /** @type {{ features: Record<string, number|string|boolean>, action: string, time: number, source: string }[]} */
   let trainingData = [];
@@ -134,15 +136,17 @@ const Habits = (() => {
 
   /**
    * Record a training example: features snapshot + chosen action.
-   * Source is determined automatically: if the action matches the last
-   * visible prediction, it's 'suggested' (downweighted during training).
-   * Otherwise it's 'player' (full weight).
+   * Source is determined automatically unless overridden: if the action
+   * matches the last visible prediction, it's 'suggested' (downweighted).
+   * Otherwise it's 'player' (full weight). Pass 'auto' explicitly for
+   * auto-advance actions.
    * @param {Record<string, number|string|boolean>} features
    * @param {string} actionId
+   * @param {string} [sourceOverride]
    */
-  function addExample(features, actionId) {
+  function addExample(features, actionId, sourceOverride) {
     const time = State.get('time');
-    const source = (lastPredictionId && actionId === lastPredictionId) ? 'suggested' : 'player';
+    const source = sourceOverride || ((lastPredictionId && actionId === lastPredictionId) ? 'suggested' : 'player');
     trainingData.push({ features, action: actionId, time, source });
     lastTimeFor[actionId] = time;
     lastActionId = actionId;
@@ -442,7 +446,7 @@ const Habits = (() => {
   /**
    * Predict the most likely habitual action from available actions.
    * @param {string[]} availableActionIds
-   * @returns {{ actionId: string, strength: number, path: string[] } | null}
+   * @returns {{ actionId: string, strength: number, tier: 'auto' | 'suggested', path: string[] } | null}
    */
   function predictHabit(availableActionIds) {
     if (Object.keys(trees).length === 0) return null;
@@ -492,9 +496,11 @@ const Habits = (() => {
     const best = candidates[0];
     // Record what we predicted so addExample can detect suggestion-following
     lastPredictionId = best.actionId;
+    const autoThreshold = AUTO_THRESHOLD + thresholdAdjust;
     return {
       actionId: best.actionId,
       strength: best.probability,
+      tier: best.probability >= autoThreshold ? 'auto' : 'suggested',
       path: best.path,
     };
   }

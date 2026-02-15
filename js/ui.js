@@ -134,7 +134,7 @@ const UI = (() => {
 
   // --- Actions ---
 
-  /** @param {Interaction[]} interactions @param {{ actionId: string, strength: number } | null} [prediction] */
+  /** @param {Interaction[]} interactions @param {{ actionId: string, strength: number, tier: string } | null} [prediction] */
   function showActions(interactions, prediction) {
     actionsEl.innerHTML = '';
     actionsEl.classList.remove('visible');
@@ -148,7 +148,7 @@ const UI = (() => {
       const btn = document.createElement('button');
       btn.className = 'action';
       if (prediction && prediction.actionId === interaction.id) {
-        btn.classList.add('action--suggested');
+        btn.classList.add(prediction.tier === 'auto' ? 'action--auto' : 'action--suggested');
       }
       btn.textContent = interaction.label;
       btn.addEventListener('click', () => {
@@ -165,8 +165,8 @@ const UI = (() => {
 
   // --- Movement ---
 
-  /** @param {ConnectionInfo[]} connections */
-  function showMovement(connections) {
+  /** @param {ConnectionInfo[]} connections @param {{ actionId: string, strength: number, tier: string } | null} [prediction] */
+  function showMovement(connections, prediction) {
     movementEl.innerHTML = '';
     movementEl.classList.remove('visible');
 
@@ -177,6 +177,9 @@ const UI = (() => {
     for (const conn of connections) {
       const btn = document.createElement('button');
       btn.className = 'movement-link';
+      if (prediction && prediction.actionId === 'move:' + conn.id) {
+        btn.classList.add(prediction.tier === 'auto' ? 'movement-link--auto' : 'movement-link--suggested');
+      }
       btn.textContent = conn.name;
       btn.addEventListener('click', () => {
         if (onMove) onMove(conn.id);
@@ -234,11 +237,14 @@ const UI = (() => {
     showPassage(description);
 
     const interactions = Content.getAvailableInteractions();
-    const prediction = Habits.predictHabit(interactions.map(i => i.id));
-    showActions(interactions, prediction);
-
     const connections = World.getConnections();
-    showMovement(connections);
+    const allIds = [
+      ...interactions.map(i => i.id),
+      ...connections.map(c => 'move:' + c.id),
+    ];
+    const prediction = Habits.predictHabit(allIds);
+    showActions(interactions, prediction);
+    showMovement(connections, prediction);
   }
 
   // --- Awareness display ---
