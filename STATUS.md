@@ -302,7 +302,7 @@ Competing habits (top two within 0.1) → no prediction. Movement predictions no
 
 **Approaching prose:** 30 interaction + 7 movement connection prose functions in `Content.approachingProse`. All deterministic (moodTone + NT conditionals, no RNG consumed). Terse at neutral mood ("Shower."), body-aware when stressed ("Water. You need the water."), colored when low ("The bathroom. Automatic.").
 
-**UI classes:** `action--suggested` (medium), `action--auto` (brighter — the character is committed), `movement-link--suggested`, `movement-link--auto`.
+**Continuous brightness:** Predicted action's text color interpolates smoothly with strength — barely above base at 0.6, approaching body text color at 1.0. No discrete CSS classes or threshold snaps. Actions lerp from #8a8078 to #c8c0b8; movement from #605850 to #a09890.
 
 **Character influence:** Routine comfort sentiment lowers both thresholds (habits form easier). Routine irritation raises them (habits resist forming).
 

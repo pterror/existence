@@ -132,6 +132,32 @@ const UI = (() => {
     return paragraphs.map(/** @param {string} p */ p => `<p>${p.trim()}</p>`).join('');
   }
 
+  // --- Habit strength → color ---
+  // Continuous brightness based on prediction strength. No threshold snap.
+  // Strength 0.6 (minimum) = barely above base, 1.0 = approaching body text.
+
+  // Action: base #8a8078 (138,128,120) → bright #c8c0b8 (200,192,184)
+  const ACTION_BASE = { r: 0x8a, g: 0x80, b: 0x78 };
+  const ACTION_BRIGHT = { r: 0xc8, g: 0xc0, b: 0xb8 };
+  // Movement: base #605850 (96,88,80) → bright #a09890 (160,152,144)
+  const MOVE_BASE = { r: 0x60, g: 0x58, b: 0x50 };
+  const MOVE_BRIGHT = { r: 0xa0, g: 0x98, b: 0x90 };
+
+  /**
+   * Interpolate color from base to bright based on habit strength.
+   * @param {number} strength — prediction probability (0.6–1.0 range)
+   * @param {{ r: number, g: number, b: number }} base
+   * @param {{ r: number, g: number, b: number }} bright
+   * @returns {string}
+   */
+  function habitColor(strength, base, bright) {
+    const t = Math.min(1, Math.max(0, (strength - 0.6) / 0.4));
+    const r = Math.round(base.r + (bright.r - base.r) * t);
+    const g = Math.round(base.g + (bright.g - base.g) * t);
+    const b = Math.round(base.b + (bright.b - base.b) * t);
+    return `rgb(${r},${g},${b})`;
+  }
+
   // --- Actions ---
 
   /** @param {Interaction[]} interactions @param {{ actionId: string, strength: number, tier: string } | null} [prediction] */
@@ -148,7 +174,7 @@ const UI = (() => {
       const btn = document.createElement('button');
       btn.className = 'action';
       if (prediction && prediction.actionId === interaction.id) {
-        btn.classList.add(prediction.tier === 'auto' ? 'action--auto' : 'action--suggested');
+        btn.style.color = habitColor(prediction.strength, ACTION_BASE, ACTION_BRIGHT);
       }
       btn.textContent = interaction.label;
       btn.addEventListener('click', () => {
@@ -178,7 +204,7 @@ const UI = (() => {
       const btn = document.createElement('button');
       btn.className = 'movement-link';
       if (prediction && prediction.actionId === 'move:' + conn.id) {
-        btn.classList.add(prediction.tier === 'auto' ? 'movement-link--auto' : 'movement-link--suggested');
+        btn.style.color = habitColor(prediction.strength, MOVE_BASE, MOVE_BRIGHT);
       }
       btn.textContent = conn.name;
       btn.addEventListener('click', () => {

@@ -125,22 +125,6 @@ body {
   display: inline;
 }
 
-.action--suggested {
-  color: #9a9088;
-}
-
-.action--auto {
-  color: #b0a898;
-}
-
-.movement-link--suggested {
-  color: #706860;
-}
-
-.movement-link--auto {
-  color: #8a8078;
-}
-
 /* Movement — separate from actions, quieter */
 
 #movement {
