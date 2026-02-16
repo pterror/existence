@@ -947,17 +947,20 @@ const Content = (() => {
         const debtPenalty = 1 / (1 + currentDebt / 1200);
         const energyGain = (sleepMinutes / 5) * qualityMult * debtPenalty;
 
+        // Sleep cycle breakdown — determines deep sleep / REM architecture
+        const cycles = State.sleepCycleBreakdown(sleepMinutes);
+
         // Neurochemistry: sleep effects
         // Store sleep quality for serotonin/NE target functions
         State.set('last_sleep_quality', qualityMult);
-        // Adenosine: cleared proportional to sleep duration (sleep pressure reset)
-        const adenosineClear = -(sleepMinutes / 480) * State.get('adenosine') * 0.9;
+        // Adenosine: cleared by deep sleep (the clearing mechanism)
+        const adenosineClear = -(sleepMinutes / 480) * State.get('adenosine') * 0.9 * (0.4 + 0.6 * cycles.deepSleepFrac);
         State.adjustNT('adenosine', adenosineClear);
         // Serotonin: good sleep promotes synthesis, poor sleep impairs
         State.adjustNT('serotonin', qualityMult >= 0.9 ? 3 : qualityMult < 0.6 ? -2 : 0);
-        // Norepinephrine: REM sleep occurs in NE-free environment
-        // Good sleep lowers NE (emotional charge processed). Poor sleep preserves it.
-        State.adjustNT('norepinephrine', qualityMult >= 0.9 ? -4 : qualityMult < 0.6 ? 3 : 0);
+        // Norepinephrine: REM sleep is the NE-free environment — more REM = better NE clearing
+        const neClear = cycles.remFrac * qualityMult;
+        State.adjustNT('norepinephrine', neClear > 0.15 ? -4 * neClear : qualityMult < 0.6 ? 3 : 0);
 
         State.advanceTime(fallAsleepDelay + sleepMinutes);
 
@@ -971,8 +974,9 @@ const Content = (() => {
         State.adjustStress(-sleepMinutes / 20);
         State.set('actions_since_rest', 0);
 
-        // Sleep emotional processing — attenuate sentiment deviations from baseline
-        State.processSleepEmotions(Character.get().sentiments, qualityMult, sleepMinutes);
+        // Sleep emotional processing — REM quality determines processing effectiveness
+        const emotionalQuality = qualityMult * (0.4 + 0.6 * cycles.remFrac);
+        State.processSleepEmotions(Character.get().sentiments, emotionalQuality, sleepMinutes);
 
         // Friend absence — guilt accumulates per night of silence
         State.processAbsenceEffects();
@@ -1001,6 +1005,7 @@ const Content = (() => {
         const postNE = State.get('norepinephrine');
         const postGaba = State.get('gaba');
         const postAden = State.get('adenosine');
+        const sleepInertia = cycles.sleepInertia;
 
         // --- Falling asleep ---
         let asleep;
@@ -1106,6 +1111,8 @@ const Content = (() => {
               { weight: 1, value: 'Noise. Then not noise. Then the slow work of becoming someone who is awake. The pillow is warm. The air is not. You\'re somewhere between the two.' },
               // High adenosine residual — thicker fog
               { weight: State.lerp01(postAden, 25, 45), value: 'The alarm. You hear it for a long time before it becomes an alarm — just sound, formless, part of something you were already in. Your hand knows what to do before you do. The silence after is cotton. You float in it, not yet here.' },
+              // Sleep inertia — pulled out of deep sleep
+              { weight: sleepInertia, value: 'The alarm rips you out of something. Deep, whatever it was — the sound is wrong, the room is wrong, everything is a foreign country for a few bad seconds. Your hand kills the noise and you lie there while the world slowly becomes a place you recognize.' },
             ]);
           } else {
             // rested/alert alarm wake

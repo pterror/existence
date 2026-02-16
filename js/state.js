@@ -488,6 +488,61 @@ const State = (() => {
     return 'deep_night';
   }
 
+  // --- Sleep cycle breakdown ---
+  // Models the internal architecture of a sleep episode. 90-min cycles;
+  // early cycles are deep-sleep heavy, later cycles are REM heavy.
+  // No PRNG consumed — purely deterministic from duration.
+
+  /**
+   * Break a sleep episode into its cycle components.
+   * @param {number} sleepMinutes
+   * @returns {{ completeCycles: number, partialCycleFrac: number, deepSleepFrac: number, remFrac: number, sleepInertia: number }}
+   */
+  function sleepCycleBreakdown(sleepMinutes) {
+    const cycleLength = 90;
+    const completeCycles = Math.floor(sleepMinutes / cycleLength);
+    const remainder = sleepMinutes % cycleLength;
+    const partialCycleFrac = remainder / cycleLength;
+
+    // Deep sleep fraction: high in early cycles, plateaus after ~3
+    // Cycle 1: ~50% deep, Cycle 2: ~35%, Cycle 3+: ~20%
+    let deepTotal = 0;
+    let remTotal = 0;
+    const totalCycles = completeCycles + (partialCycleFrac > 0 ? partialCycleFrac : 0);
+
+    for (let i = 0; i < completeCycles; i++) {
+      const cycleDeep = i === 0 ? 0.50 : i === 1 ? 0.35 : 0.20;
+      const cycleRem = i === 0 ? 0.10 : Math.min(0.15 + i * 0.07, 0.45);
+      deepTotal += cycleDeep;
+      remTotal += cycleRem;
+    }
+    // Partial cycle contributes proportionally (as if continuing the pattern)
+    if (partialCycleFrac > 0) {
+      const i = completeCycles;
+      const cycleDeep = i === 0 ? 0.50 : i === 1 ? 0.35 : 0.20;
+      const cycleRem = i === 0 ? 0.10 : Math.min(0.15 + i * 0.07, 0.45);
+      deepTotal += cycleDeep * partialCycleFrac;
+      remTotal += cycleRem * partialCycleFrac;
+    }
+
+    // Normalize to fractions of total sleep
+    const deepSleepFrac = totalCycles > 0 ? clamp(deepTotal / totalCycles, 0, 1) : 0;
+    const remFrac = totalCycles > 0 ? clamp(remTotal / totalCycles, 0, 1) : 0;
+
+    // Sleep inertia: waking mid-deep-sleep in early cycles is worst.
+    // Partial cycle in first 3 cycles with deep sleep → high inertia.
+    let sleepInertia = 0;
+    if (partialCycleFrac > 0 && completeCycles < 3) {
+      // In the deep-sleep-heavy early phase
+      const depthFactor = completeCycles === 0 ? 0.50 : completeCycles === 1 ? 0.35 : 0.20;
+      // Mid-cycle is worst (peak at 0.3-0.6 of cycle = deep sleep phase)
+      const phaseInertia = partialCycleFrac < 0.6 ? partialCycleFrac / 0.6 : (1 - partialCycleFrac) / 0.4;
+      sleepInertia = clamp(depthFactor * phaseInertia * 1.2, 0, 0.6);
+    }
+
+    return { completeCycles, partialCycleFrac, deepSleepFrac, remFrac, sleepInertia };
+  }
+
   // --- Compound state queries ---
   // These reflect how states interact
 
@@ -1426,5 +1481,6 @@ const State = (() => {
     processSleepEmotions,
     processAbsenceEffects,
     regulationCapacity,
+    sleepCycleBreakdown,
   };
 })();
