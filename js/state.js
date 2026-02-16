@@ -153,6 +153,7 @@ const State = (() => {
 
       // Sleep tracking for neurochemistry
       last_sleep_quality: 0.8,  // 0-1 quality multiplier from most recent sleep
+      sleep_debt: 0,            // minutes of accumulated deficit (cap 4800 = 10 days)
 
       // Flags and soft state
       alarm_time: 6 * 60 + 30,  // Minutes since midnight. When the alarm fires.
@@ -465,6 +466,13 @@ const State = (() => {
     if (s.money < 1500) return 'okay';
     if (s.money < 5000) return 'comfortable';
     return 'cushioned';
+  }
+
+  function sleepDebtTier() {
+    if (s.sleep_debt <= 60) return 'none';       // under an hour
+    if (s.sleep_debt <= 240) return 'mild';      // up to 4 hours
+    if (s.sleep_debt <= 720) return 'moderate';  // up to 12 hours
+    return 'severe';                             // 12+ hours
   }
 
   function timePeriod() {
@@ -1023,6 +1031,11 @@ const State = (() => {
       if (s.money < 200) t -= (200 - s.money) * 0.019;
     }
 
+    // Sleep debt — cumulative deficit erodes serotonin baseline
+    if (s.sleep_debt > 240) {
+      t -= Math.min((s.sleep_debt - 240) * 0.005, 8);  // max -8 at extreme debt
+    }
+
     return clamp(t, 15, 85);
   }
 
@@ -1057,6 +1070,11 @@ const State = (() => {
       // Financial anxiety at work — working for money you'll never keep
       const moneyAnx = sentimentIntensity('money', 'anxiety');
       t -= moneyAnx * 2;
+    }
+
+    // Sleep debt — cumulative deficit kills motivation
+    if (s.sleep_debt > 240) {
+      t -= Math.min((s.sleep_debt - 240) * 0.006, 10);  // max -10 at extreme debt
     }
 
     return clamp(t, 15, 85);
@@ -1262,6 +1280,10 @@ const State = (() => {
     if (s.stress > 60) {
       inertia += (s.stress - 60) * 0.005;  // up to +0.2 at stress=100
     }
+    // Sleep debt: accumulated deficit makes the brain sluggish at mood transitions.
+    if (s.sleep_debt > 240) {
+      inertia += Math.min((s.sleep_debt - 240) * 0.0003, 0.15);  // up to +0.15 at extreme debt
+    }
 
     return inertia;
   }
@@ -1371,6 +1393,7 @@ const State = (() => {
     jobTier,
     batteryTier,
     moneyTier,
+    sleepDebtTier,
     timePeriod,
     canFocus,
     moodTone,

@@ -935,7 +935,17 @@ const Content = (() => {
           qualityMult += rainComfort * 0.1;  // max +0.09 at intensity 0.9
         }
 
-        const energyGain = (sleepMinutes / 5) * qualityMult;
+        // Sleep debt: ideal 480 min/day. Deficit accumulates fully, excess repays at 33%.
+        const ideal = 480;
+        const deficit = ideal - sleepMinutes;
+        const debtChange = deficit > 0 ? deficit : deficit * 0.33;
+        const oldDebt = State.get('sleep_debt');
+        State.set('sleep_debt', Math.max(0, Math.min(4800, oldDebt + debtChange)));
+
+        // Debt penalty on energy recovery: chronic deficit impairs restoration
+        const currentDebt = State.get('sleep_debt');
+        const debtPenalty = 1 / (1 + currentDebt / 1200);
+        const energyGain = (sleepMinutes / 5) * qualityMult * debtPenalty;
 
         // Neurochemistry: sleep effects
         // Store sleep quality for serotonin/NE target functions
@@ -1150,6 +1160,10 @@ const Content = (() => {
             { weight: 1, value: 'Morning, probably. You\'re awake, technically. Your body is a sandbag version of itself — present but dense, uncooperative. The ceiling is up there. You\'re down here. The gap between is everything.' },
             // Low serotonin — the not-enough has a color
             { weight: State.lerp01(postSer, 35, 15), value: 'You surface and the first thing waiting is the knowledge that this is it. This is all the rest you\'re getting. Your body is heavy. Your thoughts are heavy. The room is the same room, and you\'re worse for having opened your eyes.' },
+            // Moderate+ sleep debt — not just last night, it's cumulative
+            { weight: State.lerp01(currentDebt, 300, 720), value: 'You wake up and it\'s not just last night. It\'s the night before, and the one before that. The tiredness has layers — each one a sleep that wasn\'t enough, stacked up, compounding. One good night won\'t fix this. You can feel that in your bones.' },
+            // Severe sleep debt — the body running on empty
+            { weight: State.lerp01(currentDebt, 720, 2400), value: 'You\'re awake. You think. The line between sleeping and not has worn so thin you can\'t always tell which side you\'re on. Your body has been running a tab it can\'t pay, and this morning it\'s not even pretending to try. Everything is far away.' },
           ]);
         } else if (quality === 'poor') {
           // Slept but poorly — the gritty surface feeling
@@ -1159,6 +1173,8 @@ const Content = (() => {
             { weight: 1, value: 'Awake. Or some version of it. Your body did the hours but skipped the rest — you can feel it in your eyes, your joints, the dull headache that isn\'t quite a headache. The room is the same room. You\'re a worse version of who lay down in it.' },
             // High NE — sleep didn't clear the charge
             { weight: State.lerp01(postNE, 50, 70), value: 'You wake up tight. Your jaw, your shoulders, your hands — clenched around something that wasn\'t there when you went to sleep, or was and didn\'t leave. The sleep didn\'t clear it. You can feel the charge in your teeth.' },
+            // Moderate sleep debt — the poor quality is catching up
+            { weight: State.lerp01(currentDebt, 300, 720), value: 'You slept, but your body isn\'t buying it. This isn\'t one bad night — it\'s a string of them, the deficit compounding, each morning a little worse than the last. The ceiling looks the same but you\'re seeing it from deeper down.' },
           ]);
         } else if (postEnergy === 'rested' || postEnergy === 'alert') {
           // Actually rested — rare clarity
