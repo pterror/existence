@@ -943,6 +943,21 @@ const Content = (() => {
           qualityMult += rainComfort * 0.1;  // max +0.09 at intensity 0.9
         }
 
+        // Melatonin at sleep onset — proper melatonin improves architecture
+        if (melatoninAtOnset > 60) qualityMult *= 1.05;
+        else if (melatoninAtOnset < 25) qualityMult *= 0.85;
+
+        // Circadian alignment — sleeping at the wrong time degrades quality
+        const sleepHour = Math.floor(State.timeOfDay() / 60);
+        if (sleepHour >= 10 && sleepHour <= 16) {
+          qualityMult *= 0.75;  // daytime sleep is structurally worse
+        } else if (sleepHour >= 6 && sleepHour < 10) {
+          qualityMult *= 0.9;   // late morning sleep is suboptimal
+        }
+
+        // Crash sleep — emergency shutdown is less restorative
+        if (State.get('adenosine') > 80) qualityMult *= 0.9;
+
         // Sleep debt: ideal 480 min/day. Deficit accumulates fully, excess repays at 33%.
         const ideal = 480;
         const deficit = ideal - sleepMinutes;
