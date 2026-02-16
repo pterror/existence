@@ -154,6 +154,7 @@ const State = (() => {
       // Sleep tracking for neurochemistry
       last_sleep_quality: 0.8,  // 0-1 quality multiplier from most recent sleep
       sleep_debt: 0,            // minutes of accumulated deficit (cap 4800 = 10 days)
+      daylight_exposure: 0,     // bright-light minutes in current wake period
 
       // Flags and soft state
       alarm_time: 6 * 60 + 30,  // Minutes since midnight. When the alarm fires.
@@ -268,6 +269,14 @@ const State = (() => {
     // Phone battery drains — screen-on vs standby
     const batteryDrain = s.viewing_phone ? 15 : 1;
     s.phone_battery = Math.max(0, s.phone_battery - hours * batteryDrain);
+
+    // Daylight exposure — outside during daytime accumulates faster
+    const hour = Math.floor(timeOfDay() / 60);
+    if (hour >= 6 && hour <= 20) {
+      const area = World.getCurrentLocation()?.area;
+      const outsideRate = (area === 'outside') ? 1.0 : 0.15;
+      s.daylight_exposure = Math.min(300, s.daylight_exposure + minutes * outsideRate);
+    }
 
     // Social isolation increases over time without interaction
     const actionsSinceLastSocial = Timeline.getActionCount() - s.last_social_interaction;
@@ -385,6 +394,7 @@ const State = (() => {
     s.alarm_went_off = false;
     s.surfaced_late = 0;
     s.work_nagged_today = false;
+    s.daylight_exposure = 0;
   }
 
   // --- Qualitative tiers ---
@@ -1175,15 +1185,38 @@ const State = (() => {
   }
 
   /** Melatonin target: rises in darkness, suppressed by light/activity.
-   *  Peaks ~2-3AM, suppressed during daylight hours. */
+   *  Peaks ~2-3AM, suppressed during daylight hours.
+   *  Modulated by daylight exposure, phone screen at night, indoor evening. */
   function melatoninTarget() {
     const tod = timeOfDay();
     const hourFrac = tod / 60;
     // Inverse of light: high at night (peak ~3AM), low during day
     // cos((hour - 3) * pi/12) peaks at 3AM
     const nocturnal = Math.cos((hourFrac - 3) * Math.PI / 12);
-    // Map to [5,80]: fully suppressed during day, high at night
-    return clamp(42.5 + nocturnal * 37.5, 5, 80);
+    // Base: [5,80]: fully suppressed during day, high at night
+    let t = 42.5 + nocturnal * 37.5;
+
+    // Good daylight exposure strengthens nighttime melatonin peak
+    // Saturates at 120 min of bright light (outside daytime)
+    const daylightBonus = Math.min(s.daylight_exposure / 120, 1.0) * 10;
+    if (hourFrac >= 20 || hourFrac <= 6) {
+      t += daylightBonus;  // up to +10 at night if you got enough light
+    }
+
+    // Phone screen suppression at night — blue light blocks melatonin
+    if (s.viewing_phone && (hourFrac >= 21 || hourFrac <= 5)) {
+      t -= 15;
+    }
+
+    // Indoor evening suppression — dim indoor light delays melatonin onset
+    if (hourFrac >= 19 && hourFrac <= 21) {
+      const area = World.getCurrentLocation()?.area;
+      if (area === 'apartment' || area === 'work') {
+        t -= 3;
+      }
+    }
+
+    return clamp(t, 5, 90);
   }
 
   /** Ghrelin target: maps directly to hunger state.

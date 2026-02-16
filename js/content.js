@@ -891,6 +891,14 @@ const Content = (() => {
           fallAsleepDelay = Timeline.randomInt(3, 15);
         }
 
+        // Melatonin modifier — high melatonin eases onset, low delays it
+        const melatoninAtOnset = State.get('melatonin');
+        if (melatoninAtOnset > 60) {
+          fallAsleepDelay = Math.max(1, Math.round(fallAsleepDelay * 0.7));
+        } else if (melatoninAtOnset < 20) {
+          fallAsleepDelay = Math.round(fallAsleepDelay * 1.4);
+        }
+
         // Natural sleep duration
         let sleepMinutes;
         if (energy === 'depleted') {
