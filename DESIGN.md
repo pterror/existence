@@ -92,6 +92,41 @@ Sleep is an action, not a phase. You choose to lie down — or the body chooses 
 
 **Sleep and substances** — caffeine delays sleep onset. Alcohol makes you fall asleep faster and sleep worse. Cannabis suppresses dreaming, and stopping it brings dreams back with a vengeance. Nicotine withdrawal disrupts sleep. Stimulants can make sleep impossible for a day or more. Each substance has its own relationship with sleep, and the simulation models them specifically.
 
+#### Sleep debt
+
+The body keeps a running ledger. Ideal sleep is 480 min/day. Sleeping less adds the full deficit to the debt. Sleeping more repays at only 33% — you can't bank sleep. Debt caps at 4800 minutes (10 days). The interest rate is high: one good night after a week of bad ones barely dents the total.
+
+Effects are continuous, not threshold-based. As debt passes 240 minutes: serotonin and dopamine targets drop (max -8 and -10), emotional inertia increases (moods get stickier), and energy recovery from sleep suffers diminishing returns (penalty = 1/(1+debt/1200) — at 2 days deficit, recovery is ~60% effective). Four tiers for prose selection: none/mild/moderate/severe.
+
+#### Sleep architecture
+
+Sleep unfolds in 90-minute cycles. Early cycles are deep-sleep heavy (50%→35%→20%); later cycles are REM heavy (10%→22%→29%→36%). `State.sleepCycleBreakdown()` models this from duration alone — no PRNG consumed.
+
+Deep sleep is the adenosine clearing mechanism. Short sleep (1–2 cycles) gets plenty of deep sleep but misses the REM-heavy later cycles. Long sleep (5+ cycles) maximizes REM. Adenosine clearing scales with deep sleep fraction. NE clearing scales with REM fraction × quality (REM is the NE-free environment). Emotional processing quality incorporates REM fraction — more REM = better sentiment attenuation during sleep.
+
+Sleep inertia: being pulled out of deep sleep in an early cycle produces the worst waking fog (0–0.6 scale). Used in prose — the alarm that rips you out of something deep feels different from the one that finds you already surfacing.
+
+#### Melatonin and daylight
+
+Melatonin isn't purely cosmetic anymore. Four modifiers on the base circadian curve:
+
+- **Daylight exposure** (+10 at night if ≥120 min of outdoor daytime light). Tracked per wake period. Outside = 1.0 rate, inside = 0.15. Reset on wake.
+- **Phone screen** (-15 when viewing phone at 21:00–5:00). Blue light suppresses melatonin.
+- **Indoor evening** (-3 when inside at 19:00–21:00). Dim indoor light delays onset.
+- **Fall-asleep delay** (melatonin >60 → 0.7x delay, <20 → 1.4x). Applied as a multiplier, no new RNG.
+
+#### Sleep quality
+
+Quality is multiplicative from six factors: stress, hunger, rain comfort, melatonin at onset (>60 → 1.05x, <25 → 0.85x), circadian alignment (sleeping 10AM–4PM → 0.75x), and crash sleep (adenosine >80 → 0.9x).
+
+#### The alarm as negotiation
+
+The alarm resolves inside the sleep interaction — when it truncates sleep, it sets `just_woke_alarm`. Then two new interactions appear: **snooze** (9 minutes, tiny energy, prose escalates from fog through negotiation to guilt) and **dismiss** (clears the alarm state, prose varies by snooze count). Both are normal recorded actions — replay-safe, deterministic.
+
+Snooze prose layers: first press is pure fog (the hand acting before the person). Second is negotiation (knowing you should, staying anyway). Third+ is guilt (losing time, aware of it, doing it anyway). NT-shaded throughout: adenosine depth, serotonin reluctance.
+
+Auto-advance approaching prose for snooze: "Your hand is already moving." / "Again." For dismiss: "Up." / "Enough. Up."
+
 ### The body as prose
 
 None of these are numbers the player sees. They show up as: which interactions are available (can't do dishes if energy is too low), how the prose reads (the same room described differently at different energy levels), what idle thoughts surface (hunger thoughts when starving, exhaustion thoughts when depleted).

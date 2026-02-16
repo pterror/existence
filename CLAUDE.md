@@ -104,6 +104,14 @@ No build step. Plain JS loaded via script tags.
 
 **Habits don't train on their own predictions.** Each training example carries a source tag: `'player'` (full weight 1.0) when the action didn't match a visible prediction, `'suggested'` (weight 0.5) when it matched a suggestion, `'auto'` (weight 0.1) when auto-advance fired. Without this, the system snowballs — suggesting an action makes the player more likely to pick it, which makes the system more confident, which makes it suggest harder. Source-weighted training keeps habit strength grounded in genuine player preference.
 
+**Sleep debt has high interest.** Ideal 480 min/day. Full deficit accumulates; excess repays at 33%. Cap 4800 min. Effects continuous above 240 min: serotonin/dopamine targets drop, emotional inertia increases, energy recovery degrades via `1/(1+debt/1200)`. One good night after a week of bad ones barely dents the total.
+
+**Sleep has architecture.** 90-min cycles. Early cycles are deep-sleep heavy, later are REM heavy. `State.sleepCycleBreakdown()` — no PRNG. Deep sleep clears adenosine. REM clears NE and processes emotions. Short sleep gets deep sleep but misses REM. Sleep inertia worst when pulled from deep sleep in early cycles.
+
+**Melatonin is behavioral.** Four modifiers on the base cosine curve: daylight exposure bonus (+10 if ≥120 min outside), phone screen suppression (-15 at night), indoor evening delay (-3 at 19:00–21:00), fall-asleep delay multiplier (high melatonin → 0.7x, low → 1.4x). `daylight_exposure` tracked per wake period, reset on wake.
+
+**The alarm is a negotiation.** Sleep sets `just_woke_alarm`. snooze_alarm: 9 min, tiny energy, prose escalates (fog→negotiation→guilt), 2 RNG calls. dismiss_alarm: clears the flag, 1 RNG call. Both are normal recorded actions. Snooze approaching prose: "Your hand is already moving." / "Again."
+
 ## Code Conventions
 
 **RNG discipline:**

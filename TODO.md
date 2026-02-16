@@ -83,11 +83,11 @@ Runs never finish. No mechanism for a life ending or the game concluding. What t
 ### Cooking and food variety
 Only "eat from fridge" and "buy cheap meal." No cooking (time + energy + ingredients), no meals that feel different, no dietary texture. DESIGN.md describes food as deeply personal — comfort food, cultural food, what's in the fridge vs what you need.
 
-### Alarm negotiation
-The alarm fires as an event but there's no snooze, no "turn it off and go back to sleep," no choosing not to set one. DESIGN.md describes the alarm as a negotiation between the person who set it and the person who hears it.
+### ~~Alarm negotiation~~
+~~The alarm fires as an event but there's no snooze, no "turn it off and go back to sleep," no choosing not to set one. DESIGN.md describes the alarm as a negotiation between the person who set it and the person who hears it.~~ — **IMPLEMENTED.** snooze_alarm and dismiss_alarm interactions. Snooze escalates (fog → negotiation → guilt), dismiss varies by snooze count. Sleep debt, melatonin, circadian alignment, REM cycle model all integrated into sleep. See "Deep sleep model" in STATUS.md.
 
 ### Sleep prose
-**Partially implemented.** Sleep prose now has two phases: falling-asleep (how sleep came) and waking-up (the gradient back to consciousness). Waking prose branches on post-sleep energy, sleep quality, alarm vs natural, time of day, and mood — ~40 total variants. Still missing: snooze/alarm negotiation (see "Alarm negotiation" above), insomnia/not-sleeping as a distinct experience, dreaming.
+**Largely implemented.** Sleep prose now has two phases: falling-asleep (how sleep came) and waking-up (the gradient back to consciousness). Waking prose branches on post-sleep energy, sleep quality, alarm vs natural, time of day, mood, sleep debt, and sleep inertia — ~44 waking + ~22 falling-asleep variants. Alarm negotiation implemented (snooze/dismiss). Slept-through-alarm awareness. Still missing: insomnia/not-sleeping as a distinct experience, dreaming.
 
 ### Apartment mess as autonomous force
 apartment_mess exists as a state variable but doesn't grow on its own or meaningfully shape prose beyond event notices. DESIGN.md describes entropy that accumulates by itself — the apartment as a mirror of how you're managing.

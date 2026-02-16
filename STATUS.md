@@ -33,7 +33,12 @@ Current state of the codebase. Keep this up to date — see CLAUDE.md workflow r
 **Placeholder systems (18)** — initialized at baseline 50, drift toward 50 with jitter. Will gain active feeders as their game systems are built:
 glutamate, endorphin, acetylcholine, endocannabinoid, dht, estradiol, progesterone, allopregnanolone, lh, fsh, oxytocin, prolactin, thyroid, insulin, leptin, dhea, hcg (default 0), calcitriol.
 
-**Sleep neurochemistry effects:** sleep interaction stores quality, clears adenosine proportionally, nudges serotonin (good sleep +3, poor -2) and norepinephrine (good sleep -4, poor +3).
+**Sleep model:**
+- **Sleep debt** — cumulative deficit (cap 4800 min). Ideal 480 min/day. Full deficit accumulation, 33% excess repayment. Tiers: none/mild/moderate/severe. Feeds serotonin/dopamine targets (-8/-10 max), emotional inertia (+0.15 max), energy recovery penalty (1/(1+debt/1200)).
+- **Sleep architecture** — `sleepCycleBreakdown(minutes)`: 90-min cycles, deep/REM ratio shifts across cycles. Adenosine clearing scales with deep sleep fraction. NE clearing scales with REM fraction × quality. Emotional processing quality = qualityMult × (0.4 + 0.6 × remFrac). Sleep inertia from cycle phase at wake (0–0.6).
+- **Melatonin behavior** — daylight exposure tracking (outside 1.0, inside 0.15, reset on wake), phone screen suppression (-15 at night), indoor evening suppression (-3), daylight bonus (+10 at night if ≥120 min exposure). Melatonin affects fall-asleep delay (>60 → 0.7x, <20 → 1.4x).
+- **Sleep quality** — six multiplicative factors: stress, hunger, rain comfort, melatonin at onset (>60 → 1.05x, <25 → 0.85x), circadian alignment (daytime → 0.75x), crash sleep (adenosine >80 → 0.9x).
+- **Neurochemistry** — stores quality, clears adenosine (scaled by deep sleep), nudges serotonin (good +3, poor -2), clears NE (scaled by REM × quality).
 
 ### Emotional Inertia (Layer 2 of DESIGN-EMOTIONS.md)
 Per-character trait controlling how sticky moods are. Only affects the four mood-primary systems (serotonin, dopamine, NE, GABA) — physiological rhythms are unaffected by personality.
@@ -166,7 +171,7 @@ Financial anxiety sentiment connects to neurochemistry:
 - **Weather** — overcast / clear / grey / drizzle. 3% shift chance per action. Affects prose, not mechanics.
 
 ### Daily Flags (reset on wake)
-dressed, showered, ate_today, at_work_today, called_in, alarm_set, alarm_went_off, work_nagged_today
+dressed, showered, ate_today, at_work_today, called_in, alarm_set, alarm_went_off, just_woke_alarm, snooze_count, daylight_exposure, work_nagged_today
 
 ### Phone State
 Battery (dual-rate drain: 1%/hr standby, 15%/hr screen-on; tiers: dead/critical/low/fine), silent mode, inbox (messages accumulate whether or not you look). Charges at 30%/hr during sleep at home and via charge_phone interaction. Starting battery 80–100% (chargen RNG). Message sources: friends (flavor-driven frequency), work nag (30min late), paycheck deposits (biweekly), bill auto-pay notifications (rent/utilities/phone, monthly).
@@ -184,10 +189,10 @@ apartment_bathroom ──────────┘          corner_store
 
 Travel times: 1min within apartment, 2min apartment↔street, 3min street↔bus_stop, 4min street↔corner_store, 20min bus_stop↔workplace.
 
-## Interactions (33)
+## Interactions (35)
 
-### Bedroom (9)
-sleep, get_dressed, set_alarm, skip_alarm, charge_phone, check_phone_bedroom, lie_there, look_out_window, (alarm event wakes you)
+### Bedroom (11)
+sleep, get_dressed, set_alarm, skip_alarm, snooze_alarm, dismiss_alarm, charge_phone, check_phone_bedroom, lie_there, look_out_window, (alarm event wakes you)
 
 ### Kitchen (5)
 eat_food, drink_water, do_dishes, check_phone_kitchen, sit_at_table
@@ -248,7 +253,10 @@ Each has: workplace description (dynamic), do_work prose (6 variants), work_brea
 Dynamic generation based on mood (8 categories × ~7 general variants + 2–4 NT-weighted variants each), hunger (starving/very_hungry), energy (depleted), social isolation (friend-specific thoughts). NT values (serotonin, dopamine, NE, GABA, adenosine, cortisol) continuously weight variant selection via `State.lerp01()` and `Timeline.weightedPick()`. Recency tracking avoids repeats.
 
 ### Sleep Prose
-Two-phase system: falling-asleep (how sleep came) + waking-up (the gradient back to consciousness). Falling-asleep branches on pre-sleep energy, stress, quality, and duration, with NT shading: adenosine→crash depth, GABA→can't-settle anxiety, NE→hyper-alertness, serotonin→warmth of surrender (~22 variants). Waking-up branches on post-sleep energy, sleep quality, alarm vs natural wake, time of day (dark/late/morning), and mood, with NT shading: adenosine→sleep inertia, serotonin→dread-vs-ease, NE→sharp edges, GABA→night dread (~38 variants). Composed together as a single passage. No numeric hour counts — all qualitative.
+Two-phase system: falling-asleep (how sleep came) + waking-up (the gradient back to consciousness). Falling-asleep branches on pre-sleep energy, stress, quality, and duration, with NT shading: adenosine→crash depth, GABA→can't-settle anxiety, NE→hyper-alertness, serotonin→warmth of surrender, melatonin→onset delay (~22 variants). Waking-up branches on post-sleep energy, sleep quality, alarm vs natural wake, time of day (dark/late/morning), mood, sleep debt, and sleep inertia, with NT shading: adenosine→sleep inertia, serotonin→dread-vs-ease, NE→sharp edges, GABA→night dread, debt→cumulative exhaustion (~44 variants). Composed together as a single passage. No numeric hour counts — all qualitative.
+
+### Alarm Negotiation Prose
+Snooze and dismiss interactions with escalating prose. Snooze has three tiers: first press (fog, 4 variants), second press (negotiation, 3 variants), third+ (guilt, 4 variants). All NT-shaded (adenosine, serotonin). Dismiss varies by snooze count (0 = immediate, 1-2 = typical, 3+ = running late) and mood/energy. Slept-through-alarm awareness adds to waking prose when alarm fired but didn't wake you.
 
 ### Outfit Prose
 6 outfit sets, each with 3 variants: default / low_mood / messy. 6 sleepwear options. All complete prose sentences.
@@ -300,7 +308,7 @@ Competing habits (top two within 0.1) → no prediction. Movement predictions no
 
 **Auto-advance:** When prediction reaches auto tier, the system shows approaching prose (deterministic, no RNG — mood-toned text like "Clothes." or "You're reaching for your clothes before you've thought about it."), highlights the predicted action with `action--auto` / `movement-link--auto` CSS class, and starts a 2500ms timer. After the delay, the action fires automatically. The player can click any action at any point to interrupt. Auto-advance chains naturally: each auto-fired action re-renders, re-predicts, and chains if the next prediction is also auto-tier. Morning routines flow: get_dressed → shower → eat_food → move:street without the player clicking.
 
-**Approaching prose:** 30 interaction + 7 movement connection prose functions in `Content.approachingProse`. All deterministic (moodTone + NT conditionals, no RNG consumed). Terse at neutral mood ("Shower."), body-aware when stressed ("Water. You need the water."), colored when low ("The bathroom. Automatic.").
+**Approaching prose:** 32 interaction + 7 movement connection prose functions in `Content.approachingProse`. All deterministic (moodTone + NT conditionals, no RNG consumed). Terse at neutral mood ("Shower."), body-aware when stressed ("Water. You need the water."), colored when low ("The bathroom. Automatic.").
 
 **Continuous brightness:** Predicted action's text color interpolates smoothly with strength — barely above base at 0.6, approaching body text color at 1.0. No discrete CSS classes or threshold snaps. Actions lerp from #8a8078 to #c8c0b8; movement from #605850 to #a09890.
 
