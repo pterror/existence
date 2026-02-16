@@ -160,6 +160,8 @@ const State = (() => {
       alarm_time: 6 * 60 + 30,  // Minutes since midnight. When the alarm fires.
       alarm_set: true,
       alarm_went_off: false,
+      just_woke_alarm: false,   // true after alarm truncates sleep — enables snooze/dismiss
+      snooze_count: 0,          // how many times snoozed this wake
       at_work_today: false,
       called_in: false,
       ate_today: false,
@@ -392,6 +394,8 @@ const State = (() => {
     s.called_in = false;
     s.work_tasks_done = 0;
     s.alarm_went_off = false;
+    s.just_woke_alarm = false;
+    s.snooze_count = 0;
     s.surfaced_late = 0;
     s.work_nagged_today = false;
     s.daylight_exposure = 0;

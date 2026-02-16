@@ -1011,6 +1011,10 @@ const Content = (() => {
 
         // Reset wake-period flags
         State.wakeUp();
+        // Set just_woke_alarm AFTER wakeUp() clears it — enables snooze/dismiss
+        if (wokeByAlarm) {
+          State.set('just_woke_alarm', true);
+        }
         Habits.noteWake();
 
         // Record events
@@ -1251,6 +1255,11 @@ const Content = (() => {
           }
         }
 
+        // Slept-through-alarm awareness — alarm fired but didn't wake you
+        if (State.get('alarm_went_off') && !wokeByAlarm) {
+          waking += ' Your phone is quiet. The alarm went off, earlier. You think.';
+        }
+
         return asleep + ' ' + waking;
       },
     },
@@ -1319,6 +1328,103 @@ const Content = (() => {
         State.set('alarm_set', false);
         State.advanceTime(1);
         return 'You turn off the alarm. Tomorrow is tomorrow\'s problem.';
+      },
+    },
+
+    snooze_alarm: {
+      id: 'snooze_alarm',
+      label: 'Snooze',
+      location: 'apartment_bedroom',
+      available: () => State.get('just_woke_alarm'),
+      execute: () => {
+        const count = State.get('snooze_count');
+        State.set('snooze_count', count + 1);
+        State.advanceTime(9);
+        const energyGain = Timeline.randomInt(1, 3);
+        State.adjustEnergy(energyGain);
+        State.adjustNT('adenosine', -1);
+        // Phone charges a tiny bit during snooze
+        if (State.get('location') === 'apartment_bedroom') {
+          State.adjustBattery(4);
+        }
+
+        Events.record('snoozed', { count: count + 1 });
+
+        const mood = State.moodTone();
+        const aden = State.get('adenosine');
+        const ser = State.get('serotonin');
+
+        if (count === 0) {
+          // First snooze — pure fog
+          return Timeline.weightedPick([
+            { weight: 1, value: 'Your hand finds the button before the rest of you wakes up. Nine minutes. The pillow takes you back. The room dissolves.' },
+            { weight: 1, value: 'Snooze. The sound stops. The silence rushes in and you sink back into it, the warm dark, the not-yet. Nine minutes of borrowed time.' },
+            { weight: 1, value: 'You hit snooze the way you breathe — without deciding. The alarm goes quiet. The mattress has you. Nine more minutes of not being a person.' },
+            // High adenosine — barely surfaced
+            { weight: State.lerp01(aden, 40, 70), value: 'The sound. Your hand. Silence. You were never really awake — just close enough to the surface for your arm to know what to do. You\'re already gone again.' },
+          ]);
+        } else if (count === 1) {
+          // Second snooze — negotiation
+          return Timeline.weightedPick([
+            { weight: 1, value: 'Again. The alarm, the hand, the silence. You know you should get up. You know exactly what you should do. Nine minutes. Just nine more.' },
+            { weight: 1, value: 'The alarm comes back and part of you expected it, and part of you is furious. You hit snooze. Your body makes a convincing argument for staying. You listen to it.' },
+            // Low serotonin — the negotiation has weight
+            { weight: State.lerp01(ser, 40, 20), value: 'Again. And this time there\'s something behind it — not just tired, but the specific reluctance of knowing what\'s on the other side of getting up. The alarm goes quiet. You stay.' },
+          ]);
+        } else {
+          // Third+ snooze — guilt building
+          return Timeline.weightedPick([
+            { weight: 1, value: 'You hit snooze again and the guilt is there now, thin but present, accumulating with each press. You know. You know. Nine minutes won\'t fix anything. You press it anyway.' },
+            { weight: 1, value: 'Snooze. Again. The ritual of it — sound, hand, silence, sinking. You\'re losing time you\'ll pay for later. You can feel that and you do it anyway because the alternative is now and now is too much.' },
+            // High adenosine — guilt can't compete with the fog
+            { weight: State.lerp01(aden, 40, 65), value: 'You should feel bad about this. You will, later. Right now the fog is thicker than the guilt and nine minutes is nine minutes is nine minutes.' },
+            // Low serotonin — each snooze is a small defeat
+            { weight: State.lerp01(ser, 40, 20), value: 'Again. And each time it\'s less about being tired and more about the thing you can\'t name — the weight of it, the knowing that getting up means starting and starting is the part you can\'t do. Nine more minutes of not starting.' },
+          ]);
+        }
+      },
+    },
+
+    dismiss_alarm: {
+      id: 'dismiss_alarm',
+      label: 'Get up',
+      location: 'apartment_bedroom',
+      available: () => State.get('just_woke_alarm'),
+      execute: () => {
+        State.set('just_woke_alarm', false);
+        State.advanceTime(1);
+
+        Events.record('dismissed_alarm', { snoozeCount: State.get('snooze_count') });
+
+        const count = State.get('snooze_count');
+        const mood = State.moodTone();
+        const energy = State.energyTier();
+
+        if (count === 0) {
+          // Dismissed immediately — no snoozes
+          return Timeline.weightedPick([
+            { weight: 1, value: 'You turn off the alarm and sit up. Just like that. Some mornings you can do it. This is one of them.' },
+            { weight: 1, value: 'Alarm off. Feet on the floor. The air is cold and the bed is warm and you leave it anyway, the way you leave a conversation — just turning away before you can change your mind.' },
+            // Good energy — body cooperates
+            { weight: (energy === 'rested' || energy === 'alert') ? 0.8 : 0, value: 'The alarm, and you\'re up. Actually up, not the negotiation, not the bargaining — just a body that slept and is now vertical and mostly willing to be.' },
+            // Heavy mood — up, but at cost
+            { weight: (mood === 'heavy' || mood === 'numb') ? 0.6 : 0, value: 'You turn off the alarm and sit up because that\'s what happens next. Not because you want to. Because the alternative is lying here and you already know what lying here becomes.' },
+          ]);
+        } else if (count <= 2) {
+          // A few snoozes — the typical morning
+          return Timeline.weightedPick([
+            { weight: 1, value: 'You turn off the alarm this time. Actually turn it off. Your body protests — loudly, in the language of heavy limbs and warm sheets — but you\'re up. You\'re up.' },
+            { weight: 1, value: 'Enough. You sit up before you can hit snooze again. The room tilts slightly, then settles. The morning is waiting. It\'s been waiting.' },
+            // Heavy mood — getting up is the hard part
+            { weight: (mood === 'heavy') ? 0.5 : 0, value: 'You force yourself up and it takes everything the word "force" implies. The hardest part of the day is over. It\'s also the first part.' },
+          ]);
+        } else {
+          // Many snoozes — running late, aware of it
+          return Timeline.weightedPick([
+            { weight: 1, value: 'You finally get up and the clock tells you what you already know — you\'re late, or close to it, and every snoozed minute is a minute you don\'t have. The day started without you.' },
+            { weight: 1, value: 'Up. Finally. Your body moves like it\'s doing you a personal favor. The time — you don\'t want to look at the time, but you do, and it\'s exactly as bad as you thought.' },
+          ]);
+        }
       },
     },
 
@@ -3206,6 +3312,20 @@ const Content = (() => {
 
     skip_alarm: () => {
       return 'No alarm.';
+    },
+
+    snooze_alarm: () => {
+      const count = State.get('snooze_count');
+      const aden = State.get('adenosine');
+      if (count > 1) return 'Again.';
+      if (aden > 50) return 'Your hand is already moving.';
+      return 'Snooze.';
+    },
+
+    dismiss_alarm: () => {
+      const count = State.get('snooze_count');
+      if (count > 2) return 'Enough. Up.';
+      return 'Up.';
     },
 
     charge_phone: () => {
