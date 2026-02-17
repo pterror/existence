@@ -8,8 +8,12 @@ Text-based HTML5 game. "Power anti-fantasy" — constrained agency without judgm
 
 ## Architecture
 
+ES modules. Each module exports a factory function (`createFoo(ctx)`) that receives a context object. `createGameContext()` in `context.js` wires all instances together. No global mutable state — multiple game instances can coexist.
+
 ```
 js/
+  main.js       # Module entry point — creates context, starts game
+  context.js    # createGameContext() — wires all module factories together
   names.js      # Generated name frequency data (US Census + SSA). Built by scripts/build-names.js
   runs.js       # IndexedDB storage layer for multi-run support
   timeline.js   # Seeded PRNG (xoshiro128**), dual streams, action log, delegates save to Runs
@@ -24,7 +28,7 @@ js/
   game.js       # Async init, threshold screen, step-away, look-back, orchestration
 css/
   style.css     # Typography, layout, atmosphere
-index.html      # Single page, minimal markup
+index.html      # Single page, single <script type="module">
 serve.js        # Bun static file server
 scripts/
   download-names.sh  # Downloads raw Census + SSA data into vendor/
