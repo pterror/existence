@@ -2,7 +2,7 @@
 // Semantic log parallel to the action log. Not persisted —
 // reconstructed during replay (same seed + actions = same events).
 
-const Events = (() => {
+function createEvents(ctx) {
   /** @type {{ time: number, type: string, data: object }[]} */
   let log = [];
 
@@ -12,7 +12,7 @@ const Events = (() => {
 
   /** @param {string} type @param {object} [data] */
   function record(type, data = {}) {
-    log.push({ time: State.get('time'), type, data });
+    log.push({ time: ctx.state.get('time'), type, data });
   }
 
   /** @param {string} type @returns {{ time: number, type: string, data: object } | null} */
@@ -49,7 +49,7 @@ const Events = (() => {
   function daysSinceLast(type) {
     const entry = last(type);
     if (!entry) return null;
-    return (State.get('time') - entry.time) / 1440;
+    return (ctx.state.get('time') - entry.time) / 1440;
   }
 
   function all() {
@@ -62,4 +62,7 @@ const Events = (() => {
   }
 
   return { init, record, last, since, count, daysSinceLast, all, restoreLog };
-})();
+}
+
+// Compat: global singleton (removed when switching to ES modules)
+const Events = createEvents({ get state() { return State; } });

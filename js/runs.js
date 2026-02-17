@@ -1,6 +1,6 @@
 // runs.js — IndexedDB storage layer for multi-run support
 
-const Runs = (() => {
+function createRuns(ctx) {
   const DB_NAME = 'existence';
   const DB_VERSION = 1;
 
@@ -14,6 +14,9 @@ const Runs = (() => {
   let pendingSave = null;
 
   const SAVE_DEBOUNCE_MS = 500;
+
+  // Store the bound flush handler so we can remove it on dispose
+  const boundFlush = () => flush();
 
   // --- Database lifecycle ---
 
@@ -38,7 +41,7 @@ const Runs = (() => {
         db = /** @type {IDBOpenDBRequest} */ (event.target).result;
 
         // Flush pending writes on unload
-        window.addEventListener('beforeunload', flush);
+        window.addEventListener('beforeunload', boundFlush);
 
         resolve();
       };
@@ -252,6 +255,14 @@ const Runs = (() => {
     });
   }
 
+  /**
+   * Clean up event listeners. Call when disposing of this game instance.
+   */
+  function dispose() {
+    window.removeEventListener('beforeunload', boundFlush);
+    flush();
+  }
+
   return {
     open,
     createRun,
@@ -262,5 +273,9 @@ const Runs = (() => {
     flush,
     listRuns,
     deleteRun,
+    dispose,
   };
-})();
+}
+
+// Compat: global singleton (removed when switching to ES modules)
+const Runs = createRuns({});
