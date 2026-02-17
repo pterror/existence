@@ -1,6 +1,6 @@
 // character.js — character schema, accessors, state application
 
-const Character = (() => {
+function createCharacter(ctx) {
   /** @type {GameCharacter | null} */
   let current = null;
 
@@ -25,6 +25,9 @@ const Character = (() => {
   // Apply character to game state (called once at game start)
   function applyToState() {
     if (!current) return;
+
+    const State = ctx.state;
+    const Timeline = ctx.timeline;
 
     // Calendar and geography
     State.set('start_timestamp', current.start_timestamp);
@@ -132,4 +135,10 @@ const Character = (() => {
     isSet,
     applyToState,
   };
-})();
+}
+
+// Compat: global singleton (removed when switching to ES modules)
+const Character = createCharacter({
+  get state() { return State; },
+  get timeline() { return Timeline; },
+});

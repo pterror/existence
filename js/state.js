@@ -3,7 +3,7 @@
 
 /** @typedef {ReturnType<typeof State.getAll>} GameState */
 
-const State = (() => {
+function createState(ctx) {
   // --- Internal state ---
   /** @type {ReturnType<typeof defaults>} */
   let s = /** @type {any} */ ({});
@@ -275,13 +275,13 @@ const State = (() => {
     // Daylight exposure — outside during daytime accumulates faster
     const hour = Math.floor(timeOfDay() / 60);
     if (hour >= 6 && hour <= 20) {
-      const area = World.getCurrentLocation()?.area;
+      const area = ctx.world.getCurrentLocation()?.area;
       const outsideRate = (area === 'outside') ? 1.0 : 0.15;
       s.daylight_exposure = Math.min(300, s.daylight_exposure + minutes * outsideRate);
     }
 
     // Social isolation increases over time without interaction
-    const actionsSinceLastSocial = Timeline.getActionCount() - s.last_social_interaction;
+    const actionsSinceLastSocial = ctx.timeline.getActionCount() - s.last_social_interaction;
     if (actionsSinceLastSocial > 10) {
       s.social = Math.max(0, s.social - hours * 2);
     }
@@ -637,7 +637,7 @@ const State = (() => {
   function adjustSocial(amount) {
     s.social = Math.max(0, Math.min(100, s.social + amount));
     if (amount > 0) {
-      s.last_social_interaction = Timeline.getActionCount();
+      s.last_social_interaction = ctx.timeline.getActionCount();
     }
   }
 
@@ -1214,7 +1214,7 @@ const State = (() => {
 
     // Indoor evening suppression — dim indoor light delays melatonin onset
     if (hourFrac >= 19 && hourFrac <= 21) {
-      const area = World.getCurrentLocation()?.area;
+      const area = ctx.world.getCurrentLocation()?.area;
       if (area === 'apartment' || area === 'work') {
         t -= 3;
       }
@@ -1520,4 +1520,10 @@ const State = (() => {
     regulationCapacity,
     sleepCycleBreakdown,
   };
-})();
+}
+
+// Compat: global singleton (removed when switching to ES modules)
+const State = createState({
+  get world() { return World; },
+  get timeline() { return Timeline; },
+});

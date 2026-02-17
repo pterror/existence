@@ -1,6 +1,6 @@
 // timeline.js — seeded PRNG, action log, autosave/restore, deterministic replay
 
-const Timeline = (() => {
+function createTimeline(ctx) {
 
   // --- xoshiro128** PRNG ---
   // 128-bit state, excellent statistical quality, deterministic
@@ -173,7 +173,7 @@ const Timeline = (() => {
 
   /** @param {{ type: string; id?: string; destination?: string }} action */
   function recordAction(action) {
-    actions.push({ action, timestamp: State.get('time') });
+    actions.push({ action, timestamp: ctx.state.get('time') });
     save();
   }
 
@@ -209,7 +209,7 @@ const Timeline = (() => {
 
   function save() {
     if (activeRunId) {
-      Runs.saveActions(activeRunId, actions);
+      ctx.runs.saveActions(activeRunId, actions);
     }
   }
 
@@ -273,4 +273,10 @@ const Timeline = (() => {
     getRngState,
     setRngState,
   };
-})();
+}
+
+// Compat: global singleton (removed when switching to ES modules)
+const Timeline = createTimeline({
+  get state() { return State; },
+  get runs() { return Runs; },
+});
