@@ -1,6 +1,9 @@
 // world.js — locations, movement, event triggers
 
-const World = (() => {
+function createWorld(ctx) {
+  const State = ctx.state;
+  const Timeline = ctx.timeline;
+  const Events = ctx.events;
 
   // --- Location definitions ---
   // Each location has an id, connections, and travel times (in minutes)
@@ -257,4 +260,11 @@ const World = (() => {
     updateWeather,
     isInside,
   };
-})();
+}
+
+// Compat: global singleton (removed when switching to ES modules)
+const World = createWorld({
+  get state() { return State; },
+  get timeline() { return Timeline; },
+  get events() { return Events; },
+});

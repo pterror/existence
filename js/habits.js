@@ -3,7 +3,9 @@
 // CART decision trees learn action patterns from features.
 // No RNG consumed — pure state reads + ML.
 
-const Habits = (() => {
+function createHabits(ctx) {
+  const State = ctx.state;
+  const World = ctx.world;
 
   // --- Feature schema ---
   // Declares whether each feature is continuous or categorical.
@@ -527,4 +529,10 @@ const Habits = (() => {
     predictHabit,
     reset,
   };
-})();
+}
+
+// Compat: global singleton (removed when switching to ES modules)
+const Habits = createHabits({
+  get state() { return State; },
+  get world() { return World; },
+});
