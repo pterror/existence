@@ -2,7 +2,7 @@
 // Semantic log parallel to the action log. Not persisted —
 // reconstructed during replay (same seed + actions = same events).
 
-function createEvents(ctx) {
+export function createEvents(ctx) {
   /** @type {{ time: number, type: string, data: object }[]} */
   let log = [];
 
@@ -64,5 +64,3 @@ function createEvents(ctx) {
   return { init, record, last, since, count, daysSinceLast, all, restoreLog };
 }
 
-// Compat: global singleton (removed when switching to ES modules)
-const Events = createEvents({ get state() { return State; } });

@@ -1,6 +1,6 @@
 // game.js — initialization, game loop, orchestration
 
-function createGame(ctx) {
+export function createGame(ctx) {
   const State = ctx.state;
   const Timeline = ctx.timeline;
   const Character = ctx.character;
@@ -1236,17 +1236,3 @@ function createGame(ctx) {
   return { init };
 }
 
-// Compat: global singleton (removed when switching to ES modules)
-const Game = createGame({
-  get state() { return State; },
-  get timeline() { return Timeline; },
-  get character() { return Character; },
-  get world() { return World; },
-  get events() { return Events; },
-  get content() { return Content; },
-  get habits() { return Habits; },
-  get ui() { return UI; },
-  get runs() { return Runs; },
-  get chargen() { return Chargen; },
-});
-document.addEventListener('DOMContentLoaded', () => Game.init());

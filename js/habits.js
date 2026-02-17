@@ -3,7 +3,7 @@
 // CART decision trees learn action patterns from features.
 // No RNG consumed — pure state reads + ML.
 
-function createHabits(ctx) {
+export function createHabits(ctx) {
   const State = ctx.state;
   const World = ctx.world;
 
@@ -531,8 +531,3 @@ function createHabits(ctx) {
   };
 }
 
-// Compat: global singleton (removed when switching to ES modules)
-const Habits = createHabits({
-  get state() { return State; },
-  get world() { return World; },
-});

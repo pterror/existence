@@ -1,6 +1,8 @@
 // chargen.js — character generation and creation UI flow
 
-function createChargen(ctx) {
+import { NameData } from './names.js';
+
+export function createChargen(ctx) {
   const Timeline = ctx.timeline;
   const Character = ctx.character;
   const Runs = ctx.runs;
@@ -933,9 +935,3 @@ function createChargen(ctx) {
   };
 }
 
-// Compat: global singleton (removed when switching to ES modules)
-const Chargen = createChargen({
-  get timeline() { return Timeline; },
-  get character() { return Character; },
-  get runs() { return Runs; },
-});

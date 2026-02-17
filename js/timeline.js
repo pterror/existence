@@ -1,6 +1,6 @@
 // timeline.js — seeded PRNG, action log, autosave/restore, deterministic replay
 
-function createTimeline(ctx) {
+export function createTimeline(ctx) {
 
   // --- xoshiro128** PRNG ---
   // 128-bit state, excellent statistical quality, deterministic
@@ -275,8 +275,3 @@ function createTimeline(ctx) {
   };
 }
 
-// Compat: global singleton (removed when switching to ES modules)
-const Timeline = createTimeline({
-  get state() { return State; },
-  get runs() { return Runs; },
-});

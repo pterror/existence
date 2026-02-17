@@ -1,6 +1,6 @@
 // ui.js — rendering, text display, interaction handling
 
-function createUI(ctx) {
+export function createUI(ctx) {
   const State = ctx.state;
   const Content = ctx.content;
   const World = ctx.world;
@@ -330,10 +330,3 @@ function createUI(ctx) {
   };
 }
 
-// Compat: global singleton (removed when switching to ES modules)
-const UI = createUI({
-  get state() { return State; },
-  get content() { return Content; },
-  get world() { return World; },
-  get habits() { return Habits; },
-});

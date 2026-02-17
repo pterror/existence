@@ -1,6 +1,6 @@
 // runs.js — IndexedDB storage layer for multi-run support
 
-function createRuns(ctx) {
+export function createRuns(ctx) {
   const DB_NAME = 'existence';
   const DB_VERSION = 1;
 
@@ -277,5 +277,3 @@ function createRuns(ctx) {
   };
 }
 
-// Compat: global singleton (removed when switching to ES modules)
-const Runs = createRuns({});

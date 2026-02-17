@@ -1,6 +1,6 @@
 // world.js — locations, movement, event triggers
 
-function createWorld(ctx) {
+export function createWorld(ctx) {
   const State = ctx.state;
   const Timeline = ctx.timeline;
   const Events = ctx.events;
@@ -262,9 +262,3 @@ function createWorld(ctx) {
   };
 }
 
-// Compat: global singleton (removed when switching to ES modules)
-const World = createWorld({
-  get state() { return State; },
-  get timeline() { return Timeline; },
-  get events() { return Events; },
-});

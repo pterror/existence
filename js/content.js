@@ -1,7 +1,7 @@
 // content.js — all text content, variants, events
 // A world, not a script. Text carries everything.
 
-function createContent(ctx) {
+export function createContent(ctx) {
   const State = ctx.state;
   const Timeline = ctx.timeline;
   const Character = ctx.character;
@@ -3572,11 +3572,3 @@ function createContent(ctx) {
   };
 }
 
-// Compat: global singleton (removed when switching to ES modules)
-const Content = createContent({
-  get state() { return State; },
-  get timeline() { return Timeline; },
-  get character() { return Character; },
-  get world() { return World; },
-  get events() { return Events; },
-});

@@ -3,7 +3,7 @@
 
 /** @typedef {ReturnType<typeof State.getAll>} GameState */
 
-function createState(ctx) {
+export function createState(ctx) {
   // --- Internal state ---
   /** @type {ReturnType<typeof defaults>} */
   let s = /** @type {any} */ ({});
@@ -1522,8 +1522,3 @@ function createState(ctx) {
   };
 }
 
-// Compat: global singleton (removed when switching to ES modules)
-const State = createState({
-  get world() { return World; },
-  get timeline() { return Timeline; },
-});
