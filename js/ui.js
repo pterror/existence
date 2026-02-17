@@ -1,6 +1,10 @@
 // ui.js — rendering, text display, interaction handling
 
-const UI = (() => {
+function createUI(ctx) {
+  const State = ctx.state;
+  const Content = ctx.content;
+  const World = ctx.world;
+  const Habits = ctx.habits;
   /** @type {HTMLElement} */ let passageEl;
   /** @type {HTMLElement} */ let eventTextEl;
   /** @type {HTMLElement} */ let actionsEl;
@@ -324,4 +328,12 @@ const UI = (() => {
     showAwareness,
     hideAwareness,
   };
-})();
+}
+
+// Compat: global singleton (removed when switching to ES modules)
+const UI = createUI({
+  get state() { return State; },
+  get content() { return Content; },
+  get world() { return World; },
+  get habits() { return Habits; },
+});

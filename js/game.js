@@ -1,6 +1,16 @@
 // game.js — initialization, game loop, orchestration
 
-const Game = (() => {
+function createGame(ctx) {
+  const State = ctx.state;
+  const Timeline = ctx.timeline;
+  const Character = ctx.character;
+  const World = ctx.world;
+  const Events = ctx.events;
+  const Content = ctx.content;
+  const Habits = ctx.habits;
+  const UI = ctx.ui;
+  const Runs = ctx.runs;
+  const Chargen = ctx.chargen;
 
   let isReplaying = false;
 
@@ -1223,9 +1233,20 @@ const Game = (() => {
     UI.updateAwareness();
   }
 
-  // --- Start ---
-
-  document.addEventListener('DOMContentLoaded', init);
-
   return { init };
-})();
+}
+
+// Compat: global singleton (removed when switching to ES modules)
+const Game = createGame({
+  get state() { return State; },
+  get timeline() { return Timeline; },
+  get character() { return Character; },
+  get world() { return World; },
+  get events() { return Events; },
+  get content() { return Content; },
+  get habits() { return Habits; },
+  get ui() { return UI; },
+  get runs() { return Runs; },
+  get chargen() { return Chargen; },
+});
+document.addEventListener('DOMContentLoaded', () => Game.init());
