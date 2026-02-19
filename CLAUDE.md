@@ -54,6 +54,7 @@ No build step. Plain JS loaded via script tags.
 
 - **Note things down immediately:** problems, tech debt, or issues spotted MUST be added to TODO.md backlog
 - **Capture fundamental principles.** When a design principle is discovered, clarified, or corrected — whether in conversation or during implementation — write it into CLAUDE.md (short rule) and DESIGN.md (full explanation) immediately. Principles are more important than code. Don't let them live only in chat history.
+- **Write it down if it will ever need to be written down.** If something is discussed — a real-world mechanic, a design option, a system that should exist, a gap in the simulation — and it's the kind of thing that should eventually be built or considered, document it now. Don't wait until it's being implemented. TODO.md, DESIGN.md, and CLAUDE.md exist so nothing lives only in chat history or someone's memory. When in doubt: write it down.
 - **Do the work properly.** Don't leave workarounds or hacks undocumented.
 - **No shortcuts.** When full fidelity isn't achievable right now, don't implement a lower-fidelity version silently. Either do it properly or add it to TODO.md as an explicit approximation debt with a note on what's being lost. Never paper over a gap with a hardcoded assumption — name the assumption, document what should replace it.
 
