@@ -22,6 +22,9 @@ export function createUI(ctx) {
   let idleCallback = null;
   let idleCount = 0;
   let lastActivityTime = Date.now();
+  let afkDetectionEnabled = true;
+  /** @type {HTMLElement | null} */
+  let afkIndicatorEl = null;
 
   // Focus state — UI-only, not saved or replayed
   let timeFocus = 0.5;
@@ -72,10 +75,32 @@ export function createUI(ctx) {
     });
 
     // Track real user presence — any input resets the activity clock.
-    const markActive = () => { lastActivityTime = Date.now(); };
+    const markActive = () => {
+      lastActivityTime = Date.now();
+      if (afkDetectionEnabled && afkIndicatorEl) {
+        afkIndicatorEl.classList.add('hidden');
+      }
+    };
     document.addEventListener('mousemove', markActive, { passive: true });
     document.addEventListener('keydown', markActive, { passive: true });
     document.addEventListener('click', markActive, { passive: true });
+
+    afkIndicatorEl = /** @type {HTMLElement} */ (document.getElementById('afk-indicator'));
+    afkIndicatorEl.addEventListener('click', () => {
+      afkDetectionEnabled = !afkDetectionEnabled;
+      if (!afkDetectionEnabled) {
+        // Detection off — show indicator in off state, restart chain so thoughts continue
+        afkIndicatorEl.classList.remove('hidden');
+        afkIndicatorEl.classList.add('detection-off');
+        resetIdleTimer();
+      } else {
+        // Detection on — remove off styling; hide if player is currently present
+        afkIndicatorEl.classList.remove('detection-off');
+        if (Date.now() - lastActivityTime <= ACTIVITY_TIMEOUT) {
+          afkIndicatorEl.classList.add('hidden');
+        }
+      }
+    });
   }
 
   // --- Text rendering ---
@@ -239,7 +264,10 @@ export function createUI(ctx) {
     const delay = delays[Math.min(idleCount, delays.length - 1)];
     idleTimer = setTimeout(() => {
       // If the player has been truly absent, drop silently without rescheduling.
-      if (Date.now() - lastActivityTime > ACTIVITY_TIMEOUT) return;
+      if (afkDetectionEnabled && Date.now() - lastActivityTime > ACTIVITY_TIMEOUT) {
+        if (afkIndicatorEl) afkIndicatorEl.classList.remove('hidden');
+        return;
+      }
       if (idleCallback) idleCallback();
       idleCount++;
       scheduleNextIdle();

@@ -53,6 +53,19 @@ body {
   display: none;
 }
 
+#afk-indicator {
+  margin-right: auto;
+  opacity: 0.2;
+}
+
+#afk-indicator.detection-off {
+  opacity: 0.4;
+}
+
+#afk-indicator.hidden {
+  display: none;
+}
+
 #text-area {
   flex: 1;
   margin-bottom: 2rem;
