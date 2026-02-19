@@ -170,8 +170,8 @@ No content level configuration. DESIGN.md describes: baseline tier (everyday str
 - Onset probability magnitudes not derived from real incidence data — need calibration
 - No seasonal variation (flu season, winter colds)
 - No recent-illness immunity (just recovered → lower susceptibility)
-- No job-type exposure rates (food service vs. remote vs. office — very different)
-- No immune function model — stress/sleep suppression is real but current magnitudes are guesses
+- **Contact intensity, not job type, is the real exposure variable.** The driver of illness exposure is how many people you're in close contact with, for how long, in what ventilation. Job type correlates with this but isn't the mechanism — a remote office worker and an in-person office worker are very different; a retail cashier and a food service worker are similar. The right model: daily close contacts derived from (job type + housing situation + social behavior). Not a parameter that exists yet.
+- No immune function model — stress/sleep suppression of immunity is real but current magnitudes are guesses
 
 ### Jurisdiction as a character parameter
 Healthcare access, reproductive rights, and legal protections are **legal/political variables**, not geographic ones. Latitude does not predict abortion access, healthcare coverage, drug policy, or trans protections — a character at 59°N in Sweden has near-universal access; one at 52°N in Poland (historically) near-total prohibition. Using latitude as a proxy for US-style regional variation is a US-centric assumption that doesn't survive leaving the country.
