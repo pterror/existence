@@ -57,6 +57,12 @@ Temperature:
 - Used in street, bus_stop descriptions; move:street approaching prose.
 - Diurnal variation ○.
 
+### Finance accessors
+- Billing cycle offsets now stored in state (set by `applyToState()`) — content no longer calls `Character.get('..._day_offset')`
+- `nextPaycheckDays()` — days until next paycheck (0 = today)
+- `nextBillDue()` → `{ name, amount, daysUntil }` — soonest upcoming bill across rent/utilities/phone
+- TODO.md: noted paycheck structure + bill amounts as approximation debts that should derive from job type, season, usage, plan
+
 ### Substances (caffeine)
 - **caffeine_level** (0–100 state var) — one cup ≈ 50 units. Half-life 5h, metabolized in `advanceTime`.
 - `caffeineTier()` — 'none' | 'low' | 'active' | 'high'

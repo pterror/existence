@@ -52,6 +52,11 @@ export function createCharacter(ctx) {
     State.set('pay_rate', sim.pay_rate);
     State.set('rent_amount', sim.rent_amount);
     State.set('job_standing', sim.job_standing_start);
+    // Billing cycle offsets — needed by State.nextPaycheck() / nextBillDue()
+    State.set('paycheck_day_offset', current.paycheck_day_offset ?? 7);
+    State.set('rent_day_offset', current.rent_day_offset ?? 1);
+    State.set('utility_day_offset', current.utility_day_offset ?? 15);
+    State.set('phone_bill_day_offset', current.phone_bill_day_offset ?? 20);
 
     // Financial anxiety sentiment
     if (sim.financial_anxiety > 0.01) {

@@ -2969,8 +2969,8 @@ export function createContent(ctx) {
     // Amounts and offsets derive from character backstory.
     const day = State.getDay();
 
-    // Paycheck — every 14 days, offset by character's paycheck_day_offset
-    const paycheckOffset = Character.get('paycheck_day_offset') ?? 7;
+    // Paycheck — every 14 days, offset stored in state from character
+    const paycheckOffset = State.get('paycheck_day_offset');
     if (day > 1 && day % 14 === paycheckOffset % 14 && State.get('last_paycheck_day') !== day) {
       State.set('last_paycheck_day', day);
       const payRate = State.get('pay_rate');
@@ -2993,26 +2993,24 @@ export function createContent(ctx) {
       State.set('days_worked_this_period', 0);
     }
 
-    // Rent — every 30 days, offset by character's rent_day_offset
-    const rentOffset = Character.get('rent_day_offset') ?? 1;
+    // Rent — every 30 days, offset stored in state from character
+    const rentOffset = State.get('rent_day_offset');
     if (day > 1 && day % 30 === rentOffset % 30 && State.get('last_rent_day') !== day) {
       State.set('last_rent_day', day);
       State.deductBill(State.get('rent_amount'), 'rent');
       added = true;
     }
 
-    // Utilities — every 30 days, offset by character's utility_day_offset
-    // TODO: derive from actual usage (lights, heating/cooling, season, apartment size)
-    const utilityOffset = Character.get('utility_day_offset') ?? 15;
+    // Utilities — every 30 days
+    const utilityOffset = State.get('utility_day_offset');
     if (day > 1 && day % 30 === utilityOffset % 30 && State.get('last_utility_day') !== day) {
       State.set('last_utility_day', day);
       State.deductBill(65, 'utilities');
       added = true;
     }
 
-    // Phone bill — every 30 days, offset by character's phone_bill_day_offset
-    // TODO: derive from plan type (prepaid vs contract, data usage)
-    const phoneOffset = Character.get('phone_bill_day_offset') ?? 20;
+    // Phone bill — every 30 days
+    const phoneOffset = State.get('phone_bill_day_offset');
     if (day > 1 && day % 30 === phoneOffset % 30 && State.get('last_phone_bill_day') !== day) {
       State.set('last_phone_bill_day', day);
       State.deductBill(45, 'phone');

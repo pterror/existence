@@ -74,8 +74,9 @@ Full design in [DESIGN-HABITS.md](DESIGN-HABITS.md). The character develops beha
 ~~Basic financial cycle (paycheck, rent, utilities, phone)~~ — **IMPLEMENTED.** Life history backstory generates starting money, pay rate, rent. Bills auto-deduct monthly. Paycheck varies with attendance.
 
 **Still arbitrary (should become derived):**
-- Utilities ($65 flat) — should derive from season, apartment size, actual usage
-- Phone bill ($45 flat) — should derive from plan type, data usage
+- Paycheck: flat biweekly amount. Should vary by hours worked, overtime, deductions (taxes, insurance). Pay period length is also job-type-specific (weekly gig, biweekly salary, monthly freelance).
+- Utilities ($65 flat) — should derive from season (heating/cooling), apartment size, actual usage
+- Phone bill ($45 flat) — should derive from plan type (prepaid vs contract), data usage
 - Rent bracket — should derive from housing type (apartment/room/family), not just origin
 - Personality parameters — currently random 0–100, should partially derive from upbringing events
 - Friend flavors — currently random, should connect to backstory (who stays after life events?)

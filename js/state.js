@@ -213,6 +213,11 @@ export function createState(ctx) {
       last_rent_day: 0,         // guard: game day of last rent deduction
       last_utility_day: 0,      // guard: game day of last utility deduction
       last_phone_bill_day: 0,   // guard: game day of last phone bill deduction
+      // Billing cycle offsets — set from character by applyToState()
+      paycheck_day_offset: 7,   // day % 14 === this → paycheck fires
+      rent_day_offset: 1,       // day % 30 === this → rent fires
+      utility_day_offset: 15,   // day % 30 === this → utilities fire
+      phone_bill_day_offset: 20, // day % 30 === this → phone bill fires
 
       // Internal counters the player never sees
       actions_since_rest: 0,
@@ -574,6 +579,40 @@ export function createState(ctx) {
   /** Whether the character has enough money to spend this amount. */
   function canAfford(amount) {
     return s.money >= amount;
+  }
+
+  /**
+   * Days until next paycheck (0 = today, 1 = tomorrow, etc.).
+   * Paycheck fires on day % 14 === paycheck_day_offset % 14.
+   */
+  function nextPaycheckDays() {
+    const day = getDay();
+    const offset = s.paycheck_day_offset % 14;
+    const daysInCycle = ((offset - day % 14) + 14) % 14;
+    // If today is paycheck day and it already fired this period, next is in 14 days
+    return (daysInCycle === 0 && s.last_paycheck_day === day) ? 14 : daysInCycle;
+  }
+
+  /**
+   * The next bill due: name, rough amount, and days until it fires.
+   * Returns the soonest upcoming bill.
+   */
+  function nextBillDue() {
+    const day = getDay();
+    const bills = [
+      { name: 'rent',      amount: s.rent_amount, offset: s.rent_day_offset % 30,      cycle: 30, last: s.last_rent_day },
+      { name: 'utilities', amount: 65,            offset: s.utility_day_offset % 30,   cycle: 30, last: s.last_utility_day },
+      { name: 'phone',     amount: 45,            offset: s.phone_bill_day_offset % 30, cycle: 30, last: s.last_phone_bill_day },
+    ];
+    let soonest = null;
+    for (const bill of bills) {
+      const daysUntil = ((bill.offset - day % bill.cycle) + bill.cycle) % bill.cycle;
+      const adjustedDays = (daysUntil === 0 && bill.last === day) ? bill.cycle : daysUntil;
+      if (soonest === null || adjustedDays < soonest.daysUntil) {
+        soonest = { name: bill.name, amount: bill.amount, daysUntil: adjustedDays };
+      }
+    }
+    return soonest;
   }
 
   /**
@@ -1681,6 +1720,8 @@ export function createState(ctx) {
     moneyTier,
     sleepDebtTier,
     canAfford,
+    nextPaycheckDays,
+    nextBillDue,
     timePeriod,
     canFocus,
     moodTone,
