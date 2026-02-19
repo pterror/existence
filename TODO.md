@@ -64,6 +64,7 @@ Full design in [DESIGN-HABITS.md](DESIGN-HABITS.md). The character develops beha
 4. **Prose modulation** — habit strength modulates prose density (high habit → terse, low habit → full). Needs content variants.
 5. **Decision path → prose motivation** — tree path tells prose system WHY the habit fired (morning routine vs hygiene need). Needs auto-advance prose system.
 6. **Routine sentiment activation** — overall habit consistency feeds routine comfort/irritation NT targets.
+7. **Numeric field pre-fill from history** — parameterized interactions (e.g. `help_friend` amount) can pre-fill input fields when habit confidence is high enough. The action log already carries `action.data.amount`; the habit system would need to track predicted parameter values alongside action predictions. Input stays editable — prediction just saves typing when behavior is consistent.
 
 ### Social initiation
 ~~Friends only send messages to you~~ — **MOSTLY IMPLEMENTED.** `reply_to_friend` phone interaction: player replies, friend responds after 30–90 min. `message_friend` phone interaction: player reaches out first when no unread messages from that friend, picks friend by guilt/contact recency. Both reduce guilt 0.06, reset contact timer, queue response. NT-shaded prose per flavor (separate prose tables for initiating vs replying).
