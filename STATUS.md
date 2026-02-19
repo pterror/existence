@@ -94,6 +94,9 @@ Pattern established for character health conditions. First condition: migraines.
 - `adenosineBlock()` — 0–1 receptor block factor. High caffeine = adenosine still accumulates but isn't felt. Crash hits when caffeine clears.
 - `caffeineSleepInterference()` — quality multiplier (0.65–1.0) for sleep execute
 - `make_coffee` interaction at kitchen — available unless caffeineTier is 'high'. Prose shades on mood + adenosine + caffeine.
+- `get_coffee_work` interaction at workplace — available during work hours unless caffeineTier is 'high'. 40 caffeine units (slightly weaker than home coffee). Job-type specific prose (office/retail/food_service).
+- `buy_coffee_store` interaction at corner store — costs ~$1.75–3.00. 50 caffeine units. Available if canAfford(2) and not 'high' tier.
+- **`adenosineBlock()` propagation** — all ~25 adenosine-fog prose sites (weighted picks + if-branches) now multiply by `adenosineBlock()`, so caffeine actually masks the tiredness texture in prose. Fog variants suppressed when caffeine is active.
 
 ### Emotional Inertia (Layer 2 of DESIGN-EMOTIONS.md)
 Per-character trait controlling how sticky moods are. Only affects the four mood-primary systems (serotonin, dopamine, NE, GABA) — physiological rhythms are unaffected by personality.

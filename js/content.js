@@ -363,8 +363,8 @@ export function createContent(ctx) {
         { weight: 1, value: `You ask ${name} about the coffee. Same as yesterday. You nod. It's small. It's something.` },
         { weight: 1, value: `${name} tells you about a sale somewhere. You listen. It's easier than not listening.` },
         { weight: 1, value: `You mention the weather to ${name}. The conversation goes exactly where you'd expect. It's fine.` },
-        // High adenosine — you drift through the interaction
-        { weight: State.lerp01(aden, 50, 70), value: `${name} is saying something. You catch every third word — enough to nod, enough to make the right face. The rest dissolves. You're here but the fog is doing most of the work.` },
+        // High adenosine (unblocked by caffeine) — you drift through the interaction
+        { weight: State.lerp01(aden, 50, 70) * State.adenosineBlock(), value: `${name} is saying something. You catch every third word — enough to nod, enough to make the right face. The rest dissolves. You're here but the fog is doing most of the work.` },
         // Accumulated irritation — everything they say costs you
         { weight: irr * 1.5, value: `You say something to ${name}. They respond at length. You knew they would. You always know they will. Every word takes something from you that you can't name.` },
         // Accumulated warmth — the mundane has become familiar
@@ -726,8 +726,8 @@ export function createContent(ctx) {
         { weight: 1, value: 'The overhead music changes to a song you know. You wish it hadn\'t.' },
         { weight: 1, value: 'The automatic doors open and close. Open and close.' },
         { weight: 1, value: 'A child is crying somewhere in the store. The sound carries.' },
-        // High adenosine — everything blurs together
-        { weight: State.lerp01(aden, 50, 70), value: 'The store sounds blur into a single hum — registers, music, voices, the hiss of the HVAC. You\'re standing in it. It\'s hard to pick anything apart.' },
+        // High adenosine (unblocked) — everything blurs together
+        { weight: State.lerp01(aden, 50, 70) * State.adenosineBlock(), value: 'The store sounds blur into a single hum — registers, music, voices, the hiss of the HVAC. You\'re standing in it. It\'s hard to pick anything apart.' },
       ]);
     },
     food_service: () => {
@@ -736,8 +736,8 @@ export function createContent(ctx) {
         { weight: 1, value: 'The exhaust fan changes pitch for a second, then settles.' },
         { weight: 1, value: 'Someone drops a pan in the back. The clatter hangs in the air.' },
         { weight: 1, value: 'The drive-through speaker crackles with a voice you can\'t quite make out.' },
-        // High adenosine — the kitchen noise is a wall
-        { weight: State.lerp01(aden, 50, 70), value: 'The kitchen noise is a wall of sound and you\'re behind it. Hood fans, fryer, someone talking — it\'s all one texture. You move through it without separating the parts.' },
+        // High adenosine (unblocked) — the kitchen noise is a wall
+        { weight: State.lerp01(aden, 50, 70) * State.adenosineBlock(), value: 'The kitchen noise is a wall of sound and you\'re behind it. Hood fans, fryer, someone talking — it\'s all one texture. You move through it without separating the parts.' },
       ]);
     },
   };
@@ -865,7 +865,7 @@ export function createContent(ctx) {
       }
 
       // Deterministic NT modifiers — no RNG consumed, appended as undertones
-      if (aden > 65) {
+      if (aden > 65 && State.adenosineBlock() > 0.4) {
         desc += ' The edges of things are soft. Not blurry — just not quite sharp.';
       }
       if (ne > 60 && gaba < 35) {
@@ -933,7 +933,7 @@ export function createContent(ctx) {
       // NT deterministic modifiers (no RNG — location descriptions called from UI.render)
       const aden = State.get('adenosine');
       const ne = State.get('norepinephrine');
-      if (aden > 65) {
+      if (aden > 65 && State.adenosineBlock() > 0.4) {
         desc += ' The light in here is doing more than its share.';
       } else if (ne > 65 && (time === 'morning' || time === 'early_morning')) {
         desc += ' Everything in here feels very present this early.';
@@ -991,7 +991,7 @@ export function createContent(ctx) {
       // NT deterministic modifiers
       const aden = State.get('adenosine');
       const ne = State.get('norepinephrine');
-      if (aden > 70) {
+      if (aden > 70 && State.adenosineBlock() > 0.4) {
         desc += ' The light in here is harsh.';
       } else if (ne > 65) {
         desc += ' The faucet drip sounds too loud.';
@@ -1062,7 +1062,7 @@ export function createContent(ctx) {
       const gaba = State.get('gaba');
       if (ne > 70) {
         desc += ' Every car, every voice arrives separately. Too much input for a street.';
-      } else if (aden > 65) {
+      } else if (aden > 65 && State.adenosineBlock() > 0.4) {
         desc += ' The street softens at the edges. You\'re moving through it but not quite in it.';
       } else if (gaba < 35) {
         desc += ' The openness doesn\'t help as much as it should.';
@@ -1113,7 +1113,7 @@ export function createContent(ctx) {
       const gaba = State.get('gaba');
       if (ne > 65) {
         desc += ' The other people waiting register louder than they should.';
-      } else if (aden > 65) {
+      } else if (aden > 65 && State.adenosineBlock() > 0.4) {
         desc += ' The wait stretches in that thick, slow way. Time doing what it does when you\'re tired.';
       } else if (gaba < 35) {
         desc += ' Standing still is hard.';
@@ -1158,7 +1158,7 @@ export function createContent(ctx) {
       const aden = State.get('adenosine');
       if (ne > 65) {
         desc += ' The fluorescent hum, the fridge doors rattling — too much input for a corner store.';
-      } else if (aden > 65) {
+      } else if (aden > 65 && State.adenosineBlock() > 0.4) {
         desc += ' The aisles smear a little. You know what you need.';
       }
 
@@ -2024,7 +2024,7 @@ export function createContent(ctx) {
         }
 
         // Deterministic modifiers — no RNG consumed
-        if (aden > 70) {
+        if (aden > 70 && State.adenosineBlock() > 0.4) {
           text += ' Everything is soft at the edges. The kind of tired that blurs.';
         }
 
@@ -2139,7 +2139,7 @@ export function createContent(ctx) {
           { weight: 1, value: 'The window. Outside. Not much happening, but you look for a while anyway.' },
           { weight: 1, value: 'You watch the street for a few minutes. Nothing in particular. It passes the time.' },
           // High adenosine — the view is soft
-          { weight: State.lerp01(aden, 50, 75), value: 'You look out. The view is there but soft — edges blurred, details optional. You watch without really watching. The tiredness makes it all a little far away.' },
+          { weight: State.lerp01(aden, 50, 75) * State.adenosineBlock(), value: 'You look out. The view is there but soft — edges blurred, details optional. You watch without really watching. The tiredness makes it all a little far away.' },
           // Rain lover during drizzle — rain on glass
           { weight: weather === 'drizzle' && rc > 0 ? rc * 0.7 : 0, value: 'You look out. The rain runs down the glass in slow lines. The sound of it is something you don\'t have a word for, just a feeling. You watch.' },
           // Snow — the view is the same but different
@@ -2384,8 +2384,8 @@ export function createContent(ctx) {
           { weight: 1, value: 'Something from the fridge. You eat it at the counter. It\'s food. It does the job.' },
           // High food comfort — eating is a small pleasure
           { weight: fc > 0 ? fc : 0, value: 'You make something simple from what\'s there and eat it slowly. The warmth of it, the familiar taste. A small comfort, but a real one.' },
-          // High adenosine — eating through fog
-          { weight: State.lerp01(aden, 55, 75), value: 'You eat something. Standing at the counter, half-awake, chewing without really tasting. The food goes in. Your body processes it somewhere behind the fog.' },
+          // High adenosine (unblocked) — eating through fog
+          { weight: State.lerp01(aden, 55, 75) * State.adenosineBlock(), value: 'You eat something. Standing at the counter, half-awake, chewing without really tasting. The food goes in. Your body processes it somewhere behind the fog.' },
         ]);
       },
     },
@@ -2423,7 +2423,7 @@ export function createContent(ctx) {
         if (mood === 'numb' || mood === 'hollow') {
           return Timeline.weightedPick([
             { weight: 1, value: `You find something in the cupboard. You eat it without much thought. It goes in.${lastLine}` },
-            { weight: State.lerp01(aden, 50, 75), value: `Something from the back of the cupboard. You make it and eat it and that's about all there is to say about it.${lastLine}` },
+            { weight: State.lerp01(aden, 50, 75) * State.adenosineBlock(), value: `Something from the back of the cupboard. You make it and eat it and that's about all there is to say about it.${lastLine}` },
           ]);
         }
         return Timeline.weightedPick([
@@ -2462,7 +2462,7 @@ export function createContent(ctx) {
         if (energy === 'depleted' || energy === 'exhausted') {
           return 'Water from the tap. You drink it standing at the sink. Your body wanted it more than you realized.';
         }
-        if (aden > 60 && (mood === 'numb' || mood === 'heavy')) {
+        if (aden > 60 && State.adenosineBlock() > 0.4 && (mood === 'numb' || mood === 'heavy')) {
           return 'Water. Something your body can process without much thought from you.';
         }
         return 'You fill a glass and drink it. Tap water. It\'s fine.';
@@ -2537,7 +2537,7 @@ export function createContent(ctx) {
         if (mood === 'heavy' || mood === 'numb') {
           return 'You wash dishes. The warm water is the closest thing to comfort available right now. One thing, at least, is done.';
         }
-        if (aden > 65) {
+        if (aden > 65 && State.adenosineBlock() > 0.4) {
           return 'Your hands know what to do without you deciding anything. Hot water, soap, the stack going down. When it\'s over you\'re not sure how long it took.';
         }
         return 'You wash the dishes. Warm water, soap, the repetition of it. The kitchen looks a little more like someone lives here on purpose.';
@@ -2623,7 +2623,7 @@ export function createContent(ctx) {
             { weight: 1, value: 'The table. You sit at it. Not eating, not doing anything. Just occupying a chair in a room where chairs exist.' },
             { weight: 1, value: 'You sit. The kitchen is empty in the way it always is. You\'re in it. The clock ticks, or doesn\'t. Hard to tell.' },
             // High adenosine — the sitting is heavy
-            { weight: State.lerp01(aden, 50, 75), value: 'You sit down and your body thanks you by getting heavier. The table is a surface to put your arms on. Your eyelids are interested in closing. The kitchen hums around you, distant.' },
+            { weight: State.lerp01(aden, 50, 75) * State.adenosineBlock(), value: 'You sit down and your body thanks you by getting heavier. The table is a surface to put your arms on. Your eyelids are interested in closing. The kitchen hums around you, distant.' },
           ]);
         }
         if (mood === 'clear' || mood === 'present') {
@@ -2720,7 +2720,7 @@ export function createContent(ctx) {
         if (mood === 'numb' || mood === 'hollow') {
           return 'Cold water. You go through the motions. The face in the mirror is yours. You don\'t stay to look.';
         }
-        if (aden > 70) {
+        if (aden > 70 && State.adenosineBlock() > 0.4) {
           return 'Cold water on your face. The shock of it is the point. You stand there dripping for a second, waiting to feel more awake.';
         }
         if (ne > 65) {
@@ -2825,7 +2825,7 @@ export function createContent(ctx) {
         // NT deterministic shading (no RNG — replay-safe)
         const aden = State.get('adenosine');
         const ne = State.get('norepinephrine');
-        if (aden > 65) {
+        if (aden > 65 && State.adenosineBlock() > 0.4) {
           return 'You sit down. Your body asked for this before the rest of you decided.';
         }
         if (ne > 65) {
@@ -2912,8 +2912,8 @@ export function createContent(ctx) {
             return Timeline.weightedPick([
               { weight: 1, value: 'You walk in the drizzle. Your jacket darkens at the shoulders. The movement helps some — not a lot, but some. You come back damp.' },
               { weight: 1, value: 'Rain. You walk through it because you\'re already out. It\'s not pleasant but the walking itself does something. Slightly.' },
-              // High adenosine — the walk is a slog
-              { weight: State.lerp01(aden, 50, 70), value: 'You walk in the rain and your legs are heavy. The dampness seeps into your shoes. Each block takes more than the last. The air helps, barely. You come back tired and wet.' },
+              // High adenosine (unblocked) — the walk is a slog
+              { weight: State.lerp01(aden, 50, 70) * State.adenosineBlock(), value: 'You walk in the rain and your legs are heavy. The dampness seeps into your shoes. Each block takes more than the last. The air helps, barely. You come back tired and wet.' },
               // Rain lover — the drizzle is okay
               { weight: rc > 0 ? rc * 0.7 : 0, value: 'You walk in the drizzle and it\'s fine, actually. The sound of rain on your hood. The wet streets. Not everyone likes this. You don\'t mind it.' },
             ]);
@@ -2922,8 +2922,8 @@ export function createContent(ctx) {
             return Timeline.weightedPick([
               { weight: 1, value: 'You walk in the snow. It\'s an effort. Your shoes are damp by the third block. But the movement does something — something small — and the world under snow is at least a different version of itself.' },
               { weight: 1, value: 'Snow. You walk through it because walking is the thing you\'re doing. Each step leaves a mark. The cold is a fact you move through. You come back wetter than you went out.' },
-              // High adenosine — the cold and the drag compound
-              { weight: State.lerp01(aden, 50, 70), value: 'You walk in the snow and your body is doing its best. Heavy legs, cold feet, the kind of tired that makes snow feel like sand. You do it anyway. That\'s the whole story.' },
+              // High adenosine (unblocked) — the cold and the drag compound
+              { weight: State.lerp01(aden, 50, 70) * State.adenosineBlock(), value: 'You walk in the snow and your body is doing its best. Heavy legs, cold feet, the kind of tired that makes snow feel like sand. You do it anyway. That\'s the whole story.' },
             ]);
           }
           return Timeline.weightedPick([
@@ -2956,8 +2956,8 @@ export function createContent(ctx) {
             { weight: 1, value: 'You walk. Slowly. The effort of being outside is real — the bodies, the noise, the fact of being vertical and moving. But the air changes things, slightly.' },
             { weight: 1, value: 'A walk. Your body does it reluctantly. The street, the sounds, the sky that\'s bigger than any ceiling. By the end something has shifted — not much, but it\'s there.' },
             { weight: 1, value: 'You make yourself walk. Each block is a small negotiation. But the air is different out here and by the time you turn back, something in your chest is a fraction looser.' },
-            // High adenosine — the body drags
-            { weight: State.lerp01(aden, 50, 70), value: 'You walk. Your body is a heavy thing you\'re carrying through space. The legs work but they want you to know they\'re working. By the second block you\'re wondering if this was a mistake. By the third, you don\'t care. You just walk.' },
+            // High adenosine (unblocked) — the body drags
+            { weight: State.lerp01(aden, 50, 70) * State.adenosineBlock(), value: 'You walk. Your body is a heavy thing you\'re carrying through space. The legs work but they want you to know they\'re working. By the second block you\'re wondering if this was a mistake. By the third, you don\'t care. You just walk.' },
           ]);
         }
         if (mood === 'fraying') {
@@ -3063,8 +3063,8 @@ export function createContent(ctx) {
           return Timeline.weightedPick([
             { weight: 1, value: long ? 'Snow on your shoulders. The bus takes a long time. There\'s nowhere warmer within reach.' : 'Snow while you wait. The bus comes.' },
             { weight: 1, value: 'The shelter doesn\'t help much with cold. You stand in it anyway. Snow on everything. The bus arrives eventually.' },
-            // High adenosine — cold and tired compound
-            { weight: State.lerp01(aden, 50, 70), value: 'The cold gets into your feet first, then your hands. You shift your weight. Snow on your shoulders.' + (long ? ' The bus takes a long time.' : ' The bus comes.') },
+            // High adenosine (unblocked) — cold and tired compound
+            { weight: State.lerp01(aden, 50, 70) * State.adenosineBlock(), value: 'The cold gets into your feet first, then your hands. You shift your weight. Snow on your shoulders.' + (long ? ' The bus takes a long time.' : ' The bus comes.') },
             // Low serotonin — the wait has more weight than it should
             { weight: State.lerp01(ser, 40, 20), value: 'Snow, cold, waiting. ' + (long ? 'The bus doesn\'t come and doesn\'t come.' : 'The bus comes.') + ' You get on. That\'s all.' },
           ]);
@@ -3108,8 +3108,8 @@ export function createContent(ctx) {
           return Timeline.weightedPick([
             { weight: 1, value: long ? 'The bus takes its time. You wait in the cold.' : 'You wait at the stop. The bus arrives.' },
             { weight: 1, value: 'Your bag. Your shoes. Your body wanting to lean on something.' + (long ? ' The bus is a long time coming.' : ' The bus comes.') },
-            // High adenosine — legs want to sit
-            { weight: State.lerp01(aden, 45, 68), value: 'Your legs are tired and you\'ve only been standing for a few minutes.' + (long ? ' The bus takes forever.' : '') + ' You get on when it comes.' },
+            // High adenosine (unblocked) — legs want to sit
+            { weight: State.lerp01(aden, 45, 68) * State.adenosineBlock(), value: 'Your legs are tired and you\'ve only been standing for a few minutes.' + (long ? ' The bus takes forever.' : '') + ' You get on when it comes.' },
           ]);
         }
 
@@ -3117,8 +3117,8 @@ export function createContent(ctx) {
           return Timeline.weightedPick([
             { weight: 1, value: 'You stand there. People come and go. The bus doesn\'t, and then it does.' },
             { weight: 1, value: 'The stop is exposed. You wait in it. Other people, their lives, the bus.' },
-            // High adenosine — standing hollow and tired
-            { weight: State.lerp01(aden, 45, 65), value: 'Standing is its own kind of tired. You shift your weight from foot to foot. The bus eventually comes.' },
+            // High adenosine (unblocked) — standing hollow and tired
+            { weight: State.lerp01(aden, 45, 65) * State.adenosineBlock(), value: 'Standing is its own kind of tired. You shift your weight from foot to foot. The bus eventually comes.' },
           ]);
         }
 
@@ -3135,8 +3135,8 @@ export function createContent(ctx) {
         return Timeline.weightedPick([
           { weight: 1, value: long ? 'The bus takes its time. You wait.' : 'A few minutes. Buses arrive when they arrive.' },
           { weight: 1, value: 'You stand at the stop. Time passes at the speed it passes. The bus comes.' },
-          // High adenosine — legs want to sit
-          { weight: State.lerp01(aden, 45, 65), value: 'Your legs want you to sit. The bench is full. You stand.' + (long ? ' The bus takes a while.' : ' The bus comes.') },
+          // High adenosine (unblocked) — legs want to sit
+          { weight: State.lerp01(aden, 45, 65) * State.adenosineBlock(), value: 'Your legs want you to sit. The bench is full. You stand.' + (long ? ' The bus takes a while.' : ' The bus comes.') },
         ]);
       },
     },
@@ -3303,12 +3303,68 @@ export function createContent(ctx) {
         if (hunger === 'starving' || hunger === 'very_hungry') {
           return Timeline.weightedPick([
             { weight: 1, value: 'You take your break early and eat. Staff meal — you\'re entitled to it. You eat faster than you meant to.' },
-            { weight: State.lerp01('adenosine', 50, 80), value: 'You eat on your feet, between tasks, barely sitting. The food disappears. You feel more human than you have all shift.' },
+            { weight: State.lerp01('adenosine', 50, 80) * State.adenosineBlock(), value: 'You eat on your feet, between tasks, barely sitting. The food disappears. You feel more human than you have all shift.' },
           ]);
         }
         return Timeline.weightedPick([
           { weight: 1, value: 'Staff meal. You eat in the back, standing at the counter. It\'s not a moment to savor but it\'s real food and you needed it.' },
           { weight: State.lerp01('dopamine', 0, 40), value: 'You take your meal break. The kitchen smells like work but you eat it anyway. Something about eating what you made.' },
+        ]);
+      },
+    },
+
+    get_coffee_work: {
+      id: 'get_coffee_work',
+      label: 'Get coffee',
+      location: 'workplace',
+      available: () => State.caffeineTier() !== 'high' && State.isWorkHours(),
+      execute: () => {
+        State.consumeCaffeine(40);
+        State.advanceTime(Timeline.randomInt(4, 7));
+
+        const mood = State.moodTone();
+        const aden = State.get('adenosine');
+        const caffeine = State.caffeineTier();
+        const jobType = Character.get('job_type');
+
+        if (caffeine === 'active') {
+          return Timeline.weightedPick([
+            { weight: 1, value: 'You go back for another. The machine goes through its routine. You go through yours.' },
+            { weight: State.lerp01(aden, 40, 75) * State.adenosineBlock(), value: 'The second one. You weren\'t done needing it.' },
+          ]);
+        }
+
+        if (jobType === 'office') {
+          if (mood === 'numb' || mood === 'hollow') {
+            return Timeline.weightedPick([
+              { weight: 1, value: 'You fill a mug in the break room. Something warm to hold. The smell is stale but present.' },
+              { weight: State.lerp01(aden, 40, 70) * State.adenosineBlock(), value: 'Break room. Coffee. Your brain needed something to hold onto.' },
+            ]);
+          }
+          if (mood === 'fraying' || mood === 'heavy') {
+            return Timeline.weightedPick([
+              { weight: 1, value: 'Break room. Stale coffee but you pour it anyway. The walk over was the real thing.' },
+              { weight: State.lerp01(aden, 40, 70) * State.adenosineBlock(), value: 'You needed the break as much as the coffee. A minute away from your desk.' },
+            ]);
+          }
+          return Timeline.weightedPick([
+            { weight: 1, value: 'You grab coffee from the break room. The machine\'s been running all morning.' },
+            { weight: State.lerp01(aden, 30, 65) * State.adenosineBlock(), value: 'Coffee from the break room. You needed it more than you realized.' },
+          ]);
+        }
+
+        if (jobType === 'retail') {
+          return Timeline.weightedPick([
+            { weight: 1, value: 'The break room machine. You fill a cup and drink it in the thirty seconds you have.' },
+            { weight: 1, value: 'Coffee from the back. Burnt, vending-machine quality. You drink it anyway.' },
+            { weight: State.lerp01(aden, 40, 70) * State.adenosineBlock(), value: 'You get coffee in the back. It\'s bad. Your body doesn\'t care.' },
+          ]);
+        }
+
+        // food_service
+        return Timeline.weightedPick([
+          { weight: 1, value: 'Staff coffee, poured fast, drunk faster. It tastes like the rest of the shift.' },
+          { weight: State.lerp01(aden, 40, 70) * State.adenosineBlock(), value: 'You pour coffee before the next rush. The mug is warm. That\'s enough.' },
         ]);
       },
     },
@@ -3428,11 +3484,62 @@ export function createContent(ctx) {
         const aden = State.get('adenosine');
         if (money !== 'broke' && dopa < 35) {
           text += ' Nothing in here catches you. The things are just things.';
-        } else if (aden > 65) {
+        } else if (aden > 65 && State.adenosineBlock() > 0.4) {
           text += ' You move through the aisles without fully seeing them.';
         }
 
         return text;
+      },
+    },
+
+    buy_coffee_store: {
+      id: 'buy_coffee_store',
+      label: 'Get a coffee',
+      location: 'corner_store',
+      available: () => State.canAfford(2) && State.caffeineTier() !== 'high',
+      execute: () => {
+        const cost = Timeline.randomFloat(1.75, 3.00);
+        const roundedCost = Math.round(cost * 100) / 100;
+
+        if (!State.spendMoney(roundedCost)) {
+          return 'Not enough. You put it back.';
+        }
+
+        State.consumeCaffeine(50);
+        State.advanceTime(Timeline.randomInt(3, 5));
+        State.glanceMoney();
+
+        const mood = State.moodTone();
+        const aden = State.get('adenosine');
+        const caffeine = State.caffeineTier();
+        const money = State.moneyTier();
+
+        if (caffeine === 'active') {
+          return Timeline.weightedPick([
+            { weight: 1, value: 'The second one. You buy it because the first one didn\'t finish the job.' },
+            { weight: State.lerp01(aden, 40, 75) * State.adenosineBlock(), value: 'You\'re already on one. You buy another. Your body is making its case.' },
+          ]);
+        }
+
+        if (mood === 'numb' || mood === 'hollow') {
+          return Timeline.weightedPick([
+            { weight: 1, value: 'Coffee from the register. You pay and carry it out. The cup is warm in your hand.' },
+            { weight: State.lerp01(aden, 40, 70) * State.adenosineBlock(), value: 'You buy coffee. Something your body wanted. The warmth of the cup is the best part.' },
+          ]);
+        }
+
+        if (money === 'broke' || money === 'scraping') {
+          return Timeline.weightedPick([
+            { weight: 1, value: 'A small coffee. You pocket your change.' },
+            { weight: State.lerp01(aden, 30, 65) * State.adenosineBlock(), value: 'A coffee because you needed it more than the two dollars. The math feels simple right now.' },
+          ]);
+        }
+
+        return Timeline.weightedPick([
+          { weight: 1, value: 'Corner store coffee. It\'s not good but it\'s something. You drink it on the street.' },
+          { weight: 1, value: 'Coffee from the register. The cup is warm. You take it outside.' },
+          { weight: State.lerp01(aden, 30, 60) * State.adenosineBlock(), value: 'You buy coffee. You needed it before you realized. The first sip confirms it.' },
+        ]);
       },
     },
 
@@ -3479,7 +3586,7 @@ export function createContent(ctx) {
         if (hunger === 'starving' || hunger === 'very_hungry') {
           return Timeline.weightedPick([
             { weight: 1, value: 'You\'ve been here before. You go through the line, you sit, and you eat faster than you mean to. The food is hot. That\'s enough.' },
-            { weight: State.lerp01('adenosine', 50, 75), value: 'Through the line, a seat, and then you eat. Your hands settle once there\'s a plate in front of them.' },
+            { weight: State.lerp01('adenosine', 50, 75) * State.adenosineBlock(), value: 'Through the line, a seat, and then you eat. Your hands settle once there\'s a plate in front of them.' },
           ]);
         }
         return Timeline.weightedPick([
@@ -4403,8 +4510,8 @@ export function createContent(ctx) {
           { weight: 1, value: 'Everything\'s been here long enough to stop being mess and start just being how it is.' },
           // Low serotonin — it reads as evidence
           { weight: State.lerp01(ser, 40, 20), value: 'The apartment looks like what it is. A place someone\'s been barely keeping up with. You know because you\'re that person.' },
-          // High adenosine — it blurs, then unregisters
-          { weight: State.lerp01(aden, 55, 75), value: 'You look at the state of things for a second. Then the moment passes and you\'ve stopped registering it.' },
+          // High adenosine (unblocked) — it blurs, then unregisters
+          { weight: State.lerp01(aden, 55, 75) * State.adenosineBlock(), value: 'You look at the state of things for a second. Then the moment passes and you\'ve stopped registering it.' },
           // Low dopamine — nothing moves toward fixing it
           { weight: State.lerp01(dop, 40, 20), value: 'You know it needs dealing with. Knowing and doing are in different rooms right now.' },
         ]);
@@ -4416,8 +4523,8 @@ export function createContent(ctx) {
           { weight: 1, value: 'The mess hasn\'t moved. You knew it wouldn\'t.' },
           // Low serotonin — minor disorder registers as more than it is
           { weight: State.lerp01(ser, 40, 20), value: 'The small disorder of the place catches your eye. It shouldn\'t bother you this much.' },
-          // High adenosine — registers then blurs
-          { weight: State.lerp01(aden, 55, 75), value: 'The mess registers and then doesn\'t. You don\'t have the bandwidth to hold it.' },
+          // High adenosine (unblocked) — registers then blurs
+          { weight: State.lerp01(aden, 55, 75) * State.adenosineBlock(), value: 'The mess registers and then doesn\'t. You don\'t have the bandwidth to hold it.' },
         ]);
       }
       return '';
@@ -4511,9 +4618,9 @@ export function createContent(ctx) {
         // Low serotonin deepens the numbness toward despair
         { weight: State.lerp01(ser, 35, 15), value: 'There was a feeling here once. You can\'t remember what it was shaped like.' },
         { weight: State.lerp01(ser, 35, 15), value: 'You try to care about something. Anything. The effort folds in on itself.' },
-        // High adenosine — the numbness is also fog
-        { weight: State.lerp01(aden, 50, 80), value: 'Your thoughts don\'t finish. They start and then they\'re somewhere else. Or nowhere.' },
-        { weight: State.lerp01(aden, 50, 80), value: 'The edges of the room are soft. Not comforting. Just indistinct.' },
+        // High adenosine (unblocked) — the numbness is also fog
+        { weight: State.lerp01(aden, 50, 80) * State.adenosineBlock(), value: 'Your thoughts don\'t finish. They start and then they\'re somewhere else. Or nowhere.' },
+        { weight: State.lerp01(aden, 50, 80) * State.adenosineBlock(), value: 'The edges of the room are soft. Not comforting. Just indistinct.' },
       );
     } else if (mood === 'hollow') {
       const friend1 = Character.get('friend1');
@@ -4618,8 +4725,8 @@ export function createContent(ctx) {
         { weight: State.lerp01(ne, 45, 65), value: 'You\'re not doing anything but your foot is bouncing. When did it start. You stop it. It starts again.' },
         // Low dopamine — flat and going through motions
         { weight: State.lerp01(dop, 42, 25), value: 'The day is happening. You\'re technically in it. Participation is a strong word.' },
-        // High adenosine — flat is also foggy
-        { weight: State.lerp01(aden, 50, 75), value: 'Your thoughts keep softening at the edges. Not drifting. Dissolving. Like sugar in water.' },
+        // High adenosine (unblocked) — flat is also foggy
+        { weight: State.lerp01(aden, 50, 75) * State.adenosineBlock(), value: 'Your thoughts keep softening at the edges. Not drifting. Dissolving. Like sugar in water.' },
       );
     }
 
@@ -4757,9 +4864,9 @@ export function createContent(ctx) {
         // Low serotonin deepens the silence
         { weight: State.lerp01(ser, 35, 15), value: 'You keep waiting to feel something about this. Nothing shows up.' },
         { weight: State.lerp01(ser, 35, 15), value: 'There\'s no version of this that helps.' },
-        // High adenosine — fog as static
-        { weight: State.lerp01(aden, 55, 80), value: 'The thought was right there.' },
-        { weight: State.lerp01(aden, 55, 80), value: 'What were you—' },
+        // High adenosine (unblocked) — fog as static
+        { weight: State.lerp01(aden, 55, 80) * State.adenosineBlock(), value: 'The thought was right there.' },
+        { weight: State.lerp01(aden, 55, 80) * State.adenosineBlock(), value: 'What were you—' },
       );
     } else if (mood === 'hollow') {
       thoughts.push(
@@ -4834,9 +4941,9 @@ export function createContent(ctx) {
         w1('Still here.'),
         // Low serotonin — flat is darker
         { weight: State.lerp01(ser, 45, 25), value: 'Fine. It\'s fine.' },
-        // High adenosine — flat and foggy
-        { weight: State.lerp01(aden, 55, 75), value: 'Something. There was something.' },
-        { weight: State.lerp01(aden, 55, 75), value: 'Never mind.' },
+        // High adenosine (unblocked) — flat and foggy
+        { weight: State.lerp01(aden, 55, 75) * State.adenosineBlock(), value: 'Something. There was something.' },
+        { weight: State.lerp01(aden, 55, 75) * State.adenosineBlock(), value: 'Never mind.' },
       );
     }
 
@@ -4910,8 +5017,8 @@ export function createContent(ctx) {
           return Timeline.weightedPick([
             { weight: 1, value: 'The bus is full. Bodies pressed together going the same direction. You find a spot to stand and not be. Twenty minutes of that.' },
             { weight: 1, value: 'Standing room. You press in and find a hold bar. The bus moves. You move with it. Twenty minutes.' },
-            // High adenosine — the bus sway is almost restful
-            { weight: State.lerp01(aden, 50, 70), value: 'The bus is packed and warm. You close your eyes for most of the ride. The sway. Twenty minutes you barely noticed.' },
+            // High adenosine (unblocked) — the bus sway is almost restful
+            { weight: State.lerp01(aden, 50, 70) * State.adenosineBlock(), value: 'The bus is packed and warm. You close your eyes for most of the ride. The sway. Twenty minutes you barely noticed.' },
             // Low serotonin — the press of bodies is nothing
             { weight: State.lerp01(ser, 35, 18), value: 'The bus is full. You find a grip and hold it. Bodies around you, sounds, movement. None of it reaches you. Twenty minutes.' },
           ]);
@@ -4931,8 +5038,8 @@ export function createContent(ctx) {
       return Timeline.weightedPick([
         { weight: 1, value: 'The bus comes. It\'s quieter this time of day. You find a seat and watch the city slide past the window.' },
         { weight: 1, value: 'Off-peak. Seats to choose from. You sit and the route unfolds.' },
-        // High adenosine — the seat and the motion
-        { weight: State.lerp01(aden, 50, 70), value: 'A seat to yourself. The city goes past the window. Your head finds the glass. Twenty minutes that feel almost like a pause.' },
+        // High adenosine (unblocked) — the seat and the motion
+        { weight: State.lerp01(aden, 50, 70) * State.adenosineBlock(), value: 'A seat to yourself. The city goes past the window. Your head finds the glass. Twenty minutes that feel almost like a pause.' },
         // Low serotonin — the ride has weight
         { weight: State.lerp01(ser, 40, 22), value: 'A seat. You take it. The route you know well enough to not watch. The bus carries you forward anyway.' },
         // High NE — the quiet bus is still a lot
@@ -4949,8 +5056,8 @@ export function createContent(ctx) {
         return Timeline.weightedPick([
           { weight: 1, value: 'The bus ride back. You sit and close your eyes and exist in the motion of it.' },
           { weight: 1, value: 'A seat. You take it and don\'t move. The city in reverse outside the window. You\'re barely there.' },
-          // High adenosine — the ride is surrender
-          { weight: State.lerp01(aden, 58, 78), value: 'The bus seat holds you. That\'s the job. You close your eyes and the motion of it is the only thing that\'s asking anything of you.' },
+          // High adenosine (unblocked) — the ride is surrender
+          { weight: State.lerp01(aden, 58, 78) * State.adenosineBlock(), value: 'The bus seat holds you. That\'s the job. You close your eyes and the motion of it is the only thing that\'s asking anything of you.' },
           // Low serotonin — the day comes in pieces
           { weight: State.lerp01(ser, 38, 18), value: 'You sit down hard. The day sits with you. Eyes closed, the bus brings you home through it.' },
         ]);
@@ -5322,6 +5429,14 @@ export function createContent(ctx) {
       return 'Staff meal.';
     },
 
+    get_coffee_work: () => {
+      const aden = State.get('adenosine');
+      const caffeine = State.caffeineTier();
+      if (caffeine === 'active') return 'The second one.';
+      if (aden > 65 && State.adenosineBlock() > 0.4) return 'Coffee. You need it.';
+      return 'Coffee.';
+    },
+
     // === CORNER STORE ===
 
     buy_groceries: () => {
@@ -5333,6 +5448,14 @@ export function createContent(ctx) {
     buy_cheap_meal: () => {
       if (['very_hungry', 'starving'].includes(State.hungerTier())) return 'Something quick. You\'re hungry.';
       return 'Something to eat.';
+    },
+
+    buy_coffee_store: () => {
+      const aden = State.get('adenosine');
+      const caffeine = State.caffeineTier();
+      if (caffeine === 'active') return 'The second one.';
+      if (aden > 65 && State.adenosineBlock() > 0.4) return 'Coffee. You want it.';
+      return 'Coffee.';
     },
 
     browse_store: () => {
