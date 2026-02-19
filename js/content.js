@@ -2036,9 +2036,16 @@ export function createContent(ctx) {
         State.adjustHunger(-3);
         State.advanceTime(2);
 
+        // NT deterministic variants (no RNG — replay-safe)
         const energy = State.energyTier();
+        const aden = State.get('adenosine');
+        const mood = State.moodTone();
+
         if (energy === 'depleted' || energy === 'exhausted') {
           return 'Water from the tap. You drink it standing at the sink. Your body wanted it more than you realized.';
+        }
+        if (aden > 60 && (mood === 'numb' || mood === 'heavy')) {
+          return 'Water. Something your body can process without much thought from you.';
         }
         return 'You fill a glass and drink it. Tap water. It\'s fine.';
       },
@@ -2288,6 +2295,24 @@ export function createContent(ctx) {
         State.adjustStress(-2);
         State.advanceTime(3);
 
+        // NT deterministic variants (no RNG — replay-safe)
+        const mood = State.moodTone();
+        const aden = State.get('adenosine');
+        const ne = State.get('norepinephrine');
+        const ser = State.get('serotonin');
+
+        if (mood === 'numb' || mood === 'hollow') {
+          return 'Cold water. You go through the motions. The face in the mirror is yours. You don\'t stay to look.';
+        }
+        if (aden > 70) {
+          return 'Cold water on your face. The shock of it is the point. You stand there dripping for a second, waiting to feel more awake.';
+        }
+        if (ne > 65) {
+          return 'Water on your face. The cold is immediate, distinct. Your hands on the edges of the sink, grounded.';
+        }
+        if (ser < 35) {
+          return 'Cold water. You look at yourself in the mirror. You look away before the looking becomes something.';
+        }
         return 'Cold water on your face. You look at yourself in the mirror, briefly. You look away.';
       },
     },
@@ -2351,11 +2376,24 @@ export function createContent(ctx) {
         const mood = State.moodTone();
         const weather = State.get('weather');
 
+        if (weather === 'snow') {
+          return 'You sit on the step. Cold through your clothes immediately. The street is muffled, quieted. You stay a minute anyway.';
+        }
         if (weather === 'drizzle') {
           return 'You sit on the step under the awning. Rain taps the concrete. A few minutes. No one bothers you about it.';
         }
         if (mood === 'hollow' || mood === 'quiet') {
           return 'You sit. Watch people. They\'re all going places. You\'re sitting. Both of these things are fine.';
+        }
+
+        // NT deterministic shading (no RNG — replay-safe)
+        const aden = State.get('adenosine');
+        const ne = State.get('norepinephrine');
+        if (aden > 65) {
+          return 'You sit down. Your body asked for this before the rest of you decided.';
+        }
+        if (ne > 65) {
+          return 'You sit on the step. The street goes on around you — cars, footsteps, someone\'s music. A lot for a step.';
         }
         return 'You sit on the step. Just for a minute. The air is better than inside.';
       },
@@ -2528,20 +2566,30 @@ export function createContent(ctx) {
 
         const mood = State.moodTone();
         const weather = State.get('weather');
+        const long = waitTime > 10;
 
         let text = '';
-        if (waitTime > 10) {
-          text = 'The bus takes its time. You wait. ';
+
+        if (weather === 'snow') {
+          text = long
+            ? 'Snow on your shoulders. The bus takes a long time. There\'s nowhere warmer within reach.'
+            : 'Snow while you wait. The bus comes.';
+        } else if (weather === 'drizzle') {
+          text = 'Rain collects on the shelter roof and drips from the edge in a line.';
+          if (long) text += ' The bus takes its time.';
+        } else if (mood === 'hollow' || mood === 'quiet') {
+          text = 'You stand there. People come and go. The bus doesn\'t, and then it does.';
         } else {
-          text = 'A few minutes. ';
+          text = long ? 'The bus takes its time. You wait.' : 'A few minutes. Buses arrive when they arrive.';
         }
 
-        if (weather === 'drizzle') {
-          text += 'Rain collects on the shelter roof and drips from the edge in a line.';
-        } else if (mood === 'hollow') {
-          text += 'You stand there. People come and go. The bus doesn\'t, and then it does.';
-        } else {
-          text += 'Buses arrive when they arrive.';
+        // NT deterministic modifiers (no RNG — replay-safe)
+        const aden = State.get('adenosine');
+        const ne = State.get('norepinephrine');
+        if (weather !== 'snow' && aden > 65) {
+          text += ' Your legs are tired from standing.';
+        } else if (ne > 65 && weather !== 'drizzle' && weather !== 'snow') {
+          text += ' The street is a lot of input right now.';
         }
 
         return text;
