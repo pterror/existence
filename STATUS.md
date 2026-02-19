@@ -108,6 +108,7 @@ Friends who reach out and get silence back generate guilt over time. Per-friend 
 - Seeing unread friend messages on phone screen nudges guilt by `guilt * 0.02` (proportional, only when guilt > 0.03)
 - Reading a friend's message: resets contact timer, reduces guilt by 0.02
 - **Replying to a friend** (`reply_to_friend` phone interaction): resets contact timer, reduces guilt by 0.06 (3× reading), +3 social. Generates friend's response immediately (RNG, stored in `pending_replies`), delivered after 30–90 min. Prose per flavor + NT-shaded (dopamine/serotonin). 3 RNG calls total.
+- **Writing first** (`message_friend` phone interaction): available when a friend has no unread messages and no pending reply queued. Picks the friend with highest guilt (tie-breaks by least recent contact). Resets contact timer, reduces guilt by 0.06, +2 social. Response generated now, delivered after 30–90 min. Prose per flavor + NT-shaded (dopamine/serotonin). 3 RNG calls total. Separate initiation prose tables (`friendInitiateProse`, `friendInitiateMessages`) from reply prose — reaching out first reads differently from responding.
 
 **Effects:**
 - Friend guilt lowers serotonin target when at home (max ~6 points at extreme guilt toward both friends)
@@ -213,8 +214,8 @@ do_work, work_break, talk_to_coworker, check_phone_work
 ### Corner Store (3)
 buy_groceries, buy_cheap_meal, browse_store
 
-### Phone Mode (4, available anywhere)
-read_messages, reply_to_friend, toggle_phone_silent, put_phone_away
+### Phone Mode (5, available anywhere)
+read_messages, reply_to_friend, message_friend, toggle_phone_silent, put_phone_away
 
 ### Global (1, available anywhere with phone)
 call_in (call in sick — morning only, work hours)
