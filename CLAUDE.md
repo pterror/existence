@@ -6,6 +6,10 @@ Behavioral rules for Claude Code in the existence repository.
 
 Text-based HTML5 game. "Power anti-fantasy" — constrained agency without judgment. No stats visible. All state hidden. Prose carries everything.
 
+## Simulation Architecture
+
+See [PHILOSOPHY.md](PHILOSOPHY.md). Every simulation system is an interface designed for maximum fidelity. Implementations vary per-run; granularity is hotswappable between saves, never mid-run. Scalars that stand in for richer structure are approximation debts — name them, plan to pay them.
+
 ## Architecture
 
 ES modules. Each module exports a factory function (`createFoo(ctx)`) that receives a context object. `createGameContext()` in `context.js` wires all instances together. No global mutable state — multiple game instances can coexist.

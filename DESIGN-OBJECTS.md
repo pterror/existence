@@ -1,6 +1,8 @@
 # Domestic Object Systems
 
-The apartment contains real things. Those things have real state. The simulation tracks them — not as aggregate scalars, but as objects with histories. A dish you ate from is dirty. The shirt you wore yesterday is on the chair. The towel from this morning is still damp. These facts exist whether or not the player looks.
+The apartment contains real things. Those things have real state. The simulation tracks them — not as aggregate scalars, but as objects with histories.
+
+This document applies the principles in [PHILOSOPHY.md](PHILOSOPHY.md) to the specific case of domestic objects. Read that first. A dish you ate from is dirty. The shirt you wore yesterday is on the chair. The towel from this morning is still damp. These facts exist whether or not the player looks.
 
 This document describes the architecture for tracking domestic objects and the principles behind it.
 

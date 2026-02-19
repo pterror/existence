@@ -2,6 +2,8 @@
 
 The simulation behind the prose. None of this is visible to the player. Text carries everything.
 
+See [PHILOSOPHY.md](PHILOSOPHY.md) for the architectural principles that apply across all systems: the interface model, granularity-per-run, and the treatment of scalars as approximation debts.
+
 ## Core Principles
 
 **Prose leads, simulation follows.** If the text needs a phone inbox to feel real, build the inbox. If a character's age changes what financial stress looks like, the simulation models that. Don't hollow out prose to match a thin sim — deepen the sim to support the prose.
