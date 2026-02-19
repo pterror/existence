@@ -166,6 +166,13 @@ No content level configuration. DESIGN.md describes: baseline tier (everyday str
 ### Health system
 No health conditions exist. DESIGN.md describes: chronic conditions (diabetes, chronic pain, migraines, etc.), injury, illness, disability. Two kinds of effect — texture (how things feel) and concrete (what's physically possible). Good days and bad days. Medication as its own system.
 
+### Jurisdiction as a character parameter
+Healthcare access, reproductive rights, and legal protections are **legal/political variables**, not geographic ones. Latitude does not predict abortion access, healthcare coverage, drug policy, or trans protections — a character at 59°N in Sweden has near-universal access; one at 52°N in Poland (historically) near-total prohibition. Using latitude as a proxy for US-style regional variation is a US-centric assumption that doesn't survive leaving the country.
+
+The right model: **jurisdiction** (country + region/state) is a character parameter generated at chargen. Healthcare access, reproductive rights access, legal protections are derived attributes from jurisdiction. Until jurisdiction exists as a first-class parameter, any location-based access gating is an explicit approximation debt — not laundered through latitude as though it were a derived geographic relationship.
+
+**Approximation debt:** Any health/reproductive access gating currently present should be documented as hardcoded, not derived.
+
 ### Mental health as distinct from state
 Stress and energy model some of this but DESIGN.md describes depression, anxiety, bipolar, PTSD, OCD as structural conditions — not "low energy" but "the specific way getting out of bed takes everything you have."
 

@@ -1,0 +1,273 @@
+# DESIGN-HEALTH.md
+
+Health as lived experience, not a stat. The player never sees "sick=true" — they see fatigue that doesn't lift, interactions that aren't there, prose that reads differently. The simulation models real biological and social mechanics. The player lives inside them.
+
+---
+
+## Core principle
+
+Two kinds of health effect:
+
+1. **Texture** — how things feel. The walk feels longer. Getting up takes longer. Prose shades toward exhaustion or pain. The same actions cost more subjectively.
+2. **Concrete** — what's physically possible. Work becomes `callInSick`. Certain movements aren't available. Food choices narrow. Appointments appear.
+
+Both matter. The simulation shouldn't reduce health to just texture (hollow) or just concrete limitations (brittle). A bad back flare is both the ache that's there when you wake up AND the interaction that isn't available today.
+
+---
+
+## Jurisdiction first
+
+Healthcare access, reproductive rights, medication costs, disability support — none of these are geographic variables. They're **legal and political variables**.
+
+Latitude does not predict abortion access. A character at 59°N in Sweden has near-universal access. One at 52°N in Poland (historically) near-total prohibition. Nordic countries have universal healthcare and high latitude. The US has fragmented, market-based coverage and lower average latitude. These are uncorrelated.
+
+**The correct model:** `jurisdiction` is a character parameter generated at chargen — country, and where relevant, region/state within it. Healthcare access, reproductive rights, legal protections are derived attributes from jurisdiction. Drug policy, insurance system type, disability recognition, mental health coverage — all derived.
+
+Until jurisdiction exists as a first-class chargen parameter, health access gating is an explicit approximation debt. Don't use latitude as a proxy. Don't assume the US. Name the assumption.
+
+---
+
+## Acute illness
+
+### Flu / bad cold
+
+Maps cleanly to existing systems:
+- Adenosine-analog spike — fatigue that won't clear with normal rest
+- NE disruption — sensory processing dulled, not sharpened
+- Hunger suppression — food becomes effortful or aversive
+- Sleep quality degraded even with more sleep
+- Work becomes `callInSick` — job standing pressure applies
+
+Resolves over days if you rest. Lingers if you don't. The brutal version: gig work, no sick days, can't afford to stop regardless.
+
+**Treatment path:** over-the-counter meds (accessible, small cost), doctor visit (cost, time off, insurance gap, whether you even have a doctor). The friction of getting care is part of the simulation.
+
+### Fever
+
+Special case of illness. Fever sleep is not restful sleep — adenosine doesn't clear properly, REM cycles disrupted. The sleep architecture model already handles this conceptually; fever would be a multiplier on sleep quality degradation regardless of duration.
+
+### GI illness
+
+Faster arc than flu. Hunger/eating system disrupted — not just suppressed, actively aversive. Can't leave home easily. Resolves in 24–48 hours usually. The forced pause, the inability to do anything but wait.
+
+### Injury
+
+- Mobility limitations: movement options restricted or more costly in time/energy
+- Work injury: job standing implications, workers' comp or not, whether the job acknowledges it
+- Healing time: days to weeks. Being home doesn't mean resting — rent doesn't pause.
+- Chronic pain as long tail: an injury that doesn't fully resolve, becoming a permanent background condition
+
+---
+
+## Dental
+
+Specifically worth designing because it's so class-stratified and so commonly neglected. Dental care sits outside most insurance coverage; many people go years without it not from laziness but from cost.
+
+**The arc:**
+- Toothache as a state: constant low-level pain. NE elevation (hyperalgesia), stress increase, focus disruption. The kind of thing you learn to live around until you can't.
+- "I've been putting this off" is a real, common experience. The simulation should model the delay, not just the resolution.
+- Treatment: expensive. Requires time off. May require multiple appointments spread over weeks. Possible need for referral (specialist, oral surgeon).
+- The split: emergency extraction vs. proper restoration. The poor person's version vs. the comfortable one. Both are real.
+- Neglect arc: minor ache → persistent pain → abscess → emergency room. What starts as a $200 problem becomes a $2000 one plus an ER visit because the ER is the only option at 11pm on a Saturday.
+- Dental insurance (separate from health, often not included, always has caps) — if the character has it, limits what it covers per year, which runs out.
+
+**Prose:** The toothache is always there in the background. It shades narration via deterministic modifier — an ache on NE-adjacent tissue. It doesn't announce itself; it's just part of how the day goes.
+
+---
+
+## Chronic conditions
+
+Generated at chargen from family history, demographic risk factors, life events — or developing during play from accumulated stress/poor sleep/lifestyle. The backstory system is the upstream mechanism; as it deepens, conditions become derived rather than random.
+
+### Type 2 diabetes / prediabetes
+
+- Hunger/energy interaction changes: glucose dysregulation means harder crashes after carbs, need for more consistent eating rhythm
+- Medication (metformin common): daily routine, cost, refill scheduling, side effects (GI effects early on)
+- Management effects: skipping medication → symptoms worsen over days not hours (models the real delayed consequence)
+- Long-term: peripheral fatigue, focus issues — map to existing NT model
+- Food access becomes more complex: the cheap food options are often the ones that cause the worst crashes
+
+### Hypertension
+
+Largely invisible until it isn't — suits the hidden-state philosophy perfectly. The player doesn't see a blood pressure reading. They see medication they take every morning, the interaction that reminds them to refill, prose that acknowledges the quiet management of a permanent condition.
+
+- Medication: daily, costs vary, side effects (fatigue, dizziness, some people stop because of how it makes them feel)
+- Stress amplifies it. The simulation already models stress as a continuous variable — hypertension could be a threshold mechanism: chronic high stress + poor management → event (not death, but a wake-up moment, a trip to urgent care, a conversation)
+
+### Chronic pain
+
+Back pain, fibromyalgia, migraines, nerve damage. Common, poorly understood, poorly treated, disproportionately disbelieved.
+
+- Constant background NE elevation (hyperalgesia)
+- Sleep quality degraded continuously
+- Good days and bad days: flare as an event type — not random, triggered by stress + sleep debt + physical overexertion
+- Complicates everything: work attendance (standing for a retail shift with a bad back), mobility (can't do laundry today), even rest (lying down doesn't always help)
+- The medications: OTC (limited, ceiling effect), prescription (access, cost, stigma around pain medication, especially opioids), none at all
+
+---
+
+## Mental health as structural, not fluctuation
+
+The NT model already simulates mood fluctuation naturally. Clinical depression and anxiety are different — not "in a low mood" but a persistent floor that changes what's possible. Structural, not situational.
+
+### Depression
+
+- Persistent dopamine/serotonin targets capped low — not a bad day, a bad baseline
+- Anhedonia: things that used to matter don't register
+- Executive dysfunction layer: not that you don't want to, but that the gap between intending and starting is enormous
+- Treatment-seeking: cost, access, waitlists, the energy required to seek help when you have none
+
+**Medication (SSRIs):** Takes weeks to shift. Early side effects (nausea, sleep disruption, anorgasmia) before benefit appears. Some people stop early because of the early phase. Interesting interaction with the NT model — medication would shift targets and drift rates, not snap levels. The slow turn of a large ship.
+
+**Therapy:** Requires time (session + travel), money, energy to show up, and often a long wait. Some therapy enhances emotional processing — sleep processing rate improved, or a new mechanism. Cognitive approaches might affect rumination parameter over time.
+
+**Crisis states:** The interaction list contracts. Only a few options remain. Gradients-not-binaries means this is still navigable, not a dead end — but the path is very narrow. This is one of the most important things to get right. The experience of having almost no moves is real and deserves honest prose.
+
+### Anxiety disorders
+
+- GABA targets suppressed — resting anxiety floor elevated
+- Certain interactions require overcoming an availability-modulated barrier (social interactions cost more, some may not appear at very high anxiety)
+- Physical symptoms: tension, NE elevation, cortisol chronically elevated
+- Avoidance as a real mechanic: the interaction is there, but not taking it is also a choice the system supports
+
+---
+
+## Reproductive health
+
+Requires knowing what body the character has. This is not the same as gender — they're separate dimensions. The relevant variable is reproductive anatomy, stored as a private internal field, never displayed, that gates which experiences are possible.
+
+Chargen adds this to the schema. It's not a choice the player makes consciously — it's part of who the character is, like height or the neighborhood they grew up in.
+
+### Menstruation
+
+- Cycle tracking as state: `cycle_day`, `cycle_length`. Irregular vs. regular. Stress disrupts cycles (very real — delayed ovulation under stress, irregular intervals).
+- PMS/PMDD: mood instability window, physical symptoms (cramping, fatigue, headache). A window of several days where the NT drift targets shift toward worse.
+- Period supplies: cost (low but real), availability, the interaction of being out of supplies and broke.
+- Heavy/painful periods → adenosine spike, NE elevation, work implications. "I just need to get through today."
+
+### PCOS / endometriosis
+
+- Chronic: pain, fatigue, irregular cycles, mood effects
+- Often undiagnosed for years — could be a chargen flag that starts unresolved. The character has symptoms; they don't have a name for them yet.
+- Treatment: hormonal BC, pain management, surgery for endo (longer arc)
+
+### Contraception
+
+If sexual activity is modeled (not yet):
+- Access: OTC options now exist in the US, prescription required for others, cost, insurance coverage
+- Adherence: easy to forget; schedule disruption (illness, travel) creates gaps
+- Each type has a different side effect profile (hormonal changes, weight, mood, libido) — these interact directly with the NT model
+- The choice of method is a character parameter, possibly modifiable during play
+
+### STIs
+
+Requires sexual activity to be modeled. Could be seeded in backstory (chargen generates a history).
+- Often asymptomatic — detection requires testing, which requires access and choice
+- Testing access: cost, availability (Planned Parenthood, free clinic, primary care), anonymity concerns
+- Treatment: bacterial (antibiotics + partner notification, which has its own social cost), viral (management, disclosure as ongoing)
+
+---
+
+## Pregnancy
+
+The most complex, the most important to get right. No editorializing. The simulation presents what's available given the character's actual situation. The player makes the choice.
+
+### Detection arc
+
+- Late period → noticing → uncertainty window. The character might track their cycle or might not.
+- Pharmacy test: $10–15, requires a trip, results are private. The trip to buy it is its own moment.
+- Symptoms before confirmation: nausea, fatigue, breast tenderness. Prose changes before the player knows why — the simulation is honest.
+- Confirmation: home test, or clinic (cost, access, scheduling)
+
+### First trimester experience
+
+- Nausea: hunger system disrupted. Food aversion. "Morning sickness" is misnamed — it's all day, unpredictably.
+- Fatigue: adenosine-like, doesn't clear with normal sleep. The body is doing enormous work invisibly.
+- Mood instability: NT targets shifting due to hormonal changes — not character-driven, biologically driven.
+- Mostly invisible to others — the character carries it alone during the period of highest loss risk.
+
+### The decision
+
+Three paths. The simulation presents what's accessible given the character's situation — jurisdiction, money, support, timing. No path is editorially favored. The prose doesn't shade one toward "right answer."
+
+**Termination:**
+- Access is a jurisdiction variable, not a latitude variable
+- Cost: varies widely by jurisdiction, method, gestational age. In the US, medication abortion ~$150–600, procedural more.
+- Wait times: some jurisdictions have mandatory waiting periods. Some have none.
+- Possible need to travel: cost of travel, logistics, time off work, whether anyone knows.
+- Medication abortion: can often be done at home. Involves physical discomfort over several hours. Private, but not painless.
+- Procedural: clinic appointment, possibly multiple visits, recovery time.
+- Emotional aftermath: varies enormously per person. The NT model handles it without prescribing a response. No guilt mechanic. No relief mechanic. The simulation is honest about the range.
+
+**Continuing — prenatal care:**
+- Cost: significant without insurance, still significant with. OB appointments, bloodwork, imaging.
+- Appointments: time off work, scheduling, transportation.
+- Nutrition requirements change.
+- Job implications: nausea at work, eventual visible pregnancy, legal protections that vary by jurisdiction, discrimination that happens anyway.
+- Partner or support person or alone — radically different experiences.
+
+**Continuing — later pregnancy:**
+- Physical limitations that grow: fatigue intensifies, mobility changes, sleep quality degrades (position constraints, frequent waking).
+- Nesting behaviors (real psychological phenomenon) — could surface as habit-system behaviors.
+- Financial pressure: preparation, supplies, potential childcare costs start looming.
+- Maternity leave: jurisdiction variable. Some places: paid, protected. Others: none.
+
+**Birth:**
+- An event, not a long interactive sequence.
+- Sleep debt explodes. This is the sleep debt model at its extreme — a newborn feeds every 2–3 hours.
+- Postpartum: NT model shifts. Postpartum depression is a real phenomenon (hormone crash + sleep deprivation + enormous life change). Not all people get it. The simulation shouldn't assume either.
+- The decision about feeding method (breastfeeding vs formula) is the character's — each has its own logistics, cost, and physical demands. Formula costs money; breastfeeding costs time and bodily autonomy.
+
+**Ongoing:**
+- Childcare: cost (enormous — in the US often more than rent), availability, quality.
+- Schedule: everything reorganizes around the child's needs.
+- The simulation becomes about navigating work + child survival simultaneously.
+- Single parent vs. partner present: radically different resource profiles.
+- This is a genuinely different game mode — the texture of daily life restructures around another person's needs.
+
+---
+
+## Architecture implications
+
+### New state variables
+
+- `health_conditions`: array of active conditions, each with `{ type, severity, onset, managed }`. Severity is continuous 0–1.
+- `cycle_day`, `cycle_length`: for characters with cycles. `cycle_length` varies with stress (real).
+- `pregnancy_week`: null, or 0–42
+- `pregnancy_status`: null / suspected / confirmed / terminated / continuing
+- `chronic_pain_level`: 0–1 continuous, underlying floor with flare events on top
+- `dental_pain`: 0–1 continuous
+
+### Chargen additions
+
+- Reproductive anatomy: private internal field, never displayed. Gates which experiences are possible.
+- Chronic condition seeds: family history flags, demographic risk weights. Some conditions generated at chargen, some emerging during play.
+- Baseline health: affects how much energy/NE recovery is possible from a given sleep duration.
+- Jurisdiction: country + region. Healthcare access, reproductive rights, drug policy all derived.
+
+### Content
+
+- Each active condition shades narration continuously via deterministic modifier — not announced, just present.
+- Interactions appear/disappear based on health state: can't do laundry during a bad flare, certain food options unavailable during nausea, `callInSick` costs more job standing when it's already been used recently.
+- Dental pain shades background prose via NE-adjacent modifier — it's always there at the relevant intensity, doesn't need to announce itself.
+
+### Condition lifecycle
+
+Different from sentiment accumulation — needs its own structure:
+- **Onset**: gradual (chronic) or event (acute/injury)
+- **Severity arc**: acute conditions peak and resolve; chronic conditions have a baseline with flares
+- **Treatment effects**: medication shifts severity and/or symptom profile; no treatment → possible progression
+- **Resolution**: acute conditions resolve; chronic conditions are managed, not cured
+
+---
+
+## Implementation order
+
+1. **Acute illness** — most tractable. Maps to existing systems. Single state variable per episode.
+2. **Dental pain** — tractable, high texture value, class-stratified arc worth having.
+3. **Menstrual cycle** — requires anatomy flag in chargen, meaningful texture for many players.
+4. **Chronic conditions** — one condition to establish the pattern (chronic pain, probably). Then others follow.
+5. **Mental health (structural)** — hardest to get right. Needs careful design of what "persistent floor" means mechanically without creating a dead end.
+6. **Pregnancy** — most complex. Needs jurisdiction system first for access gating.
+
+Jurisdiction as a character parameter is a prerequisite for honest pregnancy and reproductive health modeling. Build it before building those systems.

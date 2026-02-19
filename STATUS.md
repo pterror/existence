@@ -64,15 +64,15 @@ Snow:
 - Snow prose in: street description (quiet, muffled), bus_stop (bench clearing), weather_shift event (inside: window light change; outside: street softens), move:street approaching prose.
 
 ### Health Conditions
-Pattern established for character health conditions. First condition: migraines.
+Two health tracks: chronic conditions (permanent, per-character) and acute illness (transient, anyone can get it).
 
-**Architecture:**
+**Chronic condition architecture:**
 - `health_conditions: string[]` in state, set by `Character.applyToState()` from `character.conditions`
 - `hasCondition(id)` query — all condition-gated behavior uses this
-- `energyCeiling()` — returns max achievable energy (100 normally; 30–70 during migraine)
+- `energyCeiling()` — returns max achievable energy (100 normally; reduced by migraine or illness)
 - `migraineTier()` — 'none' | 'building' | 'active' | 'severe'
 
-**Migraines (first condition):**
+**Migraines (first chronic condition):**
 - ~15% prevalence at chargen (+5% for high-neuroticism or precarious career)
 - Trigger: probabilistic in `advanceTime`, risk score from adenosine + stress + sleep debt
 - Intensity: 30–70 at onset, decays ~8 pts/hr after 2h active phase
@@ -80,6 +80,18 @@ Pattern established for character health conditions. First condition: migraines.
 - `take_pain_reliever` interaction at apartment_bathroom: -35 intensity, available when migraineTier ≠ 'none'
 - `go_for_walk` blocked at 'severe' tier
 - Postdrome/aura ○
+
+**Acute illness (flu / cold / GI):**
+- `illness_severity` (0–1), `illness_type` (null|'flu'|'cold'|'gi'), `illness_day`, `illness_medicated` (boolean, resets each wakeUp)
+- `illnessTier()` — 'healthy' | 'unwell' | 'sick' | 'very_sick'
+- **Onset:** probabilistic each sleep (base 4%, +4% if high stress, +4% if sleep debt, +2% if worked). Always 2 balanced RNG calls per sleep regardless of health state.
+- **Arc:** severity 0.2 at onset → grows for 2 days (peak ~0.56 unmedicated) → recovers ~0.12–0.22/day. Working while sick cuts recovery to 40%.
+- **NT effects per tick:** adenosine pushed up (illness fatigue), NE elevated (body ache), dopamine suppressed (no motivation). Medicated = 40% impact.
+- **Hunger:** appetite suppressed — rate scaled by `max(0.3, 1 - severity * 0.7)`.
+- **Sleep quality:** fever degrades architecture — `qualityMult *= max(0.5, 1 - severity * 0.35)`.
+- **energyCeiling():** illness > 0.1 cuts ceiling proportionally (max −45 at severity 1.0).
+- **Content:** bedroom/kitchen descriptions shade when sick (deterministic modifiers). `callInSick` distinguishes actually-sick vs. not. Idle thoughts pool gains illness-specific entries at 'unwell'/'sick'/'very_sick' tiers.
+- **`buy_medicine`** at corner store: ~$9–13, sets `illness_medicated`, slows peak and boosts recovery. Available once per day (resets with wakeUp). 2 RNG calls.
 
 ### Finance accessors
 - Billing cycle offsets now stored in state (set by `applyToState()`) — content no longer calls `Character.get('..._day_offset')`

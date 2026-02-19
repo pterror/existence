@@ -232,6 +232,12 @@ export function createState(ctx) {
       migraine_intensity: 0,    // 0-100 pain level; decays ~8 pts/hr during active phase
       migraine_hours_active: 0, // hours since onset; used to pace decay
 
+      // Acute illness — transient, anyone can get it. Separate from chronic health_conditions.
+      illness_severity: 0,                             // 0-1 continuous (0 = healthy)
+      illness_type: /** @type {string|null} */ (null), // 'flu' | 'cold' | 'gi'
+      illness_day: 0,                                  // days since onset; drives severity arc
+      illness_medicated: false,                        // OTC medicine taken today; resets each wakeUp
+
       // Internal counters the player never sees
       actions_since_rest: 0,
       times_late_this_week: 0,
@@ -313,8 +319,11 @@ export function createState(ctx) {
     // Passive effects per time passage
     const hours = minutes / 60;
 
-    // Hunger increases over time
-    s.hunger = Math.min(100, s.hunger + hours * 4);
+    // Hunger increases over time — illness suppresses appetite
+    const hungerRate = s.illness_severity > 0
+      ? 4 * Math.max(0.3, 1 - s.illness_severity * 0.7)
+      : 4;
+    s.hunger = Math.min(100, s.hunger + hours * hungerRate);
 
     // Energy drain — accelerated by hunger
     const hungerDrainMultiplier = s.hunger > 70 ? 1.8 : s.hunger > 40 ? 1.3 : 1.0;
@@ -389,6 +398,18 @@ export function createState(ctx) {
           s.migraine_hours_active = 0;
         }
       }
+    }
+
+    // Acute illness — NT effects per tick
+    if (s.illness_severity > 0) {
+      const sev = s.illness_severity;
+      const medFactor = s.illness_medicated ? 0.4 : 1.0;
+      // Illness drives fatigue that doesn't clear through normal rest
+      adjustNT('adenosine', sev * hours * 3 * medFactor);
+      // Immune activation + body ache elevates NE (dull, not sharp)
+      adjustNT('norepinephrine', sev * hours * 1.5 * medFactor);
+      // Suppresses motivation and engagement
+      adjustNT('dopamine', -sev * hours * 2 * medFactor);
     }
 
     // Neurochemistry drift — levels approach targets with inertia
@@ -544,6 +565,7 @@ export function createState(ctx) {
     s.ate_at_work_today = false;
     s.ate_at_soup_kitchen_today = false;
     s.daylight_exposure = 0;
+    s.illness_medicated = false;
   }
 
   // --- Qualitative tiers ---
@@ -825,6 +847,10 @@ export function createState(ctx) {
       // Migraine cuts ceiling: -30 at intensity 60, -50 at intensity 100
       return Math.max(30, 100 - s.migraine_intensity * 0.5);
     }
+    if (s.illness_severity > 0.1) {
+      // Illness cuts ceiling proportionally: -25 at severity 0.5, -45 at severity 1.0
+      return Math.max(30, 100 - s.illness_severity * 50);
+    }
     return 100;
   }
 
@@ -834,6 +860,14 @@ export function createState(ctx) {
     if (s.migraine_intensity < 30) return 'building';
     if (s.migraine_intensity < 65) return 'active';
     return 'severe';
+  }
+
+  /** Qualitative acute illness state. 'healthy' when not sick. */
+  function illnessTier() {
+    if (s.illness_severity < 0.05) return 'healthy';
+    if (s.illness_severity < 0.3) return 'unwell';
+    if (s.illness_severity < 0.65) return 'sick';
+    return 'very_sick';
   }
 
   function timePeriod() {
@@ -1960,6 +1994,7 @@ export function createState(ctx) {
     hasCondition,
     energyCeiling,
     migraineTier,
+    illnessTier,
     innerVoiceTier,
   };
 }

@@ -832,6 +832,16 @@ export function createContent(ctx) {
         desc += ' Something is starting behind your left eye. Or your right. The kind of pressure that you know, by now, what it means.';
       }
 
+      // Illness — physical reality layered over mood (deterministic, no RNG)
+      const illTier = State.illnessTier();
+      if (illTier === 'very_sick') {
+        desc = 'The bed is the whole world right now. Moving anywhere feels like a decision that requires more from you than you have.';
+      } else if (illTier === 'sick') {
+        desc += ' Your body has an opinion about everything you\'re considering doing. The opinion is no.';
+      } else if (illTier === 'unwell') {
+        desc += ' Something\'s off. Not enough to stop you, just enough to be there.';
+      }
+
       // Floor clothes — from Clothing module
       const floorClothes = Clothing.floorDescription('bedroom');
       if (floorClothes) {
@@ -937,6 +947,16 @@ export function createContent(ctx) {
         desc += ' The light in here is doing more than its share.';
       } else if (ne > 65 && (time === 'morning' || time === 'early_morning')) {
         desc += ' Everything in here feels very present this early.';
+      }
+
+      // Illness modifier (deterministic, no RNG)
+      const illTierK = State.illnessTier();
+      if (illTierK === 'very_sick') {
+        desc += ' Getting here took something out of you.';
+      } else if (illTierK === 'sick') {
+        desc += ' Your body keeps reminding you it would prefer to be horizontal.';
+      } else if (illTierK === 'unwell') {
+        desc += ' Something about the light in here isn\'t helping.';
       }
 
       // Time of day flavor
@@ -1423,6 +1443,12 @@ export function createContent(ctx) {
         // Caffeine interference — caffeine at bedtime degrades sleep architecture
         qualityMult *= State.caffeineSleepInterference();
 
+        // Illness — fever and immune activation degrade sleep architecture
+        if (State.get('illness_severity') > 0) {
+          const sev = State.get('illness_severity');
+          qualityMult *= Math.max(0.5, 1 - sev * 0.35);
+        }
+
         // Sleep debt: ideal 480 min/day. Deficit accumulates fully, excess repays at 33%.
         const ideal = 480;
         const deficit = ideal - sleepMinutes;
@@ -1472,6 +1498,44 @@ export function createContent(ctx) {
         // Fridge food slowly goes bad overnight
         if (State.fridgeTier() !== 'empty' && Timeline.chance(0.15)) {
           State.set('fridge_food', Math.max(0, State.get('fridge_food') - 1));
+        }
+
+        // Illness onset / progression — always 2 balanced RNG calls per sleep
+        const illnessRoll1 = Timeline.random();
+        const illnessRoll2 = Timeline.randomInt(0, 3);
+        if (State.illnessTier() === 'healthy') {
+          const stressRisk  = State.get('stress') > 60      ? 0.04 : 0;
+          const debtRisk    = State.get('sleep_debt') > 480 ? 0.04 : 0;
+          const workedRisk  = State.get('at_work_today')    ? 0.02 : 0;
+          const baseChance  = 0.04 + stressRisk + debtRisk + workedRisk;
+          if (illnessRoll1 < baseChance) {
+            const types = ['flu', 'cold', 'cold', 'gi']; // cold more common
+            State.set('illness_severity', 0.2);
+            State.set('illness_type', types[illnessRoll2]);
+            State.set('illness_day', 0);
+          }
+        } else {
+          // Deterministic progression — RNG already consumed above
+          const illDay    = State.get('illness_day');
+          const sev       = State.get('illness_severity');
+          const medicated = State.get('illness_medicated');
+          State.set('illness_day', illDay + 1);
+          if (illDay < 2) {
+            // Peak phase — severity builds, medicine slows it
+            const increase = medicated ? 0.07 : 0.18;
+            State.set('illness_severity', Math.min(1.0, sev + increase));
+          } else {
+            // Recovery — rest helps, working delays it, medicine speeds it
+            const baseRecovery  = 0.12 + qualityMult * 0.1;
+            const recoveryRate  = State.get('at_work_today') ? baseRecovery * 0.4 : baseRecovery;
+            const medBonus      = medicated ? 0.05 : 0;
+            const newSev        = Math.max(0, sev - recoveryRate - medBonus);
+            State.set('illness_severity', newSev);
+            if (newSev < 0.05) {
+              State.set('illness_type', null);
+              State.set('illness_day', 0);
+            }
+          }
         }
 
         // Undress — destination depends on energy + mood
@@ -3498,6 +3562,42 @@ export function createContent(ctx) {
       },
     },
 
+    buy_medicine: {
+      id: 'buy_medicine',
+      label: 'Get something for it',
+      location: 'corner_store',
+      available: () => State.illnessTier() !== 'healthy' && State.canAfford(9) && !State.get('illness_medicated'),
+      execute: () => {
+        const cost = Timeline.randomFloat(9, 13);
+        const roundedCost = Math.round(cost * 100) / 100;
+        if (!State.spendMoney(roundedCost)) return 'Not enough. You put it back.';
+        State.set('illness_medicated', true);
+        State.advanceTime(Timeline.randomInt(5, 8));
+        State.glanceMoney();
+
+        const illTier = State.illnessTier();
+        const aden = State.get('adenosine');
+        if (illTier === 'very_sick') {
+          return Timeline.weightedPick([
+            { weight: 1, value: 'You find what you need and bring it to the register. The cashier doesn\'t comment. You get home and take it. It won\'t fix anything, but it will make it possible to exist in your body for a while.' },
+            { weight: 1, value: 'Cold medicine. You take it in the store parking lot because you can\'t wait. The chemical taste is almost comforting — something doing something.' },
+          ]);
+        }
+        if (illTier === 'sick') {
+          return Timeline.weightedPick([
+            { weight: 1, value: 'DayQuil or NyQuil or whatever the generic version is. You take the recommended dose, which feels insufficient. You take it anyway.' },
+            { weight: 1, value: 'You find the right aisle, pick something up, pay. You already feel slightly better just from the act of doing something about it.' },
+            // High adenosine — the shopping itself was an effort
+            { weight: State.lerp01(aden, 50, 80) * State.adenosineBlock(), value: 'The walk here took most of what you had. You get the medicine, get out. That\'s enough for now.' },
+          ]);
+        }
+        return Timeline.weightedPick([
+          { weight: 1, value: 'Something to head it off before it gets worse. Or just help. Either way.' },
+          { weight: 1, value: 'You grab cold medicine, the generic kind. Probably the same thing in the box. You pay and go.' },
+        ]);
+      },
+    },
+
     buy_coffee_store: {
       id: 'buy_coffee_store',
       label: 'Get a coffee',
@@ -4369,8 +4469,16 @@ export function createContent(ctx) {
       Events.record('called_in_sick');
 
       const job = State.jobTier();
+      const sick = State.illnessTier() !== 'healthy';
+
       if (job === 'at_risk' || job === 'shaky') {
+        if (sick) {
+          return 'You call. You tell them you\'re sick. The pause on the other end carries more weight than you have energy for right now.';
+        }
         return 'You call. The phone rings twice. You say you\'re not coming in. The pause on the other end says more than the words that follow.';
+      }
+      if (sick) {
+        return 'You call in sick. You actually are. They say okay. For once the words are true and you\'re too tired to feel anything about that.';
       }
       return 'You call in. They say okay. It\'s fine. It\'s always fine, until it isn\'t.';
     },
@@ -4819,6 +4927,34 @@ export function createContent(ctx) {
         thoughts.push(
           { weight: moneyAnx * 5, value: 'You think about the account balance without checking. The not-checking is its own kind of checking.' },
           { weight: moneyAnx * 5, value: 'Every purchase is a small negotiation. Not with anyone. Just with the feeling in your chest.' },
+        );
+      }
+    }
+
+    // Illness — intrusive physical presence when sick
+    {
+      const illTier = State.illnessTier();
+      if (illTier === 'very_sick') {
+        thoughts.push(
+          { weight: 10, value: 'You feel bad in the specific, consuming way that makes everything else feel far away.' },
+          { weight: 10, value: 'Your body is doing something it shouldn\'t and it wants you to know about it.' },
+          { weight: 10, value: 'Being sick alone in your apartment is its own specific texture of bad.' },
+          { weight: 8, value: 'The floor looks very far away. You\'re not planning on going there. Just noting it.' },
+          { weight: 8, value: 'You try to remember if this is the worst you\'ve felt recently. It might be.' },
+        );
+      } else if (illTier === 'sick') {
+        thoughts.push(
+          { weight: 7, value: 'Your body is staging a slow protest. The banners say: lie down.' },
+          { weight: 7, value: 'You feel like the physical version of a bad day.' },
+          { weight: 6, value: 'Everything takes slightly more than you have right now.' },
+          { weight: 5, value: 'Not dramatically sick. Just relentlessly, continuously sick.' },
+          { weight: 5, value: 'You try to assess whether you\'re getting better or worse. It\'s hard to tell from inside it.' },
+        );
+      } else if (illTier === 'unwell') {
+        thoughts.push(
+          { weight: 4, value: 'Something\'s starting. Or finishing. You can\'t tell yet.' },
+          { weight: 4, value: 'You feel like the day before sick.' },
+          { weight: 3, value: 'Not quite right. Not quite sick. Somewhere in between.' },
         );
       }
     }
@@ -5465,6 +5601,12 @@ export function createContent(ctx) {
 
     browse_store: () => {
       return 'Looking around.';
+    },
+
+    buy_medicine: () => {
+      const illTier = State.illnessTier();
+      if (illTier === 'very_sick') return 'Medicine. You need it.';
+      return 'Something for it.';
     },
 
     // === PHONE MODE ===
