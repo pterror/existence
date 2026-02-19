@@ -121,6 +121,7 @@ Two health tracks: chronic conditions (permanent, per-character) and acute illne
 - `get_coffee_work` interaction at workplace — available during work hours unless caffeineTier is 'high'. 40 caffeine units (slightly weaker than home coffee). Job-type specific prose (office/retail/food_service).
 - `buy_coffee_store` interaction at corner store — costs ~$1.75–3.00. 50 caffeine units. Available if canAfford(2) and not 'high' tier.
 - **`adenosineBlock()` propagation** — all ~25 adenosine-fog prose sites (weighted picks + if-branches) now multiply by `adenosineBlock()`, so caffeine actually masks the tiredness texture in prose. Fog variants suppressed when caffeine is active.
+- **Tolerance + withdrawal** — `caffeine_habit` (0–100) grows +8 per day caffeine peak ≥ 40, fades -5 per day without. `caffeine_withdrawal` builds at ~6 pts/hr (habit=100) when habit > 10 and caffeine_level < 15; clears at 25 pts/hr when caffeinated. Withdrawal raises NE, suppresses dopamine. `withdrawalTier()` — 'none' | 'mild' | 'moderate' | 'severe'. Withdrawal prose at make_coffee / get_coffee_work / buy_coffee_store (relief branch) and idleThoughts (3-tier headache presence).
 
 ### Emotional Inertia (Layer 2 of DESIGN-EMOTIONS.md)
 Per-character trait controlling how sticky moods are. Only affects the four mood-primary systems (serotonin, dopamine, NE, GABA) — physiological rhythms are unaffected by personality.

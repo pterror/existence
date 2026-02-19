@@ -2591,6 +2591,7 @@ export function createContent(ctx) {
         const mood = State.moodTone();
         const aden = State.get('adenosine');
         const caffeine = State.caffeineTier();
+        const withdrawal = State.withdrawalTier();
         const dentalAche = State.get('dental_ache');
         const dentalW = State.lerp01(dentalAche, 25, 70);
 
@@ -2608,6 +2609,15 @@ export function createContent(ctx) {
           return Timeline.weightedPick([
             { weight: 1, value: 'The second one. The first one wore off faster than it should have.' },
             { weight: State.lerp01(aden, 40, 80), value: 'You weren\'t done needing it yet. The second cup goes down the same way as the first.' },
+          ]);
+        }
+
+        // Withdrawal relief — the headache was building
+        if (withdrawal === 'moderate' || withdrawal === 'severe') {
+          return Timeline.weightedPick([
+            { weight: 1, value: 'You make coffee. The headache has been sitting behind your eyes all morning. You wait for it to start clearing. It takes a few minutes. Then it does.' },
+            { weight: 1, value: 'The coffee is ready. You drink it standing at the counter. The pressure behind your eyes starts to ease — you hadn\'t realized how much it was there until it wasn\'t.' },
+            { weight: withdrawal === 'severe' ? 2 : 1, value: 'You needed this an hour ago. The headache has been building since you woke up — not loud enough to stop you, just loud enough to make everything harder. First sip. Second. Something shifts.' },
           ]);
         }
 
@@ -3489,12 +3499,21 @@ export function createContent(ctx) {
         const mood = State.moodTone();
         const aden = State.get('adenosine');
         const caffeine = State.caffeineTier();
+        const withdrawal = State.withdrawalTier();
         const jobType = Character.get('job_type');
 
         if (caffeine === 'active') {
           return Timeline.weightedPick([
             { weight: 1, value: 'You go back for another. The machine goes through its routine. You go through yours.' },
             { weight: State.lerp01(aden, 40, 75) * State.adenosineBlock(), value: 'The second one. You weren\'t done needing it.' },
+          ]);
+        }
+
+        // Withdrawal relief — made it to work with a headache
+        if (withdrawal === 'moderate' || withdrawal === 'severe') {
+          return Timeline.weightedPick([
+            { weight: 1, value: 'Break room. You pour coffee and drink it standing up. The headache starts to retreat. You give it a minute, then go back.' },
+            { weight: 1, value: 'You\'ve had a headache since you got here. The coffee starts to address that. Not immediately — it takes a few minutes. But the pressure behind your eyes starts to ease and the shift gets a little more navigable.' },
           ]);
         }
 
@@ -3720,12 +3739,21 @@ export function createContent(ctx) {
         const mood = State.moodTone();
         const aden = State.get('adenosine');
         const caffeine = State.caffeineTier();
+        const withdrawal = State.withdrawalTier();
         const money = State.moneyTier();
 
         if (caffeine === 'active') {
           return Timeline.weightedPick([
             { weight: 1, value: 'The second one. You buy it because the first one didn\'t finish the job.' },
             { weight: State.lerp01(aden, 40, 75) * State.adenosineBlock(), value: 'You\'re already on one. You buy another. Your body is making its case.' },
+          ]);
+        }
+
+        // Withdrawal relief — the headache finally has an answer
+        if (withdrawal === 'moderate' || withdrawal === 'severe') {
+          return Timeline.weightedPick([
+            { weight: 1, value: 'The headache has been sitting behind your eyes. You buy the coffee, take it outside, drink it faster than you should. The pressure starts to ease. You stand there a moment letting that happen.' },
+            { weight: withdrawal === 'severe' ? 2 : 1, value: 'Two dollars for the headache to stop. You\'ve been carrying it since you woke up. You pay and stand outside with the cup and wait. It takes a few minutes. Then: less.' },
           ]);
         }
 
@@ -5082,6 +5110,28 @@ export function createContent(ctx) {
         thoughts.push(
           { weight: 2, value: 'Somewhere in the back of your mouth, a low dull note.' },
           { weight: 2, value: 'The tooth again. Not bad right now. Just reminding you it\'s there.' },
+        );
+      }
+    }
+
+    // Caffeine withdrawal — background headache pressing in
+    {
+      const wdTier = State.withdrawalTier();
+      if (wdTier === 'severe') {
+        thoughts.push(
+          { weight: 10, value: 'The headache is a fact. It\'s been a fact since you woke up. It sits behind your eyes and does not move.' },
+          { weight: 8, value: 'You keep registering the headache like it\'s new information. It\'s not new.' },
+          { weight: 7, value: 'Everything is slightly worse than it needs to be. The headache is why.' },
+        );
+      } else if (wdTier === 'moderate') {
+        thoughts.push(
+          { weight: 6, value: 'There\'s a pressure behind your eyes. Not bad yet. Building.' },
+          { weight: 5, value: 'You could use a coffee. More than usual.' },
+          { weight: 4, value: 'Something\'s off about the light. Too sharp. Or your head is too tender.' },
+        );
+      } else if (wdTier === 'mild') {
+        thoughts.push(
+          { weight: 3, value: 'A mild awareness somewhere behind your eyes. Could be nothing. Probably isn\'t nothing.' },
         );
       }
     }

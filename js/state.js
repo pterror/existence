@@ -161,6 +161,11 @@ export function createState(ctx) {
       // Half-life ~5h. High caffeine at bedtime degrades sleep quality.
       // One cup of coffee ≈ 50 units.
       caffeine_level: 0,
+      // Tolerance tracking: grows when daily peak ≥ 40, fades when day passes without caffeine.
+      caffeine_habit: 0,       // 0-100; habitual use level
+      // Withdrawal: builds when habit > 10 and caffeine_level < 15. Clears with caffeine.
+      caffeine_withdrawal: 0,  // 0-100; headache + dopamine suppression
+      caffeine_today_peak: 0,  // highest caffeine_level this wake period; reset at wakeUp
 
       // Environment
       // Temperature in celsius. Set by updateWeather() in world.js.
@@ -427,6 +432,24 @@ export function createState(ctx) {
       adjustNT('dopamine', -sev * hours * 2 * medFactor);
     }
 
+    // Caffeine withdrawal — builds when habitual user goes without caffeine
+    if (s.caffeine_habit > 10) {
+      if (s.caffeine_level < 15) {
+        // Withdrawal builds proportional to habit strength. At habit=100: ~6 pts/hr.
+        // Takes ~8–12h to reach moderate (40) at typical habit levels.
+        const buildRate = (s.caffeine_habit / 100) * 6;
+        s.caffeine_withdrawal = Math.min(100, s.caffeine_withdrawal + buildRate * hours);
+      } else if (s.caffeine_level >= 25) {
+        // Caffeine clears withdrawal quickly once it reaches meaningful levels
+        s.caffeine_withdrawal = Math.max(0, s.caffeine_withdrawal - hours * 25);
+      }
+      if (s.caffeine_withdrawal > 0) {
+        // Withdrawal headache signal: elevated NE; suppressed dopamine (low motivation, fog)
+        adjustNT('norepinephrine', (s.caffeine_withdrawal / 100) * hours * 2.5);
+        adjustNT('dopamine', -(s.caffeine_withdrawal / 100) * hours * 2);
+      }
+    }
+
     // Neurochemistry drift — levels approach targets with inertia
     driftNeurochemistry(hours);
   }
@@ -581,6 +604,13 @@ export function createState(ctx) {
     s.ate_at_soup_kitchen_today = false;
     s.daylight_exposure = 0;
     s.illness_medicated = false;
+    // Caffeine habit — update from yesterday's peak, then reset
+    if (s.caffeine_today_peak >= 40) {
+      s.caffeine_habit = Math.min(100, s.caffeine_habit + 8);
+    } else {
+      s.caffeine_habit = Math.max(0, s.caffeine_habit - 5);
+    }
+    s.caffeine_today_peak = 0;
     // Dental — underlying condition means you always wake with at least a dull ache
     if (s.health_conditions.includes('dental_pain')) {
       s.dental_ache = Math.max(s.dental_ache, 8);
@@ -781,6 +811,7 @@ export function createState(ctx) {
    */
   function consumeCaffeine(amount) {
     s.caffeine_level = clamp(s.caffeine_level + amount, 0, 100);
+    s.caffeine_today_peak = Math.max(s.caffeine_today_peak, s.caffeine_level);
     // Acute sympathomimetic effect: small NE boost
     adjustNT('norepinephrine', amount * 0.2);
   }
@@ -803,6 +834,15 @@ export function createState(ctx) {
     if (c < 30) return 1.0;
     // Linear from 1.0 at 30 → 0.65 at 100
     return Math.max(0.65, 1.0 - (c - 30) * 0.005);
+  }
+
+  /** Qualitative caffeine withdrawal tier. Content branches on these labels. */
+  function withdrawalTier() {
+    const w = s.caffeine_withdrawal;
+    if (w < 15) return 'none';
+    if (w < 40) return 'mild';
+    if (w < 70) return 'moderate';
+    return 'severe';
   }
 
   // --- Temperature ---
@@ -2027,6 +2067,7 @@ export function createState(ctx) {
     consumeCaffeine,
     adenosineBlock,
     caffeineSleepInterference,
+    withdrawalTier,
     // Temperature
     seasonalTemperatureBaseline,
     diurnalTemperatureOffset,
