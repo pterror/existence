@@ -950,6 +950,52 @@ body.phone-open #game {
   color: #c8c0b8;
 }
 
+/* Amount input row (help_friend) */
+.phone-amount-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+}
+
+.phone-amount-prefix {
+  color: #807870;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.phone-amount-input {
+  flex: 1;
+  min-width: 0;
+  background: #181614;
+  border: 1px solid #2a2826;
+  border-radius: 10px;
+  color: #c8c0b8;
+  font-family: inherit;
+  font-size: 13px;
+  padding: 8px 10px;
+  appearance: textfield;
+}
+
+.phone-amount-input::-webkit-inner-spin-button,
+.phone-amount-input::-webkit-outer-spin-button {
+  appearance: none;
+}
+
+.phone-amount-input::placeholder {
+  color: #504848;
+}
+
+.phone-amount-input:focus {
+  outline: none;
+  border-color: #3a3634;
+}
+
+.phone-amount-send {
+  flex: 0 0 auto;
+  padding: 8px 14px;
+}
+
 /* Empty state */
 .phone-empty {
   color: #4a4540;

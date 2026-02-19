@@ -14,7 +14,7 @@ export function createUI(ctx) {
   /** @type {HTMLElement} */ let awarenessTimeEl;
   /** @type {HTMLElement} */ let awarenessMoneyEl;
   /** @type {HTMLElement | null} */ let phoneEl = null;
-  /** @type {((interaction: Interaction) => void) | null} */
+  /** @type {((interaction: Interaction, data?: Record<string, any>) => void) | null} */
   let onAction = null;
   /** @type {((destId: string) => void) | null} */
   let onMove = null;
@@ -455,7 +455,7 @@ export function createUI(ctx) {
         compose = '<div class="phone-compose">';
         if (canReply) compose += `<button class="phone-compose-btn" data-phone-action="reply_to_friend">Reply</button>`;
         if (canWrite) compose += `<button class="phone-compose-btn" data-phone-action="message_friend">Write</button>`;
-        if (canHelpFriend) compose += `<button class="phone-compose-btn" data-phone-action="help_friend">Help</button>`;
+        if (canHelpFriend) compose += `<div class="phone-amount-row"><span class="phone-amount-prefix">$</span><input type="number" class="phone-amount-input" id="phone-help-amount" min="1" step="1" placeholder="amount"><button class="phone-compose-btn phone-amount-send" data-phone-action="help_friend">Send</button></div>`;
         if (canAsk) compose += `<button class="phone-compose-btn" data-phone-action="ask_for_help">Ask for help</button>`;
         compose += '</div>';
       }
@@ -559,8 +559,11 @@ export function createUI(ctx) {
         const inter = Content.getInteraction('message_friend');
         if (inter && onAction) onAction(/** @type {Interaction} */ (inter));
       } else if (action === 'help_friend') {
+        const amountInput = /** @type {HTMLInputElement | null} */ (document.getElementById('phone-help-amount'));
+        const amount = amountInput ? parseFloat(amountInput.value) : 0;
+        if (!amount || amount <= 0) return;
         const inter = Content.getInteraction('help_friend');
-        if (inter && onAction) onAction(/** @type {Interaction} */ (inter));
+        if (inter && onAction) onAction(/** @type {Interaction} */ (inter), { amount });
       } else if (action === 'ask_for_help') {
         const inter = Content.getInteraction('ask_for_help');
         if (inter && onAction) onAction(/** @type {Interaction} */ (inter));

@@ -3729,10 +3729,10 @@ export function createContent(ctx) {
         if (!inbox.some(m => m.source === thread && !m.read && m.subtype === 'in_need')) return false;
         const pending = State.get('pending_replies') || [];
         if (pending.some(r => r.slot === thread)) return false;
-        if (!State.canAfford(10)) return false;
+        if (!State.canAfford(1)) return false;
         return true;
       },
-      execute: () => {
+      execute: (data = {}) => {
         if (State.get('phone_battery') <= 0) {
           State.set('viewing_phone', false);
           return 'The screen goes dark. Dead.';
@@ -3745,12 +3745,9 @@ export function createContent(ctx) {
         const mood = State.moodTone();
         const flavor = friend.flavor || 'warm_quiet';
 
-        // Amount derives from financial situation — you send what you can spare
-        const mt = State.moneyTier();
-        const baseAmount = mt === 'okay' || mt === 'comfortable' || mt === 'cushioned' ? 20
-          : mt === 'careful' ? 15
-          : 10; // tight — minimum
-        const amount = Math.min(baseAmount, Math.floor(State.get('money')));
+        // Amount is player-entered (live play via phone UI input) or recorded in action data (replay)
+        const amount = Math.min(Math.round(data.amount || 0), Math.floor(State.get('money')));
+        if (amount <= 0) return '';
 
         // 1 RNG call: player's reply
         const playerPools = {

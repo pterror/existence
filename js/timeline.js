@@ -171,7 +171,7 @@ export function createTimeline(ctx) {
 
   // --- Action log ---
 
-  /** @param {{ type: string; id?: string; destination?: string }} action */
+  /** @param {{ type: string; id?: string; destination?: string; data?: Record<string, any> }} action */
   function recordAction(action) {
     actions.push({ action, timestamp: ctx.state.get('time') });
     save();

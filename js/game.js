@@ -360,7 +360,7 @@ export function createGame(ctx) {
       // Execute action (same as existing replayActions logic)
       const action = actions[i].action;
       if (action.type === 'interact') {
-        replayInteraction(action.id);
+        replayInteraction(action.id, action.data);
         consumeEvents();
       } else if (action.type === 'move') {
         replayMove(action.destination);
@@ -930,7 +930,7 @@ export function createGame(ctx) {
       const habitFeatures = Habits.extractFeatures();
 
       if (action.type === 'interact') {
-        replayInteraction(action.id);
+        replayInteraction(action.id, action.data);
         consumeEvents();
         Habits.addExample(habitFeatures, action.id);
         lastIdleThought = undefined;
@@ -970,13 +970,13 @@ export function createGame(ctx) {
     Content.generateIncomingMessages();
   }
 
-  /** @param {string | undefined} id */
-  function replayInteraction(id) {
+  /** @param {string | undefined} id @param {Record<string, any>} [data] */
+  function replayInteraction(id, data = {}) {
     if (!id) return;
     // During replay, always execute — don't check availability.
     const interaction = findInteraction(id);
     if (interaction) {
-      interaction.execute();
+      interaction.execute(data);
     }
   }
 
@@ -1069,19 +1069,21 @@ export function createGame(ctx) {
 
   // --- Action handling ---
 
-  /** @param {Interaction} interaction */
-  function handleAction(interaction) {
+  /** @param {Interaction} interaction @param {Record<string, any>} [data] */
+  function handleAction(interaction, data = {}) {
     if (isReplaying) return;
     cancelAutoAdvance();
 
     // Snapshot features before action for habit training
     const habitFeatures = Habits.extractFeatures();
 
-    // Record the action
-    Timeline.recordAction({ type: 'interact', id: interaction.id });
+    // Record the action (include data if present)
+    const actionEntry = /** @type {{ type: string; id: string; data?: Record<string, any> }} */ ({ type: 'interact', id: interaction.id });
+    if (Object.keys(data).length) actionEntry.data = data;
+    Timeline.recordAction(actionEntry);
 
     // Execute and get prose response
-    const responseText = interaction.execute();
+    const responseText = interaction.execute(data);
 
     // Record training example with source tag and retrain periodically
     Habits.addExample(habitFeatures, interaction.id, nextActionSource || undefined);
