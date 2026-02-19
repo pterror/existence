@@ -176,10 +176,15 @@ export function createWorld(ctx) {
       }
     }
 
-    // Late for work stress — escalates twice then goes silent
+    // Late for work stress — fires on crossing into late, then again when very late.
+    // Deterministic: no RNG consumed. Resets each morning in wakeUp().
     if (State.isLateForWork() && hour < 12) {
-      if (Timeline.chance(0.15) && State.get('surfaced_late') < 2) {
-        events.push('late_anxiety');
+      const late = State.latenessMinutes();
+      const surfacedLate = State.get('surfaced_late');
+      if (surfacedLate === 0) {
+        events.push('late_anxiety');  // first notice — just became late
+      } else if (surfacedLate === 1 && late > 30) {
+        events.push('late_anxiety');  // escalation — now significantly late
       }
     }
 
