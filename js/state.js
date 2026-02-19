@@ -850,9 +850,25 @@ export function createState(ctx) {
   }
 
   // --- Sleep cycle breakdown ---
-  // Models the internal architecture of a sleep episode. 90-min cycles;
-  // early cycles are deep-sleep heavy, later cycles are REM heavy.
+  // Models the internal architecture of a sleep episode. Cycle lengths are
+  // variable: first cycle is shorter (~75 min, deep sleep onset is fast),
+  // later cycles lengthen as REM dominates (~90, ~100, ~105 min).
+  // Early cycles are deep-sleep heavy; later cycles are REM heavy.
   // No PRNG consumed — purely deterministic from duration.
+  // TODO: add per-character cycle_length_base offset (charRng at chargen).
+  // Individual variation (~±15 min) is a stable biological trait, not noise.
+
+  /**
+   * Duration of cycle i (0-indexed).
+   * @param {number} i
+   * @returns {number} minutes
+   */
+  function cycleDuration(i) {
+    if (i === 0) return 75;
+    if (i === 1) return 90;
+    if (i === 2) return 100;
+    return 105;
+  }
 
   /**
    * Break a sleep episode into its cycle components.
@@ -860,16 +876,26 @@ export function createState(ctx) {
    * @returns {{ completeCycles: number, partialCycleFrac: number, deepSleepFrac: number, remFrac: number, sleepInertia: number }}
    */
   function sleepCycleBreakdown(sleepMinutes) {
-    const cycleLength = 90;
-    const completeCycles = Math.floor(sleepMinutes / cycleLength);
-    const remainder = sleepMinutes % cycleLength;
-    const partialCycleFrac = remainder / cycleLength;
+    // Walk through variable-length cycles to find how many complete and the partial fraction.
+    let elapsed = 0;
+    let completeCycles = 0;
+    let partialCycleFrac = 0;
+    while (true) {
+      const dur = cycleDuration(completeCycles);
+      if (elapsed + dur <= sleepMinutes) {
+        elapsed += dur;
+        completeCycles++;
+      } else {
+        partialCycleFrac = (sleepMinutes - elapsed) / dur;
+        break;
+      }
+    }
 
     // Deep sleep fraction: high in early cycles, plateaus after ~3
     // Cycle 1: ~50% deep, Cycle 2: ~35%, Cycle 3+: ~20%
     let deepTotal = 0;
     let remTotal = 0;
-    const totalCycles = completeCycles + (partialCycleFrac > 0 ? partialCycleFrac : 0);
+    const totalCycles = completeCycles + partialCycleFrac;
 
     for (let i = 0; i < completeCycles; i++) {
       const cycleDeep = i === 0 ? 0.50 : i === 1 ? 0.35 : 0.20;
@@ -894,7 +920,6 @@ export function createState(ctx) {
     // Partial cycle in first 3 cycles with deep sleep → high inertia.
     let sleepInertia = 0;
     if (partialCycleFrac > 0 && completeCycles < 3) {
-      // In the deep-sleep-heavy early phase
       const depthFactor = completeCycles === 0 ? 0.50 : completeCycles === 1 ? 0.35 : 0.20;
       // Mid-cycle is worst (peak at 0.3-0.6 of cycle = deep sleep phase)
       const phaseInertia = partialCycleFrac < 0.6 ? partialCycleFrac / 0.6 : (1 - partialCycleFrac) / 0.4;
