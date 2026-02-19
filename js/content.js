@@ -4131,6 +4131,133 @@ export function createContent(ctx) {
     return picked;
   };
 
+  // --- Inner voice ---
+
+  /** @type {string[]} */
+  const recentInnerVoice = [];
+
+  /**
+   * Returns a single inner voice string (the character's self-talk).
+   * Called only when innerVoiceTier() !== null.
+   * Consumes 1 RNG call via Timeline.weightedPick().
+   */
+  const innerVoiceThoughts = () => {
+    const mood = State.moodTone();
+
+    const ser = State.get('serotonin');
+    const ne = State.get('norepinephrine');
+    const gaba = State.get('gaba');
+    const aden = State.get('adenosine');
+
+    const w1 = (/** @type {string} */ s) => ({ weight: 1, value: s });
+
+    /** @type {{ weight: number, value: string }[]} */
+    const thoughts = [];
+
+    if (mood === 'numb') {
+      thoughts.push(
+        w1('You\'re still here.'),
+        w1('Nothing\'s coming.'),
+        w1('You had something to do. You can\'t remember what.'),
+        w1('It doesn\'t matter. That\'s not comforting, it\'s just true.'),
+        // Low serotonin deepens the silence
+        { weight: State.lerp01(ser, 35, 15), value: 'You keep waiting to feel something about this. Nothing shows up.' },
+        { weight: State.lerp01(ser, 35, 15), value: 'There\'s no version of this that helps.' },
+        // High adenosine — fog as static
+        { weight: State.lerp01(aden, 55, 80), value: 'The thought was right there.' },
+        { weight: State.lerp01(aden, 55, 80), value: 'What were you—' },
+      );
+    } else if (mood === 'hollow') {
+      thoughts.push(
+        w1('You could text them. You\'re not going to.'),
+        w1('There\'s a message you should send.'),
+        w1('You used to have more to say to yourself.'),
+        w1('Quiet. It\'s been quiet a long time.'),
+        // Low serotonin — hollow with weight
+        { weight: State.lerp01(ser, 40, 20), value: 'You don\'t know what you\'d say even if you tried.' },
+        { weight: State.lerp01(ser, 40, 20), value: 'They\'re fine without you. Everyone is fine.' },
+        // Low NE — hollow and flat
+        { weight: State.lerp01(ne, 45, 25), value: 'Nothing needs you right now. Nothing.' },
+      );
+    } else if (mood === 'heavy') {
+      thoughts.push(
+        w1('You keep meaning to.'),
+        w1('It\'ll be easier tomorrow.'),
+        w1('You could start small. You haven\'t.'),
+        w1('Later. You\'ll deal with it later.'),
+        // Low serotonin — heavy tips into defeat
+        { weight: State.lerp01(ser, 40, 20), value: 'You know what you should be doing.' },
+        { weight: State.lerp01(ser, 40, 20), value: 'You\'re not doing it.' },
+        // Low NE — nothing reaching through
+        { weight: State.lerp01(ne, 45, 25), value: 'Nothing\'s reaching you right now.' },
+        { weight: State.lerp01(ne, 45, 25), value: 'You\'re in here somewhere.' },
+        // Low GABA — heavy with tremor underneath
+        { weight: State.lerp01(gaba, 40, 20), value: 'There\'s something under the tiredness. You don\'t look at it.' },
+      );
+    } else if (mood === 'fraying') {
+      thoughts.push(
+        w1('You know how this goes.'),
+        w1('Something\'s wrong. Nothing\'s wrong.'),
+        w1('Stop.'),
+        w1('Don\'t.'),
+        w1('You\'re doing it again.'),
+        w1('Okay. Okay.'),
+        // High NE — tight loop
+        { weight: State.lerp01(ne, 60, 80), value: 'Your heart is going too fast for what you\'re doing.' },
+        { weight: State.lerp01(ne, 60, 80), value: 'Every sound has a reason. You don\'t know the reason.' },
+        // Low GABA — no floor
+        { weight: State.lerp01(gaba, 40, 20), value: 'You try to calm down. You don\'t calm down.' },
+        { weight: State.lerp01(gaba, 40, 20), value: 'The thing about trying to relax is you can\'t make yourself relax.' },
+        // Low serotonin — fraying with hopeless undertow
+        { weight: State.lerp01(ser, 40, 20), value: 'You can\'t keep doing this. You\'re doing it.' },
+      );
+    } else if (mood === 'quiet') {
+      thoughts.push(
+        w1('Quiet.'),
+        w1('Nothing right now.'),
+        w1('You\'re not going anywhere.'),
+        // Lower serotonin — quiet with an edge
+        { weight: State.lerp01(ser, 45, 25), value: 'Something you were going to do. It can wait.' },
+        { weight: State.lerp01(ser, 45, 25), value: 'This is fine. This is exactly fine.' },
+        // High NE — quiet but not still
+        { weight: State.lerp01(ne, 50, 70), value: 'Everything\'s fine. You know it\'s fine. Your body hasn\'t gotten the message.' },
+      );
+    } else if (mood === 'clear' || mood === 'present') {
+      thoughts.push(
+        // Sparse — the voice is quieter when things are okay. Lower weights.
+        { weight: 0.5, value: 'This is okay.' },
+        { weight: 0.5, value: 'You\'re here.' },
+        { weight: 0.4, value: 'Yeah.' },
+        // Slight NE presence — noticing without worry
+        { weight: State.lerp01(ne, 35, 55) * 0.5, value: 'Something you noticed. Nothing to do with it.' },
+      );
+    } else {
+      // flat
+      thoughts.push(
+        w1('Again.'),
+        w1('You could start.'),
+        w1('You\'ve been here a while.'),
+        w1('Still here.'),
+        // Low serotonin — flat is darker
+        { weight: State.lerp01(ser, 45, 25), value: 'Fine. It\'s fine.' },
+        // High adenosine — flat and foggy
+        { weight: State.lerp01(aden, 55, 75), value: 'Something. There was something.' },
+        { weight: State.lerp01(aden, 55, 75), value: 'Never mind.' },
+      );
+    }
+
+    const fresh = thoughts.filter(t => !recentInnerVoice.includes(t.value));
+    const pool = fresh.length > 0 ? fresh : thoughts;
+    const picked = Timeline.weightedPick(pool);
+
+    if (picked) {
+      recentInnerVoice.push(picked);
+      while (recentInnerVoice.length > 3) recentInnerVoice.shift();
+    }
+
+    return picked;
+  };
+
   // --- Transition text ---
 
   /** @param {string} from @param {string} to */
@@ -4328,6 +4455,7 @@ export function createContent(ctx) {
 
   function resetIdleTracking() {
     recentIdle.length = 0;
+    recentInnerVoice.length = 0;
   }
 
   // --- Approaching prose ---
@@ -4669,6 +4797,7 @@ export function createContent(ctx) {
     interactions,
     eventText,
     idleThoughts,
+    innerVoiceThoughts,
     transitionText,
     getAvailableInteractions,
     getInteraction,

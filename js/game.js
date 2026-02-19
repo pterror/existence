@@ -139,7 +139,7 @@ export function createGame(ctx) {
       if (eventFn) eventFn();
     }
     Content.generateIncomingMessages();
-    const { lastIdleThought } = replayActions(saved.actions);
+    const { lastIdleThought, lastInnerVoice, lastInnerVoiceTier } = replayActions(saved.actions);
 
     // Initialize UI
     UI.init({
@@ -157,9 +157,13 @@ export function createGame(ctx) {
     showStepAway();
     showLookBack();
 
-    // Restore last idle thought so it doesn't vanish on refresh
-    if (lastIdleThought) {
+    // Restore last idle thought and inner voice so they don't vanish on refresh
+    if (lastIdleThought && lastInnerVoiceTier !== 'tremor') {
       setTimeout(() => UI.appendEventText(lastIdleThought), 500);
+    }
+    if (lastInnerVoice && lastInnerVoiceTier) {
+      const ivDelay = lastInnerVoiceTier === 'tremor' ? 500 : 1200;
+      setTimeout(() => UI.appendInnerVoice(lastInnerVoice, lastInnerVoiceTier), ivDelay);
     }
   }
 
@@ -424,6 +428,8 @@ export function createGame(ctx) {
     } else if (action.type === 'idle') {
       const thought = Content.idleThoughts();
       if (thought) responseText = thought;
+      const ivTier = State.innerVoiceTier();
+      if (ivTier) Content.innerVoiceThoughts(); // consume RNG to keep replay aligned
       State.advanceTime(Timeline.randomInt(2, 5));
     } else if (action.type === 'observe_time') {
       State.observeTime();
@@ -912,9 +918,11 @@ export function createGame(ctx) {
 
   // --- Replay (state reconstruction, no visual) ---
 
-  /** @param {ActionEntry[]} actions @returns {{ lastIdleThought: string | undefined }} */
+  /** @param {ActionEntry[]} actions @returns {{ lastIdleThought: string | undefined, lastInnerVoice: string | null, lastInnerVoiceTier: string | null }} */
   function replayActions(actions) {
     let lastIdleThought;
+    let lastInnerVoice = null;
+    let lastInnerVoiceTier = null;
     for (const entry of actions) {
       const action = entry.action;
 
@@ -926,13 +934,20 @@ export function createGame(ctx) {
         consumeEvents();
         Habits.addExample(habitFeatures, action.id);
         lastIdleThought = undefined;
+        lastInnerVoice = null;
+        lastInnerVoiceTier = null;
       } else if (action.type === 'move') {
         replayMove(action.destination);
         consumeEvents();
         Habits.addExample(habitFeatures, 'move:' + action.destination);
         lastIdleThought = undefined;
+        lastInnerVoice = null;
+        lastInnerVoiceTier = null;
       } else if (action.type === 'idle') {
-        lastIdleThought = replayIdle();
+        const result = replayIdle();
+        lastIdleThought = result.thought;
+        lastInnerVoice = result.voice;
+        lastInnerVoiceTier = result.ivTier;
       } else if (action.type === 'observe_time') {
         State.observeTime();
       } else if (action.type === 'observe_money') {
@@ -943,7 +958,7 @@ export function createGame(ctx) {
     // Train habit trees from replay data
     Habits.train();
 
-    return { lastIdleThought };
+    return { lastIdleThought, lastInnerVoice, lastInnerVoiceTier };
   }
 
   function consumeEvents() {
@@ -965,12 +980,16 @@ export function createGame(ctx) {
     }
   }
 
-  /** @returns {string | undefined} the idle thought text (for resume display) */
+  /**
+   * @returns {{ thought: string | undefined, voice: string | null, ivTier: string | null }}
+   */
   function replayIdle() {
-    // Consume the same RNG as live idle
+    // RNG order must match handleIdle() exactly
     const thought = Content.idleThoughts();
+    const ivTier = State.innerVoiceTier();
+    const voice = ivTier ? Content.innerVoiceThoughts() : null;
     State.advanceTime(Timeline.randomInt(2, 5));
-    return thought;
+    return { thought, voice, ivTier };
   }
 
   /** @param {string | undefined} destId */
@@ -1235,13 +1254,23 @@ export function createGame(ctx) {
     // Record idle as an action so RNG consumption is replayable
     Timeline.recordAction({ type: 'idle' });
 
-    // Surface an idle thought — pure atmosphere, no events or state changes
+    // RNG order must match replayIdle() exactly:
+    // 1. idleThoughts() — always (1 RNG)
+    // 2. innerVoiceThoughts() — only when ivTier !== null (1 RNG, conditional)
+    // 3. advanceTime(randomInt(2,5)) — always (1 RNG)
     const thought = Content.idleThoughts();
-    if (thought) {
+    const ivTier = State.innerVoiceTier();
+    const voice = ivTier ? Content.innerVoiceThoughts() : null;
+
+    // Tremor: inner voice drowns out the narration
+    if (thought && ivTier !== 'tremor') {
       UI.appendEventText(thought);
     }
+    if (voice && ivTier) {
+      const delay = ivTier === 'tremor' ? 0 : 800;
+      setTimeout(() => UI.appendInnerVoice(voice, ivTier), delay);
+    }
 
-    // Small time passage from idling
     State.advanceTime(Timeline.randomInt(2, 5));
 
     UI.updateAwareness();

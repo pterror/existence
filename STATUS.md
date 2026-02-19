@@ -338,6 +338,19 @@ Each has: workplace description (dynamic), do_work prose (6 variants), work_brea
 ### Idle Thoughts
 Dynamic generation based on mood (8 categories × ~7 general variants + 2–4 NT-weighted variants each), hunger (starving/very_hungry), energy (depleted), social isolation (friend-specific thoughts). NT values (serotonin, dopamine, NE, GABA, adenosine, cortisol) continuously weight variant selection via `State.lerp01()` and `Timeline.weightedPick()`. Recency tracking avoids repeats.
 
+### Inner Voice
+Second text stream that fires alongside idle thoughts when NT state is destabilized. Typographically distinct from narration — rendered as italic with intensity tiers driven by NT conditions.
+
+**Tier function:** `State.innerVoiceTier()` — score-based, pure state read, no RNG. Each condition adds 1: GABA < 40, NE > 65, serotonin < 35, rumination > 65. Score 0 → null (voice absent); 1 → `uneasy`; 2 → `prominent`; 3+ → `tremor`.
+
+**CSS tiers:** `uneasy` — slightly elevated letter-spacing, muted warm; `prominent` — body color, normal weight; `tremor` — bright, subtle horizontal shake animation (collapses to static high-contrast under `prefers-reduced-motion`).
+
+**Content:** `innerVoiceThoughts()` — mood-branched pool with NT-weighted variants, 1 RNG call (same pattern as idleThoughts). Separate `recentInnerVoice` dedup array (last 3). Voice is sparser at `clear`/`present` moods — when things are okay, it goes quiet.
+
+**Rendering:** At `tremor` tier, the inner voice drowns out narration (idle thought suppressed). At `uneasy`/`prominent`, voice appears 800ms after narration. Resume display restores both streams.
+
+**RNG discipline:** idle (1) → inner voice if tier non-null (1, conditional) → advanceTime (1). Order identical in `handleIdle`, `replayIdle`, and `executeActionForReplay`.
+
 ### Sleep Prose
 Two-phase system: falling-asleep (how sleep came) + waking-up (the gradient back to consciousness). Falling-asleep branches on pre-sleep energy, stress, quality, and duration, with NT shading: adenosine→crash depth, GABA→can't-settle anxiety, NE→hyper-alertness, serotonin→warmth of surrender, melatonin→onset delay (~22 variants). Waking-up branches on post-sleep energy, sleep quality, alarm vs natural wake, time of day (dark/late/morning), mood, sleep debt, and sleep inertia, with NT shading: adenosine→sleep inertia, serotonin→dread-vs-ease, NE→sharp edges, GABA→night dread, debt→cumulative exhaustion (~44 variants). Composed together as a single passage. No numeric hour counts — all qualitative.
 
