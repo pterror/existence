@@ -3716,6 +3716,137 @@ export function createContent(ctx) {
         return initiateText;
       },
     },
+
+    ask_for_help: {
+      id: 'ask_for_help',
+      label: 'Ask for help',
+      location: null,
+      available: () => {
+        if (!State.get('viewing_phone') || State.get('phone_battery') <= 0) return false;
+        const thread = State.get('phone_thread_contact');
+        if (!thread || !['friend1', 'friend2'].includes(thread)) return false;
+        const mt = State.moneyTier();
+        if (mt !== 'broke' && mt !== 'scraping') return false;
+        const pending = State.get('pending_replies') || [];
+        if (pending.some(r => r.slot === thread)) return false;
+        // 7-day cooldown — asking for money puts a real cost on the friendship
+        const lastAsked = State.get('last_asked_for_help_time');
+        if (lastAsked > 0 && State.get('time') - lastAsked < 7 * 24 * 60) return false;
+        return true;
+      },
+      execute: () => {
+        if (State.get('phone_battery') <= 0) {
+          State.set('viewing_phone', false);
+          return 'The screen goes dark. Dead.';
+        }
+        const thread = State.get('phone_thread_contact');
+        if (!thread) return '';
+        const friend = Character.get(thread);
+        if (!friend) return '';
+        const slot = thread;
+        const mood = State.moodTone();
+
+        // 1 RNG call: player's sent message
+        const sentPools = {
+          heavy:  [
+            { weight: 1, value: 'hey. sorry to ask. i\'m struggling right now. any chance you could help?' },
+            { weight: 1, value: 'i hate to bother you. things are really hard. could you maybe send a little?' },
+          ],
+          hollow: [
+            { weight: 1, value: 'hey. i\'m kind of stuck. sorry to ask but i need help.' },
+            { weight: 1, value: 'hey. it\'s bad right now. any chance?' },
+          ],
+          fraying: [
+            { weight: 1, value: 'things got kind of bad. any chance you could send a little money?' },
+            { weight: 1, value: 'hey, not sure if you can, but i could really use some help right now.' },
+          ],
+          flat:   [
+            { weight: 1, value: 'hey, any chance you could float me some money? kind of short right now.' },
+            { weight: 1, value: 'hey. i hate to ask, but i\'m pretty stuck financially.' },
+          ],
+          okay:   [
+            { weight: 1, value: 'hey, kind of embarrassing, but i need some help. any chance?' },
+            { weight: 1, value: 'hey, not sure if you have it, but things are tight. could you help me out?' },
+          ],
+        };
+        const sentText = Timeline.weightedPick(sentPools[mood] || sentPools.flat);
+
+        // Build response pool — help/decline weighted by warmth sentiment (default 0.6 if none accumulated)
+        const warmth = State.sentimentIntensity(slot, 'warmth');
+        const helpProb = 0.5 + warmth * 0.5; // 0.5–1.0
+        const helpWeight = Math.max(1, Math.round(helpProb * 10));
+        const declineWeight = Math.max(1, 10 - helpWeight);
+        const flavor = friend.flavor || 'warm_quiet';
+
+        const helpResponses = {
+          sends_things: [
+            'oh no, of course — just sent it. let me know if you need more.',
+            'yeah i\'ve got you. just sent $20. hang in there.',
+          ],
+          dry_humor: [
+            'you\'re lucky i like you. sent.',
+            'don\'t make a habit of this. sent $20.',
+          ],
+          warm_quiet: [
+            'of course. just sent. please don\'t hesitate to ask.',
+            'sent. i\'ve been there. it\'s okay.',
+          ],
+          checking_in: [
+            'oh! yes of course, sending it now. are you okay?',
+            'already sent — and call me if you need anything, okay?',
+          ],
+        };
+        const declineResponses = {
+          sends_things: [
+            'ugh, i\'m so sorry, i\'m really tight this month too :(',
+            'i wish i could, i really do. it\'s just not a good month.',
+          ],
+          dry_humor: [
+            'you picked the wrong week. i\'m broke too, weirdly.',
+            'i genuinely don\'t have it right now. sorry.',
+          ],
+          warm_quiet: [
+            'i\'m sorry, i really am. i can\'t right now. i\'m thinking of you though.',
+            'i don\'t have it to spare right now. i\'m so sorry.',
+          ],
+          checking_in: [
+            'i would if i could. i\'m kind of in the same boat right now. are you okay?',
+            'i\'m so sorry, i can\'t right now. please tell me if there\'s anything else i can do.',
+          ],
+        };
+
+        // 1 RNG call: friend's response (outcome + text combined)
+        const responsePool = [
+          ...(helpResponses[flavor] || helpResponses.warm_quiet).map(text => ({ weight: helpWeight, value: { text, helps: true } })),
+          ...(declineResponses[flavor] || declineResponses.warm_quiet).map(text => ({ weight: declineWeight, value: { text, helps: false } })),
+        ];
+        const responseItem = Timeline.weightedPick(responsePool);
+
+        // 1 RNG call: arrival delay
+        const delay = Timeline.randomInt(30, 90);
+
+        /** @type {{ slot: string, arrivesAt: number, text: string, effect?: { type: 'receiveMoney', amount: number } }} */
+        const pendingReply = { slot, arrivesAt: State.get('time') + delay, text: responseItem.text };
+        if (responseItem.helps) {
+          pendingReply.effect = { type: 'receiveMoney', amount: 20 };
+        }
+        State.addPendingReply(pendingReply);
+
+        // Store sent message in inbox
+        State.addPhoneMessage({ type: 'sent', source: slot, text: sentText, read: true, direction: 'sent' });
+
+        // Reset contact timer, reduce guilt, set cooldown
+        const fc = State.get('friend_contact');
+        fc[slot] = State.get('time');
+        State.adjustSentiment(slot, 'guilt', -0.04);
+        State.set('last_asked_for_help_time', State.get('time'));
+
+        State.advanceTime(5);
+        State.adjustBattery(-1);
+
+        return sentText;
+      },
+    },
   };
 
   // --- Phone mode ---
@@ -3864,6 +3995,10 @@ export function createContent(ctx) {
       const remaining = [];
       for (const reply of pendingReplies) {
         if (reply.arrivesAt <= now) {
+          // Apply any effects before delivering the message
+          if (reply.effect?.type === 'receiveMoney') {
+            State.receiveMoney(reply.effect.amount);
+          }
           State.addPhoneMessage({ type: 'friend', text: reply.text, read: false, source: reply.slot });
           added = true;
         } else {
@@ -5074,6 +5209,13 @@ export function createContent(ctx) {
       if (mood === 'hollow' || mood === 'heavy') return 'Write. Just something.';
       if (mood === 'fraying') return 'Send something. Anything.';
       return 'Write.';
+    },
+
+    ask_for_help: () => {
+      const mood = State.moodTone();
+      if (mood === 'hollow' || mood === 'heavy') return 'You\'re typing. You hate that you\'re doing this.';
+      if (mood === 'fraying') return 'You\'re asking. You don\'t want to but you are.';
+      return 'Asking.';
     },
 
     // === ANYWHERE ===

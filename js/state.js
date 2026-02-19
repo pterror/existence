@@ -238,7 +238,7 @@ export function createState(ctx) {
       consecutive_meals_skipped: 0,
       last_social_interaction: 0, // action count at last interaction
       friend_contact: /** @type {Record<string, number>} */ ({}), // slot → game time of last engagement
-      pending_replies: /** @type {{ slot: string, arrivesAt: number, text: string }[]} */ ([]),
+      pending_replies: /** @type {{ slot: string, arrivesAt: number, text: string, effect?: { type: 'receiveMoney', amount: number } }[]} */ ([]),
 
       // Event surfacing — tracks last tier at which body-state events fired.
       // Events fire once per tier crossing (hungry→very_hungry→starving, exhausted→depleted).
@@ -258,6 +258,9 @@ export function createState(ctx) {
       // Food bank
       last_food_bank_day: 0,     // game day of last visit (0 = never)
       food_bank_visits: 0,       // lifetime visit count — shapes prose
+
+      // Asking a friend for money — cooldown to prevent spamming
+      last_asked_for_help_time: 0, // game time of last ask (0 = never)
 
       // Laundry async state
       laundry_phase: 'none',    // 'none' | 'washing' | 'drying' | 'done'
@@ -1117,7 +1120,7 @@ export function createState(ctx) {
     for (const m of s.phone_inbox) m.read = true;
   }
 
-  /** @param {{ slot: string, arrivesAt: number, text: string }} reply */
+  /** @param {{ slot: string, arrivesAt: number, text: string, effect?: { type: 'receiveMoney', amount: number } }} reply */
   function addPendingReply(reply) {
     if (!s.pending_replies) s.pending_replies = [];
     s.pending_replies.push(reply);

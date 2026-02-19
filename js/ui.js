@@ -445,12 +445,15 @@ export function createUI(ctx) {
     if (['friend1', 'friend2'].includes(slot)) {
       const replyInter = Content.getInteraction('reply_to_friend');
       const writeInter = Content.getInteraction('message_friend');
+      const askInter = Content.getInteraction('ask_for_help');
       const canReply = replyInter && replyInter.available();
       const canWrite = writeInter && writeInter.available();
-      if (canReply || canWrite) {
+      const canAsk = askInter && askInter.available();
+      if (canReply || canWrite || canAsk) {
         compose = '<div class="phone-compose">';
         if (canReply) compose += `<button class="phone-compose-btn" data-phone-action="reply_to_friend">Reply</button>`;
         if (canWrite) compose += `<button class="phone-compose-btn" data-phone-action="message_friend">Write</button>`;
+        if (canAsk) compose += `<button class="phone-compose-btn" data-phone-action="ask_for_help">Ask for help</button>`;
         compose += '</div>';
       }
     }
@@ -551,6 +554,9 @@ export function createUI(ctx) {
         if (inter && onAction) onAction(/** @type {Interaction} */ (inter));
       } else if (action === 'message_friend') {
         const inter = Content.getInteraction('message_friend');
+        if (inter && onAction) onAction(/** @type {Interaction} */ (inter));
+      } else if (action === 'ask_for_help') {
+        const inter = Content.getInteraction('ask_for_help');
         if (inter && onAction) onAction(/** @type {Interaction} */ (inter));
       } else if (action === 'toggle_phone_silent') {
         const inter = Content.getInteraction('toggle_phone_silent');
