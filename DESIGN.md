@@ -260,6 +260,12 @@ Health conditions are part of who the character is (like age and job type). They
 - What objects matter (medication, mobility aids, specific foods)
 - What the phone is for (pharmacy notifications, appointment reminders, health tracking)
 
+**Two kinds of condition at chargen:**
+
+*Constitutional* conditions arise from genetics or biology, not circumstances. Migraines, color blindness, sickle cell, genetic deafness — these are probabilistic. A random roll grounded in real-world prevalence is appropriate. The condition isn't predicted by the character's backstory; it's just part of who they are.
+
+*Circumstantial* conditions are consequences of life history — dental disease from lack of care, occupational injury, conditions that develop from sustained poverty or poor nutrition or chronic stress. These are not random. Whether a character has an untreated cavity is not a dice roll — it is the outcome of whether they had access to dental care, which follows from income, insurance, jurisdiction. These conditions must derive deterministically from backstory. When the backstory doesn't yet model the relevant upstream variables, the condition cannot be properly assigned at chargen. The correct response is to leave the condition unassigned (not to approximate with a random roll) and build the backstory mechanism that will eventually derive it.
+
 ### Good days and bad days
 
 Chronic conditions aren't constant. They fluctuate. Some days you almost forget. Some days it's the only thing. The simulation should model this variation — not as random good/bad dice rolls, but as the interaction between the condition, sleep, stress, medication adherence, and the specific demands of the day.

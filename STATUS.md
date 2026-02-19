@@ -82,9 +82,9 @@ Two health tracks: chronic conditions (permanent, per-character) and acute illne
 - `go_for_walk` blocked at 'severe' tier
 - Postdrome/aura ○
 
-**Dental pain (chronic condition):**
+**Dental pain (chronic condition — simulation ready, chargen assignment pending):**
 - `dental_ache` (0–100): continuous pain; spikes from eating/hot coffee (~15–25), decays ~1.5/hr
-- ~18% prevalence at chargen (+7% if low starting money); approximation debt — no jurisdiction/insurance model
+- **Not yet assigned at chargen** — circumstantial condition requiring jurisdiction + healthcare access backstory to derive properly. Simulation and prose code is complete. Assign manually via `conditions` array for testing.
 - Morning baseline: `wakeUp()` ensures dental_ache ≥ 8 when condition present (jaw pressure overnight)
 - **Tier effects:** 'dull' (8–25) — background noise; 'ache' (25–60) — shapes eating prose; 'flare' (60+) — overrides eating, cuts energyCeiling, suppresses GABA
 - **NT per tick:** NE raised proportional to ache; GABA suppressed when ache > 50
