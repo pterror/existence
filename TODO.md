@@ -116,7 +116,7 @@ Full design in [DESIGN-OBJECTS.md](DESIGN-OBJECTS.md). Mess is not a scalar — 
 **Implementation path (from DESIGN-OBJECTS.md):**
 1. ~~**Define interfaces**~~ — **DONE.** See [DESIGN-INTERFACES.md](DESIGN-INTERFACES.md).
 2. ~~**Coarse implementations**~~ — **DONE.** `js/dishes.js`, `js/linens.js`, `js/clothing.js` — count-based backends. Wired in context.js + game.js. content.js updated throughout.
-3. **Remove `apartment_mess`** — once object systems cover the same ground. Still needed: `apartment_notice` event and bedroom general clutter lean on it. Will go once Clothing covers floor tracking fully and a residual-clutter model is added.
+3. ~~**Remove `apartment_mess`**~~ — **DONE.** `apartment_mess` scalar removed from state.js. `messTier()` moved into content.js, computed from Dishes + Linens + Clothing. Bedroom, kitchen, apartment_notice all use local `messTier()`. Four tiers: tidy / cluttered / messy / chaotic.
 4. **Full implementations** — per-item tracking, one system at a time. Clothing first (wardrobe generated at chargen, items with location/wear states, undressing shaped by mood/energy).
 5. **Laundry mechanic** — requires in-home option (hand-wash, drying rack) or laundromat (doesn't exist yet). Stub for now.
 

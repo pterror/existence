@@ -245,7 +245,7 @@ Battery (dual-rate drain: 1%/hr standby, 15%/hr screen-on; tiers: dead/critical/
 
 - **Clothing** (`js/clothing.js`) — tracks floor items per location, basket, and worn count. `get_dressed` calls `Clothing.wear()`. `sleep` calls `Clothing.undress(energyTier, moodTone, location)` — worn items go to floor (depleted/numb) or basket (okay/clear). Bedroom description uses `Clothing.floorDescription('bedroom')` for floor clothes.
 
-**Remaining approximation debt:** `apartment_mess` scalar (0–100, grows 0.2/hr) still tracks general disorder not yet covered by object systems. `do_dishes` also reduces it by 25 to prevent monotonic drift. Will be removed once Clothing covers the remaining ground. `messTier()` still derives from it for bedroom general clutter, `apartment_notice` events, and bathroom counter clutter.
+**Mess is now fully emergent.** `apartment_mess` scalar removed. `messTier()` moved from State into content.js, computed from Dishes + Linens + Clothing: dishes in sink (9pts each, max 5), bed state (messy=15, unmade=5, made=0), towel on floor (8pts), clothing floor items (8pts/bedroom, 5pts/bathroom). Four tiers: tidy (<20), cluttered (<45), messy (<70), chaotic (≥70).
 
 **fridge_food** (integer) — depletes on eating, restocked by groceries. Still a scalar (appropriate — no item identity needed for food units).
 

@@ -181,7 +181,6 @@ export function createState(ctx) {
       has_phone: true,
       phone_battery: 70,     // 0-100
       fridge_food: 2,        // Rough units. 0 = empty.
-      apartment_mess: 35,    // 0-100. Dishes, clothes, etc.
       weather: 'overcast',   // Set by events
       rain: false,
 
@@ -327,9 +326,6 @@ export function createState(ctx) {
     if (actionsSinceLastSocial > 10) {
       s.social = Math.max(0, s.social - hours * 2);
     }
-
-    // Gradual apartment entropy
-    s.apartment_mess = Math.min(100, s.apartment_mess + hours * 0.2);
 
     // Actions since rest
     s.actions_since_rest++;
@@ -569,16 +565,6 @@ export function createState(ctx) {
       [55, 'neutral'],
       [75, 'connected'],
       [100, 'warm']
-    ]);
-  }
-
-  function messTier() {
-    return tier(s.apartment_mess, [
-      [20, 'tidy'],
-      [45, 'lived_in'],
-      [65, 'cluttered'],
-      [80, 'messy'],
-      [100, 'chaotic']
     ]);
   }
 
@@ -1799,7 +1785,6 @@ export function createState(ctx) {
     hungerTier,
     socialTier,
     fridgeTier,
-    messTier,
     jobTier,
     batteryTier,
     moneyTier,

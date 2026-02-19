@@ -11,6 +11,26 @@ export function createContent(ctx) {
   const Linens = ctx.linens;
   const Clothing = ctx.clothing;
 
+  // --- Mess tier — derived from object systems ---
+  // Replaces apartment_mess scalar. Computed from Dishes + Linens + Clothing.
+
+  function messScore() {
+    const dishScore = Math.min(5, Dishes.inSinkCount()) * 9;
+    const bedScore = Linens.bedState() === 'messy' ? 15 : Linens.bedState() === 'unmade' ? 5 : 0;
+    const towelScore = Linens.towelState() === 'on_floor' ? 8 : 0;
+    const clothingBedScore = Clothing.itemsOnFloor('bedroom').length * 8;
+    const clothingBathScore = Clothing.itemsOnFloor('bathroom').length * 5;
+    return Math.min(100, dishScore + bedScore + towelScore + clothingBedScore + clothingBathScore);
+  }
+
+  function messTier() {
+    const score = messScore();
+    if (score >= 70) return 'chaotic';
+    if (score >= 45) return 'messy';
+    if (score >= 20) return 'cluttered';
+    return 'tidy';
+  }
+
   // --- Relationship prose tables ---
   // Keyed on flavor archetype. Name is the only dynamic part.
 
@@ -693,7 +713,7 @@ export function createContent(ctx) {
     apartment_bedroom: () => {
       const energy = State.energyTier();
       const time = State.timePeriod();
-      const mess = State.messTier();
+      const mess = messTier();
       const mood = State.moodTone();
 
       // NT values for continuous shading (no RNG consumed)
@@ -782,7 +802,7 @@ export function createContent(ctx) {
         desc += ' ' + floorClothes;
       }
 
-      // General mess — still from apartment_mess (residual clutter not tracked by objects)
+      // General mess tier — computed from Dishes + Linens + Clothing
       if (!floorClothes && mess === 'tidy') {
         desc += ' It\'s relatively in order in here. The surfaces have their surfaces back.';
       } else if (mess === 'chaotic') {
@@ -822,7 +842,7 @@ export function createContent(ctx) {
     apartment_kitchen: () => {
       const hunger = State.hungerTier();
       const fridge = State.fridgeTier();
-      const mess = State.messTier();
+      const mess = messTier();
       const mood = State.moodTone();
       const time = State.timePeriod();
 
@@ -861,7 +881,7 @@ export function createContent(ctx) {
       // Dishes — sink state from object system
       desc += ' ' + Dishes.sinkDescription();
 
-      // Counter clutter — still from apartment_mess (general mess, not dishes)
+      // Counter clutter — mess tier from object systems (general disorder beyond dishes)
       if (mess === 'chaotic' || mess === 'messy') {
         desc += ' The counter has its own layer — things set down and left, the kind that stops registering once it\'s been there long enough.';
       }
@@ -893,7 +913,7 @@ export function createContent(ctx) {
       const energy = State.energyTier();
       const mood = State.moodTone();
       const showered = State.get('showered');
-      const mess = State.messTier();
+      const mess = messTier();
 
       let desc = 'The bathroom. Mirror, sink, shower.';
 
@@ -2112,8 +2132,6 @@ export function createContent(ctx) {
       available: () => Dishes.dirtyCount() > 0 && State.energyTier() !== 'depleted',
       execute: () => {
         Dishes.wash();
-        // Also reduce apartment_mess — still tracks general disorder until Clothing covers it
-        State.set('apartment_mess', Math.max(0, State.get('apartment_mess') - 25));
         State.set('surfaced_mess', 0);
         State.adjustEnergy(-8);
         State.adjustStress(-5);
@@ -3455,7 +3473,7 @@ export function createContent(ctx) {
     apartment_notice: () => {
       const n = State.get('surfaced_mess');
       State.set('surfaced_mess', n + 1);
-      const mess = State.messTier();
+      const mess = messTier();
       const ser = State.get('serotonin');
       const aden = State.get('adenosine');
       const dop = State.get('dopamine');
