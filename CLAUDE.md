@@ -136,11 +136,13 @@ This is distinct from "no numbers ever appear." The world contains quantities th
 - ALL randomness goes through `Timeline.random()` and friends
 - Event text must be generated synchronously (consuming RNG), then displayed with `setTimeout` delays
 - Interaction IDs must be unique across all locations (e.g., `check_phone_bedroom`, not `check_phone`)
+- **Balanced RNG consumption:** interactions that branch (help vs. decline, succeed vs. fail) must consume the same number of RNG calls on every path. If one branch doesn't need a call, add `Timeline.random()` as an explicit balance — otherwise replay diverges from any future branch that gets added
 
 **Replay correctness:**
 - Replay skips availability checks — always executes recorded actions
 - Idle events are recorded as actions so their RNG consumption replays correctly
 - RNG consumption order must match exactly between live play and replay
+- Parameterized interactions record `data` in the action log (`{ type: 'interact', id, data }`). `replayInteraction(id, data)` passes `action.data` through to `execute(data)`. Player-entered quantities (e.g. transfer amounts) are in the log — replay is exact
 
 **Tier functions, not inline scalars.** When content.js needs to branch on a continuous state variable, use a tier function in state.js that returns a named qualitative label — `messTier()` → `'cluttered'`, `energyTier()` → `'exhausted'`, etc. Content.js branches on those labels, never on `State.get('x') > 47`. Tier thresholds live in one place, carry meaning through their names, and keep raw numbers entirely out of prose logic. Location descriptions, interaction available checks, and event text all follow this rule. The same applies to NT conditionals in deterministic modifiers — use `aden > 65` as a readable threshold, not a magic scalar buried in a chain of comparisons.
 
@@ -157,7 +159,7 @@ This is distinct from "no numbers ever appear." The world contains quantities th
   2. **Deterministic modifiers** — short phrases appended via NT conditionals (no RNG consumed). Adenosine fog, NE tension, cortisol body stress.
   3. **Mechanical shading** — same action at different NT states produces different mechanical outcomes (e.g. heavy+lowGABA gets no stress relief from lying down).
 - Key dimensions: serotonin (emotional coloring), dopamine (engagement/motivation), NE (alertness/sensory detail), GABA (anxiety undertone), adenosine (perceptual clarity), cortisol (body tension).
-- When converting a `Timeline.pick([...])` site: wrap existing strings as `{ weight: 1, value: str }`, add 1–3 NT-weighted variants per mood branch, replace with `Timeline.weightedPick([...])`. RNG count stays unchanged.
+- New prose sites use `Timeline.weightedPick([...])` with `{ weight, value }` objects from the start — wrap general texts at weight 1, NT-specific texts weighted by `State.lerp01()`. Same 1 RNG call as a plain pick.
 
 ## Workflow
 
