@@ -205,6 +205,7 @@ export function createState(ctx) {
       consecutive_meals_skipped: 0,
       last_social_interaction: 0, // action count at last interaction
       friend_contact: /** @type {Record<string, number>} */ ({}), // slot → game time of last engagement
+      pending_replies: /** @type {{ slot: string, arrivesAt: number, text: string }[]} */ ([]),
 
       // Event surfacing — tracks how many times state-condition events have appeared.
       // After cap, they go silent and let tier-based prose carry the weight.
@@ -755,6 +756,12 @@ export function createState(ctx) {
 
   function markMessagesRead() {
     for (const m of s.phone_inbox) m.read = true;
+  }
+
+  /** @param {{ slot: string, arrivesAt: number, text: string }} reply */
+  function addPendingReply(reply) {
+    if (!s.pending_replies) s.pending_replies = [];
+    s.pending_replies.push(reply);
   }
 
   // --- Observation / fidelity ---
@@ -1501,6 +1508,7 @@ export function createState(ctx) {
     receiveMoney,
     deductBill,
     addPhoneMessage,
+    addPendingReply,
     getUnreadMessages,
     hasUnreadMessages,
     markMessagesRead,

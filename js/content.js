@@ -67,6 +67,66 @@ export function createContent(ctx) {
     earnest: (name) => `Your phone buzzes. ${name}. You look at the name on the screen for a while.`,
   };
 
+  /** @type {Record<string, (name: string) => string>} */
+  const friendReplyProse = {
+    sends_things: (name) => {
+      const dopa = State.get('dopamine');
+      return Timeline.weightedPick([
+        { weight: 1, value: `You tap back a reaction. Quick. ${name} will know you saw it.` },
+        { weight: 1, value: `You send something small — two characters, an emoji. The effort is almost nothing, which is the only way it could have happened.` },
+        { weight: State.lerp01(dopa, 40, 15), value: `You send a single character back. The effort it takes is out of proportion to how small it is.` },
+      ]);
+    },
+    checks_in: (name) => {
+      const ser = State.get('serotonin');
+      return Timeline.weightedPick([
+        { weight: 1, value: `You type "yeah, I'm good." You're not sure if it's true. You hit send before you can second-guess it.` },
+        { weight: 1, value: `"Been busy." Not a lie, exactly. You send it.` },
+        { weight: State.lerp01(ser, 35, 15), value: `You stare at the text field for a moment. "Sorry, been a lot going on." Vague enough to be true. You send it before you can revise it into nothing.` },
+      ]);
+    },
+    dry_humor: (_name) => {
+      const dopa = State.get('dopamine');
+      return Timeline.weightedPick([
+        { weight: 1, value: `You type something brief. He'll understand what it means.` },
+        { weight: 1, value: `You send a meme back, or one word, or not much. He doesn't need more than that.` },
+        { weight: State.lerp01(dopa, 40, 15), value: `You send something back. It comes out flat, but that's fine — he doesn't require anything more.` },
+      ]);
+    },
+    earnest: (name) => {
+      const ser = State.get('serotonin');
+      return Timeline.weightedPick([
+        { weight: 1, value: `You write back. It takes a minute — ${name} put thought into hers, and you want to give it some.` },
+        { weight: 1, value: `You compose a reply. Not long, but honest. You send it.` },
+        { weight: State.lerp01(ser, 35, 15), value: `You write something short. It doesn't feel like enough. You send it anyway.` },
+      ]);
+    },
+  };
+
+  /** @type {Record<string, (name: string) => string>} */
+  const friendReplyMessages = {
+    sends_things: (name) => Timeline.weightedPick([
+      { weight: 1, value: `${name} responds immediately. A follow-up — she had it ready. The thread continues on its own terms.` },
+      { weight: 1, value: `${name} sends a thumbs up, then a voice note. Three seconds. The sound of her laughing at something off-screen.` },
+      { weight: 1, value: `Another thing from ${name}. She had this one saved. The conversation is alive again.` },
+    ]),
+    checks_in: (name) => Timeline.weightedPick([
+      { weight: 1, value: `${name}: "Good. Just wanted to make sure." Then, a beat later: "Let me know if you need anything."` },
+      { weight: 1, value: `A response from ${name}. "Okay good. Miss you." Short. Means what it says.` },
+      { weight: 1, value: `${name} replies quickly. "okay good :)" And then nothing, which is exactly right.` },
+    ]),
+    dry_humor: (name) => Timeline.weightedPick([
+      { weight: 1, value: `${name} sends a meme back. Different one. No explanation needed.` },
+      { weight: 1, value: `His response: two words. The whole exchange is complete.` },
+      { weight: 1, value: `"lmao" from ${name}. That's it. Conversation finished.` },
+    ]),
+    earnest: (name) => Timeline.weightedPick([
+      { weight: 1, value: `A longer reply from ${name}. She's glad you reached out. She asks a follow-up question — gentle, not pushy. You could answer it or leave it there.` },
+      { weight: 1, value: `${name} responds warmly. The kind of message that doesn't ask for anything. You feel slightly less alone.` },
+      { weight: 1, value: `${name}: "I've been thinking about you." Two more sentences. Genuine. No pressure in it.` },
+    ]),
+  };
+
   /** @type {Record<string, (name: string) => string[]>} */
   const friendIdleThoughts = {
     sends_things: (name) => [
@@ -858,6 +918,34 @@ export function createContent(ctx) {
       return desc;
     },
   };
+
+  // --- Helpers ---
+
+  /** Returns the friend slot + character to reply to, or null if nothing to reply to.
+   *  Prefers the friend with higher guilt; tie-breaks by most recent message in inbox.
+   *  Excludes slots that already have a pending reply queued. */
+  function getReplyTarget() {
+    const inbox = State.get('phone_inbox');
+    const pending = State.get('pending_replies') || [];
+    const candidates = ['friend1', 'friend2'].filter(
+      slot => inbox.some(m => m.source === slot) && !pending.some(r => r.slot === slot)
+    );
+    if (candidates.length === 0) return null;
+    if (candidates.length === 1) return { slot: candidates[0], friend: Character.get(candidates[0]) };
+    // Both available — prefer highest guilt, tie-break by most recent message
+    const g0 = State.sentimentIntensity(candidates[0], 'guilt');
+    const g1 = State.sentimentIntensity(candidates[1], 'guilt');
+    let slot;
+    if (g0 > g1 + 0.05) slot = candidates[0];
+    else if (g1 > g0 + 0.05) slot = candidates[1];
+    else {
+      slot = candidates[0];
+      for (const m of inbox) {
+        if (m.source && candidates.includes(m.source)) slot = m.source;
+      }
+    }
+    return { slot, friend: Character.get(slot) };
+  }
 
   // --- Interactions ---
 
@@ -2479,6 +2567,44 @@ export function createContent(ctx) {
         return descFn ? descFn() : '';
       },
     },
+
+    reply_to_friend: {
+      id: 'reply_to_friend',
+      label: 'Reply',
+      location: null,
+      available: () => {
+        if (!State.get('viewing_phone') || State.get('phone_battery') <= 0) return false;
+        return getReplyTarget() !== null;
+      },
+      execute: () => {
+        if (State.get('phone_battery') <= 0) {
+          State.set('viewing_phone', false);
+          return 'The screen goes dark. Dead.';
+        }
+        const target = getReplyTarget();
+        if (!target) return '';
+        const { slot, friend } = target;
+
+        // 1 RNG call: reply prose
+        const replyText = friendReplyProse[friend.flavor](friend.name);
+        // 1 RNG call: friend's response text (generated now, delivered later)
+        const responseText = friendReplyMessages[friend.flavor](friend.name);
+        // 1 RNG call: arrival delay
+        const delay = Timeline.randomInt(30, 90);
+        State.addPendingReply({ slot, arrivesAt: State.get('time') + delay, text: responseText });
+
+        // Reset contact timer, reduce guilt more than just reading does
+        const fc = State.get('friend_contact');
+        fc[slot] = State.get('time');
+        State.adjustSentiment(slot, 'guilt', -0.06);
+        State.adjustSocial(3);
+
+        State.advanceTime(5);
+        State.adjustBattery(-1);
+
+        return replyText;
+      },
+    },
   };
 
   // --- Phone mode ---
@@ -2611,6 +2737,21 @@ export function createContent(ctx) {
       State.set('last_phone_bill_day', day);
       State.deductBill(45, 'phone');
       added = true;
+    }
+
+    // --- Pending friend replies (deterministic, no RNG) ---
+    const pendingReplies = State.get('pending_replies');
+    if (pendingReplies && pendingReplies.length > 0) {
+      const remaining = [];
+      for (const reply of pendingReplies) {
+        if (reply.arrivesAt <= now) {
+          State.addPhoneMessage({ type: 'friend', text: reply.text, read: false, source: reply.slot });
+          added = true;
+        } else {
+          remaining.push(reply);
+        }
+      }
+      State.set('pending_replies', remaining);
     }
 
     return added;
@@ -3212,7 +3353,7 @@ export function createContent(ctx) {
 
     // Phone mode — only phone interactions
     if (State.get('viewing_phone')) {
-      const phoneIds = ['read_messages', 'toggle_phone_silent', 'put_phone_away'];
+      const phoneIds = ['read_messages', 'reply_to_friend', 'toggle_phone_silent', 'put_phone_away'];
       for (const id of phoneIds) {
         const interaction = interactions[id];
         if (interaction && interaction.available()) {
@@ -3498,6 +3639,13 @@ export function createContent(ctx) {
 
     put_phone_away: () => {
       return 'Phone away.';
+    },
+
+    reply_to_friend: () => {
+      const mood = State.moodTone();
+      if (mood === 'hollow' || mood === 'heavy') return 'Reply. Just a few words.';
+      if (mood === 'fraying') return 'Send something back.';
+      return 'Reply.';
     },
 
     // === ANYWHERE ===

@@ -51,7 +51,9 @@ Full design in [DESIGN-HABITS.md](DESIGN-HABITS.md). The character develops beha
 6. **Routine sentiment activation** — overall habit consistency feeds routine comfort/irritation NT targets.
 
 ### Social initiation
-Currently friends only send messages to you. No way to text back, call, or initiate contact. Relationships are one-directional. DESIGN.md describes friends who respond differently to your withdrawal and engagement.
+~~Friends only send messages to you~~ — **PARTIALLY IMPLEMENTED.** `reply_to_friend` phone interaction added: player can reply, friend responds after 30–90 min (stored in `pending_replies`, delivered via `generateIncomingMessages`). Guilt reduction 3× reading. NT-shaded prose per flavor.
+
+**Still missing:** Initiating contact when there are no pending messages (reaching out first), calling, the different way each friend responds to prolonged vs brief absence.
 
 ### Financial cycle — remaining depth
 ~~Basic financial cycle (paycheck, rent, utilities, phone)~~ — **IMPLEMENTED.** Life history backstory generates starting money, pay rate, rent. Bills auto-deduct monthly. Paycheck varies with attendance.
