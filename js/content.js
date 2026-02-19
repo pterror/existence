@@ -941,6 +941,12 @@ export function createContent(ctx) {
         desc += ' The towel from earlier still hanging damp.';
       }
 
+      // Clothes on bathroom floor — from Clothing
+      const bathClothes = Clothing.floorDescription('bathroom');
+      if (bathClothes) {
+        desc += ' ' + bathClothes;
+      }
+
       // NT deterministic modifiers
       const aden = State.get('adenosine');
       const ne = State.get('norepinephrine');
@@ -1588,14 +1594,14 @@ export function createContent(ctx) {
       location: 'apartment_bedroom',
       available: () => !State.get('dressed'),
       execute: () => {
+        // Check before wear() — no wearable items means grabbing from the floor
+        const grabbingFromFloor = Clothing.wearableItems().length === 0;
         State.set('dressed', true);
         Clothing.wear();
         State.advanceTime(5);
         Events.record('got_dressed');
 
         const mood = State.moodTone();
-        // Messy outfit when grabbing from the floor (low wearable items) or bad mood
-        const grabbingFromFloor = Clothing.wearableItems().length === 0;
 
         if (mood === 'numb' || mood === 'heavy') {
           return Character.get('outfit_low_mood');
