@@ -2003,6 +2003,58 @@ export function createContent(ctx) {
       },
     },
 
+    make_bed: {
+      id: 'make_bed',
+      label: 'Make the bed',
+      location: 'apartment_bedroom',
+      available: () => Linens.bedState() !== 'made' && State.energyTier() !== 'depleted',
+      execute: () => {
+        Linens.makeBed();
+        State.adjustEnergy(-3);
+        State.adjustStress(-2);
+        State.advanceTime(5);
+
+        const mood = State.moodTone();
+        const ser = State.get('serotonin');
+        const dopa = State.get('dopamine');
+
+        if (mood === 'numb') {
+          return Timeline.weightedPick([
+            { weight: 1, value: 'You pull the sheets straight. Tuck the corners. Smooth the surface. The bed is made. You don\'t feel any different.' },
+            { weight: 1, value: 'The motions of making a bed. You do them. It\'s done.' },
+            { weight: State.lerp01(dopa, 40, 20), value: 'Sheets. Pillow. Done. You stand there looking at it. Nothing catches.' },
+          ]);
+        }
+        if (mood === 'heavy') {
+          return Timeline.weightedPick([
+            { weight: 1, value: 'You straighten the sheets, tuck the pillow back where it belongs. The room looks a little more like someone lives here intentionally. You\'re not sure that\'s a comfort.' },
+            { weight: 1, value: 'You make the bed. One thing done. One thing that will stay done until you sleep in it again.' },
+            { weight: State.lerp01(ser, 35, 20), value: 'You make the bed without knowing why. The bed doesn\'t care. The room doesn\'t look better, not really. But you made it.' },
+          ]);
+        }
+        if (mood === 'fraying') {
+          return Timeline.weightedPick([
+            { weight: 1, value: 'You make the bed. Smooth the cover, straighten the pillow. One small thing you can actually do. It helps, a little.' },
+            { weight: 1, value: 'The bed. You pull it straight. One corner, then the next. The room looks slightly less like evidence. That\'s something.' },
+            { weight: State.lerp01(ser, 40, 55), value: 'You make the bed. It takes three minutes and when you\'re done the room feels fractionally more like a place you meant to be in.' },
+          ]);
+        }
+        if (mood === 'clear' || mood === 'present') {
+          return Timeline.weightedPick([
+            { weight: 1, value: 'You make the bed — sheets pulled taut, pillow back where it belongs. The room settles. Small but real.' },
+            { weight: 1, value: 'Quick and deliberate. Sheets, blanket, pillow. The bed is made. Something in the day clicks slightly into place.' },
+            { weight: State.lerp01(ser, 55, 75), value: 'You make the bed without thinking too hard about it. When you\'re done the room looks right, the kind of right that carries.' },
+          ]);
+        }
+        // flat / hollow / quiet
+        return Timeline.weightedPick([
+          { weight: 1, value: 'You make the bed. Straighten the sheets, fix the pillow. The room looks more like a room now.' },
+          { weight: 1, value: 'Sheets pulled straight, cover smoothed. The bed\'s made. You move on.' },
+          { weight: State.lerp01(dopa, 50, 30), value: 'The bed. You straighten it. The kind of small thing that\'s easy to skip and easy to do and makes no large difference either way.' },
+        ]);
+      },
+    },
+
     // === KITCHEN ===
     eat_food: {
       id: 'eat_food',
@@ -2344,6 +2396,26 @@ export function createContent(ctx) {
           return 'Cold water. You look at yourself in the mirror. You look away before the looking becomes something.';
         }
         return 'Cold water on your face. You look at yourself in the mirror, briefly. You look away.';
+      },
+    },
+
+    rehang_towel: {
+      id: 'rehang_towel',
+      label: 'Pick up the towel',
+      location: 'apartment_bathroom',
+      available: () => Linens.towelState() === 'on_floor',
+      execute: () => {
+        Linens.rehangTowel();
+        State.advanceTime(1);
+
+        const mood = State.moodTone();
+        if (mood === 'numb' || mood === 'heavy') {
+          return 'You pick up the towel. Hang it back up. One thing off the floor.';
+        }
+        return Timeline.weightedPick([
+          { weight: 1, value: 'You pick up the towel and hang it back where it goes. The floor looks like a floor again.' },
+          { weight: 1, value: 'The towel from the floor. You rehang it. Twenty seconds, done.' },
+        ]);
       },
     },
 
@@ -4032,6 +4104,13 @@ export function createContent(ctx) {
       return 'The window.';
     },
 
+    make_bed: () => {
+      const mood = State.moodTone();
+      if (mood === 'numb' || mood === 'heavy') return 'The bed. You pull the sheets straight.';
+      if (mood === 'fraying') return 'The bed. One small thing.';
+      return 'Make the bed.';
+    },
+
     // === KITCHEN ===
 
     eat_food: () => {
@@ -4087,6 +4166,10 @@ export function createContent(ctx) {
 
     use_sink: () => {
       return 'The sink.';
+    },
+
+    rehang_towel: () => {
+      return 'The towel.';
     },
 
     take_pain_reliever: () => {
