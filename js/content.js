@@ -2131,6 +2131,7 @@ export function createContent(ctx) {
         const ser = State.get('serotonin');
         const aden = State.get('adenosine');
         const dopa = State.get('dopamine');
+        const fridgeNow = State.fridgeTier(); // checked AFTER decrement
 
         if (mood === 'numb') {
           return Timeline.weightedPick([
@@ -2146,6 +2147,15 @@ export function createContent(ctx) {
             { weight: 1, value: 'You eat standing up, barely tasting it. Your body was louder than you realized. The relief is immediate and physical.' },
             // High food comfort — the eating itself is a release
             { weight: fc > 0 ? fc : 0, value: 'You eat too fast and it doesn\'t matter — the warmth of it, the taste, the simple animal fact of being fed. Something unwinds. Your body thanks you the only way it knows how.' },
+          ]);
+        }
+        // Last item eaten — fridge is now empty
+        if (fridgeNow === 'empty') {
+          return Timeline.weightedPick([
+            { weight: 1, value: 'You eat the last thing in the fridge. Standing at the counter. The shelf is empty now. That\'s a thing you\'ll have to deal with.' },
+            { weight: 1, value: 'The last of it. You eat quickly, not because you\'re hurrying but because now you\'re aware of it being the last. The fridge is empty after this.' },
+            // Low serotonin — the empty fridge lands heavier
+            { weight: State.lerp01(ser, 40, 20), value: 'You eat what was left. It was the last of it. The fridge is empty now. One more thing added to the list of what needs doing, when you have the capacity to do it.' },
           ]);
         }
         return Timeline.weightedPick([
