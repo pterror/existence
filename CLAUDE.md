@@ -62,6 +62,8 @@ No build step. Plain JS loaded via script tags.
 
 **No visible quantification.** No numbers, meters, labels, or system voice. Ever. The player never sees the simulation.
 
+**Player choices that involve quantities need player input.** "No visible quantification" means hiding simulation internals — energy cost of travel, stress from a bus ride, NT drift rates. It does not mean replacing player decisions with arbitrary constants or random draws. When the player is deciding *how much* (how much to send a friend, how many items to buy), that quantity is theirs. Build the input. Never substitute a fixed number or RNG for a decision the player is actually making. The distinction: simulation consequences are hidden; player choices are explicit.
+
 **Opaque constraints.** The player never sees the full action space or why things aren't available. Things just aren't there when they can't be.
 
 **Gradients, not binaries.** State shapes experience continuously. Nothing switches on or off at a threshold. There's always something you can do at every point along every spectrum — it just changes in character, cost, and texture. The simulation never dead-ends at an extreme.
