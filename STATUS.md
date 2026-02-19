@@ -305,8 +305,8 @@ get_meal (weekdays 11am–2pm, once per day). First-visit prose distinct from re
 ### Food Bank (1)
 receive_bag (weekdays 9am–5pm, once per 7 game days). Stocks fridge +3 and pantry +2. 40 min. First-visit prose distinct. lifetime visits counter. 12 min from street.
 
-### Phone Mode (6, triggered from phone UI)
-read_messages (backward-compat replay only), reply_to_friend, message_friend, ask_for_help (broke/scraping + friend thread + 7-day cooldown; sends $20 via pending reply effect; friend response flavor-aware with warmth-weighted help/decline), toggle_phone_silent (home screen mute + status bar silent indicator), put_phone_away
+### Phone Mode (7, triggered from phone UI)
+read_messages (backward-compat replay only), reply_to_friend, message_friend, help_friend (friend sent in-need message + canAfford $10; flavor-deterministic amount $10–15; builds warmth +0.05), ask_for_help (broke/scraping + friend thread + 7-day cooldown; flavor base + warmth + repeat penalty probability; variable amount $10–40 via pending reply effect), toggle_phone_silent (home screen mute + status bar silent indicator), put_phone_away
 
 ### Global (1, available anywhere with phone)
 call_in (call in sick — morning only, work hours)

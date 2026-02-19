@@ -259,8 +259,12 @@ export function createState(ctx) {
       last_food_bank_day: 0,     // game day of last visit (0 = never)
       food_bank_visits: 0,       // lifetime visit count — shapes prose
 
-      // Asking a friend for money — cooldown to prevent spamming
+      // Asking a friend for money — cooldown and repeat tracking
       last_asked_for_help_time: 0, // game time of last ask (0 = never)
+      asked_for_help_count: /** @type {Record<string, number>} */ ({}), // slot → times asked
+
+      // Friend in-need messages — per-slot cooldown (14-day minimum gap)
+      friend_in_need_last: /** @type {Record<string, number>} */ ({}), // slot → game time of last in-need msg
 
       // Laundry async state
       laundry_phase: 'none',    // 'none' | 'washing' | 'drying' | 'done'
@@ -1101,7 +1105,7 @@ export function createState(ctx) {
 
   // --- Phone inbox helpers ---
 
-  /** @param {{ type: string, text: string, read: boolean, source?: string, direction?: string, timestamp?: number, paid?: boolean }} msg */
+  /** @param {{ type: string, text: string, read: boolean, source?: string, direction?: string, timestamp?: number, paid?: boolean, subtype?: string }} msg */
   function addPhoneMessage(msg) {
     if (msg.direction === undefined) msg.direction = 'received';
     if (msg.timestamp === undefined) msg.timestamp = s.time;
