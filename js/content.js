@@ -842,6 +842,14 @@ export function createContent(ctx) {
         desc += ' Something\'s off. Not enough to stop you, just enough to be there.';
       }
 
+      // Dental — background ache present on wake or when flaring (deterministic, no RNG)
+      const dentalT = State.dentalTier();
+      if (dentalT === 'flare') {
+        desc += ' The tooth is going. It does this sometimes — starts up and just keeps going.';
+      } else if (dentalT === 'ache') {
+        desc += ' The tooth is there. Not bad, exactly. Just there.';
+      }
+
       // Floor clothes — from Clothing module
       const floorClothes = Clothing.floorDescription('bedroom');
       if (floorClothes) {
@@ -2407,6 +2415,9 @@ export function createContent(ctx) {
         State.advanceTime(15);
         Events.record('ate', { what: 'fridge_food' });
 
+        // Dental — chewing spikes the ache
+        State.dentalSpike(15);
+
         // Food comfort sentiment — small serotonin nudge + habituation
         const fc = State.sentimentIntensity('eating', 'comfort');
         if (fc > 0) {
@@ -2420,6 +2431,17 @@ export function createContent(ctx) {
         const aden = State.get('adenosine');
         const dopa = State.get('dopamine');
         const fridgeNow = State.fridgeTier(); // checked AFTER decrement
+        const dentalAche = State.get('dental_ache');
+        const dentalW = State.lerp01(dentalAche, 20, 65); // 0 at dull, 1 at flare
+
+        // Dental flare — the tooth competes with eating
+        if (dentalAche >= 60) {
+          return Timeline.weightedPick([
+            { weight: 1, value: 'You eat carefully, keeping to one side. It still hurts. The food is fine but the tooth has opinions about all of it.' },
+            { weight: 1, value: 'You eat. Slowly, on one side, watching yourself. It helps a little. The tooth registers the effort regardless.' },
+            { weight: State.lerp01(ser, 50, 20), value: 'You eat carefully and the tooth makes its presence known anyway. At some point you\'re going to have to deal with it. You know that. You know that.' },
+          ]);
+        }
 
         if (mood === 'numb') {
           return Timeline.weightedPick([
@@ -2435,6 +2457,8 @@ export function createContent(ctx) {
             { weight: 1, value: 'You eat standing up, barely tasting it. Your body was louder than you realized. The relief is immediate and physical.' },
             // High food comfort — the eating itself is a release
             { weight: fc > 0 ? fc : 0, value: 'You eat too fast and it doesn\'t matter — the warmth of it, the taste, the simple animal fact of being fed. Something unwinds. Your body thanks you the only way it knows how.' },
+            // Dental — eating when hungry and tooth hurts
+            { weight: dentalW * 1.5, value: 'You eat too fast and the tooth makes you pay for it. You slow down. The hunger is still there, insistent. You eat carefully the rest of the way.' },
           ]);
         }
         // Last item eaten — fridge is now empty
@@ -2460,6 +2484,8 @@ export function createContent(ctx) {
           { weight: fc > 0 ? fc : 0, value: 'You make something simple from what\'s there and eat it slowly. The warmth of it, the familiar taste. A small comfort, but a real one.' },
           // High adenosine (unblocked) — eating through fog
           { weight: State.lerp01(aden, 55, 75) * State.adenosineBlock(), value: 'You eat something. Standing at the counter, half-awake, chewing without really tasting. The food goes in. Your body processes it somewhere behind the fog.' },
+          // Dental ache — eating carefully
+          { weight: dentalW, value: 'You eat on one side, the way you\'ve been doing. The food is fine. The tooth is not fine. Those are separate problems.' },
         ]);
       },
     },
@@ -2478,11 +2504,15 @@ export function createContent(ctx) {
         State.advanceTime(10);
         Events.record('ate', { what: 'pantry_food' });
 
+        // Dental — chewing spikes the ache
+        State.dentalSpike(15);
+
         const mood = State.moodTone();
         const hunger = State.hungerTier();
         const pantryNow = State.pantryTier();
         const ser = State.get('serotonin');
         const aden = State.get('adenosine');
+        const dentalW = State.lerp01(State.get('dental_ache'), 20, 65);
 
         const lastLine = pantryNow === 'empty'
           ? ' That\'s the last of it.'
@@ -2492,6 +2522,7 @@ export function createContent(ctx) {
           return Timeline.weightedPick([
             { weight: 1, value: `You find something at the back of the cupboard and eat it fast. It's not much.${lastLine}` },
             { weight: State.lerp01(ser, 50, 20), value: `Ramen, or crackers, or whatever was back there. You eat it standing up. Your body stops making its case, a little.${lastLine}` },
+            { weight: dentalW, value: `You find something and eat it carefully. The tooth makes it harder. The hunger doesn't care.${lastLine}` },
           ]);
         }
         if (mood === 'numb' || mood === 'hollow') {
@@ -2504,6 +2535,8 @@ export function createContent(ctx) {
           { weight: 1, value: `You go through the cupboard and find something. Not exciting, but it's food.${lastLine}` },
           { weight: 1, value: `There's something at the back of the cupboard. Shelf-stable, sitting there for exactly this kind of day.${lastLine}` },
           { weight: State.lerp01(ser, 60, 35), value: `You eat whatever was in the cupboard. It's the kind of meal you don't mention to anyone.${lastLine}` },
+          // Dental — eating carefully from the cupboard
+          { weight: dentalW * 0.8, value: `You find something soft enough in the cupboard. That's the criteria now. Soft enough.${lastLine}` },
         ]);
       },
     },
@@ -2552,9 +2585,23 @@ export function createContent(ctx) {
         State.consumeCaffeine(50);
         State.advanceTime(Timeline.randomInt(5, 8));
 
+        // Dental — hot liquid is a significant trigger
+        State.dentalSpike(25);
+
         const mood = State.moodTone();
         const aden = State.get('adenosine');
         const caffeine = State.caffeineTier();
+        const dentalAche = State.get('dental_ache');
+        const dentalW = State.lerp01(dentalAche, 25, 70);
+
+        // Dental flare from hot coffee
+        if (dentalAche >= 60) {
+          return Timeline.weightedPick([
+            { weight: 1, value: 'The coffee is too hot for the tooth. You knew it would be. You hold it to the other side anyway. This is your life now.' },
+            { weight: 1, value: 'First sip hits the tooth and the tooth objects loudly. You breathe through it. Drink on the left side. Or the right side. Whichever one isn\'t the problem.' },
+            { weight: State.lerp01(State.get('serotonin'), 50, 20), value: 'You make coffee and the coffee does what it always does to the tooth. You drink it anyway. It\'s not like there\'s a better option.' },
+          ]);
+        }
 
         // Second cup — already caffeinated
         if (caffeine === 'active') {
@@ -2575,12 +2622,16 @@ export function createContent(ctx) {
           return Timeline.weightedPick([
             { weight: 1, value: 'Coffee. You need the ritual as much as the caffeine. The kettle, the wait, the first sip.' },
             { weight: State.lerp01(aden, 50, 85) * State.adenosineBlock(), value: 'You\'re dragging. The coffee is supposed to help with that.' },
+            // Dental ache from hot coffee
+            { weight: dentalW, value: 'You make coffee and drink it carefully on one side. The tooth is already watching. The caffeine is worth the negotiation.' },
           ]);
         }
         return Timeline.weightedPick([
           { weight: 1, value: 'You make coffee. The machine goes through its routine. You go through yours.' },
           { weight: State.lerp01(aden, 30, 70) * State.adenosineBlock(), value: 'You make coffee. It\'s early enough that it feels necessary.' },
           { weight: State.lerp01(State.get('serotonin'), 50, 80), value: 'Coffee. The smell fills the kitchen before it\'s even done.' },
+          // Dental — hot coffee wakes the tooth up
+          { weight: dentalW * 0.8, value: 'You make coffee. The first sip touches the tooth. You wait a moment, then continue. It\'s just a thing that happens now.' },
         ]);
       },
     },
@@ -2829,18 +2880,51 @@ export function createContent(ctx) {
 
     take_pain_reliever: {
       id: 'take_pain_reliever',
-      label: 'Take something for the headache',
+      label: 'Take something for the pain',
       location: 'apartment_bathroom',
-      available: () => State.hasCondition('migraines') && State.migraineTier() !== 'none',
+      available: () => (State.hasCondition('migraines') && State.migraineTier() !== 'none')
+                    || (State.hasCondition('dental_pain') && State.dentalTier() !== 'none'),
       execute: () => {
-        // Pain reliever cuts intensity by ~35 points — takes the edge off but doesn't end it
-        State.set('migraine_intensity', Math.max(0, State.get('migraine_intensity') - 35));
+        const dentalTier = State.dentalTier();
+        const migraineTier = State.migraineTier();
+
+        // Dental — ibuprofen cuts ache by ~35 points; doesn't fix the underlying tooth
+        if (dentalTier !== 'none') {
+          State.dentalSpike(-35);
+        }
+        // Migraine — pain reliever cuts intensity by ~35 points
+        if (migraineTier !== 'none') {
+          State.set('migraine_intensity', Math.max(0, State.get('migraine_intensity') - 35));
+        }
         State.advanceTime(Timeline.randomInt(3, 6));
 
-        const tier = State.migraineTier();
         const mood = State.moodTone();
 
-        if (tier === 'none') {
+        // Dental-primary prose (when tooth is worse than or instead of migraine)
+        if (dentalTier !== 'none' && (migraineTier === 'none' || State.get('dental_ache') > State.get('migraine_intensity'))) {
+          const acheNow = State.get('dental_ache');
+          if (acheNow < 20) {
+            return Timeline.weightedPick([
+              { weight: 1, value: 'You take ibuprofen and wait at the sink. The tooth quiets down — not gone, but livable. You know it\'ll be back.' },
+              { weight: 1, value: 'The pill. You wash it down and run your tongue along the side of your mouth carefully. It\'ll help. For now.' },
+            ]);
+          }
+          if (acheNow < 45) {
+            return Timeline.weightedPick([
+              { weight: 1, value: 'You take something for it and stand there waiting for it to work. The tooth is still there, doing its thing. The medication will argue with it, eventually.' },
+              { weight: State.lerp01(mood === 'heavy' ? 80 : 40, 40, 20), value: 'Two pills and the tap. You probe the tooth with your tongue by instinct and immediately regret it. You wait for the ibuprofen to work.' },
+            ]);
+          }
+          return Timeline.weightedPick([
+            { weight: 1, value: 'You take ibuprofen with both hands on the sink and wait. The tooth is insistent. The pill will help. You just have to be still for a while.' },
+            { weight: 1, value: 'Pills, water, the tile under your feet. The tooth is still going. It will keep going until the medication gets there. You wait.' },
+            { weight: State.lerp01(State.get('serotonin'), 40, 20), value: 'You take the medication and lean against the sink. The tooth doesn\'t know it\'s supposed to stop. You know from experience that it will. You\'re not sure when.' },
+          ]);
+        }
+
+        // Migraine-primary prose (original)
+        const migraineTierNow = State.migraineTier();
+        if (migraineTierNow === 'none') {
           return Timeline.weightedPick([
             { weight: 1, value: 'The pill. You wash it down and wait. By the time you leave the bathroom the worst of it is already lifting.' },
             { weight: 1, value: 'You take two. The headache recedes — not gone, but manageable. You can think again.' },
@@ -3365,6 +3449,9 @@ export function createContent(ctx) {
         State.set('ate_at_work_today', true);
         State.advanceTime(10);
 
+        // Dental — eating spikes the ache
+        State.dentalSpike(15);
+
         const mood = State.moodTone();
         const hunger = State.hungerTier();
 
@@ -3395,6 +3482,9 @@ export function createContent(ctx) {
       execute: () => {
         State.consumeCaffeine(40);
         State.advanceTime(Timeline.randomInt(4, 7));
+
+        // Dental — hot coffee is a significant trigger
+        State.dentalSpike(25);
 
         const mood = State.moodTone();
         const aden = State.get('adenosine');
@@ -3505,6 +3595,9 @@ export function createContent(ctx) {
         State.glanceMoney();
         Events.record('ate', { what: 'cheap_meal' });
 
+        // Dental — eating anything spikes the ache
+        State.dentalSpike(15);
+
         // Food comfort sentiment — weaker than home food + habituation
         const fc = State.sentimentIntensity('eating', 'comfort');
         if (fc > 0) {
@@ -3513,6 +3606,7 @@ export function createContent(ctx) {
         }
 
         const mood = State.moodTone();
+        const dentalW = State.lerp01(State.get('dental_ache'), 20, 65);
 
         if (mood === 'numb' || mood === 'heavy') {
           return Timeline.weightedPick([
@@ -3527,6 +3621,8 @@ export function createContent(ctx) {
           { weight: 1, value: 'You grab something from the counter and eat it outside. Corner store food. It does the job.' },
           // High food comfort — small pleasure in cheap food
           { weight: fc > 0 ? fc * 0.7 : 0, value: 'You eat it outside the store. Cheap food, nothing to it, but the taste is good and the eating is a comfort in the simple way it always is.' },
+          // Dental — eating outside with a bad tooth
+          { weight: dentalW, value: 'You eat carefully on one side. Even out here it\'s a whole thing. You finish it anyway.' },
         ]);
       },
     },
@@ -3617,6 +3713,9 @@ export function createContent(ctx) {
         State.consumeCaffeine(50);
         State.advanceTime(Timeline.randomInt(3, 5));
         State.glanceMoney();
+
+        // Dental — hot coffee is a trigger
+        State.dentalSpike(25);
 
         const mood = State.moodTone();
         const aden = State.get('adenosine');
@@ -4963,6 +5062,30 @@ export function createContent(ctx) {
       }
     }
 
+    // Dental pain — persistent background awareness
+    {
+      const dentalT = State.dentalTier();
+      if (dentalT === 'flare') {
+        thoughts.push(
+          { weight: 8, value: 'The tooth. Still. Always.' },
+          { weight: 7, value: 'You try not to touch it with your tongue. You touch it with your tongue.' },
+          { weight: 6, value: 'There is a tooth in your mouth that is having a very bad time.' },
+          { weight: 5, value: 'You\'ve been ignoring this for a while now. The tooth is done being ignored.' },
+        );
+      } else if (dentalT === 'ache') {
+        thoughts.push(
+          { weight: 5, value: 'The tooth is there. It\'s been there. It\'ll keep being there.' },
+          { weight: 4, value: 'You should do something about the tooth. You know what you should do. You know why you haven\'t.' },
+          { weight: 3, value: 'The ache is manageable. You\'ve been managing it for a while.' },
+        );
+      } else if (dentalT === 'dull') {
+        thoughts.push(
+          { weight: 2, value: 'Somewhere in the back of your mouth, a low dull note.' },
+          { weight: 2, value: 'The tooth again. Not bad right now. Just reminding you it\'s there.' },
+        );
+      }
+    }
+
     // Filter out recently shown thoughts (compare .value)
     const fresh = thoughts.filter(t => !recentIdle.includes(t.value));
     const pool = fresh.length > 0 ? fresh : thoughts;
@@ -5506,9 +5629,12 @@ export function createContent(ctx) {
     },
 
     take_pain_reliever: () => {
-      const tier = State.migraineTier();
-      if (tier === 'severe') return 'The medication. You need it.';
-      if (tier === 'active') return 'Something for the headache.';
+      const migraineTier = State.migraineTier();
+      const dentalTier = State.dentalTier();
+      if (migraineTier === 'severe') return 'The medication. You need it.';
+      if (migraineTier === 'active') return 'Something for the headache.';
+      if (dentalTier === 'flare') return 'Something for the tooth. Please.';
+      if (dentalTier === 'ache') return 'Something for the tooth.';
       return 'Pain reliever.';
     },
 

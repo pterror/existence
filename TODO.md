@@ -164,7 +164,13 @@ No family exists in the simulation. DESIGN.md describes: supportive / conditiona
 No content level configuration. DESIGN.md describes: baseline tier (everyday struggles), full tier (DV, abuse, addiction, etc.), fine-grained toggles per category. Configuration before character generation, revisitable between runs.
 
 ### Health system
-~~No health conditions exist.~~ Migraines (chronic) and acute illness (flu/cold/GI) implemented. Remaining: dental pain, chronic conditions (diabetes, chronic pain), mental health as structural, pregnancy.
+~~No health conditions exist.~~ Migraines (chronic), acute illness (flu/cold/GI), and dental pain (chronic) implemented. Remaining: chronic conditions (diabetes, chronic pain), mental health as structural, pregnancy.
+
+**Dental pain approximation debts:**
+- Prevalence not derived from real incidence data — ~18% base is a placeholder
+- No jurisdiction/insurance model — dental access varies enormously by country and income
+- No treatment mechanic — can't fix the tooth (dentist visit with cost, appointment system)
+- No decay over time — condition doesn't worsen (abscesses, tooth loss)
 
 **Acute illness approximation debts:**
 - Onset probability magnitudes not derived from real incidence data — need calibration

@@ -232,6 +232,9 @@ export function createState(ctx) {
       migraine_intensity: 0,    // 0-100 pain level; decays ~8 pts/hr during active phase
       migraine_hours_active: 0, // hours since onset; used to pace decay
 
+      // Dental pain — only relevant if health_conditions includes 'dental_pain'
+      dental_ache: 0,   // 0-100 continuous pain; spikes from eating/hot-cold, decays ~1.5/hr
+
       // Acute illness — transient, anyone can get it. Separate from chronic health_conditions.
       illness_severity: 0,                             // 0-1 continuous (0 = healthy)
       illness_type: /** @type {string|null} */ (null), // 'flu' | 'cold' | 'gi'
@@ -397,6 +400,18 @@ export function createState(ctx) {
           s.migraine_intensity = 30 + riskScore * 40; // 30-70 depending on risk
           s.migraine_hours_active = 0;
         }
+      }
+    }
+
+    // Dental pain — NT effects per tick
+    if (s.health_conditions.includes('dental_pain') && s.dental_ache > 0) {
+      // Passive decay — ache fades slowly (~1.5 pts/hr); lingers for hours after a spike
+      s.dental_ache = Math.max(0, s.dental_ache - hours * 1.5);
+      // Pain signal: low NE raise when aching, stronger when flaring
+      adjustNT('norepinephrine', hours * 2 * (s.dental_ache / 100));
+      // Acute flare prevents settling — suppresses GABA
+      if (s.dental_ache > 50) {
+        adjustNT('gaba', -hours * 1.5);
       }
     }
 
@@ -566,6 +581,10 @@ export function createState(ctx) {
     s.ate_at_soup_kitchen_today = false;
     s.daylight_exposure = 0;
     s.illness_medicated = false;
+    // Dental — underlying condition means you always wake with at least a dull ache
+    if (s.health_conditions.includes('dental_pain')) {
+      s.dental_ache = Math.max(s.dental_ache, 8);
+    }
   }
 
   // --- Qualitative tiers ---
@@ -851,6 +870,10 @@ export function createState(ctx) {
       // Illness cuts ceiling proportionally: -25 at severity 0.5, -45 at severity 1.0
       return Math.max(30, 100 - s.illness_severity * 50);
     }
+    // Acute dental flare cuts ceiling modestly — pain is local but consuming
+    if (s.dental_ache > 60) {
+      return Math.max(50, 100 - s.dental_ache * 0.4);
+    }
     return 100;
   }
 
@@ -868,6 +891,24 @@ export function createState(ctx) {
     if (s.illness_severity < 0.3) return 'unwell';
     if (s.illness_severity < 0.65) return 'sick';
     return 'very_sick';
+  }
+
+  /** Qualitative dental pain state. 'none' when condition absent or quiescent. */
+  function dentalTier() {
+    if (!s.health_conditions.includes('dental_pain') || s.dental_ache < 5) return 'none';
+    if (s.dental_ache < 25) return 'dull';   // background ache, easy to push through
+    if (s.dental_ache < 60) return 'ache';   // noticeably painful, affects eating choices
+    return 'flare';                          // acute, hard to ignore, affects everything
+  }
+
+  /**
+   * Spike dental ache by amount (from eating, hot/cold triggers).
+   * No-op if dental_pain condition is absent.
+   * @param {number} amount
+   */
+  function dentalSpike(amount) {
+    if (!s.health_conditions.includes('dental_pain')) return;
+    s.dental_ache = Math.max(0, Math.min(100, s.dental_ache + amount));
   }
 
   function timePeriod() {
@@ -1995,6 +2036,8 @@ export function createState(ctx) {
     energyCeiling,
     migraineTier,
     illnessTier,
+    dentalTier,
+    dentalSpike,
     innerVoiceTier,
   };
 }

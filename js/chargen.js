@@ -478,6 +478,15 @@ export function createChargen(ctx) {
       conditions.push('migraines');
     }
 
+    // Dental pain: untreated cavity/cracked tooth. ~18% base; higher with financial hardship
+    // (less historical access to dental care). Approximation debt — no jurisdiction/insurance model yet.
+    const dentalBase = 0.18;
+    const dentalBoost = (financialSim.starting_money < 800 ? 0.07 : 0)
+      + (backstory.career_stability < 0.4 ? 0.03 : 0);
+    if (Timeline.charRandom() < dentalBase + dentalBoost) {
+      conditions.push('dental_pain');
+    }
+
     return /** @type {GameCharacter} */ ({
       first_name: playerName.first,
       last_name: playerName.last,

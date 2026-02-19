@@ -69,17 +69,29 @@ Two health tracks: chronic conditions (permanent, per-character) and acute illne
 **Chronic condition architecture:**
 - `health_conditions: string[]` in state, set by `Character.applyToState()` from `character.conditions`
 - `hasCondition(id)` query — all condition-gated behavior uses this
-- `energyCeiling()` — returns max achievable energy (100 normally; reduced by migraine or illness)
+- `energyCeiling()` — returns max achievable energy (100 normally; reduced by migraine, illness, or dental flare)
 - `migraineTier()` — 'none' | 'building' | 'active' | 'severe'
+- `dentalTier()` — 'none' | 'dull' | 'ache' | 'flare'
 
-**Migraines (first chronic condition):**
+**Migraines (chronic condition):**
 - ~15% prevalence at chargen (+5% for high-neuroticism or precarious career)
 - Trigger: probabilistic in `advanceTime`, risk score from adenosine + stress + sleep debt
 - Intensity: 30–70 at onset, decays ~8 pts/hr after 2h active phase
 - Effects: raises NE + lowers dopamine while active; bedroom description overridden for active/severe
-- `take_pain_reliever` interaction at apartment_bathroom: -35 intensity, available when migraineTier ≠ 'none'
+- `take_pain_reliever` interaction at apartment_bathroom: -35 intensity; now shared with dental pain
 - `go_for_walk` blocked at 'severe' tier
 - Postdrome/aura ○
+
+**Dental pain (chronic condition):**
+- `dental_ache` (0–100): continuous pain; spikes from eating/hot coffee (~15–25), decays ~1.5/hr
+- ~18% prevalence at chargen (+7% if low starting money); approximation debt — no jurisdiction/insurance model
+- Morning baseline: `wakeUp()` ensures dental_ache ≥ 8 when condition present (jaw pressure overnight)
+- **Tier effects:** 'dull' (8–25) — background noise; 'ache' (25–60) — shapes eating prose; 'flare' (60+) — overrides eating, cuts energyCeiling, suppresses GABA
+- **NT per tick:** NE raised proportional to ache; GABA suppressed when ache > 50
+- **Food/drink triggers:** eating interactions spike ache +15 (chewing); coffee interactions +25 (hot liquid)
+- `take_pain_reliever` reduces dental_ache by 35 (shared with migraines); dental-specific prose when tooth is dominant
+- Bedroom description: deterministic ache/flare suffix appended
+- Idle thoughts: 9 entries at 'dull'/'ache'/'flare' tiers
 
 **Acute illness (flu / cold / GI):**
 - `illness_severity` (0–1), `illness_type` (null|'flu'|'cold'|'gi'), `illness_day`, `illness_medicated` (boolean, resets each wakeUp)
@@ -300,7 +312,7 @@ sleep, get_dressed, set_alarm, skip_alarm, snooze_alarm, dismiss_alarm, charge_p
 eat_food, eat_from_pantry (fridge empty + pantry not empty), drink_water, do_dishes, check_phone_kitchen, sit_at_table
 
 ### Bathroom (3)
-shower, use_sink, rehang_towel; take_pain_reliever (migraines condition only)
+shower, use_sink, rehang_towel; take_pain_reliever (migraines or dental_pain condition)
 
 ### Street (3)
 check_phone_street, sit_on_step, go_for_walk
