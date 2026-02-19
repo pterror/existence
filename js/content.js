@@ -1902,6 +1902,8 @@ export function createContent(ctx) {
             { weight: 1, value: 'Outside exists. You can see it. Knowing that doesn\'t do anything, but you look anyway.' },
             // Low dopamine — nothing catches
             { weight: State.lerp01(dopa, 40, 15), value: 'You look out. Things move — a person, a car, a bird. Your eyes follow without your permission. None of it reaches the part of you that would care.' },
+            // Snow — white and still out there
+            { weight: weather === 'snow' ? 1.5 : 0, value: 'Snow on the street, on the rooftops. White and quiet out there. You see all of it. None of it reaches you.' },
           ]);
         }
         if (mood === 'heavy') {
@@ -1911,6 +1913,8 @@ export function createContent(ctx) {
             { weight: 1, value: 'Outside is happening. You watch it from the bed. The effort of being out there — even thinking about it is a lot.' },
             // Low serotonin — the distance is heavier
             { weight: State.lerp01(ser, 35, 15), value: 'You look out and the world is right there, close enough to touch if you opened the window. You won\'t. The distance isn\'t the glass. It\'s everything between you and being a person who goes outside.' },
+            // Snow — the white world feels like more pressure
+            { weight: weather === 'snow' ? 1.5 : 0, value: 'Snow outside. The world white and quiet. The stillness of it doesn\'t help — it just makes the inside feel louder.' },
           ]);
         }
         if (mood === 'fraying') {
@@ -1932,6 +1936,8 @@ export function createContent(ctx) {
             { weight: State.lerp01(gaba, 40, 20), value: 'You look out and the grey is everywhere — the sky, the buildings, the flat light on the street. It presses against the glass. You step back without deciding to.' },
             // Rain lover during drizzle — the sound helps even when fraying
             { weight: weather === 'drizzle' && rc > 0 ? rc * 0.6 : 0, value: 'You look out. Grey, drizzle, the streaked glass. But the sound of the rain — that steady tapping — is doing something. Somewhere beneath the noise in your head, the rain is a rhythm you can hold onto.' },
+            // Snow — the quiet doesn't match what's inside
+            { weight: weather === 'snow' ? 1.5 : 0, value: 'You look out. Snow. The world gone quiet and white, like someone turned down all the noise. Your insides didn\'t get the memo.' },
           ]);
         }
         if (mood === 'hollow') {
@@ -1941,6 +1947,8 @@ export function createContent(ctx) {
             { weight: 1, value: 'Outside. People. Movement. The glass keeps the sound out. You watch like it\'s an aquarium.' },
             // Low dopamine — watching without any pull to join
             { weight: State.lerp01(dopa, 40, 20), value: 'Someone crosses the street. Someone else waits at the corner. You watch them the way you\'d watch a screensaver — movement without meaning, pattern without pull.' },
+            // Snow — the muted street fits
+            { weight: weather === 'snow' ? 1.5 : 0, value: 'Snow out there. The street is slower, the usual movement muted under white. You watch from the glass. The stillness suits you, or you suit it. Hard to say.' },
           ]);
         }
         if (mood === 'clear' || mood === 'present') {
@@ -1955,6 +1963,8 @@ export function createContent(ctx) {
             { weight: weather === 'drizzle' && rc > 0 ? rc : 0, value: 'Rain on the glass. You stand at the window and watch it run in lines down the pane. The sound of it — steady, close, the whole world softened by water. Something in you settles. You stay.' },
             // Weather comfort — the weather itself lands
             { weight: weatherComfort > 0 ? weatherComfort * 0.7 : 0, value: 'You look out and the weather is right. Not dramatically — just quietly right, the way only your kind of weather can be. The sky, the light, the feel of the air through the cracked window. You stand there and let it reach you.' },
+            // Snow — the light is different, everything cleaner
+            { weight: weather === 'snow' ? 1.5 : 0, value: 'Snow out there, and the light is different — whiter, cleaner, the world lit from below. You press close to the glass to see more of it. Something about the particular quiet of snow feels like a gift today.' },
           ]);
         }
         // flat
@@ -1967,6 +1977,8 @@ export function createContent(ctx) {
           { weight: State.lerp01(aden, 50, 75), value: 'You look out. The view is there but soft — edges blurred, details optional. You watch without really watching. The tiredness makes it all a little far away.' },
           // Rain lover during drizzle — rain on glass
           { weight: weather === 'drizzle' && rc > 0 ? rc * 0.7 : 0, value: 'You look out. The rain runs down the glass in slow lines. The sound of it is something you don\'t have a word for, just a feeling. You watch.' },
+          // Snow — the view is the same but different
+          { weight: weather === 'snow' ? 1.5 : 0, value: 'Snow. The view is the same — same street, same buildings — but everything\'s white now, quieter. You look at it for a while. It\'s something.' },
         ]);
       },
     },
