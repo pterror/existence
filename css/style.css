@@ -96,6 +96,38 @@ body {
   opacity: 1;
 }
 
+/* Inner voice — typographic intensity as NT readout */
+
+#event-text p.inner-voice--uneasy {
+  letter-spacing: 0.015em;
+  color: #b0a898;
+}
+
+#event-text p.inner-voice--prominent {
+  color: #c0b8b0;
+  font-weight: 400;
+}
+
+#event-text p.inner-voice--tremor {
+  color: #c8c0b8;
+  font-weight: 400;
+  animation: inner-voice-shake 0.35s ease-in-out infinite;
+}
+
+@keyframes inner-voice-shake {
+  0%, 100% { transform: translateX(0); }
+  25%       { transform: translateX(-1.5px); }
+  75%       { transform: translateX(1.5px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #event-text p.inner-voice--tremor {
+    animation: none;
+    color: #e0d8d0;
+    font-weight: 400;
+  }
+}
+
 /* Actions — feel like part of the text, not a menu */
 
 #actions {

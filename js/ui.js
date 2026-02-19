@@ -156,6 +156,22 @@ export function createUI(ctx) {
     });
   }
 
+  /**
+   * @param {string} text
+   * @param {string} tier — 'uneasy' | 'prominent' | 'tremor'
+   */
+  function appendInnerVoice(text, tier) {
+    if (!text || text.trim() === '') return;
+    const p = document.createElement('p');
+    p.innerHTML = text;
+    p.className = `inner-voice inner-voice--${tier}`;
+    p.style.opacity = '0';
+    p.style.transition = 'opacity 0.5s ease';
+    eventTextEl.appendChild(p);
+    eventTextEl.classList.add('visible');
+    requestAnimationFrame(() => { p.style.opacity = '1'; });
+  }
+
   /** @param {string} text */
   function textToHTML(text) {
     // Split into paragraphs on double newlines, wrap in <p>
@@ -620,6 +636,7 @@ export function createUI(ctx) {
     showEventText,
     clearEventText,
     appendEventText,
+    appendInnerVoice,
     showActions,
     showMovement,
     resetIdleTimer,

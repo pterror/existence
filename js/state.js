@@ -614,6 +614,24 @@ export function createState(ctx) {
     return 'well_stocked';
   }
 
+  /**
+   * Typographic intensity tier for inner voice rendering.
+   * Returns null when NT state is calm — no inner voice surfaces.
+   * Score-based: each destabilizing condition adds 1 point.
+   * @returns {null | 'uneasy' | 'prominent' | 'tremor'}
+   */
+  function innerVoiceTier() {
+    let score = 0;
+    if (s.gaba < 40) score++;
+    if (s.norepinephrine > 65) score++;
+    if (s.serotonin < 35) score++;
+    if (s.rumination > 65) score++;
+    if (score === 0) return null;
+    if (score === 1) return 'uneasy';
+    if (score === 2) return 'prominent';
+    return 'tremor';
+  }
+
   /** Whether the character has enough money to spend this amount. */
   function canAfford(amount) {
     return s.money >= amount;
@@ -1852,6 +1870,7 @@ export function createState(ctx) {
     hasCondition,
     energyCeiling,
     migraineTier,
+    innerVoiceTier,
   };
 }
 
