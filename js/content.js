@@ -3478,6 +3478,14 @@ export function createContent(ctx) {
       const time = State.timePeriod();
       const weather = State.get('weather');
       const ne = State.get('norepinephrine');
+      if (weather === 'snow') {
+        return Timeline.weightedPick([
+          { weight: 1, value: 'The snow takes the edge off everything. Muffled street, muffled city.' },
+          { weight: 1, value: 'Footsteps in snow — someone else\'s, nearby, then gone.' },
+          // High NE — the muffled world still registers
+          { weight: State.lerp01(ne, 45, 65), value: 'The snow quiets most things. Not everything. A car somewhere, a shovel on concrete, your own breath. Quieter, but still there.' },
+        ]);
+      }
       if (weather === 'drizzle') {
         return 'Car tires on wet road. That specific hiss.';
       }
@@ -3499,6 +3507,7 @@ export function createContent(ctx) {
 
     someone_passes: () => {
       const social = State.socialTier();
+      const weather = State.get('weather');
       if (social === 'isolated') {
         return 'Someone walks past. They don\'t see you. You\'re part of the scenery.';
       }
@@ -3509,6 +3518,8 @@ export function createContent(ctx) {
         { weight: 1, value: 'An older woman passes and nods. You nod back. That\'s enough.' },
         // Low serotonin — other people feel far away
         { weight: State.lerp01(ser, 40, 20), value: 'Someone passes. You watch them go. They have a life — somewhere to be, someone to see. The distance between you and that is a thing you can feel.' },
+        // Snow — people are bundled, moving differently
+        { weight: weather === 'snow' ? 1.5 : 0, value: 'Someone goes past in a big coat, head down against the cold. Everyone out here looks like they\'re getting somewhere fast.' },
       ]);
     },
   };
