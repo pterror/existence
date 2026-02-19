@@ -80,6 +80,7 @@ Full design in [DESIGN-HABITS.md](DESIGN-HABITS.md). The character develops beha
 - Utilities ($65 flat) — should derive from season (heating/cooling), apartment size, actual usage
 - Phone bill ($45 flat) — should derive from plan type (prepaid vs contract), data usage
 - Rent bracket — should derive from housing type (apartment/room/family), not just origin
+- **Item prices at corner store** — `CORNER_STORE_COFFEE_PRICE` is a hardcoded constant. Should derive from character's neighborhood/local cost-of-living. A character in a high-rent area pays more for the same coffee. Same applies to buy_cheap_meal and buy_groceries ranges. Future: neighborhood economic tier generated at chargen from origin + housing.
 - Personality parameters — currently random 0–100, should partially derive from upbringing events
 - Friend flavors — currently random, should connect to backstory (who stays after life events?)
 

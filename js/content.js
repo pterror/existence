@@ -1310,6 +1310,12 @@ export function createContent(ctx) {
     return { slot, friend: Character.get(slot) };
   }
 
+  // --- Interaction price constants ---
+  // Approximation debts: these should eventually derive from character neighborhood /
+  // local cost of living. For now, single named constants so the duplication is in
+  // one place and the debt is visible.
+  const CORNER_STORE_COFFEE_PRICE = 2.25; // TODO: derive from neighborhood cost-of-living
+
   // --- Interactions ---
 
   const interactions = {
@@ -3496,9 +3502,9 @@ export function createContent(ctx) {
       id: 'buy_coffee_store',
       label: 'Get a coffee',
       location: 'corner_store',
-      available: () => State.canAfford(2.25) && State.caffeineTier() !== 'high',
+      available: () => State.canAfford(CORNER_STORE_COFFEE_PRICE) && State.caffeineTier() !== 'high',
       execute: () => {
-        const cost = 2.25;
+        const cost = CORNER_STORE_COFFEE_PRICE;
 
         if (!State.spendMoney(cost)) {
           return 'Not enough. You put it back.';
