@@ -891,36 +891,47 @@ export function createState(ctx) {
       }
     }
 
-    // Deep sleep fraction: high in early cycles, plateaus after ~3
-    // Cycle 1: ~50% deep, Cycle 2: ~35%, Cycle 3+: ~20%
-    let deepTotal = 0;
-    let remTotal = 0;
-    const totalCycles = completeCycles + partialCycleFrac;
+    // Per-cycle deep/REM fractions calibrated against real staging data:
+    // 8-hour sleep → ~20% deep, ~25% REM (fractions of total sleep time).
+    // Deep decays exponentially (k≈0.57), floors near 0 by cycle 4-5.
+    // REM grows linearly, caps at 55% (late REM-dominant cycles in extended sleep).
+    // Cycle 0: deep ~50%, REM ~10%
+    // Cycle 1: deep ~29%, REM ~17%
+    // Cycle 2: deep ~16%, REM ~24%
+    // Cycle 3: deep ~9%,  REM ~31%
+    // Cycle 4: deep ~5%,  REM ~38%
+    // Cycle 5+: deep ~2-3%, REM ~45-55%
+    function cycleFracs(i) {
+      const deep = i === 0 ? 0.50 : Math.max(0.50 * Math.pow(0.57, i), 0.02);
+      const rem  = Math.min(0.10 + i * 0.07, 0.55);
+      return { deep, rem };
+    }
 
+    // Normalize by total sleep time (not cycle count) — cycles have different durations,
+    // so equal-weight averaging over cycles would inflate REM from longer late cycles.
+    let deepMinutes = 0;
+    let remMinutes = 0;
     for (let i = 0; i < completeCycles; i++) {
-      const cycleDeep = i === 0 ? 0.50 : i === 1 ? 0.35 : 0.20;
-      const cycleRem = i === 0 ? 0.10 : Math.min(0.15 + i * 0.07, 0.45);
-      deepTotal += cycleDeep;
-      remTotal += cycleRem;
+      const { deep, rem } = cycleFracs(i);
+      const dur = cycleDuration(i);
+      deepMinutes += deep * dur;
+      remMinutes += rem * dur;
     }
-    // Partial cycle contributes proportionally (as if continuing the pattern)
     if (partialCycleFrac > 0) {
-      const i = completeCycles;
-      const cycleDeep = i === 0 ? 0.50 : i === 1 ? 0.35 : 0.20;
-      const cycleRem = i === 0 ? 0.10 : Math.min(0.15 + i * 0.07, 0.45);
-      deepTotal += cycleDeep * partialCycleFrac;
-      remTotal += cycleRem * partialCycleFrac;
+      const { deep, rem } = cycleFracs(completeCycles);
+      const dur = cycleDuration(completeCycles);
+      deepMinutes += deep * partialCycleFrac * dur;
+      remMinutes += rem * partialCycleFrac * dur;
     }
 
-    // Normalize to fractions of total sleep
-    const deepSleepFrac = totalCycles > 0 ? clamp(deepTotal / totalCycles, 0, 1) : 0;
-    const remFrac = totalCycles > 0 ? clamp(remTotal / totalCycles, 0, 1) : 0;
+    const deepSleepFrac = sleepMinutes > 0 ? clamp(deepMinutes / sleepMinutes, 0, 1) : 0;
+    const remFrac = sleepMinutes > 0 ? clamp(remMinutes / sleepMinutes, 0, 1) : 0;
 
     // Sleep inertia: waking mid-deep-sleep in early cycles is worst.
-    // Partial cycle in first 3 cycles with deep sleep → high inertia.
+    // Deep sleep fraction drops sharply after cycle 2, so inertia fades quickly.
     let sleepInertia = 0;
     if (partialCycleFrac > 0 && completeCycles < 3) {
-      const depthFactor = completeCycles === 0 ? 0.50 : completeCycles === 1 ? 0.35 : 0.20;
+      const depthFactor = cycleFracs(completeCycles).deep;
       // Mid-cycle is worst (peak at 0.3-0.6 of cycle = deep sleep phase)
       const phaseInertia = partialCycleFrac < 0.6 ? partialCycleFrac / 0.6 : (1 - partialCycleFrac) / 0.4;
       sleepInertia = clamp(depthFactor * phaseInertia * 1.2, 0, 0.6);
