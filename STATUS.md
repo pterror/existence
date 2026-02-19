@@ -181,7 +181,14 @@ Battery (dual-rate drain: 1%/hr standby, 15%/hr screen-on; tiers: dead/critical/
 **Phone UI:** Full HTML5 phone overlay. Three screens: home (large time + date + Messages app badge), messages list (contacts ordered: friends by recency, then supervisor, then bank; unread dots, preview text), thread view (sent/received bubbles, compose row with Reply/Write when applicable). Navigation (home→list→thread→back) is transient state stored in `phone_screen` + `phone_thread_contact`. Opening a friend thread marks messages as read and applies guilt side-effects. Reply and Write actions go through the normal game pipeline (RNG consumed, action recorded, friend response queued). Old `read_messages` interaction kept for replay compat. All phone messages now carry `source` and `direction` fields (auto-stamped in `addPhoneMessage`).
 
 ### Apartment State
-fridge_food (integer, depletes on eating, restocked by groceries), apartment_mess (0–100, grows passively)
+fridge_food (integer, depletes on eating, restocked by groceries), apartment_mess (0–100, grows at 0.2/hr passively, reduced by do_dishes −25). Resets surfaced_mess on wake so apartment_notice events can fire again each day.
+
+**Mess shapes prose at 4 tiers across all three apartment locations:**
+- **Bedroom:** `< 22` (clear/in order), `45–60` (pile forming, minor disorder), `60–75` (chair-as-wardrobe, floor has topography), `> 75` (entropy made visible, permanent layer)
+- **Kitchen:** `< 22` (sink empty, counter clear), `38–55` (a cup, a plate — the usual), `55–70` (dishes in the sink, been there), `> 70` (full sink + counter, mess structural)
+- **Bathroom:** `48–65` (towel on tub edge), `> 65` (towel on floor, products off shelves)
+
+**apartment_notice** — event fires randomly in apartment with 6% chance per action (max 2/day, then falls back to apartment_sound). NT-shaded variants: low serotonin makes the mess read as evidence; high adenosine makes it blur and unregister; low dopamine surfaces the gap between knowing and doing.
 
 ## Locations (7)
 

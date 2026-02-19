@@ -92,7 +92,9 @@ Only "eat from fridge" and "buy cheap meal." No cooking (time + energy + ingredi
 **Largely implemented.** Sleep prose now has two phases: falling-asleep (how sleep came) and waking-up (the gradient back to consciousness). Waking prose branches on post-sleep energy, sleep quality, alarm vs natural, time of day, mood, sleep debt, and sleep inertia — ~44 waking + ~22 falling-asleep variants. Alarm negotiation implemented (snooze/dismiss). Slept-through-alarm awareness. Still missing: insomnia/not-sleeping as a distinct experience, dreaming.
 
 ### Apartment mess as autonomous force
-apartment_mess exists as a state variable but doesn't grow on its own or meaningfully shape prose beyond event notices. DESIGN.md describes entropy that accumulates by itself — the apartment as a mirror of how you're managing.
+~~apartment_mess exists as a state variable but doesn't grow on its own or meaningfully shape prose beyond event notices.~~ — **IMPLEMENTED.** Mess now shapes prose at 4 tiers in bedroom, kitchen, and bathroom. `apartment_notice` has NT-shaded variants (low serotonin → reads as evidence, high adenosine → blurs and unregisters, low dopamine → gap between knowing and doing). `surfaced_mess` resets each morning so notices can surface daily. `do_dishes` prose expanded for clean-result and autopilot-adenosine states.
+
+**Still missing:** A dedicated bedroom tidying interaction (currently only do_dishes from kitchen reduces mess). Mess as a mild cortisol/stress target modifier (could model ambient anxiety from environmental disorder).
 
 ### Weather depth
 Only 4 weather states, no temperature, no seasonal variation, no weather affecting what you wear or how movement feels. DESIGN.md describes weather as atmosphere — the grey day that sits on you, rain changing what the street feels like.

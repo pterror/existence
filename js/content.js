@@ -764,10 +764,14 @@ export function createContent(ctx) {
       }
 
       // Mess details
-      if (mess > 70) {
-        desc += ' Clothes on the floor have been there long enough to stop looking like they just fell.';
+      if (mess > 75) {
+        desc += ' Clothes that have been on the floor long enough to stop looking fallen. Things that migrated from where they lived and didn\'t go back. The room has a layer to it now.';
+      } else if (mess > 60) {
+        desc += ' The chair in the corner has become a wardrobe. The floor has its own arrangement of things moved and not moved back.';
       } else if (mess > 45) {
-        desc += ' A few things out of place. Not bad. Not great.';
+        desc += ' Things out of place. A pile forming somewhere. The kind of disorder that arrives without any particular decision.';
+      } else if (mess < 22) {
+        desc += ' It\'s relatively in order in here. The surfaces have their surfaces back.';
       }
 
       // Alarm detail
@@ -831,8 +835,14 @@ export function createContent(ctx) {
       }
 
       // Mess
-      if (mess > 60) {
+      if (mess > 70) {
+        desc += ' The sink is full and has been for a while. The counter has its own layer — things set down and left, the kind of mess that stops registering once it\'s been there long enough.';
+      } else if (mess > 55) {
         desc += ' Dishes in the sink. They\'ve been there.';
+      } else if (mess > 38) {
+        desc += ' A cup, a plate. The usual.';
+      } else if (mess < 22) {
+        desc += ' The sink is empty. The counter has its surface back.';
       }
 
       // Microwave clock — the kitchen always tells you the time
@@ -853,6 +863,7 @@ export function createContent(ctx) {
       const energy = State.energyTier();
       const mood = State.moodTone();
       const showered = State.get('showered');
+      const mess = State.get('apartment_mess');
 
       let desc = 'The bathroom. Mirror, sink, shower.';
 
@@ -870,6 +881,13 @@ export function createContent(ctx) {
         } else {
           desc += ' The shower is right there.';
         }
+      }
+
+      // Mess
+      if (mess > 65) {
+        desc += ' A damp towel on the floor. Products off their shelves, the counter cluttered with things not put back.';
+      } else if (mess > 48) {
+        desc += ' The towel from yesterday draped over the edge of the tub.';
       }
 
       return desc;
@@ -1959,8 +1977,21 @@ export function createContent(ctx) {
         State.advanceTime(15);
 
         const mood = State.moodTone();
+        const postMess = State.get('apartment_mess');
+        const aden = State.get('adenosine');
+
+        if (postMess < 28) {
+          // Actually cleaned up well — sink is clear
+          if (mood === 'heavy' || mood === 'numb') {
+            return 'You wash dishes. The warm water helps more than it should. When you dry your hands, the sink is empty. The counter has its surface back. One thing, at least, dealt with.';
+          }
+          return 'Warm water, soap, the rhythm of it. When you\'re done the sink is empty, the counter clear. The kitchen looks like someone lives here on purpose.';
+        }
         if (mood === 'heavy' || mood === 'numb') {
           return 'You wash dishes. The warm water is the closest thing to comfort available right now. One thing, at least, is done.';
+        }
+        if (aden > 65) {
+          return 'Your hands know what to do without you deciding anything. Hot water, soap, the stack going down. When it\'s over you\'re not sure how long it took.';
         }
         return 'You wash the dishes. Warm water, soap, the repetition of it. The kitchen looks a little more like someone lives here on purpose.';
       },
@@ -3141,17 +3172,32 @@ export function createContent(ctx) {
       const n = State.get('surfaced_mess');
       State.set('surfaced_mess', n + 1);
       const mess = State.get('apartment_mess');
+      const ser = State.get('serotonin');
+      const aden = State.get('adenosine');
+      const dop = State.get('dopamine');
       if (mess > 70) {
-        if (n === 0) {
-          return 'You notice how cluttered things have gotten. When did that happen.';
-        }
-        return 'The apartment. You see it for a second the way a visitor would. Then you stop seeing it that way.';
+        return Timeline.weightedPick([
+          { weight: 1, value: 'You notice how cluttered things have gotten. When did that happen.' },
+          { weight: 1, value: 'The apartment. You see it for a second the way a visitor would. Then you stop seeing it that way.' },
+          { weight: 1, value: 'Everything\'s been here long enough to stop being mess and start just being how it is.' },
+          // Low serotonin — it reads as evidence
+          { weight: State.lerp01(ser, 40, 20), value: 'The apartment looks like what it is. A place someone\'s been barely keeping up with. You know because you\'re that person.' },
+          // High adenosine — it blurs, then unregisters
+          { weight: State.lerp01(aden, 55, 75), value: 'You look at the state of things for a second. Then the moment passes and you\'ve stopped registering it.' },
+          // Low dopamine — nothing moves toward fixing it
+          { weight: State.lerp01(dop, 40, 20), value: 'You know it needs dealing with. Knowing and doing are in different rooms right now.' },
+        ]);
       }
       if (mess > 40) {
-        if (n === 0) {
-          return 'A few things out of place. The kind of mess that builds without you deciding to let it.';
-        }
-        return 'The mess hasn\'t moved. You knew it wouldn\'t.';
+        return Timeline.weightedPick([
+          { weight: 1, value: 'A few things out of place. The kind of mess that builds without you deciding to let it.' },
+          { weight: 1, value: 'Things where they fell. Things moved somewhere temporary and then stayed.' },
+          { weight: 1, value: 'The mess hasn\'t moved. You knew it wouldn\'t.' },
+          // Low serotonin — minor disorder registers as more than it is
+          { weight: State.lerp01(ser, 40, 20), value: 'The small disorder of the place catches your eye. It shouldn\'t bother you this much.' },
+          // High adenosine — registers then blurs
+          { weight: State.lerp01(aden, 55, 75), value: 'The mess registers and then doesn\'t. You don\'t have the bandwidth to hold it.' },
+        ]);
       }
       return '';
     },

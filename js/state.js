@@ -402,6 +402,7 @@ export function createState(ctx) {
     s.just_woke_alarm = false;
     s.snooze_count = 0;
     s.surfaced_late = 0;
+    s.surfaced_mess = 0;
     s.work_nagged_today = false;
     s.daylight_exposure = 0;
   }
