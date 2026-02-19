@@ -2432,9 +2432,11 @@ export function createContent(ctx) {
         // Weather sentiment
         const weatherComfort = State.sentimentIntensity('weather_' + weather, 'comfort');
 
-        // Weather modifier — drizzle adds discomfort
+        // Weather modifier — drizzle and snow add discomfort
         if (weather === 'drizzle') {
           State.adjustStress(2);
+        } else if (weather === 'snow') {
+          State.adjustStress(3); // cold + wet + effort
         }
 
         // Stress effect depends on mood
@@ -2448,6 +2450,14 @@ export function createContent(ctx) {
               { weight: State.lerp01(ne, 45, 65), value: 'The rain is on your face and you can feel every drop — distinct, cold, alive. Your feet on the wet pavement. The smell of it. The world in the rain is a specific, sharp thing, and you\'re in it.' },
               // Rain lover — the drizzle is welcome
               { weight: rc > 0 ? rc : 0, value: 'You walk in the rain and it\'s good. The sound of it on your jacket, the wet air, the way the street smells different. Something about rain has always been yours. You walk slower than you need to.' },
+            ]);
+          }
+          if (weather === 'snow') {
+            return Timeline.weightedPick([
+              { weight: 1, value: 'You walk in the snow. The street is quiet in a specific way. Your footprints behind you, new ones forming ahead. The cold is real but the air is clean and the world feels big and still.' },
+              { weight: 1, value: 'Snow. Your feet find the cleared patches. The air has a bite to it but you\'re moving and the moving is good. The world under snow looks like a version of itself worth looking at.' },
+              // High NE — the cold is vivid
+              { weight: State.lerp01(ne, 45, 65), value: 'The cold is on your face and your breath comes out white. The snow muffles everything. Your footsteps, your breathing, the sound of the world. You\'re walking in a particular kind of quiet.' },
             ]);
           }
           return Timeline.weightedPick([
@@ -2472,6 +2482,14 @@ export function createContent(ctx) {
               { weight: rc > 0 ? rc * 0.7 : 0, value: 'You walk in the drizzle and it\'s fine, actually. The sound of rain on your hood. The wet streets. Not everyone likes this. You don\'t mind it.' },
             ]);
           }
+          if (weather === 'snow') {
+            return Timeline.weightedPick([
+              { weight: 1, value: 'You walk in the snow. It\'s an effort. Your shoes are damp by the third block. But the movement does something — something small — and the world under snow is at least a different version of itself.' },
+              { weight: 1, value: 'Snow. You walk through it because walking is the thing you\'re doing. Each step leaves a mark. The cold is a fact you move through. You come back wetter than you went out.' },
+              // High adenosine — the cold and the drag compound
+              { weight: State.lerp01(aden, 50, 70), value: 'You walk in the snow and your body is doing its best. Heavy legs, cold feet, the kind of tired that makes snow feel like sand. You do it anyway. That\'s the whole story.' },
+            ]);
+          }
           return Timeline.weightedPick([
             { weight: 1, value: 'You walk. It\'s not transformative. But the air is different and your legs are moving and that\'s better than not.' },
             { weight: 1, value: 'A walk. The neighborhood. You\'ve seen it before. But moving through it is different from being inside looking at walls. It helps, some.' },
@@ -2488,6 +2506,14 @@ export function createContent(ctx) {
               { weight: 1, value: 'Drizzle. You walk through it slowly. The world is grey and wet and you\'re in it. The effort is real. So is the fact that you went outside.' },
               // Low serotonin — the effort is almost too much
               { weight: State.lerp01(ser, 35, 15), value: 'You walk in the rain and every step asks why. The wet, the cold, the weight of your own legs. You did this to yourself. You chose outside. It\'s unclear what it was supposed to fix.' },
+            ]);
+          }
+          if (weather === 'snow') {
+            return Timeline.weightedPick([
+              { weight: 1, value: 'You walk in the snow. Everything is muffled — the world, the sounds, the sharp edges of things. Your footsteps are the loudest thing. You keep going because turning back is a different kind of effort.' },
+              { weight: 1, value: 'Snow. You walk through it slowly. The cold cuts in. Each step is deliberate. You went outside. The snow makes that feel more true than usual.' },
+              // Low serotonin + snow = weight of the world
+              { weight: State.lerp01(ser, 35, 15), value: 'You walk in the snow and the cold and the weight of it all compound. Your legs are doing the work while the rest of you follows. It doesn\'t help. But you\'re outside, which is different from not being outside.' },
             ]);
           }
           return Timeline.weightedPick([
@@ -2508,6 +2534,14 @@ export function createContent(ctx) {
               { weight: State.lerp01(ne, 55, 75), value: 'The rain is on your neck and you can feel every drop. Your jacket isn\'t enough. The cold, the wet, the sound of cars on wet road — every sensation is a needle. You walk faster. It doesn\'t help.' },
             ]);
           }
+          if (weather === 'snow') {
+            return Timeline.weightedPick([
+              { weight: 1, value: 'You walk in the snow. The cold sharpens every sensation — the thoughts, the ache in your hands, the sound of your own breathing. The world is quiet. You are not.' },
+              { weight: 1, value: 'Snow. You walk through it. The thoughts came with you. The cold doesn\'t help and doesn\'t hurt, it just adds to the pile. You come back cold and no different.' },
+              // High NE + cold — everything is too much
+              { weight: State.lerp01(ne, 55, 75), value: 'The cold is immediate — face, hands, ears. Each breath is a small shock. Your thoughts are already loud and the cold just adds a new register to the noise. You walk fast. You come back faster.' },
+            ]);
+          }
           return Timeline.weightedPick([
             { weight: 1, value: 'You walk. Fast, tight, shoulders up. The thoughts come with you — they don\'t care about the change of scenery. You burn energy. That\'s what you accomplish.' },
             { weight: 1, value: 'A walk. You thought it would help. The air is fine. The sky is there. The thing in your chest is exactly the same, just outside now instead of inside.' },
@@ -2526,6 +2560,14 @@ export function createContent(ctx) {
               { weight: State.lerp01(ser, 30, 10), value: 'You walk in the rain. It\'s cold. You know it\'s cold because your hands are wet, but the cold doesn\'t bother you the way it should. Nothing does. You walk until walking stops, then you turn around.' },
             ]);
           }
+          if (weather === 'snow') {
+            return Timeline.weightedPick([
+              { weight: 1, value: 'You walk in the snow. The world is white and muffled. You move through it. Your feet get cold. You walk back. None of it reached you.' },
+              { weight: 1, value: 'Snow. Your body walks through it. Your footprints are in the snow and that\'s the only evidence anything happened. You come back and you\'re cold. That\'s everything.' },
+              // Low dopamine — snow's beauty is just information
+              { weight: State.lerp01(dopa, 40, 15), value: 'Snow on the street, on the parked cars, on the awnings. You know this is a particular kind of beautiful. You don\'t feel it. The information is there; the feeling isn\'t.' },
+            ]);
+          }
           return Timeline.weightedPick([
             { weight: 1, value: 'You walk. The street, the air, the people. You move through all of it like water through a pipe. You were out. Now you\'re back. That happened.' },
             { weight: 1, value: 'A walk. You went, you returned. The scenery was there. You were there. The two of you didn\'t really connect.' },
@@ -2542,6 +2584,14 @@ export function createContent(ctx) {
             { weight: 1, value: 'Rain on the street. You walk through it. Cars pass. People with umbrellas. You\'re out here. That\'s a fact about your life right now.' },
             // High NE — the rain is oddly present
             { weight: State.lerp01(ne, 40, 60), value: 'You walk in the drizzle and the rain is on your face, each drop a small fact. Cars hiss past on wet road. Someone\'s umbrella is red. You notice things. You don\'t know what to do with any of them.' },
+          ]);
+        }
+        if (weather === 'snow') {
+          return Timeline.weightedPick([
+            { weight: 1, value: 'You walk in the snow. The street is quiet. Your footprints in the white behind you. The world feels like it\'s holding still, which is something.' },
+            { weight: 1, value: 'Snow on the street, on the cars, on you. You walk through it. The quiet of it is real. You were in the world for a little while. The world was muffled and still.' },
+            // Higher NE — the muffled world notices you
+            { weight: State.lerp01(ne, 40, 60), value: 'You walk in the snow and the quiet is very present. Each footstep. Your breath white in the air. The world pulled back and left this version — white and specific and only slightly demanding.' },
           ]);
         }
         return Timeline.weightedPick([
