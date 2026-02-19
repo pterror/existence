@@ -811,7 +811,7 @@ export function createContent(ctx) {
 
     apartment_kitchen: () => {
       const hunger = State.hungerTier();
-      const fridge = State.get('fridge_food');
+      const fridge = State.fridgeTier();
       const mess = State.messTier();
       const mood = State.moodTone();
       const time = State.timePeriod();
@@ -827,15 +827,15 @@ export function createContent(ctx) {
       }
 
       // Fridge
-      if (fridge === 0) {
+      if (fridge === 'empty') {
         if (hunger === 'starving' || hunger === 'very_hungry') {
           desc += ' The fridge is empty. You checked already, but you check again.';
         } else {
           desc += ' The fridge has nothing in it worth mentioning.';
         }
-      } else if (fridge === 1) {
+      } else if (fridge === 'sparse') {
         desc += ' There\'s something in the fridge. Not much.';
-      } else if (fridge <= 3) {
+      } else if (fridge === 'stocked') {
         desc += ' A few things in the fridge. Enough for now.';
       } else {
         desc += ' The fridge is reasonably stocked.';
@@ -2551,7 +2551,7 @@ export function createContent(ctx) {
       id: 'buy_groceries',
       label: 'Get a few things',
       location: 'corner_store',
-      available: () => State.get('money') >= 8,
+      available: () => State.canAfford(8),
       execute: () => {
         const cost = Timeline.randomFloat(8, 14);
         const roundedCost = Math.round(cost * 100) / 100;
@@ -2581,7 +2581,7 @@ export function createContent(ctx) {
       id: 'buy_cheap_meal',
       label: 'Grab something to eat now',
       location: 'corner_store',
-      available: () => State.get('money') >= 3,
+      available: () => State.canAfford(3),
       execute: () => {
         const cost = Timeline.randomFloat(3, 5.50);
         const roundedCost = Math.round(cost * 100) / 100;
@@ -2893,7 +2893,7 @@ export function createContent(ctx) {
     }
 
     // --- Work nag (deterministic trigger, no RNG) ---
-    const minutesLate = State.timeOfDay() - (State.get('work_shift_start') + 15);
+    const minutesLate = State.latenessMinutes();
     if (minutesLate >= 30 && !State.get('at_work_today') && !State.get('called_in') && !State.get('work_nagged_today')) {
       State.set('work_nagged_today', true);
       const supervisor = Character.get('supervisor');

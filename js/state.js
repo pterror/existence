@@ -505,6 +505,34 @@ export function createState(ctx) {
     return 'severe';                             // 12+ hours
   }
 
+  function fridgeTier() {
+    const f = s.fridge_food;
+    if (f === 0) return 'empty';
+    if (f <= 2) return 'sparse';
+    if (f <= 4) return 'stocked';
+    return 'well_stocked';
+  }
+
+  /** Whether the character has enough money to spend this amount. */
+  function canAfford(amount) {
+    return s.money >= amount;
+  }
+
+  /**
+   * Minutes late for work right now (0 if on time, not a workday, or already clocked in).
+   * Matches the 15-minute grace window used by isLateForWork().
+   */
+  function latenessMinutes() {
+    if (!isLateForWork()) return 0;
+    return Math.max(0, Math.round(timeOfDay() - (s.work_shift_start + 15)));
+  }
+
+  /** True on Mon–Fri (weekday 1–5). The character's specific schedule may differ, but this is the baseline. */
+  function isWorkday() {
+    const dow = dayOfWeek(); // 0=Sun, 1=Mon, ..., 6=Sat
+    return dow >= 1 && dow <= 5;
+  }
+
   function timePeriod() {
     const h = getHour();
     if (h < 5) return 'deep_night';
@@ -1503,16 +1531,20 @@ export function createState(ctx) {
     isSameDay,
     isWorkHours,
     isLateForWork,
+    isWorkday,
+    latenessMinutes,
     wakeUp,
     energyTier,
     stressTier,
     hungerTier,
     socialTier,
+    fridgeTier,
     messTier,
     jobTier,
     batteryTier,
     moneyTier,
     sleepDebtTier,
+    canAfford,
     timePeriod,
     canFocus,
     moodTone,
