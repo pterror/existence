@@ -270,10 +270,10 @@ apartment_bathroom ──────────┘          corner_store
 
 Travel times: 1min within apartment, 2min apartment↔street, 3min street↔bus_stop, 4min street↔corner_store, 20min bus_stop↔workplace.
 
-## Interactions (37)
+## Interactions (38)
 
-### Bedroom (12)
-sleep, get_dressed, set_alarm, skip_alarm, snooze_alarm, dismiss_alarm, charge_phone, check_phone_bedroom, lie_there, look_out_window, make_bed, (alarm event wakes you)
+### Bedroom (13)
+sleep, get_dressed, set_alarm, skip_alarm, snooze_alarm, dismiss_alarm, charge_phone, check_phone_bedroom, lie_there, look_out_window, make_bed, tidy_clothes, (alarm event wakes you)
 
 ### Kitchen (5)
 eat_food, drink_water, do_dishes, check_phone_kitchen, sit_at_table

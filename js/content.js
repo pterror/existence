@@ -2016,6 +2016,7 @@ export function createContent(ctx) {
       available: () => Linens.bedState() !== 'made' && State.energyTier() !== 'depleted',
       execute: () => {
         Linens.makeBed();
+        State.set('surfaced_mess', 0);
         State.adjustEnergy(-3);
         State.adjustStress(-2);
         State.advanceTime(5);
@@ -2057,6 +2058,48 @@ export function createContent(ctx) {
           { weight: 1, value: 'You make the bed. Straighten the sheets, fix the pillow. The room looks more like a room now.' },
           { weight: 1, value: 'Sheets pulled straight, cover smoothed. The bed\'s made. You move on.' },
           { weight: State.lerp01(dopa, 50, 30), value: 'The bed. You straighten it. The kind of small thing that\'s easy to skip and easy to do and makes no large difference either way.' },
+        ]);
+      },
+    },
+
+    tidy_clothes: {
+      id: 'tidy_clothes',
+      label: 'Pick up the clothes',
+      location: 'apartment_bedroom',
+      available: () => Clothing.itemsOnFloor('bedroom').length > 0 && State.energyTier() !== 'depleted',
+      execute: () => {
+        Clothing.moveToBasket('bedroom');
+        State.set('surfaced_mess', 0);
+        State.adjustEnergy(-4);
+        State.advanceTime(5);
+
+        const mood = State.moodTone();
+        const ser = State.get('serotonin');
+
+        if (mood === 'numb' || mood === 'heavy') {
+          return Timeline.weightedPick([
+            { weight: 1, value: 'You pick the clothes up off the floor. Move them to the basket. The floor is a floor again. You don\'t feel anything about it.' },
+            { weight: 1, value: 'The clothes from the floor into the basket. One task. Done.' },
+            { weight: State.lerp01(ser, 35, 20), value: 'You gather the clothes from the floor. It takes less time than you thought it would. The room looks different after. You\'re not sure what to do with that.' },
+          ]);
+        }
+        if (mood === 'fraying') {
+          return Timeline.weightedPick([
+            { weight: 1, value: 'You gather the clothes from the floor. Something about the physical task steadies you — the motion of it, the before and after. One small thing actually done.' },
+            { weight: 1, value: 'The floor clothes into the basket. The room looks less accidental. You needed something to be less accidental.' },
+          ]);
+        }
+        if (mood === 'clear' || mood === 'present') {
+          return Timeline.weightedPick([
+            { weight: 1, value: 'You scoop the clothes off the floor and drop them in the basket. Takes thirty seconds. The bedroom is a room you meant to live in again.' },
+            { weight: 1, value: 'Floor to basket. The room is visibly better. Thirty seconds of actual improvement.' },
+          ]);
+        }
+        // flat / hollow / quiet
+        return Timeline.weightedPick([
+          { weight: 1, value: 'You pick the clothes up. Floor to basket. The room looks a little less like something gave up in here.' },
+          { weight: 1, value: 'You deal with the clothes on the floor. It\'s a thing to do. Now it\'s done.' },
+          { weight: State.lerp01(ser, 40, 60), value: 'Clothes off the floor, into the basket. The room has its floor back. Small thing, but the small things count.' },
         ]);
       },
     },
@@ -4115,6 +4158,12 @@ export function createContent(ctx) {
       if (mood === 'numb' || mood === 'heavy') return 'The bed. You pull the sheets straight.';
       if (mood === 'fraying') return 'The bed. One small thing.';
       return 'Make the bed.';
+    },
+
+    tidy_clothes: () => {
+      const mood = State.moodTone();
+      if (mood === 'fraying') return 'The clothes. Off the floor.';
+      return 'The clothes on the floor.';
     },
 
     // === KITCHEN ===
