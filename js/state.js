@@ -461,6 +461,16 @@ export function createState(ctx) {
     ]);
   }
 
+  function messTier() {
+    return tier(s.apartment_mess, [
+      [20, 'tidy'],
+      [45, 'lived_in'],
+      [65, 'cluttered'],
+      [80, 'messy'],
+      [100, 'chaotic']
+    ]);
+  }
+
   function jobTier() {
     return tier(s.job_standing, [
       [20, 'at_risk'],
@@ -1498,6 +1508,7 @@ export function createState(ctx) {
     stressTier,
     hungerTier,
     socialTier,
+    messTier,
     jobTier,
     batteryTier,
     moneyTier,

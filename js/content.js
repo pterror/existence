@@ -690,7 +690,7 @@ export function createContent(ctx) {
     apartment_bedroom: () => {
       const energy = State.energyTier();
       const time = State.timePeriod();
-      const mess = State.get('apartment_mess');
+      const mess = State.messTier();
       const mood = State.moodTone();
 
       // NT values for continuous shading (no RNG consumed)
@@ -764,13 +764,13 @@ export function createContent(ctx) {
       }
 
       // Mess details
-      if (mess > 75) {
+      if (mess === 'chaotic') {
         desc += ' Clothes that have been on the floor long enough to stop looking fallen. Things that migrated from where they lived and didn\'t go back. The room has a layer to it now.';
-      } else if (mess > 60) {
+      } else if (mess === 'messy') {
         desc += ' The chair in the corner has become a wardrobe. The floor has its own arrangement of things moved and not moved back.';
-      } else if (mess > 45) {
+      } else if (mess === 'cluttered') {
         desc += ' Things out of place. A pile forming somewhere. The kind of disorder that arrives without any particular decision.';
-      } else if (mess < 22) {
+      } else if (mess === 'tidy') {
         desc += ' It\'s relatively in order in here. The surfaces have their surfaces back.';
       }
 
@@ -798,7 +798,7 @@ export function createContent(ctx) {
     apartment_kitchen: () => {
       const hunger = State.hungerTier();
       const fridge = State.get('fridge_food');
-      const mess = State.get('apartment_mess');
+      const mess = State.messTier();
       const mood = State.moodTone();
       const time = State.timePeriod();
 
@@ -835,13 +835,13 @@ export function createContent(ctx) {
       }
 
       // Mess
-      if (mess > 70) {
+      if (mess === 'chaotic') {
         desc += ' The sink is full and has been for a while. The counter has its own layer — things set down and left, the kind of mess that stops registering once it\'s been there long enough.';
-      } else if (mess > 55) {
+      } else if (mess === 'messy') {
         desc += ' Dishes in the sink. They\'ve been there.';
-      } else if (mess > 38) {
+      } else if (mess === 'cluttered') {
         desc += ' A cup, a plate. The usual.';
-      } else if (mess < 22) {
+      } else if (mess === 'tidy') {
         desc += ' The sink is empty. The counter has its surface back.';
       }
 
@@ -863,7 +863,7 @@ export function createContent(ctx) {
       const energy = State.energyTier();
       const mood = State.moodTone();
       const showered = State.get('showered');
-      const mess = State.get('apartment_mess');
+      const mess = State.messTier();
 
       let desc = 'The bathroom. Mirror, sink, shower.';
 
@@ -884,9 +884,9 @@ export function createContent(ctx) {
       }
 
       // Mess
-      if (mess > 65) {
+      if (mess === 'chaotic' || mess === 'messy') {
         desc += ' A damp towel on the floor. Products off their shelves, the counter cluttered with things not put back.';
-      } else if (mess > 48) {
+      } else if (mess === 'cluttered') {
         desc += ' The towel from yesterday draped over the edge of the tub.';
       }
 
@@ -1496,12 +1496,12 @@ export function createContent(ctx) {
         Events.record('got_dressed');
 
         const mood = State.moodTone();
-        const mess = State.get('apartment_mess');
+        const mess = State.messTier();
 
         if (mood === 'numb' || mood === 'heavy') {
           return Character.get('outfit_low_mood');
         }
-        if (mess > 60) {
+        if (mess === 'messy' || mess === 'chaotic') {
           return Character.get('outfit_messy');
         }
         return Character.get('outfit_default');
@@ -1968,7 +1968,7 @@ export function createContent(ctx) {
       id: 'do_dishes',
       label: 'Deal with the dishes',
       location: 'apartment_kitchen',
-      available: () => State.get('apartment_mess') > 40 && State.get('energy') > 15,
+      available: () => ['cluttered', 'messy', 'chaotic'].includes(State.messTier()) && State.get('energy') > 15,
       execute: () => {
         State.set('apartment_mess', Math.max(0, State.get('apartment_mess') - 25));
         State.set('surfaced_mess', 0);
@@ -1977,10 +1977,10 @@ export function createContent(ctx) {
         State.advanceTime(15);
 
         const mood = State.moodTone();
-        const postMess = State.get('apartment_mess');
+        const postMess = State.messTier();
         const aden = State.get('adenosine');
 
-        if (postMess < 28) {
+        if (postMess === 'tidy') {
           // Actually cleaned up well — sink is clear
           if (mood === 'heavy' || mood === 'numb') {
             return 'You wash dishes. The warm water helps more than it should. When you dry your hands, the sink is empty. The counter has its surface back. One thing, at least, dealt with.';
@@ -3171,11 +3171,11 @@ export function createContent(ctx) {
     apartment_notice: () => {
       const n = State.get('surfaced_mess');
       State.set('surfaced_mess', n + 1);
-      const mess = State.get('apartment_mess');
+      const mess = State.messTier();
       const ser = State.get('serotonin');
       const aden = State.get('adenosine');
       const dop = State.get('dopamine');
-      if (mess > 70) {
+      if (mess === 'chaotic' || mess === 'messy') {
         return Timeline.weightedPick([
           { weight: 1, value: 'You notice how cluttered things have gotten. When did that happen.' },
           { weight: 1, value: 'The apartment. You see it for a second the way a visitor would. Then you stop seeing it that way.' },
@@ -3188,7 +3188,7 @@ export function createContent(ctx) {
           { weight: State.lerp01(dop, 40, 20), value: 'You know it needs dealing with. Knowing and doing are in different rooms right now.' },
         ]);
       }
-      if (mess > 40) {
+      if (mess === 'cluttered') {
         return Timeline.weightedPick([
           { weight: 1, value: 'A few things out of place. The kind of mess that builds without you deciding to let it.' },
           { weight: 1, value: 'Things where they fell. Things moved somewhere temporary and then stayed.' },
