@@ -892,12 +892,17 @@ export function createContent(ctx) {
         desc = 'The kitchen.';
       }
 
-      // Fridge
+      // Fridge + pantry
+      const pantry = State.pantryTier();
       if (fridge === 'empty') {
         if (hunger === 'starving' || hunger === 'very_hungry') {
-          desc += ' The fridge is empty. You checked already, but you check again.';
+          desc += pantry !== 'empty'
+            ? ' The fridge is empty. There\'s still something in the cupboard.'
+            : ' The fridge is empty. You checked already, but you check again.';
         } else {
-          desc += ' The fridge has nothing in it worth mentioning.';
+          desc += pantry !== 'empty'
+            ? ' The fridge has nothing in it. There\'s something in the cupboard.'
+            : ' The fridge has nothing in it worth mentioning.';
         }
       } else if (fridge === 'sparse') {
         desc += ' There\'s something in the fridge. Not much.';
@@ -2286,6 +2291,13 @@ export function createContent(ctx) {
         }
         // Last item eaten — fridge is now empty
         if (fridgeNow === 'empty') {
+          const hasPantry = State.pantryTier() !== 'empty';
+          if (hasPantry) {
+            return Timeline.weightedPick([
+              { weight: 1, value: 'You eat the last thing in the fridge. The fridge is empty now. There\'s still something in the cupboard.' },
+              { weight: State.lerp01(ser, 40, 20), value: 'You eat what was left. The fridge is empty now. At least there\'s still something in the cupboard.' },
+            ]);
+          }
           return Timeline.weightedPick([
             { weight: 1, value: 'You eat the last thing in the fridge. Standing at the counter. The shelf is empty now. That\'s a thing you\'ll have to deal with.' },
             { weight: 1, value: 'The last of it. You eat quickly, not because you\'re hurrying but because now you\'re aware of it being the last. The fridge is empty after this.' },
@@ -2300,6 +2312,50 @@ export function createContent(ctx) {
           { weight: fc > 0 ? fc : 0, value: 'You make something simple from what\'s there and eat it slowly. The warmth of it, the familiar taste. A small comfort, but a real one.' },
           // High adenosine — eating through fog
           { weight: State.lerp01(aden, 55, 75), value: 'You eat something. Standing at the counter, half-awake, chewing without really tasting. The food goes in. Your body processes it somewhere behind the fog.' },
+        ]);
+      },
+    },
+
+    eat_from_pantry: {
+      id: 'eat_from_pantry',
+      label: 'Find something in the cupboard',
+      location: 'apartment_kitchen',
+      available: () => State.fridgeTier() === 'empty' && State.pantryTier() !== 'empty',
+      execute: () => {
+        State.set('pantry_food', State.get('pantry_food') - 1);
+        Dishes.use();
+        State.adjustHunger(-20);
+        State.set('ate_today', true);
+        State.set('consecutive_meals_skipped', 0);
+        State.advanceTime(10);
+        Events.record('ate', { what: 'pantry_food' });
+
+        const mood = State.moodTone();
+        const hunger = State.hungerTier();
+        const pantryNow = State.pantryTier();
+        const ser = State.get('serotonin');
+        const aden = State.get('adenosine');
+
+        const lastLine = pantryNow === 'empty'
+          ? ' That\'s the last of it.'
+          : '';
+
+        if (hunger === 'starving' || hunger === 'very_hungry') {
+          return Timeline.weightedPick([
+            { weight: 1, value: `You find something at the back of the cupboard and eat it fast. It's not much.${lastLine}` },
+            { weight: State.lerp01(ser, 50, 20), value: `Ramen, or crackers, or whatever was back there. You eat it standing up. Your body stops making its case, a little.${lastLine}` },
+          ]);
+        }
+        if (mood === 'numb' || mood === 'hollow') {
+          return Timeline.weightedPick([
+            { weight: 1, value: `You find something in the cupboard. You eat it without much thought. It goes in.${lastLine}` },
+            { weight: State.lerp01(aden, 50, 75), value: `Something from the back of the cupboard. You make it and eat it and that's about all there is to say about it.${lastLine}` },
+          ]);
+        }
+        return Timeline.weightedPick([
+          { weight: 1, value: `You go through the cupboard and find something. Not exciting, but it's food.${lastLine}` },
+          { weight: 1, value: `There's something at the back of the cupboard. Shelf-stable, sitting there for exactly this kind of day.${lastLine}` },
+          { weight: State.lerp01(ser, 60, 35), value: `You eat whatever was in the cupboard. It's the kind of meal you don't mention to anyone.${lastLine}` },
         ]);
       },
     },
@@ -3198,6 +3254,7 @@ export function createContent(ctx) {
         }
 
         State.set('fridge_food', Math.min(6, State.get('fridge_food') + 3));
+        State.set('pantry_food', Math.min(3, State.get('pantry_food') + 1));
         State.advanceTime(10);
         State.glanceMoney();
         Events.record('bought_groceries', { cost: roundedCost });
@@ -4619,6 +4676,12 @@ export function createContent(ctx) {
       if (mood === 'numb') return 'You open the fridge. Standing there.';
       if (mood === 'heavy') return 'Something from the fridge. Whatever\'s there.';
       return 'Something from the fridge.';
+    },
+
+    eat_from_pantry: () => {
+      const hunger = State.hungerTier();
+      if (hunger === 'starving' || hunger === 'very_hungry') return 'There\'s something in the cupboard.';
+      return 'The cupboard.';
     },
 
     drink_water: () => {

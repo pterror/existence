@@ -181,6 +181,7 @@ export function createState(ctx) {
       has_phone: true,
       phone_battery: 70,     // 0-100
       fridge_food: 2,        // Rough units. 0 = empty.
+      pantry_food: 1,        // Shelf-stable. Doesn't spoil. 0 = empty.
       weather: 'overcast',   // Set by events
       rain: false,
 
@@ -617,6 +618,13 @@ export function createState(ctx) {
     if (f <= 2) return 'sparse';
     if (f <= 4) return 'stocked';
     return 'well_stocked';
+  }
+
+  function pantryTier() {
+    const p = s.pantry_food;
+    if (p === 0) return 'empty';
+    if (p <= 1) return 'sparse';
+    return 'stocked';
   }
 
   /**
@@ -1812,6 +1820,7 @@ export function createState(ctx) {
     hungerTier,
     socialTier,
     fridgeTier,
+    pantryTier,
     jobTier,
     batteryTier,
     moneyTier,
