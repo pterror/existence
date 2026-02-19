@@ -128,6 +128,8 @@ No build step. Plain JS loaded via script tags.
 - Idle events are recorded as actions so their RNG consumption replays correctly
 - RNG consumption order must match exactly between live play and replay
 
+**Tier functions, not inline scalars.** When content.js needs to branch on a continuous state variable, use a tier function in state.js that returns a named qualitative label — `messTier()` → `'cluttered'`, `energyTier()` → `'exhausted'`, etc. Content.js branches on those labels, never on `State.get('x') > 47`. Tier thresholds live in one place, carry meaning through their names, and keep raw numbers entirely out of prose logic. Location descriptions, interaction available checks, and event text all follow this rule. The same applies to NT conditionals in deterministic modifiers — use `aden > 65` as a readable threshold, not a magic scalar buried in a chain of comparisons.
+
 **Prose:**
 - No numbers, stats, or system voice in player-facing text
 - State affects prose through qualitative tiers, not numeric thresholds exposed to the player
