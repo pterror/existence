@@ -3745,8 +3745,12 @@ export function createContent(ctx) {
         const mood = State.moodTone();
         const flavor = friend.flavor || 'warm_quiet';
 
-        // Fixed deduction — the simulation needs a number; the decision is whether to help
-        const amount = Math.min(15, Math.floor(State.get('money')));
+        // Amount derives from financial situation — you send what you can spare
+        const mt = State.moneyTier();
+        const baseAmount = mt === 'okay' || mt === 'comfortable' || mt === 'cushioned' ? 20
+          : mt === 'careful' ? 15
+          : 10; // tight — minimum
+        const amount = Math.min(baseAmount, Math.floor(State.get('money')));
 
         // 1 RNG call: player's reply
         const playerPools = {
