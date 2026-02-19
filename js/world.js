@@ -238,18 +238,33 @@ export function createWorld(ctx) {
       { weight: 2, value: 'grey' },
       { weight: 1, value: 'drizzle' },
     ];
+    // Snow: only in winter when cold enough
+    if (State.season() === 'winter' && State.seasonalTemperatureBaseline() <= 2) {
+      weathers.push({ weight: 2, value: 'snow' });
+    }
     const newWeather = Timeline.weightedPick(weathers);
     State.set('weather', newWeather);
     State.set('rain', newWeather === 'drizzle');
     // Temperature: seasonal baseline shifted by weather condition
     const base = State.seasonalTemperatureBaseline();
-    const weatherOffset = newWeather === 'drizzle' ? -3 : newWeather === 'overcast' ? -1 : 0;
+    const weatherOffset = newWeather === 'drizzle' ? -3
+      : newWeather === 'overcast' ? -1
+      : newWeather === 'snow' ? -2
+      : 0;
     State.set('temperature', Math.round((base + weatherOffset) * 10) / 10);
   }
 
   function isInside() {
     const area = getCurrentLocation()?.area;
     return area === 'apartment' || area === 'work';
+  }
+
+  function isHome() {
+    return getCurrentLocation()?.area === 'apartment';
+  }
+
+  function isWorkplace() {
+    return getCurrentLocation()?.area === 'work';
   }
 
   return {
@@ -263,6 +278,8 @@ export function createWorld(ctx) {
     checkEvents,
     updateWeather,
     isInside,
+    isHome,
+    isWorkplace,
   };
 }
 

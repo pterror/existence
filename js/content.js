@@ -869,6 +869,15 @@ export function createContent(ctx) {
       // Microwave clock — the kitchen always tells you the time
       desc += ' The microwave clock reads ' + State.getTimeString() + '.';
 
+      // NT deterministic modifiers (no RNG — location descriptions called from UI.render)
+      const aden = State.get('adenosine');
+      const ne = State.get('norepinephrine');
+      if (aden > 65) {
+        desc += ' The light in here is doing more than its share.';
+      } else if (ne > 65 && (time === 'morning' || time === 'early_morning')) {
+        desc += ' Everything in here feels very present this early.';
+      }
+
       // Time of day flavor
       if (time === 'morning' || time === 'early_morning') {
         desc += ' The window shows grey morning outside.';
@@ -912,6 +921,15 @@ export function createContent(ctx) {
         desc += ' The towel from earlier still hanging damp.';
       }
 
+      // NT deterministic modifiers
+      const aden = State.get('adenosine');
+      const ne = State.get('norepinephrine');
+      if (aden > 70) {
+        desc += ' The light in here is harsh.';
+      } else if (ne > 65) {
+        desc += ' The faucet drip sounds too loud.';
+      }
+
       return desc;
     },
 
@@ -930,6 +948,12 @@ export function createContent(ctx) {
           desc = 'Rain. Not hard enough to be dramatic. Just enough to be one more thing.';
         } else {
           desc = 'A light drizzle. The sidewalk darkens in patches.';
+        }
+      } else if (weather === 'snow') {
+        if (mood === 'heavy' || mood === 'numb') {
+          desc = 'Snow. White on everything, muffled. The kind that makes the world feel smaller and quieter than you need it to be.';
+        } else {
+          desc = 'Snow coming down. The street is quiet in that way it only gets when it snows.';
         }
       } else if (weather === 'overcast') {
         desc = 'The sky is flat and grey. The kind of sky that doesn\'t commit.';
@@ -986,6 +1010,8 @@ export function createContent(ctx) {
 
       if (weather === 'drizzle') {
         desc += ' The shelter doesn\'t quite cover the bench.';
+      } else if (weather === 'snow') {
+        desc += ' Snow on the bench. You brush a corner clear.';
       }
 
       const temp = State.temperatureTier();
@@ -1034,6 +1060,15 @@ export function createContent(ctx) {
         desc += ' The cashier doesn\'t look up.';
       } else {
         desc += ' The person at the register is watching something on their phone.';
+      }
+
+      // NT deterministic modifiers
+      const ne = State.get('norepinephrine');
+      const aden = State.get('adenosine');
+      if (ne > 65) {
+        desc += ' The fluorescent hum, the fridge doors rattling — too much input for a corner store.';
+      } else if (aden > 65) {
+        desc += ' The aisles smear a little. You know what you need.';
       }
 
       return desc;
@@ -3225,10 +3260,16 @@ export function createContent(ctx) {
         if (weather === 'drizzle') {
           return 'Rain starts outside. You hear it on the window.';
         }
+        if (weather === 'snow') {
+          return 'Snow starts outside. The light through the window changes — that particular white.';
+        }
         return '';
       }
       if (weather === 'drizzle') {
         return 'It starts to rain. Not hard. Just enough to matter.';
+      }
+      if (weather === 'snow') {
+        return 'It starts snowing. The noise of the street softens.';
       }
       if (weather === 'clear') {
         return 'The clouds thin. Actual light comes through. It changes the look of everything.';
@@ -4023,7 +4064,9 @@ export function createContent(ctx) {
     'move:street': () => {
       const mood = State.moodTone();
       const temp = State.temperatureTier();
+      const weather = State.get('weather');
       const cold = temp === 'bitter' || temp === 'freezing';
+      if (weather === 'snow') return mood === 'heavy' ? 'Out. Into the snow.' : 'Out. Snow.';
       if (mood === 'heavy') return cold ? 'Out. It\'s cold.' : 'Out. You\'re heading out.';
       if (mood === 'fraying') return 'Door. Air. Outside.';
       if (cold && temp === 'bitter') return 'Door. Brace for the cold.';

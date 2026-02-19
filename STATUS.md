@@ -51,11 +51,16 @@ Derived from character `latitude` (-90 to 90). Methods on State:
 - Daylight exposure tracking uses actual astronomical sunrise/sunset window
 
 Temperature:
-- `temperature` state var (celsius). Set by `World.updateWeather()` from `seasonalTemperatureBaseline()` + weather offset (drizzle -3, overcast -1).
+- `temperature` state var (celsius). Set by `World.updateWeather()` from `seasonalTemperatureBaseline()` + weather offset (drizzle -3, overcast -1, snow -2).
 - `seasonalTemperatureBaseline()` — from latitude + season. lat 0 → 30°C, lat 42 → ~9°C mean, with seasonal ±amplitude.
 - `temperatureTier()` — 'bitter' | 'freezing' | 'cold' | 'cool' | 'mild' | 'warm' | 'hot'
 - Used in street, bus_stop descriptions; move:street approaching prose.
 - Diurnal variation ○.
+
+Snow:
+- Added to weather pool when `season() === 'winter'` and `seasonalTemperatureBaseline() <= 2°C`. Weight 2 (same as drizzle).
+- `State.set('rain', ...)` remains false for snow.
+- Snow prose in: street description (quiet, muffled), bus_stop (bench clearing), weather_shift event (inside: window light change; outside: street softens), move:street approaching prose.
 
 ### Health Conditions
 Pattern established for character health conditions. First condition: migraines.
@@ -219,7 +224,7 @@ Financial anxiety sentiment connects to neurochemistry:
 - **Time period** — deep_night / early_morning / morning / late_morning / midday / afternoon / evening / night
 - **Observation fidelity** — time and money awareness degrade with distance from last check (exact → rounded → vague → sensory/qualitative)
 - **Season** — derived from latitude + start_timestamp. Tropical: wet/dry. Temperate: four seasons. Hemisphere from sign.
-- **Weather** — overcast / clear / grey / drizzle. 3% shift chance per action. Affects prose, not mechanics.
+- **Weather** — overcast / clear / grey / drizzle / snow (winter+cold only). 3% shift chance per action. Affects prose, not mechanics.
 
 ### Daily Flags (reset on wake)
 dressed, showered, ate_today, at_work_today, called_in, alarm_set, alarm_went_off, just_woke_alarm, snooze_count, daylight_exposure, work_nagged_today
@@ -244,6 +249,15 @@ Battery (dual-rate drain: 1%/hr standby, 15%/hr screen-on; tiers: dead/critical/
 **fridge_food** (integer) — depletes on eating, restocked by groceries. Still a scalar (appropriate — no item identity needed for food units).
 
 **apartment_notice** — event fires randomly in apartment (6% per action, max 2/day). NT-shaded: low serotonin reads mess as evidence; high adenosine makes it blur; low dopamine surfaces the knowing-doing gap.
+
+### Location Description NT Shading
+Deterministic NT modifiers added to apartment locations and corner store (no RNG — location descriptions called from UI.render):
+- **Kitchen** — adenosine > 65: "The light in here is doing more than its share." NE > 65 in morning: "Everything in here feels very present this early."
+- **Bathroom** — adenosine > 70: "The light in here is harsh." NE > 65: "The faucet drip sounds too loud."
+- **Corner store** — NE > 65: fluorescent hum + sensory overload. Adenosine > 65: aisles smear.
+
+### World Predicates
+`World.isHome()` and `World.isWorkplace()` added to world.js (alongside existing `isInside()`). Available for any code that needs semantic location queries without inspecting area strings directly.
 
 ## Locations (7)
 
