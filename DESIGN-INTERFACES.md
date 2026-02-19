@@ -361,7 +361,7 @@ Health.takeMedication(id)
 Health.triggerFlare(id)    // bad day — ○ not yet
 ```
 
-**Status:** ○ No health conditions exist in the simulation. Energy ceiling is always 100. This is a significant scope item — start with one condition (chronic pain or migraine) to establish the pattern before generalizing.
+**Status:** ~ Pattern established. `hasCondition(id)` ✓, `energyCeiling()` ✓, `migraineTier()` ✓. Migraines ✓ as first condition — chargen rolls, trigger in advanceTime, decay, `take_pain_reliever` interaction, bedroom description override, go_for_walk blocked at severe. `isGoodDay(id)` ○, `medications()` ○, `triggerFlare()` ○, `passiveDrain()` ○ (migraines use NT adjustment not a drain rate).
 
 ---
 

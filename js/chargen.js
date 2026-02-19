@@ -455,6 +455,16 @@ export function createChargen(ctx) {
     const utility_day_offset = Timeline.charRandomInt(0, 29);
     const phone_bill_day_offset = Timeline.charRandomInt(0, 29);
 
+    // Health conditions — generated last to preserve PRNG order of prior systems
+    const conditions = /** @type {string[]} */ ([]);
+    // Migraines: ~15% prevalence; slightly higher with neurotic/high-stress backstory
+    const migraineBase = 0.15;
+    const migraineBoost = (personality.neuroticism > 65 ? 0.05 : 0)
+      + (backstory.career_stability < 0.4 ? 0.05 : 0); // precarious careers → more chronic stress
+    if (Timeline.charRandom() < migraineBase + migraineBoost) {
+      conditions.push('migraines');
+    }
+
     return /** @type {GameCharacter} */ ({
       first_name: playerName.first,
       last_name: playerName.last,
@@ -476,6 +486,7 @@ export function createChargen(ctx) {
       rent_day_offset,
       utility_day_offset,
       phone_bill_day_offset,
+      conditions,
     });
   }
 

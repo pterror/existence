@@ -219,6 +219,13 @@ export function createState(ctx) {
       utility_day_offset: 15,   // day % 30 === this → utilities fire
       phone_bill_day_offset: 20, // day % 30 === this → phone bill fires
 
+      // Health conditions
+      health_conditions: /** @type {string[]} */ ([]),  // set by applyToState()
+      // Migraines — only relevant if health_conditions includes 'migraines'
+      migraine_active: false,
+      migraine_intensity: 0,    // 0-100 pain level; decays ~8 pts/hr during active phase
+      migraine_hours_active: 0, // hours since onset; used to pace decay
+
       // Internal counters the player never sees
       actions_since_rest: 0,
       times_late_this_week: 0,
@@ -316,6 +323,37 @@ export function createState(ctx) {
 
     // Actions since rest
     s.actions_since_rest++;
+
+    // Migraine mechanics (only for characters with the condition)
+    if (s.health_conditions.includes('migraines')) {
+      if (s.migraine_active) {
+        // Decay: slow ramp to peak in first 2h, then decay ~8 pts/hr
+        s.migraine_hours_active += hours;
+        if (s.migraine_hours_active > 2) {
+          s.migraine_intensity = Math.max(0, s.migraine_intensity - hours * 8);
+        }
+        if (s.migraine_intensity < 5) {
+          s.migraine_active = false;
+          s.migraine_intensity = 0;
+          s.migraine_hours_active = 0;
+        }
+        // Active migraine raises NE (pain signal) and suppresses dopamine
+        adjustNT('norepinephrine', hours * 3);
+        adjustNT('dopamine', -hours * 2);
+      } else {
+        // Trigger check: risk factors determine base probability per hour
+        const riskScore = (s.adenosine > 60 ? (s.adenosine - 60) / 40 : 0) * 0.4
+                        + (s.stress > 55 ? (s.stress - 55) / 45 : 0) * 0.4
+                        + (s.sleep_debt > 480 ? Math.min(s.sleep_debt / 4800, 1) : 0) * 0.2;
+        const baseChancePerHour = 0.003; // ~3 per 1000 play-hours at baseline
+        const triggerChance = baseChancePerHour * (1 + riskScore * 8) * hours;
+        if (ctx.timeline.chance(triggerChance)) {
+          s.migraine_active = true;
+          s.migraine_intensity = 30 + riskScore * 40; // 30-70 depending on risk
+          s.migraine_hours_active = 0;
+        }
+      }
+    }
 
     // Neurochemistry drift — levels approach targets with inertia
     driftNeurochemistry(hours);
@@ -706,6 +744,32 @@ export function createState(ctx) {
     if (t < 22)  return 'mild';
     if (t < 28)  return 'warm';
     return 'hot';
+  }
+
+  // --- Health ---
+
+  function hasCondition(id) {
+    return s.health_conditions.includes(id);
+  }
+
+  /**
+   * Maximum achievable energy this moment. Conditions (and migraines) reduce the ceiling.
+   * Body.energyCeiling() — content can read this to understand what's possible.
+   */
+  function energyCeiling() {
+    if (s.migraine_active) {
+      // Migraine cuts ceiling: -30 at intensity 60, -50 at intensity 100
+      return Math.max(30, 100 - s.migraine_intensity * 0.5);
+    }
+    return 100;
+  }
+
+  /** Qualitative migraine state. 'none' when no migraine. */
+  function migraineTier() {
+    if (!s.migraine_active || s.migraine_intensity < 5) return 'none';
+    if (s.migraine_intensity < 30) return 'building';
+    if (s.migraine_intensity < 65) return 'active';
+    return 'severe';
   }
 
   function timePeriod() {
@@ -1773,6 +1837,10 @@ export function createState(ctx) {
     // Temperature
     seasonalTemperatureBaseline,
     temperatureTier,
+    // Health
+    hasCondition,
+    energyCeiling,
+    migraineTier,
   };
 }
 

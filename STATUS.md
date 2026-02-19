@@ -57,6 +57,24 @@ Temperature:
 - Used in street, bus_stop descriptions; move:street approaching prose.
 - Diurnal variation ○.
 
+### Health Conditions
+Pattern established for character health conditions. First condition: migraines.
+
+**Architecture:**
+- `health_conditions: string[]` in state, set by `Character.applyToState()` from `character.conditions`
+- `hasCondition(id)` query — all condition-gated behavior uses this
+- `energyCeiling()` — returns max achievable energy (100 normally; 30–70 during migraine)
+- `migraineTier()` — 'none' | 'building' | 'active' | 'severe'
+
+**Migraines (first condition):**
+- ~15% prevalence at chargen (+5% for high-neuroticism or precarious career)
+- Trigger: probabilistic in `advanceTime`, risk score from adenosine + stress + sleep debt
+- Intensity: 30–70 at onset, decays ~8 pts/hr after 2h active phase
+- Effects: raises NE + lowers dopamine while active; bedroom description overridden for active/severe
+- `take_pain_reliever` interaction at apartment_bathroom: -35 intensity, available when migraineTier ≠ 'none'
+- `go_for_walk` blocked at 'severe' tier
+- Postdrome/aura ○
+
 ### Finance accessors
 - Billing cycle offsets now stored in state (set by `applyToState()`) — content no longer calls `Character.get('..._day_offset')`
 - `nextPaycheckDays()` — days until next paycheck (0 = today)

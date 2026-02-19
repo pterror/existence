@@ -52,6 +52,8 @@ export function createCharacter(ctx) {
     State.set('pay_rate', sim.pay_rate);
     State.set('rent_amount', sim.rent_amount);
     State.set('job_standing', sim.job_standing_start);
+    // Health conditions — determines which condition systems are active
+    State.set('health_conditions', current.conditions || []);
     // Billing cycle offsets — needed by State.nextPaycheck() / nextBillDue()
     State.set('paycheck_day_offset', current.paycheck_day_offset ?? 7);
     State.set('rent_day_offset', current.rent_day_offset ?? 1);

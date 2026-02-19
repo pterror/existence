@@ -74,7 +74,8 @@ Full design in [DESIGN-HABITS.md](DESIGN-HABITS.md). The character develops beha
 ~~Basic financial cycle (paycheck, rent, utilities, phone)~~ — **IMPLEMENTED.** Life history backstory generates starting money, pay rate, rent. Bills auto-deduct monthly. Paycheck varies with attendance.
 
 **Still arbitrary (should become derived):**
-- Paycheck: flat biweekly amount. Should vary by hours worked, overtime, deductions (taxes, insurance). Pay period length is also job-type-specific (weekly gig, biweekly salary, monthly freelance).
+- **Bill types are hardcoded.** The simulation assumes everyone has the same three bills (rent/utilities/phone) plus a biweekly paycheck. This should derive from life situation: someone on gig work gets irregular payments not a biweekly; someone in shared housing has different rent + possibly no utility bill; someone on prepaid has no phone contract. The `nextBillDue()` / `nextPaycheckDays()` interfaces are right, but their backing data is hardcoded instead of being derived from character situation. Future: bill manifest generated from housing type, employment type, phone plan, etc. at chargen.
+- Paycheck: flat biweekly amount. Should vary by hours worked, overtime, deductions (taxes, insurance).
 - Utilities ($65 flat) — should derive from season (heating/cooling), apartment size, actual usage
 - Phone bill ($45 flat) — should derive from plan type (prepaid vs contract), data usage
 - Rent bracket — should derive from housing type (apartment/room/family), not just origin

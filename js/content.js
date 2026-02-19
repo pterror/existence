@@ -766,6 +766,16 @@ export function createContent(ctx) {
         }
       }
 
+      // Migraine — overrides mood tone with physical reality (deterministic, no RNG)
+      const migraineTier = State.migraineTier();
+      if (migraineTier === 'severe') {
+        desc = 'The room is too bright. Everything is. Light from the window is a problem. Sound from outside is a problem. The headache has its own gravity.';
+      } else if (migraineTier === 'active') {
+        desc += ' The headache is here. A specific, one-sided pressure that makes you aware of the exact dimensions of your skull.';
+      } else if (migraineTier === 'building') {
+        desc += ' Something is starting behind your left eye. Or your right. The kind of pressure that you know, by now, what it means.';
+      }
+
       // Floor clothes — from Clothing module
       const floorClothes = Clothing.floorDescription('bedroom');
       if (floorClothes) {
@@ -2247,6 +2257,39 @@ export function createContent(ctx) {
       },
     },
 
+    take_pain_reliever: {
+      id: 'take_pain_reliever',
+      label: 'Take something for the headache',
+      location: 'apartment_bathroom',
+      available: () => State.hasCondition('migraines') && State.migraineTier() !== 'none',
+      execute: () => {
+        // Pain reliever cuts intensity by ~35 points — takes the edge off but doesn't end it
+        State.set('migraine_intensity', Math.max(0, State.get('migraine_intensity') - 35));
+        State.advanceTime(Timeline.randomInt(3, 6));
+
+        const tier = State.migraineTier();
+        const mood = State.moodTone();
+
+        if (tier === 'none') {
+          return Timeline.weightedPick([
+            { weight: 1, value: 'The pill. You wash it down and wait. By the time you leave the bathroom the worst of it is already lifting.' },
+            { weight: 1, value: 'You take two. The headache recedes — not gone, but manageable. You can think again.' },
+          ]);
+        }
+        if (State.get('migraine_intensity') <= 20) {
+          return Timeline.weightedPick([
+            { weight: 1, value: 'The medication is doing something. The throb is still there but the edge has come off it. You can tolerate light now.' },
+            { weight: State.lerp01(State.get('migraine_intensity'), 20, 5), value: 'The headache is quieting. Not gone — never quite gone — but livable. You hold still for a minute, waiting to be sure.' },
+          ]);
+        }
+        return Timeline.weightedPick([
+          { weight: 1, value: 'You swallow it and stand at the sink. The headache doesn\'t respond immediately. It will. You\'ve done this before.' },
+          { weight: 1, value: 'Two tablets and the tap. You lean against the sink and wait. The pill will work. You just have to be still for a while.' },
+          { weight: State.lerp01(State.get('serotonin'), 40, 20), value: 'You take the medication in the dark. Light makes it worse. You close your eyes and wait for the pills to do something. They usually do. Eventually.' },
+        ]);
+      },
+    },
+
     // === STREET ===
     check_phone_street: {
       id: 'check_phone_street',
@@ -2287,7 +2330,7 @@ export function createContent(ctx) {
       id: 'go_for_walk',
       label: 'Walk for a while',
       location: 'street',
-      available: () => State.energyTier() !== 'depleted',
+      available: () => State.energyTier() !== 'depleted' && State.migraineTier() !== 'severe',
       execute: () => {
         const mood = State.moodTone();
         const weather = State.get('weather');
@@ -3836,6 +3879,13 @@ export function createContent(ctx) {
 
     use_sink: () => {
       return 'The sink.';
+    },
+
+    take_pain_reliever: () => {
+      const tier = State.migraineTier();
+      if (tier === 'severe') return 'The medication. You need it.';
+      if (tier === 'active') return 'Something for the headache.';
+      return 'Pain reliever.';
     },
 
     // === STREET ===
