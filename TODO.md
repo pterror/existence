@@ -91,16 +91,25 @@ Only "eat from fridge" and "buy cheap meal." No cooking (time + energy + ingredi
 ### Sleep prose
 **Largely implemented.** Sleep prose now has two phases: falling-asleep (how sleep came) and waking-up (the gradient back to consciousness). Waking prose branches on post-sleep energy, sleep quality, alarm vs natural, time of day, mood, sleep debt, and sleep inertia — ~44 waking + ~22 falling-asleep variants. Alarm negotiation implemented (snooze/dismiss). Slept-through-alarm awareness. Still missing: insomnia/not-sleeping as a distinct experience, dreaming.
 
-### Apartment mess as autonomous force
-~~apartment_mess exists as a state variable but doesn't grow on its own or meaningfully shape prose beyond event notices.~~ — **IMPLEMENTED.** Mess now shapes prose at 4 tiers in bedroom, kitchen, and bathroom. `apartment_notice` has NT-shaded variants (low serotonin → reads as evidence, high adenosine → blurs and unregisters, low dopamine → gap between knowing and doing). `surfaced_mess` resets each morning so notices can surface daily. `do_dishes` prose expanded for clean-result and autopilot-adenosine states.
+### Domestic object systems
+Full design in [DESIGN-OBJECTS.md](DESIGN-OBJECTS.md). Mess is not a scalar — it's emergent from the states of real objects. The current `apartment_mess` variable is an acknowledged approximation debt. See [PHILOSOPHY.md](PHILOSOPHY.md) for the interface/granularity model that applies here.
 
-**Still missing:** A dedicated bedroom tidying interaction (currently only do_dishes from kitchen reduces mess). Mess as a mild cortisol/stress target modifier (could model ambient anxiety from environmental disorder).
+**Current state (approximation debt):** `apartment_mess` scalar shapes prose at 4 tiers in bedroom, kitchen, bathroom. `messTier()` in state.js. `apartment_notice` event is NT-shaded. Prose works but is fundamentally limited — "dishes in the sink" comes from a number, not dishes.
+
+**Implementation path (from DESIGN-OBJECTS.md):**
+1. **Define interfaces** — stable method signatures for Clothing, Dishes, Linens. This is the highest-priority step before any implementation.
+2. **Coarse implementations** — count-based backends that replace `apartment_mess`. RunRecord gains `subsystem_versions`.
+3. **Remove `apartment_mess`** — once object systems cover the same ground. `messTier()` becomes derived or removed.
+4. **Full implementations** — per-item tracking, one system at a time. Clothing first (wardrobe generated at chargen, items with location/wear states, undressing shaped by mood/energy).
+5. **Laundry mechanic** — requires in-home option (hand-wash, drying rack) or laundromat (doesn't exist yet). Stub for now.
+
+**Prose that becomes possible at full granularity:** "the shirt you've worn three days running," "three plates and a mug since Tuesday," specific items on specific surfaces, eating without a clean dish to use.
 
 ### Weather depth
 Only 4 weather states, no temperature, no seasonal variation, no weather affecting what you wear or how movement feels. DESIGN.md describes weather as atmosphere — the grey day that sits on you, rain changing what the street feels like.
 
 ### Clothing and getting dressed
-Outfit prose is static per set. No weather-appropriate clothing, no choosing what to wear, no laundry. DESIGN.md describes getting dressed as a transition from "not yet participating in the day" — the outfit reflecting mood, the easy clothes when you can't decide.
+Currently: outfit sets selected at chargen, 3 prose variants each (default/low_mood/messy). No item tracking, no laundry, no choosing what to wear. This is superseded by the domestic object systems design — see above and [DESIGN-OBJECTS.md](DESIGN-OBJECTS.md). Getting dressed becomes: `Clothing.canGetDressed()` gates availability, `Clothing.wear()` picks and marks an item, outfit prose derives from what was actually put on.
 
 ### More phone interactions
 ~~Phone is check-only.~~ **Real phone UI incoming.** Phone now renders as a full HTML5 overlay: home screen (time, battery, Messages badge), messages list (per-contact rows, unread dots), threaded conversation view (bubble layout, sent/received), in-thread compose. Navigation (home→list→thread→back) is transient state, not recorded. Only actions with game effect (reply, message_friend, put_phone_away) go through the normal action pipeline.
