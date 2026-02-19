@@ -7,6 +7,7 @@ export function createContent(ctx) {
   const Character = ctx.character;
   const World = ctx.world;
   const Events = ctx.events;
+  const Dishes = ctx.dishes;
 
   // --- Relationship prose tables ---
   // Keyed on flavor archetype. Name is the only dynamic part.
@@ -834,15 +835,12 @@ export function createContent(ctx) {
         desc += ' Standing in here makes the hunger sharper.';
       }
 
-      // Mess
-      if (mess === 'chaotic') {
-        desc += ' The sink is full and has been for a while. The counter has its own layer — things set down and left, the kind of mess that stops registering once it\'s been there long enough.';
-      } else if (mess === 'messy') {
-        desc += ' Dishes in the sink. They\'ve been there.';
-      } else if (mess === 'cluttered') {
-        desc += ' A cup, a plate. The usual.';
-      } else if (mess === 'tidy') {
-        desc += ' The sink is empty. The counter has its surface back.';
+      // Dishes — sink state from object system
+      desc += ' ' + Dishes.sinkDescription();
+
+      // Counter clutter — still from apartment_mess (general mess, not dishes)
+      if (mess === 'chaotic' || mess === 'messy') {
+        desc += ' The counter has its own layer — things set down and left, the kind that stops registering once it\'s been there long enough.';
       }
 
       // Microwave clock — the kitchen always tells you the time
@@ -1900,6 +1898,7 @@ export function createContent(ctx) {
       available: () => State.get('fridge_food') > 0,
       execute: () => {
         State.set('fridge_food', State.get('fridge_food') - 1);
+        Dishes.use();
         State.adjustHunger(-35);
         State.set('ate_today', true);
         State.set('consecutive_meals_skipped', 0);
@@ -1968,8 +1967,10 @@ export function createContent(ctx) {
       id: 'do_dishes',
       label: 'Deal with the dishes',
       location: 'apartment_kitchen',
-      available: () => ['cluttered', 'messy', 'chaotic'].includes(State.messTier()) && State.get('energy') > 15,
+      available: () => Dishes.dirtyCount() > 0 && State.get('energy') > 15,
       execute: () => {
+        Dishes.wash();
+        // Also reduce apartment_mess — still tracks general disorder until Clothing covers it
         State.set('apartment_mess', Math.max(0, State.get('apartment_mess') - 25));
         State.set('surfaced_mess', 0);
         State.adjustEnergy(-8);
@@ -1977,11 +1978,11 @@ export function createContent(ctx) {
         State.advanceTime(15);
 
         const mood = State.moodTone();
-        const postMess = State.messTier();
+        const sinkClear = Dishes.dirtyCount() === 0;
         const aden = State.get('adenosine');
 
-        if (postMess === 'tidy') {
-          // Actually cleaned up well — sink is clear
+        if (sinkClear) {
+          // Sink is now empty
           if (mood === 'heavy' || mood === 'numb') {
             return 'You wash dishes. The warm water helps more than it should. When you dry your hands, the sink is empty. The counter has its surface back. One thing, at least, dealt with.';
           }
