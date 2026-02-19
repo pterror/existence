@@ -251,6 +251,10 @@ export function createState(ctx) {
       // Daily work meal — food_service workers can eat once per shift
       ate_at_work_today: false,
 
+      // Soup kitchen
+      ate_at_soup_kitchen_today: false,
+      soup_kitchen_visits: 0,    // lifetime visit count — shapes prose
+
       // Laundry async state
       laundry_phase: 'none',    // 'none' | 'washing' | 'drying' | 'done'
       laundry_phase_started: 0, // State.get('time') when current phase began
@@ -527,6 +531,7 @@ export function createState(ctx) {
     s.surfaced_mess = 0;
     s.work_nagged_today = false;
     s.ate_at_work_today = false;
+    s.ate_at_soup_kitchen_today = false;
     s.daylight_exposure = 0;
   }
 

@@ -42,6 +42,7 @@ export function createWorld(ctx) {
         apartment_kitchen: 2,
         bus_stop: 3,
         corner_store: 4,
+        soup_kitchen: 8,
       },
     },
     bus_stop: {
@@ -64,6 +65,13 @@ export function createWorld(ctx) {
       area: 'outside',
       connections: {
         street: 4,
+      },
+    },
+    soup_kitchen: {
+      name: 'community meal',
+      area: 'outside',
+      connections: {
+        street: 8,
       },
     },
   };

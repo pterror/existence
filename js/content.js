@@ -1164,6 +1164,49 @@ export function createContent(ctx) {
 
       return desc;
     },
+
+    soup_kitchen: () => {
+      const mood = State.moodTone();
+      const hunger = State.hungerTier();
+      const visits = State.get('soup_kitchen_visits');
+      const hour = State.getHour();
+
+      let desc;
+      if (visits === 0) {
+        // First time here — the specifics land harder
+        if (mood === 'hollow' || mood === 'numb') {
+          desc = 'Long tables. Folding chairs. Someone at the door hands you a tray. You take it.';
+        } else {
+          desc = 'Long tables, folding chairs, the smell of large-quantity cooking. More people than you expected.';
+        }
+      } else {
+        // Familiar now
+        if (mood === 'hollow' || mood === 'numb') {
+          desc = 'The community meal. You know where to go.';
+        } else {
+          desc = 'The hall. Long tables, the same institutional smell. Familiar enough now to be just a place.';
+        }
+      }
+
+      if (hour >= 12 && hour < 13) {
+        desc += ' It\'s busy — the lunch rush, if you can call it that.';
+      }
+
+      if (hunger === 'starving') {
+        desc += ' Your body knows you\'re here. It\'s ahead of you already.';
+      }
+
+      // NT modifiers
+      const ne = State.get('norepinephrine');
+      const gaba = State.get('gaba');
+      if (ne > 65) {
+        desc += ' The noise of the room — chairs, voices, trays — comes in sharp.';
+      } else if (gaba < 40) {
+        desc += ' There are a lot of people in here. You find a seat toward the edge.';
+      }
+
+      return desc;
+    },
   };
 
   // --- Helpers ---
@@ -3362,6 +3405,60 @@ export function createContent(ctx) {
       },
     },
 
+    // === SOUP KITCHEN ===
+    get_meal: {
+      id: 'get_meal',
+      label: 'Get a meal',
+      location: 'soup_kitchen',
+      available: () => {
+        if (State.get('ate_at_soup_kitchen_today')) return false;
+        const hour = State.getHour();
+        return hour >= 11 && hour < 14 && State.isWorkday();
+      },
+      execute: () => {
+        State.adjustHunger(-45);
+        State.set('ate_today', true);
+        State.set('consecutive_meals_skipped', 0);
+        State.set('ate_at_soup_kitchen_today', true);
+        State.set('soup_kitchen_visits', State.get('soup_kitchen_visits') + 1);
+        State.advanceTime(25);
+        Events.record('ate', { what: 'soup_kitchen' });
+
+        const visits = State.get('soup_kitchen_visits'); // already incremented
+        const mood = State.moodTone();
+        const hunger = State.hungerTier();
+        const ser = State.get('serotonin');
+
+        // First visit
+        if (visits === 1) {
+          return Timeline.weightedPick([
+            { weight: 1, value: 'You go through the line. Someone hands you a plate. You sit down and you eat. Nobody looks at you twice. The food is hot and there is enough of it.' },
+            { weight: 1, value: 'A plate. A seat at a long table. The food is simple, institutional, warm. You eat all of it.' },
+            { weight: State.lerp01(ser, 50, 20), value: 'You take a tray and sit and eat. Around you people do the same. The food is fine. You don\'t have to think about anything except eating.' },
+          ]);
+        }
+
+        // Subsequent visits
+        if (mood === 'hollow' || mood === 'numb') {
+          return Timeline.weightedPick([
+            { weight: 1, value: 'Through the line. A plate. You eat. Same as before.' },
+            { weight: State.lerp01(ser, 50, 25), value: 'You know the routine now. Tray, line, table. You eat without tasting much. Your body gets what it needed.' },
+          ]);
+        }
+        if (hunger === 'starving' || hunger === 'very_hungry') {
+          return Timeline.weightedPick([
+            { weight: 1, value: 'You\'ve been here before. You go through the line, you sit, and you eat faster than you mean to. The food is hot. That\'s enough.' },
+            { weight: State.lerp01('adenosine', 50, 75), value: 'Through the line, a seat, and then you eat. Your hands settle once there\'s a plate in front of them.' },
+          ]);
+        }
+        return Timeline.weightedPick([
+          { weight: 1, value: 'The usual. A plate, a seat, a meal. You know the rhythm now. You eat and watch the room and then you leave.' },
+          { weight: 1, value: 'You go through the line. Eat. The woman who ladles the soup nods at you — you\'ve been here enough that she recognizes you. You nod back.' },
+          { weight: State.lerp01(ser, 60, 35), value: 'A plate of food and a seat. You eat it. There\'s something almost comfortable about the routine of it now, if you don\'t examine it too closely.' },
+        ]);
+      },
+    },
+
     // === PHONE MODE ===
     read_messages: {
       id: 'read_messages',
@@ -4509,6 +4606,23 @@ export function createContent(ctx) {
       return 'Back outside.';
     }
 
+    // To soup kitchen
+    if (from === 'street' && to === 'soup_kitchen') {
+      const visits = State.get('soup_kitchen_visits');
+      if (visits === 0) {
+        if (mood === 'heavy' || mood === 'hollow') {
+          return 'You find the place. Door, sign, the smell of food from inside.';
+        }
+        return 'You walk over. A building you\'ve passed before, a sign you may have noticed. You go in.';
+      }
+      return 'You walk over. You know where it is now.';
+    }
+
+    // From soup kitchen
+    if (from === 'soup_kitchen' && to === 'street') {
+      return 'Back outside. Less hungry than you were.';
+    }
+
     // From bus stop back to street
     if (from === 'bus_stop' && to === 'street') {
       return 'You walk back from the bus stop.';
@@ -4927,6 +5041,20 @@ export function createContent(ctx) {
       const mood = State.moodTone();
       if (mood === 'heavy') return 'The store. Walking there.';
       return 'The store.';
+    },
+
+    'move:soup_kitchen': () => {
+      const hunger = State.hungerTier();
+      const visits = State.get('soup_kitchen_visits');
+      if (hunger === 'starving') return 'The community meal. You know it\'s there.';
+      if (visits === 0) return 'The community meal is open.';
+      return 'The community meal.';
+    },
+
+    get_meal: () => {
+      const hunger = State.hungerTier();
+      if (hunger === 'starving' || hunger === 'very_hungry') return 'Through the line.';
+      return 'A plate.';
     },
   };
 

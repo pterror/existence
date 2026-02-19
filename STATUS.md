@@ -299,6 +299,9 @@ do_work, work_break, talk_to_coworker, check_phone_work, eat_at_work (food_servi
 ### Corner Store (3)
 buy_groceries, buy_cheap_meal, browse_store
 
+### Soup Kitchen / Community Meal (1)
+get_meal (weekdays + Sat, 11am–2pm, once per day). First-visit prose distinct from repeat. Lifetime visit count shapes ongoing descriptions. 8 min from street.
+
 ### Phone Mode (5, triggered from phone UI)
 read_messages (backward-compat replay only), reply_to_friend, message_friend, toggle_phone_silent (home screen mute + status bar silent indicator), put_phone_away
 
