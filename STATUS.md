@@ -292,8 +292,8 @@ check_phone_street, sit_on_step, go_for_walk
 ### Bus Stop (1)
 wait_for_bus
 
-### Workplace (4)
-do_work, work_break, talk_to_coworker, check_phone_work
+### Workplace (5)
+do_work, work_break, talk_to_coworker, check_phone_work, eat_at_work (food_service only, once per shift, hunger >= hungry)
 
 ### Corner Store (3)
 buy_groceries, buy_cheap_meal, browse_store
@@ -308,8 +308,8 @@ call_in (call in sick — morning only, work hours)
 
 - **alarm** — fires at alarm_time in bedroom
 - **late_anxiety** — stress when late for work (capped at 2 surfaces)
-- **hunger_pang** — when hunger > 65 (capped at 2)
-- **exhaustion_wave** — when energy < 15 (capped at 2)
+- **hunger_pang** — fires once per tier crossing (hungry → very_hungry → starving); deterministic, no RNG; resets on eating
+- **exhaustion_wave** — fires once per tier crossing (exhausted → depleted); deterministic, no RNG; resets on energy recovery
 - **weather_shift** — random weather change
 - **coworker_speaks** — samples coworker, uses chatter table
 - **work_task_appears** — job-specific

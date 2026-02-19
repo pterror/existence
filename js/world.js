@@ -183,16 +183,30 @@ export function createWorld(ctx) {
       }
     }
 
-    // Hunger pangs — surfaces twice then the prose carries it
-    if (State.get('hunger') > 65 && Timeline.chance(0.12)) {
-      if (State.get('surfaced_hunger') < 2) {
+    // Hunger pang — fires once per tier crossing (hungry → very_hungry → starving).
+    // Deterministic: no RNG consumed. Resets when eating.
+    const hTier = State.hungerTier();
+    const lastHTier = State.get('last_surfaced_hunger_tier');
+    const hungerTierRank = { hungry: 0, very_hungry: 1, starving: 2 };
+    if (hTier in hungerTierRank) {
+      const current = hungerTierRank[hTier];
+      const last = lastHTier !== null && lastHTier in hungerTierRank ? hungerTierRank[lastHTier] : -1;
+      if (current > last) {
+        State.set('last_surfaced_hunger_tier', hTier);
         events.push('hunger_pang');
       }
     }
 
-    // Exhaustion — surfaces twice then silence
-    if (State.get('energy') < 15 && Timeline.chance(0.15)) {
-      if (State.get('surfaced_exhaustion') < 2) {
+    // Exhaustion wave — fires once per tier crossing (exhausted → depleted).
+    // Deterministic: no RNG consumed. Resets when energy recovers.
+    const eTier = State.energyTier();
+    const lastETier = State.get('last_surfaced_energy_tier');
+    const energyTierRank = { exhausted: 0, depleted: 1 };
+    if (eTier in energyTierRank) {
+      const current = energyTierRank[eTier];
+      const last = lastETier !== null && lastETier in energyTierRank ? energyTierRank[lastETier] : -1;
+      if (current > last) {
+        State.set('last_surfaced_energy_tier', eTier);
         events.push('exhaustion_wave');
       }
     }

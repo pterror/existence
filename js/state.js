@@ -233,12 +233,16 @@ export function createState(ctx) {
       friend_contact: /** @type {Record<string, number>} */ ({}), // slot → game time of last engagement
       pending_replies: /** @type {{ slot: string, arrivesAt: number, text: string }[]} */ ([]),
 
-      // Event surfacing — tracks how many times state-condition events have appeared.
-      // After cap, they go silent and let tier-based prose carry the weight.
-      surfaced_hunger: 0,
-      surfaced_exhaustion: 0,
+      // Event surfacing — tracks last tier at which body-state events fired.
+      // Events fire once per tier crossing (hungry→very_hungry→starving, exhausted→depleted).
+      // Reset when the condition resolves (eating, resting).
+      last_surfaced_hunger_tier: /** @type {string|null} */ (null),
+      last_surfaced_energy_tier: /** @type {string|null} */ (null),
       surfaced_late: 0,
       surfaced_mess: 0,
+
+      // Daily work meal — food_service workers can eat once per shift
+      ate_at_work_today: false,
 
       // Laundry async state
       laundry_phase: 'none',    // 'none' | 'washing' | 'drying' | 'done'
@@ -515,6 +519,7 @@ export function createState(ctx) {
     s.surfaced_late = 0;
     s.surfaced_mess = 0;
     s.work_nagged_today = false;
+    s.ate_at_work_today = false;
     s.daylight_exposure = 0;
   }
 
@@ -929,8 +934,8 @@ export function createState(ctx) {
   /** @param {number} amount */
   function adjustEnergy(amount) {
     s.energy = Math.max(0, Math.min(100, s.energy + amount));
-    // Resting resets exhaustion surfacing
-    if (amount >= 10) s.surfaced_exhaustion = 0;
+    // Significant energy recovery resets exhaustion surfacing — next crossing noticed fresh
+    if (amount >= 10) s.last_surfaced_energy_tier = energyTier();
   }
 
   /** @param {number} amount */
@@ -941,8 +946,8 @@ export function createState(ctx) {
   /** @param {number} amount */
   function adjustHunger(amount) {
     s.hunger = Math.max(0, Math.min(100, s.hunger + amount));
-    // Eating resets hunger surfacing — next time hunger builds, it's noticed fresh
-    if (amount < 0) s.surfaced_hunger = 0;
+    // Eating resets hunger surfacing to current tier — prevents immediate re-fire
+    if (amount < 0) s.last_surfaced_hunger_tier = hungerTier();
   }
 
   /** @param {number} amount */

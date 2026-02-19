@@ -3136,6 +3136,43 @@ export function createContent(ctx) {
       },
     },
 
+    eat_at_work: {
+      id: 'eat_at_work',
+      label: 'Grab something to eat',
+      location: 'workplace',
+      available: () => {
+        const job = Character.get('job');
+        return job === 'food_service'
+          && !State.get('ate_at_work_today')
+          && ['hungry', 'very_hungry', 'starving'].includes(State.hungerTier());
+      },
+      execute: () => {
+        State.adjustHunger(-40);
+        State.set('ate_at_work_today', true);
+        State.advanceTime(10);
+
+        const mood = State.moodTone();
+        const hunger = State.hungerTier();
+
+        if (mood === 'hollow' || mood === 'numb') {
+          return Timeline.weightedPick([
+            { weight: 1, value: 'You eat standing up by the prep counter. Staff meal. You\'re allowed it. You barely taste it.' },
+            { weight: State.lerp01('serotonin', 0, 35), value: 'You eat because your body needs it, not because you wanted to. The food is fine. It doesn\'t matter.' },
+          ]);
+        }
+        if (hunger === 'starving' || hunger === 'very_hungry') {
+          return Timeline.weightedPick([
+            { weight: 1, value: 'You take your break early and eat. Staff meal — you\'re entitled to it. You eat faster than you meant to.' },
+            { weight: State.lerp01('adenosine', 50, 80), value: 'You eat on your feet, between tasks, barely sitting. The food disappears. You feel more human than you have all shift.' },
+          ]);
+        }
+        return Timeline.weightedPick([
+          { weight: 1, value: 'Staff meal. You eat in the back, standing at the counter. It\'s not a moment to savor but it\'s real food and you needed it.' },
+          { weight: State.lerp01('dopamine', 0, 40), value: 'You take your meal break. The kitchen smells like work but you eat it anyway. Something about eating what you made.' },
+        ]);
+      },
+    },
+
     // === CORNER STORE ===
     buy_groceries: {
       id: 'buy_groceries',
@@ -3697,25 +3734,28 @@ export function createContent(ctx) {
     },
 
     hunger_pang: () => {
-      const n = State.get('surfaced_hunger');
-      State.set('surfaced_hunger', n + 1);
-      if (n === 0) {
-        const location = World.getLocationId();
-        if (location === 'workplace') {
-          return 'Your stomach makes a sound. You glance around to see if anyone heard.';
-        }
-        return 'A wave of hunger. Not dramatic. Just your body reminding you it\'s there and it needs things.';
+      const tier = State.get('last_surfaced_hunger_tier');
+      if (tier === 'starving') {
+        return 'Your hands feel slow. The thinking narrows. Just the one thing.';
       }
-      return 'The hunger again. Sharper this time. Your body is done being polite about it.';
+      if (tier === 'very_hungry') {
+        return 'The hunger again. Sharper this time. Your body is done being polite about it.';
+      }
+      // hungry
+      const location = World.getLocationId();
+      if (location === 'workplace') {
+        return 'Your stomach makes a sound. You glance around to see if anyone heard.';
+      }
+      return 'A wave of hunger. Not dramatic. Just your body reminding you it\'s there and it needs things.';
     },
 
     exhaustion_wave: () => {
-      const n = State.get('surfaced_exhaustion');
-      State.set('surfaced_exhaustion', n + 1);
-      if (n === 0) {
-        return 'For a second everything feels heavy. Not just your body — the air, the light, the idea of doing the next thing.';
+      const tier = State.get('last_surfaced_energy_tier');
+      if (tier === 'depleted') {
+        return 'Your body is making its case. The argument is getting harder to ignore.';
       }
-      return 'Your body is making its case. The argument is getting harder to ignore.';
+      // exhausted
+      return 'For a second everything feels heavy. Not just your body — the air, the light, the idea of doing the next thing.';
     },
 
     weather_shift: () => {
@@ -4683,6 +4723,12 @@ export function createContent(ctx) {
 
     check_phone_work: () => {
       return 'Your phone, under the desk.';
+    },
+
+    eat_at_work: () => {
+      const hunger = State.hungerTier();
+      if (hunger === 'starving' || hunger === 'very_hungry') return 'You need to eat. The kitchen is right there.';
+      return 'Staff meal.';
     },
 
     // === CORNER STORE ===
