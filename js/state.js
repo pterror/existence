@@ -156,6 +156,12 @@ export function createState(ctx) {
       sleep_debt: 0,            // minutes of accumulated deficit (cap 4800 = 10 days)
       daylight_exposure: 0,     // bright-light minutes in current wake period
 
+      // Substances
+      // Caffeine: 0-100. Blocks adenosine receptors — wakefulness without clearing sleep pressure.
+      // Half-life ~5h. High caffeine at bedtime degrades sleep quality.
+      // One cup of coffee ≈ 50 units.
+      caffeine_level: 0,
+
       // Flags and soft state
       alarm_time: 6 * 60 + 30,  // Minutes since midnight. When the alarm fires.
       alarm_set: true,
@@ -277,12 +283,16 @@ export function createState(ctx) {
     const batteryDrain = s.viewing_phone ? 15 : 1;
     s.phone_battery = Math.max(0, s.phone_battery - hours * batteryDrain);
 
-    // Daylight exposure — outside during daytime accumulates faster
-    const hour = Math.floor(timeOfDay() / 60);
-    if (hour >= 6 && hour <= 20) {
+    // Daylight exposure — accumulates during astronomical daytime; faster when outside
+    if (isDaytime()) {
       const area = ctx.world.getCurrentLocation()?.area;
       const outsideRate = (area === 'outside') ? 1.0 : 0.15;
       s.daylight_exposure = Math.min(300, s.daylight_exposure + minutes * outsideRate);
+    }
+
+    // Caffeine metabolism — half-life ~5 hours (300 min)
+    if (s.caffeine_level > 0) {
+      s.caffeine_level = Math.max(0, s.caffeine_level * Math.exp(-Math.LN2 / 300 * minutes));
     }
 
     // Social isolation increases over time without interaction
@@ -368,6 +378,49 @@ export function createState(ctx) {
     if (m >= 5 && m <= 7) return 'summer';
     if (m >= 8 && m <= 10) return 'autumn';
     return 'winter';
+  }
+
+  function hemisphere() {
+    return s.latitude >= 0 ? 'north' : 'south';
+  }
+
+  function climateZone() {
+    const absLat = Math.abs(s.latitude);
+    if (absLat < 23.5) return 'tropical';
+    if (absLat <= 66.5) return 'temperate';
+    return 'polar';
+  }
+
+  /** Hours of daylight today — standard astronomical formula from latitude + day of year */
+  function dayLengthHours() {
+    const cd = calendarDate();
+    // Day of year from month/day (ignoring leap year — fine for this purpose)
+    const monthDays = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];
+    const doy = monthDays[cd.month] + cd.day;
+    const lat = s.latitude * Math.PI / 180;
+    const decl = -23.45 * Math.PI / 180 * Math.cos(2 * Math.PI / 365 * (doy + 10));
+    const cosH = -Math.tan(lat) * Math.tan(decl);
+    if (cosH <= -1) return 24; // polar day
+    if (cosH >= 1) return 0;   // polar night
+    return 2 * Math.acos(cosH) * 180 / Math.PI / 15;
+  }
+
+  function sunriseHour() { return 12 - dayLengthHours() / 2; }
+  function sunsetHour()  { return 12 + dayLengthHours() / 2; }
+
+  function isDaytime() {
+    const h = getHour() + getMinute() / 60;
+    return h >= sunriseHour() && h < sunsetHour();
+  }
+
+  function isSunrise() {
+    const h = getHour() + getMinute() / 60;
+    return Math.abs(h - sunriseHour()) < 0.5;
+  }
+
+  function isSunset() {
+    const h = getHour() + getMinute() / 60;
+    return Math.abs(h - sunsetHour()) < 0.5;
   }
 
   /** @param {number} eventTime @returns {number} */
@@ -531,6 +584,49 @@ export function createState(ctx) {
   function isWorkday() {
     const dow = dayOfWeek(); // 0=Sun, 1=Mon, ..., 6=Sat
     return dow >= 1 && dow <= 5;
+  }
+
+  // --- Caffeine ---
+
+  /** Qualitative caffeine level. Content branches on these labels. */
+  function caffeineTier() {
+    const c = s.caffeine_level;
+    if (c < 10) return 'none';
+    if (c < 35) return 'low';
+    if (c < 70) return 'active';
+    return 'high';
+  }
+
+  /**
+   * Consume caffeine (one cup of coffee ≈ 50 units).
+   * Blocks adenosine receptors — adenosine still accumulates behind the block.
+   * Crash hits when caffeine clears and all that accumulated adenosine is felt.
+   * Small acute NE bump from sympathomimetic effect.
+   */
+  function consumeCaffeine(amount) {
+    s.caffeine_level = clamp(s.caffeine_level + amount, 0, 100);
+    // Acute sympathomimetic effect: small NE boost
+    adjustNT('norepinephrine', amount * 0.2);
+  }
+
+  /**
+   * Adenosine receptor block factor. 0 = fully blocked (caffeine=100), 1 = unblocked (no caffeine).
+   * Multiply lerp01(adenosine, ...) weights by this before using them in prose.
+   * High caffeine → adenosine still accumulates but isn't felt — crash hits when caffeine clears.
+   */
+  function adenosineBlock() {
+    return Math.max(0, 1 - s.caffeine_level / 100);
+  }
+
+  /**
+   * Sleep quality multiplier from caffeine. 1.0 = no interference.
+   * Caffeine above 30 at bedtime meaningfully degrades sleep.
+   */
+  function caffeineSleepInterference() {
+    const c = s.caffeine_level;
+    if (c < 30) return 1.0;
+    // Linear from 1.0 at 30 → 0.65 at 100
+    return Math.max(0.65, 1.0 - (c - 30) * 0.005);
   }
 
   function timePeriod() {
@@ -1579,6 +1675,20 @@ export function createState(ctx) {
     processAbsenceEffects,
     regulationCapacity,
     sleepCycleBreakdown,
+    // Geo / environment
+    hemisphere,
+    climateZone,
+    isDaytime,
+    isSunrise,
+    isSunset,
+    sunriseHour,
+    sunsetHour,
+    dayLengthHours,
+    // Substances
+    caffeineTier,
+    consumeCaffeine,
+    adenosineBlock,
+    caffeineSleepInterference,
   };
 }
 

@@ -283,7 +283,7 @@ Weather.set(condition)
 Weather.setTemperature(celsius)
 ```
 
-**Status:** `Weather.current()` = State.get('weather') ✓. Temperature ○ (not tracked). Season ○ (not derived). Day length ○ (not computed). Latitude in character state. Hemisphere/climate derived helpers exist in some form but not as a clean module. Sunrise/sunset times ○.
+**Status:** `Weather.current()` = State.get('weather') ✓. Temperature ○ (not tracked). `season()` ✓ on State. `hemisphere()`, `climateZone()` ✓ on State. `dayLengthHours()`, `sunriseHour()`, `sunsetHour()`, `isDaytime()`, `isSunrise()`, `isSunset()` ✓ on State — astronomical formula from lat + date. Daylight exposure now uses actual sunrise/sunset window. Temperature ○.
 
 ---
 
@@ -305,7 +305,7 @@ Food.buyGroceries(units, cost)
 Food.buyMeal(cost)       // external food — doesn't consume fridge
 ```
 
-**Status:** `fridge_food` scalar ✓. `fridgeTier()` ○ (content uses raw State.get('fridge_food') > n comparisons). `canEat()` ~ (compound check in content). Nutrition quality ○. Cooking ○.
+**Status:** `fridge_food` scalar ✓. `fridgeTier()` ✓ on State. `canEat()` ~ (eat_food.available uses fridgeTier, Dishes.canEat() covers dish side). Nutrition quality ○. Cooking ○.
 
 ---
 
@@ -337,7 +337,7 @@ Nicotine.metabolize(hours)
 // Cannabis, prescription drugs, others follow same pattern
 ```
 
-**Status:** ○ No substances implemented. Caffeine is the entry point — meaningful daily mechanics (alertness boost, sleep interference, withdrawal headache) without requiring deep system design.
+**Status:** ~ Caffeine implemented in state.js: `caffeine_level` state var, `caffeineTier()`, `consumeCaffeine()`, `adenosineBlock()`, `caffeineSleepInterference()`. Metabolism in `advanceTime()` (half-life 5h). `make_coffee` interaction in kitchen. `adenosineBlock()` models receptor-level blocking — adenosine still accumulates, crash hits when caffeine clears. Withdrawal headache ○. Tolerance ○. Alcohol/nicotine/cannabis ○.
 
 ---
 

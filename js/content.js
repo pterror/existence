@@ -1191,6 +1191,9 @@ export function createContent(ctx) {
         // Crash sleep — emergency shutdown is less restorative
         if (State.get('adenosine') > 80) qualityMult *= 0.9;
 
+        // Caffeine interference — caffeine at bedtime degrades sleep architecture
+        qualityMult *= State.caffeineSleepInterference();
+
         // Sleep debt: ideal 480 min/day. Deficit accumulates fully, excess repays at 33%.
         const ideal = 480;
         const deficit = ideal - sleepMinutes;
@@ -1238,7 +1241,7 @@ export function createContent(ctx) {
         State.processAbsenceEffects();
 
         // Fridge food slowly goes bad overnight
-        if (State.get('fridge_food') > 0 && Timeline.chance(0.15)) {
+        if (State.fridgeTier() !== 'empty' && Timeline.chance(0.15)) {
           State.set('fridge_food', Math.max(0, State.get('fridge_food') - 1));
         }
 
@@ -1915,7 +1918,7 @@ export function createContent(ctx) {
       id: 'eat_food',
       label: 'Eat something',
       location: 'apartment_kitchen',
-      available: () => State.get('fridge_food') > 0,
+      available: () => State.fridgeTier() !== 'empty',
       execute: () => {
         State.set('fridge_food', State.get('fridge_food') - 1);
         Dishes.use();
@@ -1980,6 +1983,48 @@ export function createContent(ctx) {
           return 'Water from the tap. You drink it standing at the sink. Your body wanted it more than you realized.';
         }
         return 'You fill a glass and drink it. Tap water. It\'s fine.';
+      },
+    },
+
+    make_coffee: {
+      id: 'make_coffee',
+      label: 'Make coffee',
+      location: 'apartment_kitchen',
+      available: () => State.caffeineTier() !== 'high',
+      execute: () => {
+        State.consumeCaffeine(50);
+        State.advanceTime(Timeline.randomInt(5, 8));
+
+        const mood = State.moodTone();
+        const aden = State.get('adenosine');
+        const caffeine = State.caffeineTier();
+
+        // Second cup — already caffeinated
+        if (caffeine === 'active') {
+          return Timeline.weightedPick([
+            { weight: 1, value: 'The second one. The first one wore off faster than it should have.' },
+            { weight: State.lerp01(aden, 40, 80), value: 'You weren\'t done needing it yet. The second cup goes down the same way as the first.' },
+          ]);
+        }
+
+        // First cup of the day
+        if (mood === 'numb' || mood === 'hollow') {
+          return Timeline.weightedPick([
+            { weight: 1, value: 'You make coffee. Something to do with your hands. The smell is better than it usually is.' },
+            { weight: State.lerp01(aden, 40, 80), value: 'Coffee. Your brain needs something to hold onto. The warmth helps, a little.' },
+          ]);
+        }
+        if (mood === 'heavy' || mood === 'fraying') {
+          return Timeline.weightedPick([
+            { weight: 1, value: 'Coffee. You need the ritual as much as the caffeine. The kettle, the wait, the first sip.' },
+            { weight: State.lerp01(aden, 50, 85) * State.adenosineBlock(), value: 'You\'re dragging. The coffee is supposed to help with that.' },
+          ]);
+        }
+        return Timeline.weightedPick([
+          { weight: 1, value: 'You make coffee. The machine goes through its routine. You go through yours.' },
+          { weight: State.lerp01(aden, 30, 70) * State.adenosineBlock(), value: 'You make coffee. It\'s early enough that it feels necessary.' },
+          { weight: State.lerp01(State.get('serotonin'), 50, 80), value: 'Coffee. The smell fills the kitchen before it\'s even done.' },
+        ]);
       },
     },
 
@@ -3739,6 +3784,14 @@ export function createContent(ctx) {
       const aden = State.get('adenosine');
       if (aden > 60) return 'Water. Your mouth is dry.';
       return 'Water.';
+    },
+
+    make_coffee: () => {
+      const aden = State.get('adenosine');
+      const caffeine = State.caffeineTier();
+      if (caffeine === 'active') return 'The second cup.';
+      if (aden > 65 && State.adenosineBlock() > 0.5) return 'Coffee. You need it.';
+      return 'Coffee.';
     },
 
     do_dishes: () => {

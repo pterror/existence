@@ -37,8 +37,28 @@ glutamate, endorphin, acetylcholine, endocannabinoid, dht, estradiol, progestero
 - **Sleep debt** — cumulative deficit (cap 4800 min). Ideal 480 min/day. Full deficit accumulation, 33% excess repayment. Tiers: none/mild/moderate/severe. Feeds serotonin/dopamine targets (-8/-10 max), emotional inertia (+0.15 max), energy recovery penalty (1/(1+debt/1200)).
 - **Sleep architecture** — `sleepCycleBreakdown(minutes)`: 90-min cycles, deep/REM ratio shifts across cycles. Adenosine clearing scales with deep sleep fraction. NE clearing scales with REM fraction × quality. Emotional processing quality = qualityMult × (0.4 + 0.6 × remFrac). Sleep inertia from cycle phase at wake (0–0.6).
 - **Melatonin behavior** — daylight exposure tracking (outside 1.0, inside 0.15, reset on wake), phone screen suppression (-15 at night), indoor evening suppression (-3), daylight bonus (+10 at night if ≥120 min exposure). Melatonin affects fall-asleep delay (>60 → 0.7x, <20 → 1.4x).
-- **Sleep quality** — six multiplicative factors: stress, hunger, rain comfort, melatonin at onset (>60 → 1.05x, <25 → 0.85x), circadian alignment (daytime → 0.75x), crash sleep (adenosine >80 → 0.9x).
+- **Sleep quality** — seven multiplicative factors: stress, hunger, rain comfort, melatonin at onset (>60 → 1.05x, <25 → 0.85x), circadian alignment (daytime → 0.75x), crash sleep (adenosine >80 → 0.9x), caffeine interference (>30 → 0.65–1.0).
 - **Neurochemistry** — stores quality, clears adenosine (scaled by deep sleep), nudges serotonin (good +3, poor -2), clears NE (scaled by REM × quality).
+
+### Geography / Environment
+Derived from character `latitude` (-90 to 90). Methods on State:
+- `hemisphere()` — 'north' | 'south'
+- `climateZone()` — 'tropical' | 'temperate' | 'polar'
+- `season()` — 'spring' | 'summer' | 'autumn' | 'winter' (temperate), 'wet' | 'dry' (tropical)
+- `dayLengthHours()` — hours of daylight, astronomical formula from lat + day of year
+- `sunriseHour()`, `sunsetHour()` — fractional hours since midnight
+- `isDaytime()`, `isSunrise()`, `isSunset()` — bool queries (sunrise/sunset within 30 min)
+- Daylight exposure tracking now uses actual astronomical sunrise/sunset window (was hardcoded 6–20)
+
+Temperature: ○ not tracked.
+
+### Substances (caffeine)
+- **caffeine_level** (0–100 state var) — one cup ≈ 50 units. Half-life 5h, metabolized in `advanceTime`.
+- `caffeineTier()` — 'none' | 'low' | 'active' | 'high'
+- `consumeCaffeine(amount)` — updates caffeine_level, small acute NE bump
+- `adenosineBlock()` — 0–1 receptor block factor. High caffeine = adenosine still accumulates but isn't felt. Crash hits when caffeine clears.
+- `caffeineSleepInterference()` — quality multiplier (0.65–1.0) for sleep execute
+- `make_coffee` interaction at kitchen — available unless caffeineTier is 'high'. Prose shades on mood + adenosine + caffeine.
 
 ### Emotional Inertia (Layer 2 of DESIGN-EMOTIONS.md)
 Per-character trait controlling how sticky moods are. Only affects the four mood-primary systems (serotonin, dopamine, NE, GABA) — physiological rhythms are unaffected by personality.
