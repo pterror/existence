@@ -166,11 +166,10 @@ No content level configuration. DESIGN.md describes: baseline tier (everyday str
 ### Health system
 ~~No health conditions exist.~~ Migraines (chronic), acute illness (flu/cold/GI), and dental pain (chronic) implemented. Remaining: chronic conditions (diabetes, chronic pain), mental health as structural, pregnancy.
 
-**Dental pain — chargen assignment blocked on:**
-- Jurisdiction model (insurance/access varies enormously by country and income)
-- Deeper financial backstory (was dental care historically affordable for this character?)
-- Once those exist, assignment becomes deterministic derivation — not a random roll
-- **Also missing:** treatment mechanic (dentist visit with cost), condition worsening (abscess, tooth loss)
+**Dental pain — chargen approximation debts:**
+- Currently assigned from `economic_origin` — jurisdiction/insurance model would make this more accurate (dental access varies enormously by country)
+- No treatment mechanic — can't fix the tooth (dentist visit with cost, appointment system)
+- No condition worsening — untreated cavities progress (abscess, tooth loss)
 
 **Acute illness approximation debts:**
 - Onset probability magnitudes not derived from real incidence data — need calibration

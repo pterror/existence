@@ -478,11 +478,17 @@ export function createChargen(ctx) {
       conditions.push('migraines');
     }
 
-    // Dental pain: circumstantial condition — derives from access to dental care over the character's
-    // life history. Not assignable via random roll. Requires: jurisdiction (insurance/access model) +
-    // deeper financial backstory (was dental care affordable historically?). Left unassigned until
-    // those upstream variables exist. All simulation and prose code is ready; chargen will set this
-    // once backstory can properly derive it.
+    // Dental pain: circumstantial condition. Only at-risk for characters whose economic history
+    // indicates inability to afford regular dental care. For comfortable/secure origins the
+    // probability is effectively zero — don't roll. Within the at-risk group, ~35% prevalence
+    // is consistent with CDC NHANES data for low-income adults with untreated dental decay.
+    // Approximation debt: no jurisdiction model yet — dental access varies enormously by country.
+    if (backstory.economic_origin === 'precarious') {
+      if (Timeline.charRandom() < 0.35) conditions.push('dental_pain');
+    } else if (backstory.economic_origin === 'modest' && financialSim.starting_money < 200) {
+      // Modest origin + severe financial hardship from life events → borderline at-risk
+      if (Timeline.charRandom() < 0.20) conditions.push('dental_pain');
+    }
 
     return /** @type {GameCharacter} */ ({
       first_name: playerName.first,

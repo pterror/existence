@@ -84,7 +84,7 @@ Two health tracks: chronic conditions (permanent, per-character) and acute illne
 
 **Dental pain (chronic condition — simulation ready, chargen assignment pending):**
 - `dental_ache` (0–100): continuous pain; spikes from eating/hot coffee (~15–25), decays ~1.5/hr
-- **Not yet assigned at chargen** — circumstantial condition requiring jurisdiction + healthcare access backstory to derive properly. Simulation and prose code is complete. Assign manually via `conditions` array for testing.
+- **Chargen:** only at-risk for `precarious` economic origin (~35%, grounded in CDC NHANES low-income prevalence data) or `modest` origin with severe financial hardship (starting_money < $200, ~20%). Comfortable/secure origins: probability effectively zero — no roll. Approximation debt: no jurisdiction model yet.
 - Morning baseline: `wakeUp()` ensures dental_ache ≥ 8 when condition present (jaw pressure overnight)
 - **Tier effects:** 'dull' (8–25) — background noise; 'ache' (25–60) — shapes eating prose; 'flare' (60+) — overrides eating, cuts energyCeiling, suppresses GABA
 - **NT per tick:** NE raised proportional to ache; GABA suppressed when ache > 50
