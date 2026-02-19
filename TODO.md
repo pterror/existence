@@ -164,7 +164,14 @@ No family exists in the simulation. DESIGN.md describes: supportive / conditiona
 No content level configuration. DESIGN.md describes: baseline tier (everyday struggles), full tier (DV, abuse, addiction, etc.), fine-grained toggles per category. Configuration before character generation, revisitable between runs.
 
 ### Health system
-No health conditions exist. DESIGN.md describes: chronic conditions (diabetes, chronic pain, migraines, etc.), injury, illness, disability. Two kinds of effect — texture (how things feel) and concrete (what's physically possible). Good days and bad days. Medication as its own system.
+~~No health conditions exist.~~ Migraines (chronic) and acute illness (flu/cold/GI) implemented. Remaining: dental pain, chronic conditions (diabetes, chronic pain), mental health as structural, pregnancy.
+
+**Acute illness approximation debts:**
+- Onset probability magnitudes not derived from real incidence data — need calibration
+- No seasonal variation (flu season, winter colds)
+- No recent-illness immunity (just recovered → lower susceptibility)
+- No job-type exposure rates (food service vs. remote vs. office — very different)
+- No immune function model — stress/sleep suppression is real but current magnitudes are guesses
 
 ### Jurisdiction as a character parameter
 Healthcare access, reproductive rights, and legal protections are **legal/political variables**, not geographic ones. Latitude does not predict abortion access, healthcare coverage, drug policy, or trans protections — a character at 59°N in Sweden has near-universal access; one at 52°N in Poland (historically) near-total prohibition. Using latitude as a proxy for US-style regional variation is a US-centric assumption that doesn't survive leaving the country.
