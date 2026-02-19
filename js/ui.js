@@ -75,12 +75,8 @@ export function createUI(ctx) {
     });
 
     // Track real user presence — any input resets the activity clock.
-    const markActive = () => {
-      lastActivityTime = Date.now();
-      if (afkDetectionEnabled && afkIndicatorEl) {
-        afkIndicatorEl.classList.add('hidden');
-      }
-    };
+    // Don't touch the indicator here; it clears when a game action is taken.
+    const markActive = () => { lastActivityTime = Date.now(); };
     document.addEventListener('mousemove', markActive, { passive: true });
     document.addEventListener('keydown', markActive, { passive: true });
     document.addEventListener('click', markActive, { passive: true });
@@ -94,11 +90,9 @@ export function createUI(ctx) {
         afkIndicatorEl.classList.add('detection-off');
         resetIdleTimer();
       } else {
-        // Detection on — remove off styling; hide if player is currently present
+        // Detection on — remove off styling and hide (player just clicked = present)
         afkIndicatorEl.classList.remove('detection-off');
-        if (Date.now() - lastActivityTime <= ACTIVITY_TIMEOUT) {
-          afkIndicatorEl.classList.add('hidden');
-        }
+        afkIndicatorEl.classList.add('hidden');
       }
     });
   }
@@ -277,6 +271,10 @@ export function createUI(ctx) {
   function resetIdleTimer() {
     if (idleTimer) clearTimeout(idleTimer);
     idleCount = 0;
+    // Clear the absent indicator when the player takes a game action
+    if (afkDetectionEnabled && afkIndicatorEl) {
+      afkIndicatorEl.classList.add('hidden');
+    }
     scheduleNextIdle();
   }
 
