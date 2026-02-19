@@ -184,6 +184,7 @@ Characters have compressed life histories generated at chargen. Two-phase: broad
 - `starting_money` — integral of years working × accumulation rate + event impacts. Range: $0 (22yo precarious) to $40,000+ (48yo secure).
 - `pay_rate` — biweekly take-home by job type (food_service $480, retail $520, office $600)
 - `rent_amount` — monthly, from origin bracket × stability ($400–950)
+- `ebt_monthly_amount` — $204 if enrolled, $0 if not. Enrollment probability by origin (65% precarious / 25% modest / 4% comfortable / 0% secure). `ebt_day_offset` per-character monthly reload day.
 
 **Non-financial outputs:**
 - Financial anxiety sentiment (intensity from origin + stability + negative events)

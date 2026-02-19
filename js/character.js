@@ -59,6 +59,11 @@ export function createCharacter(ctx) {
     State.set('rent_day_offset', current.rent_day_offset ?? 1);
     State.set('utility_day_offset', current.utility_day_offset ?? 15);
     State.set('phone_bill_day_offset', current.phone_bill_day_offset ?? 20);
+    State.set('ebt_day_offset', current.ebt_day_offset ?? 5);
+
+    // EBT/SNAP — start with one month's balance if enrolled
+    State.set('ebt_monthly_amount', sim.ebt_monthly_amount ?? 0);
+    State.set('ebt_balance', sim.ebt_monthly_amount ?? 0);
 
     // Financial anxiety sentiment
     if (sim.financial_anxiety > 0.01) {

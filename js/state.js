@@ -213,11 +213,17 @@ export function createState(ctx) {
       last_rent_day: 0,         // guard: game day of last rent deduction
       last_utility_day: 0,      // guard: game day of last utility deduction
       last_phone_bill_day: 0,   // guard: game day of last phone bill deduction
+      last_ebt_day: 0,          // guard: game day of last EBT load
       // Billing cycle offsets — set from character by applyToState()
       paycheck_day_offset: 7,   // day % 14 === this → paycheck fires
       rent_day_offset: 1,       // day % 30 === this → rent fires
       utility_day_offset: 15,   // day % 30 === this → utilities fire
       phone_bill_day_offset: 20, // day % 30 === this → phone bill fires
+      ebt_day_offset: 5,        // day % 30 === this → EBT reloads
+
+      // SNAP/EBT food benefit
+      ebt_balance: 0,           // current spendable EBT balance
+      ebt_monthly_amount: 0,    // monthly load amount (0 = not enrolled)
 
       // Health conditions
       health_conditions: /** @type {string[]} */ ([]),  // set by applyToState()
@@ -1065,6 +1071,22 @@ export function createState(ctx) {
     return false;
   }
 
+  /** Load EBT benefits for the month. Adds to balance, sends phone notification. */
+  function receiveEbt(amount) {
+    s.ebt_balance = Math.round((s.ebt_balance + amount) * 100) / 100;
+    addPhoneMessage({
+      type: 'system',
+      source: null,
+      text: 'EBT: Monthly benefits loaded. Balance: $' + s.ebt_balance.toFixed(2) + '.',
+      read: false,
+    });
+  }
+
+  /** Spend EBT balance (grocery store purchases). */
+  function spendEbt(amount) {
+    s.ebt_balance = Math.max(0, Math.round((s.ebt_balance - amount) * 100) / 100);
+  }
+
   // --- Phone inbox helpers ---
 
   /** @param {{ type: string, text: string, read: boolean, source?: string, direction?: string, timestamp?: number, paid?: boolean }} msg */
@@ -1842,6 +1864,8 @@ export function createState(ctx) {
     spendMoney,
     receiveMoney,
     deductBill,
+    receiveEbt,
+    spendEbt,
     addPhoneMessage,
     addPendingReply,
     getUnreadMessages,

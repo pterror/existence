@@ -3244,12 +3244,15 @@ export function createContent(ctx) {
       id: 'buy_groceries',
       label: 'Get a few things',
       location: 'corner_store',
-      available: () => State.canAfford(8),
+      available: () => State.canAfford(8) || State.get('ebt_balance') >= 8,
       execute: () => {
         const cost = Timeline.randomFloat(8, 14);
         const roundedCost = Math.round(cost * 100) / 100;
 
-        if (!State.spendMoney(roundedCost)) {
+        const usingEbt = !State.canAfford(roundedCost) && State.get('ebt_balance') >= roundedCost;
+        if (usingEbt) {
+          State.spendEbt(roundedCost);
+        } else if (!State.spendMoney(roundedCost)) {
           return 'You pick things up and put them back. The math doesn\'t work today.';
         }
 
@@ -3261,6 +3264,13 @@ export function createContent(ctx) {
 
         const money = State.moneyTier();
 
+        if (usingEbt) {
+          return Timeline.weightedPick([
+            { weight: 1, value: 'You swipe your EBT card. The machine beeps. You take your bags.' },
+            { weight: 1, value: 'Bread. Rice. A can of beans. You pay with EBT. The cashier doesn\'t react.' },
+            { weight: State.lerp01('serotonin', 50, 25), value: 'You use your EBT. The transaction goes through. You carry the bags out without looking back.' },
+          ]);
+        }
         if (money === 'scraping' || money === 'tight') {
           return 'Bread. Rice. A can of beans. You count it out at the register.';
         }
@@ -3661,6 +3671,15 @@ export function createContent(ctx) {
     if (day > 1 && day % 30 === phoneOffset % 30 && State.get('last_phone_bill_day') !== day) {
       State.set('last_phone_bill_day', day);
       State.deductBill(45, 'phone');
+      added = true;
+    }
+
+    // EBT/SNAP — monthly benefit reload
+    const ebtMonthly = State.get('ebt_monthly_amount');
+    const ebtOffset = State.get('ebt_day_offset');
+    if (ebtMonthly > 0 && day > 1 && day % 30 === ebtOffset % 30 && State.get('last_ebt_day') !== day) {
+      State.set('last_ebt_day', day);
+      State.receiveEbt(ebtMonthly);
       added = true;
     }
 

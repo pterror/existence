@@ -194,9 +194,9 @@ export function createChargen(ctx) {
 
   /**
    * Generate life history backstory on charRng stream.
-   * ~4 charRng calls. Produces broad strokes — the story of this person.
+   * ~5 charRng calls. Produces broad strokes — the story of this person.
    * @param {number} age
-   * @returns {{ economic_origin: string, career_stability: number, life_events: Array<{ type: string, financial_impact: number }> }}
+   * @returns {{ economic_origin: string, career_stability: number, life_events: Array<{ type: string, financial_impact: number }>, ebt_enrolled: boolean }}
    */
   function generateBackstory(age) {
     // 1. Economic origin (1 charRng call)
@@ -225,7 +225,13 @@ export function createChargen(ctx) {
       life_events.push({ type, financial_impact });
     }
 
-    return { economic_origin, career_stability, life_events };
+    // 4. SNAP/EBT enrollment — probability by economic origin (1 charRng call)
+    // Based on US SNAP eligibility: ~65% of eligible people (precarious) actually enroll.
+    // Modest origin: some qualify depending on income, lower enrollment awareness.
+    const ebtEnrollRate = { precarious: 0.65, modest: 0.25, comfortable: 0.04, secure: 0.0 };
+    const ebt_enrolled = Timeline.charRandom() < (ebtEnrollRate[economic_origin] ?? 0);
+
+    return { economic_origin, career_stability, life_events, ebt_enrolled };
   }
 
   // --- Fine-grained financial simulation ---
@@ -344,6 +350,11 @@ export function createChargen(ctx) {
       if (evt.type === 'job_loss') job_standing_start = Math.max(50, job_standing_start - 5);
     }
 
+    // SNAP/EBT monthly benefit — ~US average for single-person household.
+    // Approximation debt: should eventually derive from income, household size,
+    // state rules. For now, a flat amount if enrolled.
+    const ebt_monthly_amount = backstory.ebt_enrolled ? 204 : 0;
+
     return {
       starting_money,
       pay_rate,
@@ -352,6 +363,7 @@ export function createChargen(ctx) {
       personality_adjustments: { neuroticism: neuroticismAdj, self_esteem: selfEsteemAdj },
       work_sentiment,
       job_standing_start,
+      ebt_monthly_amount,
     };
   }
 
@@ -454,6 +466,7 @@ export function createChargen(ctx) {
     const rent_day_offset = Timeline.charRandomInt(0, 29);
     const utility_day_offset = Timeline.charRandomInt(0, 29);
     const phone_bill_day_offset = Timeline.charRandomInt(0, 29);
+    const ebt_day_offset = Timeline.charRandomInt(0, 29); // day EBT reloads each month
 
     // Health conditions — generated last to preserve PRNG order of prior systems
     const conditions = /** @type {string[]} */ ([]);
@@ -486,6 +499,7 @@ export function createChargen(ctx) {
       rent_day_offset,
       utility_day_offset,
       phone_bill_day_offset,
+      ebt_day_offset,
       conditions,
     });
   }
