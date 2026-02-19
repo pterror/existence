@@ -8,6 +8,7 @@ export function createContent(ctx) {
   const World = ctx.world;
   const Events = ctx.events;
   const Dishes = ctx.dishes;
+  const Linens = ctx.linens;
 
   // --- Relationship prose tables ---
   // Keyed on flavor archetype. Name is the only dynamic part.
@@ -764,7 +765,7 @@ export function createContent(ctx) {
         }
       }
 
-      // Mess details
+      // Mess details — still from apartment_mess (clothes tracking comes with Clothing module)
       if (mess === 'chaotic') {
         desc += ' Clothes that have been on the floor long enough to stop looking fallen. Things that migrated from where they lived and didn\'t go back. The room has a layer to it now.';
       } else if (mess === 'messy') {
@@ -774,6 +775,15 @@ export function createContent(ctx) {
       } else if (mess === 'tidy') {
         desc += ' It\'s relatively in order in here. The surfaces have their surfaces back.';
       }
+
+      // Bed state — from Linens
+      const bed = Linens.bedState();
+      if (bed === 'messy') {
+        desc += ' The bed is a wreck — sheets pulled loose, pillow somewhere it shouldn\'t be.';
+      } else if (bed === 'made') {
+        desc += ' The bed is made.';
+      }
+      // 'unmade' is the default, already implied — no additional sentence
 
       // Alarm detail
       if (State.get('alarm_set') && !State.get('alarm_went_off')
@@ -881,11 +891,12 @@ export function createContent(ctx) {
         }
       }
 
-      // Mess
-      if (mess === 'chaotic' || mess === 'messy') {
-        desc += ' A damp towel on the floor. Products off their shelves, the counter cluttered with things not put back.';
-      } else if (mess === 'cluttered') {
-        desc += ' The towel from yesterday draped over the edge of the tub.';
+      // Towel — from Linens
+      const towel = Linens.towelState();
+      if (towel === 'on_floor') {
+        desc += ' The towel\'s on the floor. Been there a while.';
+      } else if (towel === 'damp_hanging') {
+        desc += ' The towel from earlier still hanging damp.';
       }
 
       return desc;
@@ -1230,6 +1241,7 @@ export function createContent(ctx) {
 
         // Reset wake-period flags
         State.wakeUp();
+        Linens.noteSlept();
         // Set just_woke_alarm AFTER wakeUp() clears it — enables snooze/dismiss
         if (wokeByAlarm) {
           State.set('just_woke_alarm', true);
@@ -2114,6 +2126,7 @@ export function createContent(ctx) {
       available: () => !State.get('showered') && State.get('energy') > 8,
       execute: () => {
         State.set('showered', true);
+        Linens.useTowel();
         State.adjustEnergy(-3);
         State.adjustStress(-8);
         State.advanceTime(15);

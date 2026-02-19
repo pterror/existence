@@ -12,6 +12,7 @@ export function createGame(ctx) {
   const Runs = ctx.runs;
   const Chargen = ctx.chargen;
   const Dishes = ctx.dishes;
+  const Linens = ctx.linens;
 
   let isReplaying = false;
 
@@ -127,6 +128,7 @@ export function createGame(ctx) {
     Events.init();
     Habits.reset();
     Dishes.reset();
+    Linens.reset();
 
     // Consume same initial RNG as fresh start (opening events + messages)
     const initEvents = World.checkEvents();
@@ -186,6 +188,7 @@ export function createGame(ctx) {
       Character.applyToState();
       Events.init();
       Dishes.reset();
+      Linens.reset();
 
       // Opening — check for initial events (consumes RNG)
       const events = World.checkEvents();

@@ -15,6 +15,7 @@ import { createContent } from './content.js';
 import { createUI } from './ui.js';
 import { createChargen } from './chargen.js';
 import { createDishes } from './dishes.js';
+import { createLinens } from './linens.js';
 import { createGame } from './game.js';
 
 export { NameData };
@@ -25,6 +26,7 @@ export function createGameContext() {
   ctx.timeline = createTimeline(ctx);
   ctx.state = createState(ctx);
   ctx.dishes = createDishes(ctx);
+  ctx.linens = createLinens(ctx);
   ctx.events = createEvents(ctx);
   ctx.character = createCharacter(ctx);
   ctx.world = createWorld(ctx);
