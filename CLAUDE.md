@@ -69,6 +69,8 @@ No build step. Plain JS loaded via script tags.
 
 **Text carries everything.** Prose tone, word choice, what's mentioned and what isn't = the "UI". The same moment reads differently depending on hidden state.
 
+**Typography is a simulation readout.** Inner voice text is typographically distinct from narration (italics, visual intensity tiers). The tiers — quiet italic → uneasy → prominent → tremor animation — are driven by NT state (GABA, NE, serotonin) and personality (rumination). There is no "spiral" state variable; the experience emerges from NT conditions. `prefers-reduced-motion` collapses motion to static contrast. Rarity is what makes the heavy treatment land.
+
 **Structure serves the moment.** Sometimes choices, sometimes description, sometimes events happening to you. Not locked to one interaction pattern.
 
 **Simulated persistence.** Objects in the world that have state in real life should have state in the simulation. A phone has an inbox — messages arrive whether or not you look, and checking shows what's accumulated. Ignoring things has weight. This isn't UI chrome; it's the simulation being honest.

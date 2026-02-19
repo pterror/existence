@@ -893,6 +893,33 @@ Not all trauma is dramatic. Some is quiet — the friend who stopped calling, th
 
 Trauma interacts with everything: it shapes narration voice, it modifies available interactions, it affects how relationships feel, it changes what the phone means, it makes certain moments heavier than others. It's not separate from mood or personality — it's underneath them.
 
+### Inner voice
+
+The character has an internal monologue — the voice that comments, loops, anticipates, justifies, and returns to unresolved things. It's typographically distinct from narration: set in italics, rendered as its own block, visually separate from the third-person prose. The player always knows where they are.
+
+**What the voice says:**
+
+- **Looping** — returns to things not yet resolved. The bill. The message. "You still haven't."
+- **Rationalization** — justifying avoidance or inaction. "Just a few more minutes." "You'll do it tomorrow."
+- **Anticipatory dread** — knowing how something goes before it happens. The voice that's already at the destination.
+- **Flat commentary** — observation without judgment. "Again."
+- **Memory intrusions** — something in the environment surfaces a fragment. Not explained. Just there.
+
+**Frequency and intensity are state outputs**, not fixed rates. The voice is quiet when the character is calm. It becomes intrusive when conditions warrant it. The NT cluster that drives high frequency and high intensity: low GABA (anxiety undertone), high NE (hyperalert, scanning), low serotonin (darker coloring), high rumination. These don't produce a named "spiral" state — that's colloquial shorthand for a specific NT configuration. The simulation just knows the values. The experience emerges.
+
+**Visual intensity tiers:**
+
+- *Quiet italic* — baseline. Calm observation, flat commentary. Present but not intrusive.
+- *Uneasy* — slightly altered spacing or tracking. Something slightly wrong.
+- **Prominent** — heavier weight or displacement. Intrusive. Hard to ignore.
+- Tremor animation — the voice won't stop. Reserved for the highest NT thresholds. CSS `animation: shake`.
+
+The visual treatment is itself a simulation readout. The player never sees "you are anxious." The text moves instead.
+
+**Rarity is the mechanism.** The tremor only lands if the player has spent most of their time seeing quiet italics. The threshold for heavy treatment must be high — genuine NT cluster conditions, not mild stress. Overuse collapses meaning.
+
+**`prefers-reduced-motion`:** Tremor animation collapses to static high-contrast styling — same intensity communicated without motion.
+
 ### Habits
 
 > Full design: see [DESIGN-HABITS.md](DESIGN-HABITS.md).
