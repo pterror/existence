@@ -118,7 +118,7 @@ Full design in [DESIGN-OBJECTS.md](DESIGN-OBJECTS.md). Mess is not a scalar — 
 2. ~~**Coarse implementations**~~ — **DONE.** `js/dishes.js`, `js/linens.js`, `js/clothing.js` — count-based backends. Wired in context.js + game.js. content.js updated throughout.
 3. ~~**Remove `apartment_mess`**~~ — **DONE.** `apartment_mess` scalar removed from state.js. `messTier()` moved into content.js, computed from Dishes + Linens + Clothing. Bedroom, kitchen, apartment_notice all use local `messTier()`. Four tiers: tidy / cluttered / messy / chaotic.
 4. **Full implementations** — per-item tracking, one system at a time. Clothing first (wardrobe generated at chargen, items with location/wear states, undressing shaped by mood/energy).
-5. **Laundry mechanic** — requires in-home option (hand-wash, drying rack) or laundromat (doesn't exist yet). Stub for now.
+5. **Laundry mechanic** — currently stubbed as 3 interactions (start_laundry / move_to_dryer / fold_laundry) in apartment_bedroom, assuming in-unit machines. This is an approximation debt: laundry path should derive from housing situation (in-unit machines → current flow; building laundry room → separate location; laundromat → travel + location; hand-wash → sink interaction). Multiple paths, not one universal. Housing type not yet a backstory parameter.
 
 **Prose that becomes possible at full granularity:** "the shirt you've worn three days running," "three plates and a mug since Tuesday," specific items on specific surfaces, eating without a clean dish to use.
 

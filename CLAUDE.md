@@ -55,6 +55,7 @@ No build step. Plain JS loaded via script tags.
 - **Note things down immediately:** problems, tech debt, or issues spotted MUST be added to TODO.md backlog
 - **Capture fundamental principles.** When a design principle is discovered, clarified, or corrected — whether in conversation or during implementation — write it into CLAUDE.md (short rule) and DESIGN.md (full explanation) immediately. Principles are more important than code. Don't let them live only in chat history.
 - **Do the work properly.** Don't leave workarounds or hacks undocumented.
+- **No shortcuts.** When full fidelity isn't achievable right now, don't implement a lower-fidelity version silently. Either do it properly or add it to TODO.md as an explicit approximation debt with a note on what's being lost. Never paper over a gap with a hardcoded assumption — name the assumption, document what should replace it.
 
 ## Design Principles
 
@@ -63,6 +64,8 @@ No build step. Plain JS loaded via script tags.
 **Opaque constraints.** The player never sees the full action space or why things aren't available. Things just aren't there when they can't be.
 
 **Gradients, not binaries.** State shapes experience continuously. Nothing switches on or off at a threshold. There's always something you can do at every point along every spectrum — it just changes in character, cost, and texture. The simulation never dead-ends at an extreme.
+
+**There is no single path.** The same need has different solutions for different characters. Laundry means in-unit machines, or building laundry, or a laundromat trip, or hand-washing when money is tight. Getting food means cooking, or the corner store, or the food bank, or nothing. When designing a mechanic, ask: what does this look like for someone with fewer resources, worse options? That version is as real as the comfortable one — often more real, for more people. Never assume one universal path.
 
 **Text carries everything.** Prose tone, word choice, what's mentioned and what isn't = the "UI". The same moment reads differently depending on hidden state.
 
