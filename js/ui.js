@@ -361,17 +361,26 @@ export function createUI(ctx) {
 
   function buildPhoneStatusBar(timeStr, batteryPct) {
     const batteryClass = batteryPct <= 15 ? ' phone-battery--low' : '';
-    return `<div class="phone-status-bar"><span class="phone-status-time">${timeStr}</span><span class="phone-battery-pct${batteryClass}">${Math.round(batteryPct)}%</span></div>`;
+    const isSilent = State.get('phone_silent');
+    const silentBtn = isSilent
+      ? `<button class="phone-silent-indicator" data-phone-action="toggle_phone_silent">silent</button>`
+      : '';
+    return `<div class="phone-status-bar"><span class="phone-status-time">${timeStr}</span>${silentBtn}<span class="phone-battery-pct${batteryClass}">${Math.round(batteryPct)}%</span></div>`;
   }
 
   function buildPhoneHomeScreen(timeStr, dateStr, batteryPct, unreadCount) {
     const badge = unreadCount > 0 ? `<span class="phone-app-badge">${unreadCount}</span>` : '';
+    const isSilent = State.get('phone_silent');
+    const silenceBtn = isSilent
+      ? ''
+      : `<button class="phone-silence-toggle" data-phone-action="toggle_phone_silent">Silence</button>`;
     return buildPhoneStatusBar(timeStr, batteryPct)
       + `<div class="phone-home-time">${timeStr}</div>`
       + `<div class="phone-home-date">${dateStr}</div>`
       + `<div class="phone-apps">`
       + `<button class="phone-app" data-phone-nav="messages">Messages${badge}</button>`
       + `</div>`
+      + silenceBtn
       + `<button class="phone-home-bar" data-phone-action="put_phone_away">&#x2014;</button>`;
   }
 
@@ -512,6 +521,9 @@ export function createUI(ctx) {
         if (inter && onAction) onAction(/** @type {Interaction} */ (inter));
       } else if (action === 'message_friend') {
         const inter = Content.getInteraction('message_friend');
+        if (inter && onAction) onAction(/** @type {Interaction} */ (inter));
+      } else if (action === 'toggle_phone_silent') {
+        const inter = Content.getInteraction('toggle_phone_silent');
         if (inter && onAction) onAction(/** @type {Interaction} */ (inter));
       }
     }

@@ -112,7 +112,7 @@ Outfit prose is static per set. No weather-appropriate clothing, no choosing wha
 
 **Personalization layer (not yet implemented):** Phone background (wallpaper image or color), lock screen photo, ringtone/notification sounds — cosmetic player choices that make the phone feel owned. Set via a Settings app. Each change is a recorded action (it changes persistent state, the replay should show it). The right wallpaper is a tiny assertion of selfhood.
 
-**`toggle_phone_silent` temporarily inaccessible** — the old phone-mode action list is gone and silent toggle hasn't been placed in the new UI yet. Should live on the home screen (a small ringer icon or silent indicator the player can tap). Currently the silent state can still be set via replay but not by live play.
+~~**`toggle_phone_silent` temporarily inaccessible**~~ — **FIXED.** Silence toggle on home screen (tap to mute); "silent" indicator in status bar on all screens (tap to unmute).
 
 **Face-down DND** — some phones (and some people) use placing the phone face-down as a temporary "don't interrupt me" gesture. Could be a location-specific interaction (put_phone_facedown at kitchen table, desk, bedside, bathroom counter before shower) that suppresses notifications until the player picks it back up. Different texture from full silent mode — not a setting, just a posture. The phone is still there, still accumulating messages; you're just choosing not to see them right now.
 

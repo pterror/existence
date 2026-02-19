@@ -217,7 +217,7 @@ do_work, work_break, talk_to_coworker, check_phone_work
 buy_groceries, buy_cheap_meal, browse_store
 
 ### Phone Mode (5, triggered from phone UI)
-read_messages (backward-compat replay only), reply_to_friend, message_friend, toggle_phone_silent (currently inaccessible in new UI — TODO), put_phone_away
+read_messages (backward-compat replay only), reply_to_friend, message_friend, toggle_phone_silent (home screen mute + status bar silent indicator), put_phone_away
 
 ### Global (1, available anywhere with phone)
 call_in (call in sick — morning only, work hours)
