@@ -120,6 +120,8 @@ Outfit prose is static per set. No weather-appropriate clothing, no choosing wha
 
 **Still missing:** Calling (vs texting), the different way each friend responds to prolonged vs brief absence, reaching out when no guilt exists (purely wanting to connect). Compulsive checking vs avoidance as distinct behavioral patterns.
 
+**Phone OS flavor** — the UI currently has no platform identity. Characters could have iOS or Android phones (generated at chargen), and the UI would reflect that: different typography weight, bubble alignment conventions, status bar layout, notification shade vs control center, app icon grid vs app drawer. Further flavor: older iOS versions (skeuomorphic textures, different type scale), Android manufacturer skins (Samsung One UI density, older HTC Sense warmth). The phone model is part of the character — a cracked-screen Android on a prepaid plan is a different object than a three-year-old iPhone with a case. Platform should be generated from economic origin and backstory (flagship → comfortable+, mid-range → careful, prepaid/old → tight/broke), stored on character, and drive the CSS class applied to the phone overlay.
+
 ### Age-specific content
 age_stage is a number (22–48 default range) but no prose varies by age. DESIGN.md describes radically different daily textures for children, teens, young adults, adults, older adults — different work, different money sources, different phone use, different constraints.
 
