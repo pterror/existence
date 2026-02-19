@@ -145,7 +145,8 @@ This is distinct from "no numbers ever appear." The world contains quantities th
 **Tier functions, not inline scalars.** When content.js needs to branch on a continuous state variable, use a tier function in state.js that returns a named qualitative label — `messTier()` → `'cluttered'`, `energyTier()` → `'exhausted'`, etc. Content.js branches on those labels, never on `State.get('x') > 47`. Tier thresholds live in one place, carry meaning through their names, and keep raw numbers entirely out of prose logic. Location descriptions, interaction available checks, and event text all follow this rule. The same applies to NT conditionals in deterministic modifiers — use `aden > 65` as a readable threshold, not a magic scalar buried in a chain of comparisons.
 
 **Prose:**
-- No numbers, stats, or system voice in player-facing text
+- No simulation variables in player-facing text — no energy values, stress levels, NT readings, job standing scores
+- No system voice — the simulation never speaks directly to the player about what it's doing
 - State affects prose through qualitative tiers, not numeric thresholds exposed to the player
 - The same moment reads differently depending on hidden state
 - Prose leads, simulation follows. If the text needs a phone inbox to feel real, build the inbox. Don't hollow out prose to match a thin simulation — deepen the simulation to support the prose.
@@ -184,7 +185,7 @@ Scope is optional (e.g., `state`, `content`, `ui`).
 ## Negative Constraints
 
 Do not:
-- Show any numbers, meters, or stats to the player
+- Surface simulation internals as visible numbers, meters, or labels — NT values, energy levels, stress scores, job standing, drift rates
 - Use `Math.random()` or `Date.now()` in simulation code
 - Force the player through a prescribed sequence — the world responds, it doesn't herd
 - Add game chrome, HUD elements, or anything that looks like a "game UI"
