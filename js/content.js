@@ -9,6 +9,7 @@ export function createContent(ctx) {
   const Events = ctx.events;
   const Dishes = ctx.dishes;
   const Linens = ctx.linens;
+  const Clothing = ctx.clothing;
 
   // --- Relationship prose tables ---
   // Keyed on flavor archetype. Name is the only dynamic part.
@@ -765,15 +766,17 @@ export function createContent(ctx) {
         }
       }
 
-      // Mess details — still from apartment_mess (clothes tracking comes with Clothing module)
-      if (mess === 'chaotic') {
-        desc += ' Clothes that have been on the floor long enough to stop looking fallen. Things that migrated from where they lived and didn\'t go back. The room has a layer to it now.';
-      } else if (mess === 'messy') {
-        desc += ' The chair in the corner has become a wardrobe. The floor has its own arrangement of things moved and not moved back.';
-      } else if (mess === 'cluttered') {
-        desc += ' Things out of place. A pile forming somewhere. The kind of disorder that arrives without any particular decision.';
-      } else if (mess === 'tidy') {
+      // Floor clothes — from Clothing module
+      const floorClothes = Clothing.floorDescription('bedroom');
+      if (floorClothes) {
+        desc += ' ' + floorClothes;
+      }
+
+      // General mess — still from apartment_mess (residual clutter not tracked by objects)
+      if (!floorClothes && mess === 'tidy') {
         desc += ' It\'s relatively in order in here. The surfaces have their surfaces back.';
+      } else if (mess === 'chaotic') {
+        desc += ' Things that migrated from where they lived and didn\'t go back. The room has a layer to it now.';
       }
 
       // Bed state — from Linens
@@ -1239,6 +1242,9 @@ export function createContent(ctx) {
           State.set('fridge_food', Math.max(0, State.get('fridge_food') - 1));
         }
 
+        // Undress — destination depends on energy + mood
+        Clothing.undress(State.energyTier(), State.moodTone(), State.get('location'));
+
         // Reset wake-period flags
         State.wakeUp();
         Linens.noteSlept();
@@ -1502,16 +1508,18 @@ export function createContent(ctx) {
       available: () => !State.get('dressed'),
       execute: () => {
         State.set('dressed', true);
+        Clothing.wear();
         State.advanceTime(5);
         Events.record('got_dressed');
 
         const mood = State.moodTone();
-        const mess = State.messTier();
+        // Messy outfit when grabbing from the floor (low wearable items) or bad mood
+        const grabbingFromFloor = Clothing.wearableItems().length === 0;
 
         if (mood === 'numb' || mood === 'heavy') {
           return Character.get('outfit_low_mood');
         }
-        if (mess === 'messy' || mess === 'chaotic') {
+        if (grabbingFromFloor) {
           return Character.get('outfit_messy');
         }
         return Character.get('outfit_default');
