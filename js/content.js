@@ -3496,12 +3496,11 @@ export function createContent(ctx) {
       id: 'buy_coffee_store',
       label: 'Get a coffee',
       location: 'corner_store',
-      available: () => State.canAfford(2) && State.caffeineTier() !== 'high',
+      available: () => State.canAfford(2.25) && State.caffeineTier() !== 'high',
       execute: () => {
-        const cost = Timeline.randomFloat(1.75, 3.00);
-        const roundedCost = Math.round(cost * 100) / 100;
+        const cost = 2.25;
 
-        if (!State.spendMoney(roundedCost)) {
+        if (!State.spendMoney(cost)) {
           return 'Not enough. You put it back.';
         }
 
