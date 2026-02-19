@@ -84,7 +84,7 @@ Two health tracks: chronic conditions (permanent, per-character) and acute illne
 **Acute illness (flu / cold / GI):**
 - `illness_severity` (0–1), `illness_type` (null|'flu'|'cold'|'gi'), `illness_day`, `illness_medicated` (boolean, resets each wakeUp)
 - `illnessTier()` — 'healthy' | 'unwell' | 'sick' | 'very_sick'
-- **Onset:** probabilistic each sleep (base 4%, +4% if high stress, +4% if sleep debt, +2% if worked). Always 2 balanced RNG calls per sleep regardless of health state.
+- **Onset:** probabilistic each sleep (base 0.7%, +0.5% stress, +0.5% sleep debt, +0.3% worked → max ~2%). ~2–3 illnesses/year at baseline; chronic stress/deprivation roughly triples it. Always 2 balanced RNG calls per sleep regardless of health state.
 - **Arc:** severity 0.2 at onset → grows for 2 days (peak ~0.56 unmedicated) → recovers ~0.12–0.22/day. Working while sick cuts recovery to 40%.
 - **NT effects per tick:** adenosine pushed up (illness fatigue), NE elevated (body ache), dopamine suppressed (no motivation). Medicated = 40% impact.
 - **Hunger:** appetite suppressed — rate scaled by `max(0.3, 1 - severity * 0.7)`.

@@ -1504,10 +1504,11 @@ export function createContent(ctx) {
         const illnessRoll1 = Timeline.random();
         const illnessRoll2 = Timeline.randomInt(0, 3);
         if (State.illnessTier() === 'healthy') {
-          const stressRisk  = State.get('stress') > 60      ? 0.04 : 0;
-          const debtRisk    = State.get('sleep_debt') > 480 ? 0.04 : 0;
-          const workedRisk  = State.get('at_work_today')    ? 0.02 : 0;
-          const baseChance  = 0.04 + stressRisk + debtRisk + workedRisk;
+          // Base ~0.7%/sleep → illness every ~140 days (~2-3/year). Risk factors can triple it.
+          const stressRisk  = State.get('stress') > 60      ? 0.005 : 0;
+          const debtRisk    = State.get('sleep_debt') > 480 ? 0.005 : 0;
+          const workedRisk  = State.get('at_work_today')    ? 0.003 : 0;
+          const baseChance  = 0.007 + stressRisk + debtRisk + workedRisk;
           if (illnessRoll1 < baseChance) {
             const types = ['flu', 'cold', 'cold', 'gi']; // cold more common
             State.set('illness_severity', 0.2);
