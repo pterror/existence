@@ -240,6 +240,10 @@ export function createState(ctx) {
       surfaced_late: 0,
       surfaced_mess: 0,
 
+      // Laundry async state
+      laundry_phase: 'none',    // 'none' | 'washing' | 'drying' | 'done'
+      laundry_phase_started: 0, // State.get('time') when current phase began
+
       // Observation tracking — fidelity degrades with distance from last observation
       last_observed_time: 6 * 60 + 30,   // alarm time
       last_observed_money: 47.50,         // matches default starting money

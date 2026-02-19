@@ -2062,42 +2062,77 @@ export function createContent(ctx) {
       },
     },
 
-    do_laundry: {
-      id: 'do_laundry',
-      label: 'Do laundry',
+    start_laundry: {
+      id: 'start_laundry',
+      label: 'Start a load of laundry',
       location: 'apartment_bedroom',
-      available: () => Clothing.dirtyCount() > 5 && State.energyTier() !== 'depleted',
+      available: () => Clothing.dirtyCount() > 5
+        && State.get('laundry_phase') === 'none'
+        && State.energyTier() !== 'depleted',
+      execute: () => {
+        State.set('laundry_phase', 'washing');
+        State.set('laundry_phase_started', State.get('time'));
+        State.adjustEnergy(-3);
+        State.advanceTime(5);
+
+        const mood = State.moodTone();
+        if (mood === 'numb' || mood === 'heavy') {
+          return 'You gather the dirty clothes and load the washer. It starts up. You have about half an hour before you need to think about it again.';
+        }
+        return Timeline.weightedPick([
+          { weight: 1, value: 'You load the washer and start it. Thirty-five minutes and you\'ll need to move it to the dryer. Until then it\'s not your problem.' },
+          { weight: 1, value: 'Laundry in, machine started. The pile is someone else\'s problem for the next half hour.' },
+        ]);
+      },
+    },
+
+    move_to_dryer: {
+      id: 'move_to_dryer',
+      label: 'Move laundry to dryer',
+      location: 'apartment_bedroom',
+      available: () => State.get('laundry_phase') === 'washing'
+        && (State.get('time') - State.get('laundry_phase_started')) >= 35,
+      execute: () => {
+        State.set('laundry_phase', 'drying');
+        State.set('laundry_phase_started', State.get('time'));
+        State.adjustEnergy(-2);
+        State.advanceTime(5);
+
+        return Timeline.weightedPick([
+          { weight: 1, value: 'You move the wet clothes to the dryer, start it. Forty-five minutes. Go.' },
+          { weight: 1, value: 'Washer done, dryer started. Now you wait again.' },
+          { weight: 1, value: 'Wet clothes into the dryer. It starts its tumble. Another forty-five minutes.' },
+        ]);
+      },
+    },
+
+    fold_laundry: {
+      id: 'fold_laundry',
+      label: 'Fold and put away laundry',
+      location: 'apartment_bedroom',
+      available: () => State.get('laundry_phase') === 'drying'
+        && (State.get('time') - State.get('laundry_phase_started')) >= 45,
       execute: () => {
         Clothing.wash();
-        State.adjustEnergy(-10);
-        State.adjustStress(-3);  // one less thing
-        State.advanceTime(90);
+        State.set('laundry_phase', 'none');
+        State.adjustEnergy(-5);
+        State.adjustStress(-3);
+        State.advanceTime(10);
         Events.record('did_laundry');
 
         const mood = State.moodTone();
         const ser = State.get('serotonin');
-        const aden = State.get('adenosine');
 
         if (mood === 'numb' || mood === 'heavy') {
           return Timeline.weightedPick([
-            { weight: 1, value: 'An hour and a half at the laundromat. Sitting with other people who are also sitting. You come back with clean clothes and not much else.' },
-            { weight: 1, value: 'You do the laundry. The machines run. You wait. You come back. The clothes are clean now. That\'s a thing that happened.' },
-            { weight: State.lerp01(ser, 35, 20), value: 'The laundromat. The hot-air smell of dryers, the hum of the machines. An hour of sitting in a plastic chair not being at home, which is something. You come back with clean clothes and ninety minutes less to account for.' },
+            { weight: 1, value: 'You fold everything and put it away. The drawer isn\'t empty anymore. That\'s something.' },
+            { weight: 1, value: 'Folded, stacked, put away. The pile is gone. It\'ll be back. For now it\'s gone.' },
           ]);
-        }
-        if (mood === 'fraying') {
-          return Timeline.weightedPick([
-            { weight: 1, value: 'You take the laundry down and sit with it while it runs. Ninety minutes where your job is just to wait. Smaller than usual. That helps, a little.' },
-            { weight: 1, value: 'The laundromat is warm. You sit. The machines run. Nobody needs anything from you for an hour and a half. The clothes come out clean.' },
-          ]);
-        }
-        if (aden > 65) {
-          return 'You take the laundry in a state of low-grade fog. Wait for it. Come back with clean clothes. Somewhere in there ninety minutes passed.';
         }
         return Timeline.weightedPick([
-          { weight: 1, value: 'Laundry done. You come back with clean clothes and room in the drawer and one less thing piled up.' },
-          { weight: 1, value: 'You do the laundry. Ninety minutes and the pile is dealt with. The drawer isn\'t empty anymore.' },
-          { weight: State.lerp01(ser, 50, 70), value: 'A load of laundry and ninety minutes of waiting. You come back to clean clothes folded on the bed. Small satisfaction, the kind that comes from finishing things.' },
+          { weight: 1, value: 'You fold and put everything away. Clean clothes in the drawer, the pile gone. One less thing.' },
+          { weight: 1, value: 'Laundry folded and away. The room looks intentional again. Small thing, but real.' },
+          { weight: State.lerp01(ser, 50, 70), value: 'You fold everything — actually fold it, put it away in the right places. The drawer is full again. Something in you settles when you close it.' },
         ]);
       },
     },
@@ -4210,8 +4245,16 @@ export function createContent(ctx) {
       return 'Make the bed.';
     },
 
-    do_laundry: () => {
-      return 'Laundry.';
+    start_laundry: () => {
+      return 'Start the laundry.';
+    },
+
+    move_to_dryer: () => {
+      return 'Move to the dryer.';
+    },
+
+    fold_laundry: () => {
+      return 'Fold the laundry.';
     },
 
     tidy_clothes: () => {
