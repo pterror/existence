@@ -910,6 +910,7 @@ export function createContent(ctx) {
       const time = State.timePeriod();
       const energy = State.energyTier();
       const mood = State.moodTone();
+      const temp = State.temperatureTier();
 
       let desc = '';
 
@@ -931,6 +932,12 @@ export function createContent(ctx) {
       } else {
         desc = 'Grey. Everything out here is some shade of grey today.';
       }
+
+      // Temperature
+      if (temp === 'bitter')   desc += ' Bitter cold. Each breath is a small shock.';
+      else if (temp === 'freezing') desc += ' The cold cuts through whatever you\'re wearing.';
+      else if (temp === 'cold')     desc += ' Cold out. You feel it.';
+      else if (temp === 'hot')      desc += ' Warm out. The air has weight.';
 
       // Time
       if (time === 'early_morning' || time === 'morning') {
@@ -970,6 +977,12 @@ export function createContent(ctx) {
       if (weather === 'drizzle') {
         desc += ' The shelter doesn\'t quite cover the bench.';
       }
+
+      const temp = State.temperatureTier();
+      if (temp === 'bitter')   desc += ' Your feet are already numb.';
+      else if (temp === 'freezing') desc += ' The cold makes standing here miserable.';
+      else if (temp === 'cold')     desc += ' Cold. You pull your jacket tighter.';
+      else if (temp === 'hot')      desc += ' No shade worth speaking of.';
 
       if (energy === 'depleted') {
         desc += ' The bench is the best thing here.';
@@ -3961,8 +3974,11 @@ export function createContent(ctx) {
 
     'move:street': () => {
       const mood = State.moodTone();
-      if (mood === 'heavy') return 'Out. You\'re heading out.';
+      const temp = State.temperatureTier();
+      const cold = temp === 'bitter' || temp === 'freezing';
+      if (mood === 'heavy') return cold ? 'Out. It\'s cold.' : 'Out. You\'re heading out.';
       if (mood === 'fraying') return 'Door. Air. Outside.';
+      if (cold && temp === 'bitter') return 'Door. Brace for the cold.';
       return 'Door.';
     },
 

@@ -162,6 +162,11 @@ export function createState(ctx) {
       // One cup of coffee ≈ 50 units.
       caffeine_level: 0,
 
+      // Environment
+      // Temperature in celsius. Set by updateWeather() in world.js.
+      // Baseline from latitude + season; weather shifts it ±3°C.
+      temperature: 15,
+
       // Flags and soft state
       alarm_time: 6 * 60 + 30,  // Minutes since midnight. When the alarm fires.
       alarm_set: true,
@@ -627,6 +632,41 @@ export function createState(ctx) {
     if (c < 30) return 1.0;
     // Linear from 1.0 at 30 → 0.65 at 100
     return Math.max(0.65, 1.0 - (c - 30) * 0.005);
+  }
+
+  // --- Temperature ---
+
+  /**
+   * Seasonal temperature baseline in celsius from latitude + current season.
+   * Formula calibrated to real-world means ± seasonal amplitude.
+   * Tropical: ~27-30°C year-round. Temperate lat 42: ~1–19°C range.
+   */
+  function seasonalTemperatureBaseline() {
+    const absLat = Math.abs(s.latitude);
+    const mean = 30 - 0.5 * absLat; // lat 0 → 30, lat 42 → 9, lat 58 → 1
+    if (absLat < 23.5) {
+      // Tropical: slight wet/dry variation (±2°C)
+      const sn = season();
+      return sn === 'wet' ? mean + 2 : mean - 2;
+    }
+    // Temperate: amplitude scales with latitude beyond tropics
+    const amplitude = (absLat - 23.5) / 43 * 22; // 0 at tropical edge, ~22°C at lat 66.5
+    const sn = season();
+    if (sn === 'summer') return mean + amplitude;
+    if (sn === 'winter') return mean - amplitude;
+    return mean; // spring/autumn at mean
+  }
+
+  /** Qualitative temperature label. Content branches on these. */
+  function temperatureTier() {
+    const t = s.temperature;
+    if (t < -5)  return 'bitter';
+    if (t < 5)   return 'freezing';
+    if (t < 10)  return 'cold';
+    if (t < 16)  return 'cool';
+    if (t < 22)  return 'mild';
+    if (t < 28)  return 'warm';
+    return 'hot';
   }
 
   function timePeriod() {
@@ -1689,6 +1729,9 @@ export function createState(ctx) {
     consumeCaffeine,
     adenosineBlock,
     caffeineSleepInterference,
+    // Temperature
+    seasonalTemperatureBaseline,
+    temperatureTier,
   };
 }
 

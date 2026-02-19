@@ -48,9 +48,14 @@ Derived from character `latitude` (-90 to 90). Methods on State:
 - `dayLengthHours()` — hours of daylight, astronomical formula from lat + day of year
 - `sunriseHour()`, `sunsetHour()` — fractional hours since midnight
 - `isDaytime()`, `isSunrise()`, `isSunset()` — bool queries (sunrise/sunset within 30 min)
-- Daylight exposure tracking now uses actual astronomical sunrise/sunset window (was hardcoded 6–20)
+- Daylight exposure tracking uses actual astronomical sunrise/sunset window
 
-Temperature: ○ not tracked.
+Temperature:
+- `temperature` state var (celsius). Set by `World.updateWeather()` from `seasonalTemperatureBaseline()` + weather offset (drizzle -3, overcast -1).
+- `seasonalTemperatureBaseline()` — from latitude + season. lat 0 → 30°C, lat 42 → ~9°C mean, with seasonal ±amplitude.
+- `temperatureTier()` — 'bitter' | 'freezing' | 'cold' | 'cool' | 'mild' | 'warm' | 'hot'
+- Used in street, bus_stop descriptions; move:street approaching prose.
+- Diurnal variation ○.
 
 ### Substances (caffeine)
 - **caffeine_level** (0–100 state var) — one cup ≈ 50 units. Half-life 5h, metabolized in `advanceTime`.

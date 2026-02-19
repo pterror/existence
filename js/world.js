@@ -241,6 +241,10 @@ export function createWorld(ctx) {
     const newWeather = Timeline.weightedPick(weathers);
     State.set('weather', newWeather);
     State.set('rain', newWeather === 'drizzle');
+    // Temperature: seasonal baseline shifted by weather condition
+    const base = State.seasonalTemperatureBaseline();
+    const weatherOffset = newWeather === 'drizzle' ? -3 : newWeather === 'overcast' ? -1 : 0;
+    State.set('temperature', Math.round((base + weatherOffset) * 10) / 10);
   }
 
   function isInside() {

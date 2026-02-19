@@ -283,7 +283,7 @@ Weather.set(condition)
 Weather.setTemperature(celsius)
 ```
 
-**Status:** `Weather.current()` = State.get('weather') ✓. Temperature ○ (not tracked). `season()` ✓ on State. `hemisphere()`, `climateZone()` ✓ on State. `dayLengthHours()`, `sunriseHour()`, `sunsetHour()`, `isDaytime()`, `isSunrise()`, `isSunset()` ✓ on State — astronomical formula from lat + date. Daylight exposure now uses actual sunrise/sunset window. Temperature ○.
+**Status:** `Weather.current()` = State.get('weather') ✓. `season()`, `hemisphere()`, `climateZone()` ✓ on State. `dayLengthHours()`, `sunriseHour()`, `sunsetHour()`, `isDaytime()`, `isSunrise()`, `isSunset()` ✓ on State — astronomical formula from lat + date. `temperature` state var ✓ — set by `World.updateWeather()` from seasonal baseline + weather offset. `temperatureTier()` ✓ → 'bitter' | 'freezing' | 'cold' | 'cool' | 'mild' | 'warm' | 'hot'. Used in street/bus_stop descriptions and move approaching prose. Diurnal temperature variation ○.
 
 ---
 
