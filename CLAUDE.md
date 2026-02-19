@@ -60,9 +60,11 @@ No build step. Plain JS loaded via script tags.
 
 ## Design Principles
 
-**The simulation stays invisible.** No numbers, meters, labels, or system voice. Ever. The player never sees the simulation.
+**The simulation stays invisible.** The simulation runs many internal variables — NT levels, energy, stress, job standing, drift rates. The player never sees any of them directly. What they see is what those variables produce: prose that reads differently, options that aren't available, moments that cost more. The simulation's own accounting language never surfaces as meters, labels, or system voice.
 
-**Player choices that involve quantities need player input.** "The simulation stays invisible" means hiding simulation internals — energy cost of travel, stress from a bus ride, NT drift rates. It does not mean replacing player decisions with arbitrary constants or random draws. When the player is deciding *how much* (how much to send a friend, how many items to buy), that quantity is theirs. Build the input. Never substitute a fixed number or RNG for a decision the player is actually making. The distinction: simulation consequences are hidden; player choices are explicit.
+This is distinct from "no numbers ever appear." The world contains quantities the character would actually know — what things cost, roughly how much money they have, what time it is. Those can surface, in the character's own terms, imprecisely. The bus fare is part of the world; the energy penalty for the journey is not. What stays invisible is the model's internal state, not the world's.
+
+**Player choices that involve quantities need player input.** When the player is deciding how much — how much to send a friend, how many items to buy — that quantity belongs to them. Don't substitute it with a fixed constant or a random draw. Build the input. The simulation models consequences of choices; it doesn't make choices on the player's behalf.
 
 **Opaque constraints.** The player never sees the full action space or why things aren't available. Things just aren't there when they can't be.
 
