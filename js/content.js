@@ -1504,11 +1504,10 @@ export function createContent(ctx) {
         const illnessRoll1 = Timeline.random();
         const illnessRoll2 = Timeline.randomInt(0, 3);
         if (State.illnessTier() === 'healthy') {
-          // Derived from epidemiology: adults average ~4-5 illness episodes/year
-          // (2-3 colds + ~1 flu + ~1 GI). At 365 sleeps/year: 4.5/365 ≈ 0.012/sleep.
-          // Base is lower (~0.007) because job exposure carries the rest. Risk modifiers
-          // are approximation debt — stress/sleep suppression is real but magnitudes are
-          // not derived. Should eventually come from immune function model.
+          // Approximation debt: all magnitudes need calibration against real incidence data.
+          // No seasonal variation, no recent-illness immunity, no job-type exposure rates.
+          // Should eventually derive from: immune function state, job type (food service
+          // vs remote), season/climate, recent illness history.
           const stressRisk  = State.get('stress') > 60      ? 0.005 : 0;
           const debtRisk    = State.get('sleep_debt') > 480 ? 0.005 : 0;
           const workedRisk  = State.get('at_work_today')    ? 0.003 : 0;
