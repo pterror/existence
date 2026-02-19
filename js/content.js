@@ -2318,6 +2318,16 @@ export function createContent(ctx) {
         const energy = State.energyTier();
         const aden = State.get('adenosine');
         const mood = State.moodTone();
+        const hunger = State.hungerTier();
+        const fridge = State.fridgeTier();
+
+        // Drinking water because there's nothing to eat — specific texture
+        if (fridge === 'empty' && (hunger === 'very_hungry' || hunger === 'starving')) {
+          return 'You drink a glass of water. It isn\'t what your body wants. It takes the edge off, slightly, for now.';
+        }
+        if (fridge === 'empty' && hunger === 'hungry') {
+          return 'You fill a glass and drink it. There\'s nothing in the fridge. This will have to do for now.';
+        }
 
         if (energy === 'depleted' || energy === 'exhausted') {
           return 'Water from the tap. You drink it standing at the sink. Your body wanted it more than you realized.';

@@ -222,7 +222,13 @@ All three jobs are day shifts. DESIGN.md doesn't prescribe this. Being awake at 
 
 ### Existing systems that need deepening
 
-~~**Money is a one-way drain.**~~ — **FIXED.** Financial cycle implemented: paychecks (biweekly, attendance-based), rent/utilities/phone (monthly auto-deduct), life history backstory. Partial fix: food_service workers can now eat at work once per shift (`eat_at_work` interaction). Still needs: food bank, asking to borrow money from friends, office/retail workers going hungry with no recourse. The gradient breaks hardest for non-food-service characters with empty fridge and no money — there's literally nothing they can do for hunger except wait for their situation to change. That's realistic but needs to be intentional, not accidental — and the character should feel it in prose regardless.
+~~**Money is a one-way drain.**~~ — **FIXED.** Financial cycle implemented: paychecks (biweekly, attendance-based), rent/utilities/phone (monthly auto-deduct), life history backstory. Partial fix: food_service workers can now eat at work once per shift (`eat_at_work`). **Gradient at $0:**
+- `drink_water` exists and gives -3 hunger — not satisfying but it's real; prose should acknowledge it more when used as a hunger-management strategy, not just hydration
+- Dry pantry — fridge can be empty but most people have shelf-stable things (ramen, rice, crackers, a tin of beans). A separate `pantry_food` pool, stocked at different rate than fridge, distinct from "there is no food here." This is the most honest next step.
+- Office/retail workers at work: break room has something (vending machine costs money; but coworker might offer something, or there's communal food). Not designed yet.
+- Asking a friend for money / asking them to grab something: phone interaction, not yet built.
+- Food bank: real option, needs a location or a travel path.
+- The character who is genuinely out of all options — broke, empty fridge, empty pantry, not at work — is experiencing something real. That experience needs prose weight, not just absence of actions.
 
 **Job standing is mechanical, not social.** Decay: late > 15min = -5, calling in = -8. Recovery added: on-time arrival +2, focused task completion +1. Still no social dynamics (coworker relationships don't affect standing), no variation by job type, no pattern-based assessment (single incident treated same as chronic pattern). Standing should be relational — shaped by what the specific job values, whether someone saw you, whether someone covered for you. See the expanded Work section in DESIGN.md.
 
