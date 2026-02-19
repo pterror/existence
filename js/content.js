@@ -1987,7 +1987,7 @@ export function createContent(ctx) {
       id: 'do_dishes',
       label: 'Deal with the dishes',
       location: 'apartment_kitchen',
-      available: () => Dishes.dirtyCount() > 0 && State.get('energy') > 15,
+      available: () => Dishes.dirtyCount() > 0 && State.energyTier() !== 'depleted',
       execute: () => {
         Dishes.wash();
         // Also reduce apartment_mess — still tracks general disorder until Clothing covers it
@@ -2131,7 +2131,7 @@ export function createContent(ctx) {
       id: 'shower',
       label: 'Take a shower',
       location: 'apartment_bathroom',
-      available: () => !State.get('showered') && State.get('energy') > 8,
+      available: () => !State.get('showered') && State.energyTier() !== 'depleted',
       execute: () => {
         State.set('showered', true);
         Linens.useTowel();
@@ -2207,7 +2207,7 @@ export function createContent(ctx) {
       id: 'sit_on_step',
       label: 'Sit on the step for a minute',
       location: 'street',
-      available: () => State.get('energy') < 50,
+      available: () => ['depleted', 'exhausted', 'tired'].includes(State.energyTier()),
       execute: () => {
         State.adjustEnergy(3);
         State.advanceTime(Timeline.randomInt(5, 12));
@@ -2229,7 +2229,7 @@ export function createContent(ctx) {
       id: 'go_for_walk',
       label: 'Walk for a while',
       location: 'street',
-      available: () => State.get('energy') > 15,
+      available: () => State.energyTier() !== 'depleted',
       execute: () => {
         const mood = State.moodTone();
         const weather = State.get('weather');
@@ -2463,15 +2463,15 @@ export function createContent(ctx) {
       id: 'work_break',
       label: 'Step away for a minute',
       location: 'workplace',
-      available: () => State.get('energy') < 60 || State.get('stress') > 40,
+      available: () => !['okay', 'rested', 'alert'].includes(State.energyTier()) || !['calm', 'baseline'].includes(State.stressTier()),
       execute: () => {
         State.adjustEnergy(5);
         State.adjustStress(-5);
 
         // The need to escape is itself a signal
-        if (State.get('stress') > 40) {
+        if (['tense', 'strained', 'overwhelmed'].includes(State.stressTier())) {
           State.adjustSentiment('work', 'dread', 0.005);
-        } else if (State.sentimentIntensity('work', 'dread') > 0 && State.get('stress') <= 30) {
+        } else if (State.sentimentIntensity('work', 'dread') > 0 && ['calm', 'baseline'].includes(State.stressTier())) {
           // A relaxed break at work gently challenges dread
           State.adjustSentiment('work', 'dread', -0.005);
         }
@@ -2489,7 +2489,7 @@ export function createContent(ctx) {
       id: 'talk_to_coworker',
       label: 'Say something to someone nearby',
       location: 'workplace',
-      available: () => State.get('social') < 70 && State.get('energy') > 10 && State.isWorkHours(),
+      available: () => State.socialTier() !== 'warm' && State.energyTier() !== 'depleted' && State.isWorkHours(),
       execute: () => {
         const mood = State.moodTone();
 
@@ -2509,10 +2509,10 @@ export function createContent(ctx) {
 
         // Accumulate coworker sentiments based on mood
         // Cross-reduction: good interactions gently challenge irritation, bad ones challenge warmth
-        if (mood === 'present' || mood === 'clear' || State.get('stress') < 35) {
+        if (mood === 'present' || mood === 'clear' || ['calm', 'baseline'].includes(State.stressTier())) {
           State.adjustSentiment(slot, 'warmth', 0.02);
           State.adjustSentiment(slot, 'irritation', -0.008);
-        } else if (mood === 'fraying' || mood === 'heavy' || mood === 'numb' || State.get('stress') > 60) {
+        } else if (mood === 'fraying' || mood === 'heavy' || mood === 'numb' || ['strained', 'overwhelmed'].includes(State.stressTier())) {
           State.adjustSentiment(slot, 'irritation', 0.015);
           State.adjustSentiment(slot, 'warmth', -0.005);
         }
@@ -3729,8 +3729,7 @@ export function createContent(ctx) {
 
     eat_food: () => {
       const mood = State.moodTone();
-      const hunger = State.get('hunger');
-      if (hunger > 70) return 'You need to eat something.';
+      if (['very_hungry', 'starving'].includes(State.hungerTier())) return 'You need to eat something.';
       if (mood === 'numb') return 'You open the fridge. Standing there.';
       if (mood === 'heavy') return 'Something from the fridge. Whatever\'s there.';
       return 'Something from the fridge.';
@@ -3840,8 +3839,7 @@ export function createContent(ctx) {
     },
 
     buy_cheap_meal: () => {
-      const hunger = State.get('hunger');
-      if (hunger > 70) return 'Something quick. You\'re hungry.';
+      if (['very_hungry', 'starving'].includes(State.hungerTier())) return 'Something quick. You\'re hungry.';
       return 'Something to eat.';
     },
 
