@@ -3745,8 +3745,8 @@ export function createContent(ctx) {
         const mood = State.moodTone();
         const flavor = friend.flavor || 'warm_quiet';
 
-        // 1 RNG call: amount — what you decide to send ($10–20, capped by what you have)
-        const amount = Math.min(Timeline.randomInt(10, 20), Math.floor(State.get('money')));
+        // Fixed deduction — the simulation needs a number; the decision is whether to help
+        const amount = Math.min(15, Math.floor(State.get('money')));
 
         // 1 RNG call: player's reply
         const playerPools = {
@@ -3795,7 +3795,7 @@ export function createContent(ctx) {
         const thanksText = Timeline.weightedPick(thanksPools[flavor] || thanksPools.warm_quiet);
 
         // 1 RNG call: delay (short — they respond fast when they're the one waiting)
-        const delay = Timeline.randomInt(5, 20); // 4th RNG call
+        const delay = Timeline.randomInt(5, 20);
 
         State.adjustMoney(-amount);
         State.addPendingReply({ slot, arrivesAt: State.get('time') + delay, text: thanksText });
