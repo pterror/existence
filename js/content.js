@@ -2819,16 +2819,27 @@ export function createContent(ctx) {
         const money = State.moneyTier();
         const hunger = State.hungerTier();
 
+        let text;
         if (money === 'broke') {
-          return 'You walk the aisles. Everything has a number attached and the numbers all say no.';
+          text = 'You walk the aisles. Everything has a number attached and the numbers all say no.';
+        } else if (hunger === 'starving' && (money === 'scraping' || money === 'tight')) {
+          text = 'You look at things you want and things you can afford and the overlap is very small.';
+        } else if (money === 'scraping') {
+          text = 'You look at the prices. You know most of them already. They haven\'t gotten better.';
+        } else {
+          text = 'You walk through. The fluorescent aisles. Same stuff as always. You don\'t need anything specific, but you look.';
         }
-        if (hunger === 'starving' && (money === 'scraping' || money === 'tight')) {
-          return 'You look at things you want and things you can afford and the overlap is very small.';
+
+        // NT deterministic modifiers (no RNG — replay-safe)
+        const dopa = State.get('dopamine');
+        const aden = State.get('adenosine');
+        if (money !== 'broke' && dopa < 35) {
+          text += ' Nothing in here catches you. The things are just things.';
+        } else if (aden > 65) {
+          text += ' You move through the aisles without fully seeing them.';
         }
-        if (money === 'scraping') {
-          return 'You look at the prices. You know most of them already. They haven\'t gotten better.';
-        }
-        return 'You walk through. The fluorescent aisles. Same stuff as always. You don\'t need anything specific, but you look.';
+
+        return text;
       },
     },
 
