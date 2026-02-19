@@ -213,7 +213,9 @@ Only 7 locations. No park, no library, no friend's place, no laundromat, no clin
 Coworkers have flavor-driven chatter but no ongoing relationship state. No coworker who notices you've been off. No coworker drama that exists whether or not you engage.
 
 ### Bus ride as experience
-The bus ride is 20 minutes of transition text. Could be its own texture — the specific experience of being a body in transit, the other people, the route, the weather through the window.
+~~The bus ride is 20 minutes of transition text.~~ — **Improved.** `wait_for_bus` and both bus ride directions (`bus_stop→workplace`, `workplace→bus_stop`) now use full mood-branched `Timeline.weightedPick()` prose with NT shading (adenosine, NE, GABA, serotonin). Wait covers all 6 moods × snow/drizzle/clear. Rides vary by rush hour vs off-peak, energy level, weather through the window, what the day was.
+
+**Still missing:** Ambient events during the ride (someone's music, overheard conversation, the specific route), in-ride interactions (checking phone on the bus, noticing something out the window).
 
 ### Night shifts and non-standard schedules
 All three jobs are day shifts. DESIGN.md doesn't prescribe this. Being awake at 3 AM when the world is asleep is a specific texture.

@@ -2913,32 +2913,91 @@ export function createContent(ctx) {
         const mood = State.moodTone();
         const weather = State.get('weather');
         const long = waitTime > 10;
-
-        let text = '';
-
-        if (weather === 'snow') {
-          text = long
-            ? 'Snow on your shoulders. The bus takes a long time. There\'s nowhere warmer within reach.'
-            : 'Snow while you wait. The bus comes.';
-        } else if (weather === 'drizzle') {
-          text = 'Rain collects on the shelter roof and drips from the edge in a line.';
-          if (long) text += ' The bus takes its time.';
-        } else if (mood === 'hollow' || mood === 'quiet') {
-          text = 'You stand there. People come and go. The bus doesn\'t, and then it does.';
-        } else {
-          text = long ? 'The bus takes its time. You wait.' : 'A few minutes. Buses arrive when they arrive.';
-        }
-
-        // NT deterministic modifiers (no RNG — replay-safe)
         const aden = State.get('adenosine');
         const ne = State.get('norepinephrine');
-        if (weather !== 'snow' && aden > 65) {
-          text += ' Your legs are tired from standing.';
-        } else if (ne > 65 && weather !== 'drizzle' && weather !== 'snow') {
-          text += ' The street is a lot of input right now.';
+        const gaba = State.get('gaba');
+        const ser = State.get('serotonin');
+        const dopa = State.get('dopamine');
+
+        if (weather === 'snow') {
+          return Timeline.weightedPick([
+            { weight: 1, value: long ? 'Snow on your shoulders. The bus takes a long time. There\'s nowhere warmer within reach.' : 'Snow while you wait. The bus comes.' },
+            { weight: 1, value: 'The shelter doesn\'t help much with cold. You stand in it anyway. Snow on everything. The bus arrives eventually.' },
+            // High adenosine — cold and tired compound
+            { weight: State.lerp01(aden, 50, 70), value: 'The cold gets into your feet first, then your hands. You shift your weight. Snow on your shoulders.' + (long ? ' The bus takes a long time.' : ' The bus comes.') },
+            // Low serotonin — the wait has more weight than it should
+            { weight: State.lerp01(ser, 40, 20), value: 'Snow, cold, waiting. ' + (long ? 'The bus doesn\'t come and doesn\'t come.' : 'The bus comes.') + ' You get on. That\'s all.' },
+          ]);
         }
 
-        return text;
+        if (weather === 'drizzle') {
+          return Timeline.weightedPick([
+            { weight: 1, value: 'Rain collects on the shelter roof and drips from the edge in a line.' + (long ? ' The bus takes its time.' : '') },
+            { weight: 1, value: 'The shelter covers most of it. You stand in the dry part and wait.' + (long ? ' A long wait.' : '') },
+            // Low GABA — exposed even under cover
+            { weight: State.lerp01(gaba, 42, 22), value: 'The shelter helps with the rain. It doesn\'t help with the feeling of standing in the open.' + (long ? ' The bus is a long time.' : ' The bus comes.') },
+            // High NE — rain sounds are amplified
+            { weight: State.lerp01(ne, 55, 75), value: 'Rain on the shelter roof. Loud in a specific way. The wet street. Headlights. ' + (long ? 'You wait a long time in it.' : 'The bus comes before it gets worse.') },
+          ]);
+        }
+
+        // Clear / overcast / grey — mood is the texture
+        if (mood === 'clear' || mood === 'present') {
+          return Timeline.weightedPick([
+            { weight: 1, value: long ? 'The bus takes its time. You wait, and the waiting is just waiting — the street, the sounds, the air.' : 'A few minutes at the stop. The air is decent. The bus arrives.' },
+            { weight: 1, value: 'You stand at the stop. A couple of people drift up. Someone checks their phone. The bus comes.' },
+            // High NE — the stop is vivid
+            { weight: State.lerp01(ne, 45, 65), value: 'The stop is its own small world — the sounds, the movement. A car passes. A pigeon. Someone checks their watch. The bus comes when it comes.' },
+            // High dopamine — small interest in the scene
+            { weight: State.lerp01(dopa, 50, 70), value: 'You watch the intersection while you wait. Things happen there. The bus turns the corner. You board.' },
+          ]);
+        }
+
+        if (mood === 'fraying') {
+          return Timeline.weightedPick([
+            { weight: 1, value: 'You check the direction it comes from too many times. It comes when it comes.' },
+            { weight: 1, value: 'The wait is hard. You can\'t stand still. The bus arrives before you\'ve decided what to do with yourself.' },
+            // Low GABA — standing in the open is difficult
+            { weight: State.lerp01(gaba, 42, 22), value: 'You keep looking up the street. You can\'t stop yourself. The openness of the stop doesn\'t help — nowhere to put your back. The bus comes.' },
+            // High NE — everything at the stop registers
+            { weight: State.lerp01(ne, 55, 75), value: 'Every car that rounds the corner gets your attention before you can stop it.' + (long ? ' The bus takes a long time. You are extremely ready to be on it.' : ' The bus comes and you move toward it before it stops.') },
+          ]);
+        }
+
+        if (mood === 'heavy') {
+          return Timeline.weightedPick([
+            { weight: 1, value: long ? 'The bus takes its time. You wait in the cold.' : 'You wait at the stop. The bus arrives.' },
+            { weight: 1, value: 'Your bag. Your shoes. Your body wanting to lean on something.' + (long ? ' The bus is a long time coming.' : ' The bus comes.') },
+            // High adenosine — legs want to sit
+            { weight: State.lerp01(aden, 45, 68), value: 'Your legs are tired and you\'ve only been standing for a few minutes.' + (long ? ' The bus takes forever.' : '') + ' You get on when it comes.' },
+          ]);
+        }
+
+        if (mood === 'hollow') {
+          return Timeline.weightedPick([
+            { weight: 1, value: 'You stand there. People come and go. The bus doesn\'t, and then it does.' },
+            { weight: 1, value: 'The stop is exposed. You wait in it. Other people, their lives, the bus.' },
+            // High adenosine — standing hollow and tired
+            { weight: State.lerp01(aden, 45, 65), value: 'Standing is its own kind of tired. You shift your weight from foot to foot. The bus eventually comes.' },
+          ]);
+        }
+
+        if (mood === 'numb') {
+          return Timeline.weightedPick([
+            { weight: 1, value: 'You stand there. The bus will come. It does.' },
+            { weight: 1, value: 'The stop. Other people waiting. The bus.' },
+            // Low serotonin — time doesn't behave
+            { weight: State.lerp01(ser, 35, 15), value: 'You stand at the stop and time doesn\'t do what it\'s supposed to.' + (long ? ' The bus is a long time.' : ' The bus comes.') + ' You get on.' },
+          ]);
+        }
+
+        // flat / default
+        return Timeline.weightedPick([
+          { weight: 1, value: long ? 'The bus takes its time. You wait.' : 'A few minutes. Buses arrive when they arrive.' },
+          { weight: 1, value: 'You stand at the stop. Time passes at the speed it passes. The bus comes.' },
+          // High adenosine — legs want to sit
+          { weight: State.lerp01(aden, 45, 65), value: 'Your legs want you to sit. The bench is full. You stand.' + (long ? ' The bus takes a while.' : ' The bus comes.') },
+        ]);
       },
     },
 
@@ -4119,21 +4178,72 @@ export function createContent(ctx) {
     // Bus ride to work
     if (from === 'bus_stop' && to === 'workplace') {
       const hour = State.getHour();
+      const aden = State.get('adenosine');
+      const ne = State.get('norepinephrine');
+      const gaba = State.get('gaba');
+      const ser = State.get('serotonin');
+      const weather = State.get('weather');
       if (hour >= 7 && hour <= 9) {
-        if (mood === 'numb' || mood === 'heavy') {
-          return 'The bus is full. Bodies pressed together going the same direction. You find a spot to stand and not be. Twenty minutes of that.';
+        // Rush hour
+        if (mood === 'numb' || mood === 'heavy' || mood === 'hollow') {
+          return Timeline.weightedPick([
+            { weight: 1, value: 'The bus is full. Bodies pressed together going the same direction. You find a spot to stand and not be. Twenty minutes of that.' },
+            { weight: 1, value: 'Standing room. You press in and find a hold bar. The bus moves. You move with it. Twenty minutes.' },
+            // High adenosine — the bus sway is almost restful
+            { weight: State.lerp01(aden, 50, 70), value: 'The bus is packed and warm. You close your eyes for most of the ride. The sway. Twenty minutes you barely noticed.' },
+            // Low serotonin — the press of bodies is nothing
+            { weight: State.lerp01(ser, 35, 18), value: 'The bus is full. You find a grip and hold it. Bodies around you, sounds, movement. None of it reaches you. Twenty minutes.' },
+          ]);
         }
-        return 'The morning bus. Standing room only. You wedge in and stare at the back of someone\'s jacket for twenty minutes.';
+        return Timeline.weightedPick([
+          { weight: 1, value: 'The morning bus. Standing room only. You wedge in and stare at the back of someone\'s jacket for twenty minutes.' },
+          { weight: 1, value: 'The bus is packed. You find a hold bar, settle your weight, let it carry you.' },
+          // High NE — the sounds of a packed bus are a lot
+          { weight: State.lerp01(ne, 50, 70), value: 'The morning bus. Brakes, announcements, someone\'s music leaking from headphones, the sound of the city outside. You hold on and get through the twenty minutes.' },
+          // Low GABA — the press of bodies is hard
+          { weight: State.lerp01(gaba, 40, 22), value: 'The bus is packed and you find the least crowded spot and try not to think about it. Twenty minutes of other people\'s proximity.' },
+          // Weather — window texture
+          { weight: weather === 'drizzle' || weather === 'snow' ? 0.8 : 0, value: 'The morning bus. Standing room. You watch the ' + (weather === 'snow' ? 'snow' : 'rain') + ' on the windows for twenty minutes. The city blurs past.' },
+        ]);
       }
-      return 'The bus comes. It\'s quieter this time of day. You find a seat and watch the city slide past the window.';
+      // Off-peak
+      return Timeline.weightedPick([
+        { weight: 1, value: 'The bus comes. It\'s quieter this time of day. You find a seat and watch the city slide past the window.' },
+        { weight: 1, value: 'Off-peak. Seats to choose from. You sit and the route unfolds.' },
+        // High adenosine — the seat and the motion
+        { weight: State.lerp01(aden, 50, 70), value: 'A seat to yourself. The city goes past the window. Your head finds the glass. Twenty minutes that feel almost like a pause.' },
+        // Low serotonin — the ride has weight
+        { weight: State.lerp01(ser, 40, 22), value: 'A seat. You take it. The route you know well enough to not watch. The bus carries you forward anyway.' },
+        // High NE — the quiet bus is still a lot
+        { weight: State.lerp01(ne, 50, 68), value: 'The bus is quiet. You notice the sounds of it anyway — the engine, the doors at each stop, someone shifting in their seat. The city slides past.' },
+      ]);
     }
 
     // Bus ride from work
     if (from === 'workplace' && to === 'bus_stop') {
+      const aden = State.get('adenosine');
+      const ne = State.get('norepinephrine');
+      const ser = State.get('serotonin');
       if (energy === 'depleted' || energy === 'exhausted') {
-        return 'The bus ride back. You sit and close your eyes and exist in the motion of it.';
+        return Timeline.weightedPick([
+          { weight: 1, value: 'The bus ride back. You sit and close your eyes and exist in the motion of it.' },
+          { weight: 1, value: 'A seat. You take it and don\'t move. The city in reverse outside the window. You\'re barely there.' },
+          // High adenosine — the ride is surrender
+          { weight: State.lerp01(aden, 58, 78), value: 'The bus seat holds you. That\'s the job. You close your eyes and the motion of it is the only thing that\'s asking anything of you.' },
+          // Low serotonin — the day comes in pieces
+          { weight: State.lerp01(ser, 38, 18), value: 'You sit down hard. The day sits with you. Eyes closed, the bus brings you home through it.' },
+        ]);
       }
-      return 'The ride back. The city in reverse. You\'re not thinking about work anymore, mostly.';
+      return Timeline.weightedPick([
+        { weight: 1, value: 'The ride back. The city in reverse. You\'re not thinking about work anymore, mostly.' },
+        { weight: 1, value: 'The commute home. The same route, the other direction. People getting on, getting off. The city doing its thing.' },
+        // Clear or present — the ride is decompression
+        { weight: (mood === 'clear' || mood === 'present') ? 1.2 : 0, value: 'The ride back is its own kind of decompression. The city slides past. You sit with what the day was and let the bus carry you out of it.' },
+        // High NE — noticing the route
+        { weight: State.lerp01(ne, 45, 65), value: 'The bus home. Stops, announcements, the sounds of the city through the windows. You watch. You\'re almost off the clock.' },
+        // Heavy or hollow — the ride doesn't erase it
+        { weight: (mood === 'heavy' || mood === 'hollow') ? State.lerp01(ser, 40, 20) : 0, value: 'The bus. The slow passage out of the part of the day that\'s done. You sit with it. It comes with you anyway.' },
+      ]);
     }
 
     // To corner store
