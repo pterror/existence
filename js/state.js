@@ -189,8 +189,9 @@ export function createState(ctx) {
       phone_silent: false,
       viewing_phone: false,
       // Phone navigation — transient, reset on put_phone_away, not meaningful in save
-      phone_screen: 'home',            // 'home' | 'messages' | 'thread'
+      phone_screen: 'home',            // 'home' | 'messages' | 'thread' | 'notifications'
       phone_thread_contact: /** @type {string | null} */ (null), // 'friend1' | 'friend2' | 'supervisor' | 'bank'
+      phone_prev_screen: /** @type {string | null} */ (null),  // screen to return to from notifications
       last_msg_gen_time: 0,     // game time of last generateIncomingMessages call
       work_nagged_today: false, // reset on wake
       // Financial cycle

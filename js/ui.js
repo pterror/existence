@@ -362,25 +362,30 @@ export function createUI(ctx) {
   function buildPhoneStatusBar(timeStr, batteryPct) {
     const batteryClass = batteryPct <= 15 ? ' phone-battery--low' : '';
     const isSilent = State.get('phone_silent');
-    const silentBtn = isSilent
-      ? `<button class="phone-silent-indicator" data-phone-action="toggle_phone_silent">silent</button>`
-      : '';
-    return `<div class="phone-status-bar"><span class="phone-status-time">${timeStr}</span>${silentBtn}<span class="phone-battery-pct${batteryClass}">${Math.round(batteryPct)}%</span></div>`;
+    const silentDot = isSilent ? `<span class="phone-silent-dot" title="Silent"></span>` : '';
+    return `<button class="phone-status-bar" data-phone-nav="notifications"><span class="phone-status-time">${timeStr}</span>${silentDot}<span class="phone-battery-pct${batteryClass}">${Math.round(batteryPct)}%</span></button>`;
+  }
+
+  function buildPhoneNotificationsScreen(timeStr, batteryPct) {
+    const isSilent = State.get('phone_silent');
+    const silentLabel = isSilent ? 'Sound on' : 'Silent';
+    const silentState = isSilent ? 'on' : 'off';
+    return `<div class="phone-notifications">`
+      + `<div class="phone-notif-header"><span class="phone-notif-time">${timeStr}</span><button class="phone-notif-close" data-phone-nav="back">&#x2715;</button></div>`
+      + `<div class="phone-quick-settings">`
+      + `<button class="phone-quick-tile phone-quick-tile--silent-${silentState}" data-phone-action="toggle_phone_silent">${silentLabel}</button>`
+      + `</div>`
+      + `</div>`;
   }
 
   function buildPhoneHomeScreen(timeStr, dateStr, batteryPct, unreadCount) {
     const badge = unreadCount > 0 ? `<span class="phone-app-badge">${unreadCount}</span>` : '';
-    const isSilent = State.get('phone_silent');
-    const silenceBtn = isSilent
-      ? ''
-      : `<button class="phone-silence-toggle" data-phone-action="toggle_phone_silent">Silence</button>`;
     return buildPhoneStatusBar(timeStr, batteryPct)
       + `<div class="phone-home-time">${timeStr}</div>`
       + `<div class="phone-home-date">${dateStr}</div>`
       + `<div class="phone-apps">`
       + `<button class="phone-app" data-phone-nav="messages">Messages${badge}</button>`
       + `</div>`
-      + silenceBtn
       + `<button class="phone-home-bar" data-phone-action="put_phone_away">&#x2014;</button>`;
   }
 
@@ -454,7 +459,9 @@ export function createUI(ctx) {
     const dateStr = phoneDateStr();
 
     let html = '';
-    if (screen === 'messages') {
+    if (screen === 'notifications') {
+      html = buildPhoneNotificationsScreen(timeStr, battery);
+    } else if (screen === 'messages') {
       html = buildPhoneMessagesScreen(timeStr, battery, inbox);
     } else if (screen === 'thread' && threadContact) {
       html = buildPhoneThreadScreen(timeStr, battery, inbox, threadContact);
@@ -499,7 +506,14 @@ export function createUI(ctx) {
 
     if (nav) {
       e.stopPropagation();
-      if (nav === 'home') {
+      if (nav === 'notifications') {
+        State.set('phone_prev_screen', State.get('phone_screen') || 'home');
+        State.set('phone_screen', 'notifications');
+      } else if (nav === 'back') {
+        const prev = State.get('phone_prev_screen') || 'home';
+        State.set('phone_screen', prev);
+        State.set('phone_prev_screen', null);
+      } else if (nav === 'home') {
         State.set('phone_screen', 'home');
         State.set('phone_thread_contact', null);
       } else if (nav === 'messages') {
