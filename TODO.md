@@ -10,7 +10,7 @@ Three-layer prose shading pattern established (see DESIGN.md "Prose-neurochemist
 - ~~`look_out_window`~~ — **DONE.** Dopamine→engagement with the scene, serotonin→emotional distance, GABA→oppressive weather, NE→sensory vividness, adenosine→soft focus.
 - ~~`sit_at_table`~~ — **DONE.** Dopamine→nothing to reach for, serotonin→weight-vs-warmth, GABA→can't-settle, adenosine→heavy sitting, NE→sound awareness.
 - ~~`go_for_walk`~~ — **DONE.** 12 branches (6 mood × 2 weather). Serotonin/dopamine→engagement, NE→sensory vividness/irritation, GABA→anxiety-walks-with-you, adenosine→body drag.
-- Other location descriptions (kitchen, bathroom, street, bus stop, workplace, corner store)
+- ~~Other location descriptions (kitchen, bathroom, street, bus stop, workplace, corner store)~~ — **DONE.** All 7 locations have NE/adenosine/GABA deterministic modifiers.
 
 **Medium impact (periodic):**
 - ~~Work event text (work_task_appears, break_room_noise)~~ — **DONE.** NE→demand sharpness, adenosine→sound blur.

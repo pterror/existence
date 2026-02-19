@@ -432,6 +432,18 @@ export function createContent(ctx) {
         desc += ' The afternoon stretches.';
       }
 
+      // NT deterministic modifiers
+      const ne = State.get('norepinephrine');
+      const aden = State.get('adenosine');
+      const gaba = State.get('gaba');
+      if (ne > 65) {
+        desc += ' Everything in here has an edge today. Keyboard clicks, AC hum, the chair.';
+      } else if (aden > 65) {
+        desc += ' The office blurs slightly. You know what\'s around you without it quite landing.';
+      } else if (gaba < 35) {
+        desc += ' You can\'t settle into the chair.';
+      }
+
       return desc;
     },
 
@@ -476,6 +488,18 @@ export function createContent(ctx) {
         desc += ' The afternoon lull. Fewer customers, more standing.';
       }
 
+      // NT deterministic modifiers
+      const ne = State.get('norepinephrine');
+      const aden = State.get('adenosine');
+      const gaba = State.get('gaba');
+      if (ne > 65) {
+        desc += ' Every loudspeaker announcement, every overhead ding, every aisle transaction. You can\'t filter any of it.';
+      } else if (aden > 65) {
+        desc += ' The store is running and you\'re somewhere inside it. Your body knows what to do.';
+      } else if (gaba < 35) {
+        desc += ' The floor is too open to stand in one place.';
+      }
+
       return desc;
     },
 
@@ -518,6 +542,18 @@ export function createContent(ctx) {
 
       if (time === 'morning' || time === 'early_morning') {
         desc += ' Morning prep. The opening routine your body does without you.';
+      }
+
+      // NT deterministic modifiers
+      const ne = State.get('norepinephrine');
+      const aden = State.get('adenosine');
+      const gaba = State.get('gaba');
+      if (ne > 65) {
+        desc += ' The kitchen sounds are already too much — oil snap, timer beep, metal on metal.';
+      } else if (aden > 65) {
+        desc += ' The rhythm keeps going without you fully inside it. Your hands follow.';
+      } else if (gaba < 35) {
+        desc += ' The pace feels relentless even when it isn\'t.';
       }
 
       return desc;
@@ -1015,6 +1051,18 @@ export function createContent(ctx) {
 
       desc += ' Your apartment building is behind you. The bus stop is down the block. There\'s a corner store across the way.';
 
+      // NT deterministic modifiers
+      const ne = State.get('norepinephrine');
+      const aden = State.get('adenosine');
+      const gaba = State.get('gaba');
+      if (ne > 70) {
+        desc += ' Every car, every voice arrives separately. Too much input for a street.';
+      } else if (aden > 65) {
+        desc += ' The street softens at the edges. You\'re moving through it but not quite in it.';
+      } else if (gaba < 35) {
+        desc += ' The openness doesn\'t help as much as it should.';
+      }
+
       return desc;
     },
 
@@ -1052,6 +1100,18 @@ export function createContent(ctx) {
 
       if (mood === 'hollow' || mood === 'quiet') {
         desc += ' Waiting. That\'s what this place is for.';
+      }
+
+      // NT deterministic modifiers
+      const ne = State.get('norepinephrine');
+      const aden = State.get('adenosine');
+      const gaba = State.get('gaba');
+      if (ne > 65) {
+        desc += ' The other people waiting register louder than they should.';
+      } else if (aden > 65) {
+        desc += ' The wait stretches in that thick, slow way. Time doing what it does when you\'re tired.';
+      } else if (gaba < 35) {
+        desc += ' Standing still is hard.';
       }
 
       return desc;

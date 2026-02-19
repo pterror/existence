@@ -252,10 +252,15 @@ Battery (dual-rate drain: 1%/hr standby, 15%/hr screen-on; tiers: dead/critical/
 **apartment_notice** — event fires randomly in apartment (6% per action, max 2/day). NT-shaded: low serotonin reads mess as evidence; high adenosine makes it blur; low dopamine surfaces the knowing-doing gap.
 
 ### Location Description NT Shading
-Deterministic NT modifiers added to apartment locations and corner store (no RNG — location descriptions called from UI.render):
+Deterministic NT modifiers added to all 7 locations (no RNG — location descriptions called from UI.render). Pattern: NE > 65 → sensory overload / everything too present; adenosine > 65 → fog / dissociation; GABA < 35 → restlessness / can't settle.
 - **Kitchen** — adenosine > 65: "The light in here is doing more than its share." NE > 65 in morning: "Everything in here feels very present this early."
 - **Bathroom** — adenosine > 70: "The light in here is harsh." NE > 65: "The faucet drip sounds too loud."
 - **Corner store** — NE > 65: fluorescent hum + sensory overload. Adenosine > 65: aisles smear.
+- **Street** — NE > 70: every car/voice arrives separately. Adenosine > 65: street softens at edges. GABA < 35: openness doesn't help.
+- **Bus stop** — NE > 65: other people register louder. Adenosine > 65: the wait stretches thick. GABA < 35: standing still is hard.
+- **Office** — NE > 65: keyboard/AC/chair have edge. Adenosine > 65: office blurs, things don't land. GABA < 35: can't settle into chair.
+- **Retail** — NE > 65: announcements/dings unfiltered. Adenosine > 65: body knows what to do. GABA < 35: floor too open.
+- **Food service** — NE > 65: kitchen sounds already too much. Adenosine > 65: rhythm keeps going, hands follow. GABA < 35: pace feels relentless.
 
 ### World Predicates
 `World.isHome()` and `World.isWorkplace()` added to world.js (alongside existing `isInside()`). Available for any code that needs semantic location queries without inspecting area strings directly.
