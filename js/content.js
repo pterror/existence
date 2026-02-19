@@ -1504,7 +1504,11 @@ export function createContent(ctx) {
         const illnessRoll1 = Timeline.random();
         const illnessRoll2 = Timeline.randomInt(0, 3);
         if (State.illnessTier() === 'healthy') {
-          // Base ~0.7%/sleep → illness every ~140 days (~2-3/year). Risk factors can triple it.
+          // Derived from epidemiology: adults average ~4-5 illness episodes/year
+          // (2-3 colds + ~1 flu + ~1 GI). At 365 sleeps/year: 4.5/365 ≈ 0.012/sleep.
+          // Base is lower (~0.007) because job exposure carries the rest. Risk modifiers
+          // are approximation debt — stress/sleep suppression is real but magnitudes are
+          // not derived. Should eventually come from immune function model.
           const stressRisk  = State.get('stress') > 60      ? 0.005 : 0;
           const debtRisk    = State.get('sleep_debt') > 480 ? 0.005 : 0;
           const workedRisk  = State.get('at_work_today')    ? 0.003 : 0;
