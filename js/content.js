@@ -1207,6 +1207,37 @@ export function createContent(ctx) {
 
       return desc;
     },
+
+    food_bank: () => {
+      const mood = State.moodTone();
+      const visits = State.get('food_bank_visits');
+
+      let desc;
+      if (visits === 0) {
+        if (mood === 'hollow' || mood === 'numb') {
+          desc = 'A waiting area. Chairs along the wall. A folding table with a sign-in sheet.';
+        } else {
+          desc = 'A waiting area with chairs along the wall. Other people. A folding table, a sign-in sheet, a volunteer who smiles at everyone equally.';
+        }
+      } else {
+        if (mood === 'hollow' || mood === 'numb') {
+          desc = 'The food bank. You know the routine.';
+        } else {
+          desc = 'The waiting area. Familiar now — the chairs, the table, the way the light comes in.';
+        }
+      }
+
+      // NT modifiers
+      const gaba = State.get('gaba');
+      const ne = State.get('norepinephrine');
+      if (gaba < 40) {
+        desc += ' Something about waiting rooms.';
+      } else if (ne > 65) {
+        desc += ' The sounds of the room are sharper than they need to be.';
+      }
+
+      return desc;
+    },
   };
 
   // --- Helpers ---
@@ -3459,6 +3490,53 @@ export function createContent(ctx) {
       },
     },
 
+    // === FOOD BANK ===
+    receive_bag: {
+      id: 'receive_bag',
+      label: 'Wait for a bag',
+      location: 'food_bank',
+      available: () => {
+        const hour = State.getHour();
+        const day = State.getDay();
+        const lastDay = State.get('last_food_bank_day');
+        return hour >= 9 && hour < 17
+          && State.isWorkday()
+          && (lastDay === 0 || day - lastDay >= 7);
+      },
+      execute: () => {
+        State.set('fridge_food', Math.min(6, State.get('fridge_food') + 3));
+        State.set('pantry_food', Math.min(3, State.get('pantry_food') + 2));
+        State.set('last_food_bank_day', State.getDay());
+        State.set('food_bank_visits', State.get('food_bank_visits') + 1);
+        State.advanceTime(40);
+        Events.record('received_food_bank_bag');
+
+        const visits = State.get('food_bank_visits');
+        const mood = State.moodTone();
+        const ser = State.get('serotonin');
+
+        if (visits === 1) {
+          return Timeline.weightedPick([
+            { weight: 1, value: 'You wait. A volunteer calls your name, or a number, and hands you a bag. Canned goods, bread, whatever they have this week. You carry it home.' },
+            { weight: 1, value: 'You sign in and you wait and eventually someone brings a bag out. It\'s heavier than you expected. You take it and go.' },
+            { weight: State.lerp01(ser, 50, 25), value: 'You wait in a plastic chair until they call you. A bag: bread, a few cans, some pasta. Enough. You walk out carrying it and you don\'t look at anyone.' },
+          ]);
+        }
+
+        if (mood === 'hollow' || mood === 'numb') {
+          return Timeline.weightedPick([
+            { weight: 1, value: 'You wait, you get the bag, you leave. Same as before.' },
+            { weight: State.lerp01(ser, 50, 20), value: 'The wait. The bag. You carry it home. It has what it has.' },
+          ]);
+        }
+        return Timeline.weightedPick([
+          { weight: 1, value: 'You know the wait by now. When your name comes, you go up and take the bag. Bread, cans, whatever they had. You carry it home.' },
+          { weight: 1, value: 'The usual wait, the usual bag. Heavier some weeks than others. This week it\'s decent.' },
+          { weight: State.lerp01(ser, 60, 35), value: 'You sit and wait and get the bag. There\'s a rhythm to it now — not comfortable exactly, but known. You carry it home.' },
+        ]);
+      },
+    },
+
     // === PHONE MODE ===
     read_messages: {
       id: 'read_messages',
@@ -4623,6 +4701,20 @@ export function createContent(ctx) {
       return 'Back outside. Less hungry than you were.';
     }
 
+    // To food bank
+    if (from === 'street' && to === 'food_bank') {
+      const visits = State.get('food_bank_visits');
+      if (visits === 0) {
+        return 'You walk over. It takes longer than you thought. You find it.';
+      }
+      return 'You walk to the food bank.';
+    }
+
+    // From food bank
+    if (from === 'food_bank' && to === 'street') {
+      return 'Back outside, carrying the bag.';
+    }
+
     // From bus stop back to street
     if (from === 'bus_stop' && to === 'street') {
       return 'You walk back from the bus stop.';
@@ -5049,6 +5141,20 @@ export function createContent(ctx) {
       if (hunger === 'starving') return 'The community meal. You know it\'s there.';
       if (visits === 0) return 'The community meal is open.';
       return 'The community meal.';
+    },
+
+    'move:food_bank': () => {
+      const visits = State.get('food_bank_visits');
+      const day = State.getDay();
+      const lastDay = State.get('last_food_bank_day');
+      const daysUntilNext = lastDay > 0 ? Math.max(0, 7 - (day - lastDay)) : 0;
+      if (daysUntilNext > 0) return null; // shouldn't be reachable (gated by availability)
+      if (visits === 0) return 'The food bank. It\'s open today.';
+      return 'The food bank.';
+    },
+
+    receive_bag: () => {
+      return 'Wait for a bag.';
     },
 
     get_meal: () => {

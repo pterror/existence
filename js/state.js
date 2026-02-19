@@ -255,6 +255,10 @@ export function createState(ctx) {
       ate_at_soup_kitchen_today: false,
       soup_kitchen_visits: 0,    // lifetime visit count — shapes prose
 
+      // Food bank
+      last_food_bank_day: 0,     // game day of last visit (0 = never)
+      food_bank_visits: 0,       // lifetime visit count — shapes prose
+
       // Laundry async state
       laundry_phase: 'none',    // 'none' | 'washing' | 'drying' | 'done'
       laundry_phase_started: 0, // State.get('time') when current phase began
