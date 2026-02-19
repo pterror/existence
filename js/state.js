@@ -312,6 +312,16 @@ export function createState(ctx) {
       s.caffeine_level = Math.max(0, s.caffeine_level * Math.exp(-Math.LN2 / 300 * minutes));
     }
 
+    // Diurnal temperature variation — coldest ~6am, warmest ~3pm
+    // Only when temperature state exists (after first weather set)
+    if (s.temperature !== undefined && s.weather) {
+      const weatherOffset = s.weather === 'drizzle' ? -3
+        : s.weather === 'snow' ? -2
+        : s.weather === 'overcast' ? -1
+        : 0;
+      s.temperature = Math.round((seasonalTemperatureBaseline() + weatherOffset + diurnalTemperatureOffset()) * 10) / 10;
+    }
+
     // Social isolation increases over time without interaction
     const actionsSinceLastSocial = ctx.timeline.getActionCount() - s.last_social_interaction;
     if (actionsSinceLastSocial > 10) {
@@ -732,6 +742,17 @@ export function createState(ctx) {
     if (sn === 'summer') return mean + amplitude;
     if (sn === 'winter') return mean - amplitude;
     return mean; // spring/autumn at mean
+  }
+
+  /**
+   * Diurnal temperature offset in celsius.
+   * Coldest ~6am, warmest ~3pm (15:00). Amplitude ≈3°C tropical, 5°C temperate.
+   */
+  function diurnalTemperatureOffset() {
+    const hour = timeOfDay() / 60; // fractional hours 0–24
+    const absLat = Math.abs(s.latitude);
+    const amplitude = absLat < 23.5 ? 3 : 5;
+    return amplitude * Math.cos(2 * Math.PI * (hour - 15) / 24);
   }
 
   /** Qualitative temperature label. Content branches on these. */
@@ -1836,6 +1857,7 @@ export function createState(ctx) {
     caffeineSleepInterference,
     // Temperature
     seasonalTemperatureBaseline,
+    diurnalTemperatureOffset,
     temperatureTier,
     // Health
     hasCondition,

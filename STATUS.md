@@ -51,11 +51,12 @@ Derived from character `latitude` (-90 to 90). Methods on State:
 - Daylight exposure tracking uses actual astronomical sunrise/sunset window
 
 Temperature:
-- `temperature` state var (celsius). Set by `World.updateWeather()` from `seasonalTemperatureBaseline()` + weather offset (drizzle -3, overcast -1, snow -2).
+- `temperature` state var (celsius). Updated continuously in `advanceTime` and on weather shift.
 - `seasonalTemperatureBaseline()` — from latitude + season. lat 0 → 30°C, lat 42 → ~9°C mean, with seasonal ±amplitude.
+- `diurnalTemperatureOffset()` — ±3°C tropical, ±5°C temperate. Coldest ~6am, warmest ~3pm. Cosine formula from hour.
+- Combined: `temperature = seasonalBaseline + weatherOffset + diurnalOffset`. Recalculated every `advanceTime` call.
 - `temperatureTier()` — 'bitter' | 'freezing' | 'cold' | 'cool' | 'mild' | 'warm' | 'hot'
 - Used in street, bus_stop descriptions; move:street approaching prose.
-- Diurnal variation ○.
 
 Snow:
 - Added to weather pool when `season() === 'winter'` and `seasonalTemperatureBaseline() <= 2°C`. Weight 2 (same as drizzle).
