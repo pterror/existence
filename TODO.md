@@ -112,9 +112,9 @@ Full design in [DESIGN-OBJECTS.md](DESIGN-OBJECTS.md). Mess is not a scalar — 
 **Current state (approximation debt):** `apartment_mess` scalar shapes prose at 4 tiers in bedroom, kitchen, bathroom. `messTier()` in state.js. `apartment_notice` event is NT-shaded. Prose works but is fundamentally limited — "dishes in the sink" comes from a number, not dishes.
 
 **Implementation path (from DESIGN-OBJECTS.md):**
-1. **Define interfaces** — stable method signatures for Clothing, Dishes, Linens. Defined in [DESIGN-INTERFACES.md](DESIGN-INTERFACES.md).
-2. **Coarse implementations** — count-based backends that replace `apartment_mess`. RunRecord gains `subsystem_versions`.
-3. **Remove `apartment_mess`** — once object systems cover the same ground. `messTier()` becomes derived or removed.
+1. ~~**Define interfaces**~~ — **DONE.** See [DESIGN-INTERFACES.md](DESIGN-INTERFACES.md).
+2. ~~**Coarse implementations**~~ — **DONE.** `js/dishes.js`, `js/linens.js`, `js/clothing.js` — count-based backends. Wired in context.js + game.js. content.js updated throughout.
+3. **Remove `apartment_mess`** — once object systems cover the same ground. Still needed: `apartment_notice` event and bedroom general clutter lean on it. Will go once Clothing covers floor tracking fully and a residual-clutter model is added.
 4. **Full implementations** — per-item tracking, one system at a time. Clothing first (wardrobe generated at chargen, items with location/wear states, undressing shaped by mood/energy).
 5. **Laundry mechanic** — requires in-home option (hand-wash, drying rack) or laundromat (doesn't exist yet). Stub for now.
 

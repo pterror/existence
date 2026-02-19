@@ -181,14 +181,20 @@ Battery (dual-rate drain: 1%/hr standby, 15%/hr screen-on; tiers: dead/critical/
 **Phone UI:** Full HTML5 phone overlay. Three screens: home (large time + date + Messages app badge), messages list (contacts ordered: friends by recency, then supervisor, then bank; unread dots, preview text), thread view (sent/received bubbles, compose row with Reply/Write when applicable). Navigation (home→list→thread→back) is transient state stored in `phone_screen` + `phone_thread_contact`. Opening a friend thread marks messages as read and applies guilt side-effects. Reply and Write actions go through the normal game pipeline (RNG consumed, action recorded, friend response queued). Old `read_messages` interaction kept for replay compat. All phone messages now carry `source` and `direction` fields (auto-stamped in `addPhoneMessage`).
 
 ### Apartment State
-fridge_food (integer, depletes on eating, restocked by groceries), apartment_mess (0–100, grows at 0.2/hr passively, reduced by do_dishes −25). Resets surfaced_mess on wake so apartment_notice events can fire again each day.
 
-**Mess shapes prose at 4 tiers across all three apartment locations:**
-- **Bedroom:** `< 22` (clear/in order), `45–60` (pile forming, minor disorder), `60–75` (chair-as-wardrobe, floor has topography), `> 75` (entropy made visible, permanent layer)
-- **Kitchen:** `< 22` (sink empty, counter clear), `38–55` (a cup, a plate — the usual), `55–70` (dishes in the sink, been there), `> 70` (full sink + counter, mess structural)
-- **Bathroom:** `48–65` (towel on tub edge), `> 65` (towel on floor, products off shelves)
+**Object systems (coarse_v1):** Mess is now emergent from tracked object states, not a single scalar. Three modules:
 
-**apartment_notice** — event fires randomly in apartment with 6% chance per action (max 2/day, then falls back to apartment_sound). NT-shaded variants: low serotonin makes the mess read as evidence; high adenosine makes it blur and unregister; low dopamine surfaces the gap between knowing and doing.
+- **Dishes** (`js/dishes.js`) — tracks clean/in_sink counts. `eat_food` calls `Dishes.use()` (one dish goes to sink). `do_dishes` calls `Dishes.wash()` (sink cleared). Kitchen description uses `Dishes.sinkDescription()`: specific prose per count ("A dish in the sink." / "A couple of dishes." / "The sink is full."). `do_dishes` available when `Dishes.dirtyCount() > 0`.
+
+- **Linens** (`js/linens.js`) — tracks bed state (`made`/`unmade`/`messy`) and towel state (`clean_hanging`/`damp_hanging`/`on_floor`). `shower` calls `Linens.useTowel()`. `sleep` calls `Linens.noteSlept()` — bed transitions, damp towel → on_floor. Bathroom description driven by towel state. Bedroom adds sentence when bed is made or messy.
+
+- **Clothing** (`js/clothing.js`) — tracks floor items per location, basket, and worn count. `get_dressed` calls `Clothing.wear()`. `sleep` calls `Clothing.undress(energyTier, moodTone, location)` — worn items go to floor (depleted/numb) or basket (okay/clear). Bedroom description uses `Clothing.floorDescription('bedroom')` for floor clothes.
+
+**Remaining approximation debt:** `apartment_mess` scalar (0–100, grows 0.2/hr) still tracks general disorder not yet covered by object systems. `do_dishes` also reduces it by 25 to prevent monotonic drift. Will be removed once Clothing covers the remaining ground. `messTier()` still derives from it for bedroom general clutter, `apartment_notice` events, and bathroom counter clutter.
+
+**fridge_food** (integer) — depletes on eating, restocked by groceries. Still a scalar (appropriate — no item identity needed for food units).
+
+**apartment_notice** — event fires randomly in apartment (6% per action, max 2/day). NT-shaded: low serotonin reads mess as evidence; high adenosine makes it blur; low dopamine surfaces the knowing-doing gap.
 
 ## Locations (7)
 
