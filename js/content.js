@@ -2062,6 +2062,46 @@ export function createContent(ctx) {
       },
     },
 
+    do_laundry: {
+      id: 'do_laundry',
+      label: 'Do laundry',
+      location: 'apartment_bedroom',
+      available: () => Clothing.dirtyCount() > 5 && State.energyTier() !== 'depleted',
+      execute: () => {
+        Clothing.wash();
+        State.adjustEnergy(-10);
+        State.adjustStress(-3);  // one less thing
+        State.advanceTime(90);
+        Events.record('did_laundry');
+
+        const mood = State.moodTone();
+        const ser = State.get('serotonin');
+        const aden = State.get('adenosine');
+
+        if (mood === 'numb' || mood === 'heavy') {
+          return Timeline.weightedPick([
+            { weight: 1, value: 'An hour and a half at the laundromat. Sitting with other people who are also sitting. You come back with clean clothes and not much else.' },
+            { weight: 1, value: 'You do the laundry. The machines run. You wait. You come back. The clothes are clean now. That\'s a thing that happened.' },
+            { weight: State.lerp01(ser, 35, 20), value: 'The laundromat. The hot-air smell of dryers, the hum of the machines. An hour of sitting in a plastic chair not being at home, which is something. You come back with clean clothes and ninety minutes less to account for.' },
+          ]);
+        }
+        if (mood === 'fraying') {
+          return Timeline.weightedPick([
+            { weight: 1, value: 'You take the laundry down and sit with it while it runs. Ninety minutes where your job is just to wait. Smaller than usual. That helps, a little.' },
+            { weight: 1, value: 'The laundromat is warm. You sit. The machines run. Nobody needs anything from you for an hour and a half. The clothes come out clean.' },
+          ]);
+        }
+        if (aden > 65) {
+          return 'You take the laundry in a state of low-grade fog. Wait for it. Come back with clean clothes. Somewhere in there ninety minutes passed.';
+        }
+        return Timeline.weightedPick([
+          { weight: 1, value: 'Laundry done. You come back with clean clothes and room in the drawer and one less thing piled up.' },
+          { weight: 1, value: 'You do the laundry. Ninety minutes and the pile is dealt with. The drawer isn\'t empty anymore.' },
+          { weight: State.lerp01(ser, 50, 70), value: 'A load of laundry and ninety minutes of waiting. You come back to clean clothes folded on the bed. Small satisfaction, the kind that comes from finishing things.' },
+        ]);
+      },
+    },
+
     tidy_clothes: {
       id: 'tidy_clothes',
       label: 'Pick up the clothes',
@@ -4168,6 +4208,10 @@ export function createContent(ctx) {
       if (mood === 'numb' || mood === 'heavy') return 'The bed. You pull the sheets straight.';
       if (mood === 'fraying') return 'The bed. One small thing.';
       return 'Make the bed.';
+    },
+
+    do_laundry: () => {
+      return 'Laundry.';
     },
 
     tidy_clothes: () => {
