@@ -1094,8 +1094,13 @@ export function createGame(ctx) {
 
     // Re-render actions and movement after a beat, then check auto-advance
     setTimeout(() => {
+      // Phone mode — re-render the phone overlay (shows sent msg, updated compose row, etc.)
+      if (State.get('viewing_phone')) {
+        UI.render();
+        return;
+      }
       const interactions = Content.getAvailableInteractions();
-      const connections = State.get('viewing_phone') ? [] : World.getConnections();
+      const connections = World.getConnections();
       const allIds = [
         ...interactions.map(i => i.id),
         ...connections.map(c => 'move:' + c.id),

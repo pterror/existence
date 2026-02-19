@@ -990,17 +990,25 @@ export function createContent(ctx) {
   // --- Helpers ---
 
   /** Returns the friend slot + character to reply to, or null if nothing to reply to.
-   *  Prefers the friend with higher guilt; tie-breaks by most recent message in inbox.
-   *  Excludes slots that already have a pending reply queued. */
+   *  When phone_thread_contact is set (live play with thread open), uses that slot.
+   *  Falls back to guilt-based selection for replay compat when thread contact isn't set. */
   function getReplyTarget() {
     const inbox = State.get('phone_inbox');
     const pending = State.get('pending_replies') || [];
+    const threadContact = State.get('phone_thread_contact');
+
+    // Live play — use the active thread
+    if (threadContact && ['friend1', 'friend2'].includes(threadContact)) {
+      if (pending.some(r => r.slot === threadContact)) return null;
+      return { slot: threadContact, friend: Character.get(threadContact) };
+    }
+
+    // Fallback — old guilt-based logic for replay compat
     const candidates = ['friend1', 'friend2'].filter(
       slot => inbox.some(m => m.source === slot) && !pending.some(r => r.slot === slot)
     );
     if (candidates.length === 0) return null;
     if (candidates.length === 1) return { slot: candidates[0], friend: Character.get(candidates[0]) };
-    // Both available — prefer highest guilt, tie-break by most recent message
     const g0 = State.sentimentIntensity(candidates[0], 'guilt');
     const g1 = State.sentimentIntensity(candidates[1], 'guilt');
     let slot;
@@ -1016,19 +1024,28 @@ export function createContent(ctx) {
   }
 
   /** Returns the friend slot + character to initiate contact with, or null if no valid target.
-   *  Only considers friends with no unread messages (those go through reply_to_friend) and
-   *  no pending reply already queued. Prefers highest guilt; tie-breaks by least recent contact. */
+   *  When phone_thread_contact is set (live play with thread open), uses that slot.
+   *  Falls back to guilt-based selection for replay compat when thread contact isn't set. */
   function getInitiateTarget() {
     const pending = State.get('pending_replies') || [];
     const inbox = State.get('phone_inbox');
+    const threadContact = State.get('phone_thread_contact');
+
+    // Live play — use the active thread
+    if (threadContact && ['friend1', 'friend2'].includes(threadContact)) {
+      if (pending.some(r => r.slot === threadContact)) return null;
+      if (inbox.some(m => m.source === threadContact && !m.read)) return null; // has unread → use reply
+      return { slot: threadContact, friend: Character.get(threadContact) };
+    }
+
+    // Fallback — old logic for replay compat
     const candidates = ['friend1', 'friend2'].filter(slot => {
       if (pending.some(r => r.slot === slot)) return false;
-      if (inbox.some(m => m.source === slot && !m.read)) return false; // unread → use reply_to_friend
+      if (inbox.some(m => m.source === slot && !m.read)) return false;
       return true;
     });
     if (candidates.length === 0) return null;
     if (candidates.length === 1) return { slot: candidates[0], friend: Character.get(candidates[0]) };
-    // Prefer highest guilt; tie-break by least recent contact
     const g0 = State.sentimentIntensity(candidates[0], 'guilt');
     const g1 = State.sentimentIntensity(candidates[1], 'guilt');
     if (g0 > g1 + 0.05) return { slot: candidates[0], friend: Character.get(candidates[0]) };
@@ -2655,6 +2672,8 @@ export function createContent(ctx) {
       available: () => State.get('viewing_phone'),
       execute: () => {
         State.set('viewing_phone', false);
+        State.set('phone_screen', 'home');
+        State.set('phone_thread_contact', null);
         const location = World.getLocationId();
         const descFn = /** @type {Record<string, (() => string) | undefined>} */ (Content.locationDescriptions)[location];
         return descFn ? descFn() : '';
@@ -2667,7 +2686,13 @@ export function createContent(ctx) {
       location: null,
       available: () => {
         if (!State.get('viewing_phone') || State.get('phone_battery') <= 0) return false;
-        return getReplyTarget() !== null;
+        const thread = State.get('phone_thread_contact');
+        if (!thread || !['friend1', 'friend2'].includes(thread)) return false;
+        const inbox = State.get('phone_inbox');
+        if (!inbox.some(m => m.source === thread && !m.read)) return false;
+        const pending = State.get('pending_replies') || [];
+        if (pending.some(r => r.slot === thread)) return false;
+        return true;
       },
       execute: () => {
         if (State.get('phone_battery') <= 0) {
@@ -2685,6 +2710,9 @@ export function createContent(ctx) {
         // 1 RNG call: arrival delay
         const delay = Timeline.randomInt(30, 90);
         State.addPendingReply({ slot, arrivesAt: State.get('time') + delay, text: responseText });
+
+        // Store sent message in inbox for thread view
+        State.addPhoneMessage({ type: 'sent', source: slot, text: replyText, read: true, direction: 'sent' });
 
         // Reset contact timer, reduce guilt more than just reading does
         const fc = State.get('friend_contact');
@@ -2705,7 +2733,13 @@ export function createContent(ctx) {
       location: null,
       available: () => {
         if (!State.get('viewing_phone') || State.get('phone_battery') <= 0) return false;
-        return getInitiateTarget() !== null;
+        const thread = State.get('phone_thread_contact');
+        if (!thread || !['friend1', 'friend2'].includes(thread)) return false;
+        const inbox = State.get('phone_inbox');
+        if (inbox.some(m => m.source === thread && !m.read)) return false; // has unread → use reply
+        const pending = State.get('pending_replies') || [];
+        if (pending.some(r => r.slot === thread)) return false;
+        return true;
       },
       execute: () => {
         if (State.get('phone_battery') <= 0) {
@@ -2723,6 +2757,9 @@ export function createContent(ctx) {
         // 1 RNG call: arrival delay
         const delay = Timeline.randomInt(30, 90);
         State.addPendingReply({ slot, arrivesAt: State.get('time') + delay, text: responseText });
+
+        // Store sent message in inbox for thread view
+        State.addPhoneMessage({ type: 'sent', source: slot, text: initiateText, read: true, direction: 'sent' });
 
         // Reset contact timer, reduce guilt
         const fc = State.get('friend_contact');
@@ -2809,6 +2846,7 @@ export function createContent(ctx) {
       const supervisor = Character.get('supervisor');
       State.addPhoneMessage({
         type: 'work',
+        source: 'supervisor',
         text: `A message from ${supervisor.name}. "Everything okay?" Which means: where are you.`,
         read: false,
       });
@@ -3482,21 +3520,8 @@ export function createContent(ctx) {
     /** @type {Interaction[]} */
     const available = [];
 
-    // Phone mode — only phone interactions
+    // Phone mode — phone UI renders its own action buttons, #actions stays empty
     if (State.get('viewing_phone')) {
-      const phoneIds = ['read_messages', 'reply_to_friend', 'message_friend', 'toggle_phone_silent', 'put_phone_away'];
-      for (const id of phoneIds) {
-        const interaction = interactions[id];
-        if (interaction && interaction.available()) {
-          // Dynamic label for silent toggle
-          if (id === 'toggle_phone_silent') {
-            const label = State.get('phone_silent') ? 'Turn sound on' : 'Silence it';
-            available.push(/** @type {Interaction} */ ({ ...interaction, label }));
-          } else {
-            available.push(/** @type {Interaction} */ (interaction));
-          }
-        }
-      }
       return available;
     }
 

@@ -5,6 +5,7 @@ export function createUI(ctx) {
   const Content = ctx.content;
   const World = ctx.world;
   const Habits = ctx.habits;
+  const Character = ctx.character;
   /** @type {HTMLElement} */ let passageEl;
   /** @type {HTMLElement} */ let eventTextEl;
   /** @type {HTMLElement} */ let actionsEl;
@@ -12,6 +13,7 @@ export function createUI(ctx) {
   /** @type {HTMLElement} */ let awarenessEl;
   /** @type {HTMLElement} */ let awarenessTimeEl;
   /** @type {HTMLElement} */ let awarenessMoneyEl;
+  /** @type {HTMLElement | null} */ let phoneEl = null;
   /** @type {((interaction: Interaction) => void) | null} */
   let onAction = null;
   /** @type {((destId: string) => void) | null} */
@@ -55,6 +57,8 @@ export function createUI(ctx) {
     awarenessEl = /** @type {HTMLElement} */ (document.getElementById('awareness'));
     awarenessTimeEl = /** @type {HTMLElement} */ (document.getElementById('awareness-time'));
     awarenessMoneyEl = /** @type {HTMLElement} */ (document.getElementById('awareness-money'));
+    phoneEl = /** @type {HTMLElement} */ (document.getElementById('phone'));
+    phoneEl.addEventListener('click', phoneClickHandler);
     onAction = callbacks.onAction;
     onMove = callbacks.onMove;
     idleCallback = callbacks.onIdle;
@@ -285,15 +289,253 @@ export function createUI(ctx) {
     }
   }
 
+  // --- Phone UI ---
+
+  const WEEKDAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+  function phoneTimeStr() {
+    const cal = State.calendarDate();
+    const h = cal.hour;
+    const m = cal.minute;
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    const h12 = h % 12 || 12;
+    return h12 + ':' + String(m).padStart(2, '0') + '\u202f' + ampm;
+  }
+
+  function phoneDateStr() {
+    const cal = State.calendarDate();
+    return WEEKDAY_NAMES[cal.weekday] + ', ' + MONTH_NAMES[cal.month] + '\u202f' + cal.day;
+  }
+
+  /** @param {string} text */
+  function escPhoneText(text) {
+    return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  /** Get display name for a contact slot */
+  function contactDisplayName(slot) {
+    if (slot === 'bank') return 'Bank';
+    if (slot === 'supervisor') {
+      const sup = /** @type {{ name: string } | undefined} */ (Character && Character.get('supervisor'));
+      return sup ? sup.name : 'Work';
+    }
+    const c = /** @type {{ name: string } | undefined} */ (Character && Character.get(slot));
+    return c ? c.name : slot;
+  }
+
+  /** Get messages for a specific contact slot from the inbox */
+  function contactMessages(inbox, slot) {
+    return inbox.filter(m => {
+      if (slot === 'bank') return m.source === 'bank' || (!m.source && (m.type === 'bank' || m.type === 'paycheck' || m.type === 'bill'));
+      if (slot === 'supervisor') return m.source === 'supervisor' || (!m.source && m.type === 'work');
+      return m.source === slot;
+    });
+  }
+
+  /** Build ordered contact list for messages screen */
+  function buildContactList(inbox) {
+    const contacts = [];
+
+    for (const slot of ['friend1', 'friend2']) {
+      const msgs = contactMessages(inbox, slot);
+      if (msgs.length === 0) continue;
+      const lastMsg = msgs[msgs.length - 1];
+      const hasUnread = msgs.some(m => !m.read && m.direction !== 'sent');
+      contacts.push({ slot, name: contactDisplayName(slot), lastMsg, hasUnread, ts: lastMsg.timestamp || 0 });
+    }
+
+    // Sort friends by most recent message
+    contacts.sort((a, b) => b.ts - a.ts);
+
+    for (const slot of ['supervisor', 'bank']) {
+      const msgs = contactMessages(inbox, slot);
+      if (msgs.length === 0) continue;
+      const lastMsg = msgs[msgs.length - 1];
+      const hasUnread = msgs.some(m => !m.read && m.direction !== 'sent');
+      contacts.push({ slot, name: contactDisplayName(slot), lastMsg, hasUnread, ts: lastMsg.timestamp || 0 });
+    }
+
+    return contacts;
+  }
+
+  function buildPhoneStatusBar(timeStr, batteryPct) {
+    const batteryClass = batteryPct <= 15 ? ' phone-battery--low' : '';
+    return `<div class="phone-status-bar"><span class="phone-status-time">${timeStr}</span><span class="phone-battery-pct${batteryClass}">${Math.round(batteryPct)}%</span></div>`;
+  }
+
+  function buildPhoneHomeScreen(timeStr, dateStr, batteryPct, unreadCount) {
+    const badge = unreadCount > 0 ? `<span class="phone-app-badge">${unreadCount}</span>` : '';
+    return buildPhoneStatusBar(timeStr, batteryPct)
+      + `<div class="phone-home-time">${timeStr}</div>`
+      + `<div class="phone-home-date">${dateStr}</div>`
+      + `<div class="phone-apps">`
+      + `<button class="phone-app" data-phone-nav="messages">Messages${badge}</button>`
+      + `</div>`
+      + `<button class="phone-home-bar" data-phone-action="put_phone_away">&#x2014;</button>`;
+  }
+
+  function buildPhoneMessagesScreen(timeStr, batteryPct, inbox) {
+    const contacts = buildContactList(inbox);
+    let rows = '';
+    for (const c of contacts) {
+      const dot = c.hasUnread ? '<span class="phone-unread-dot"></span>' : '';
+      const preview = escPhoneText(c.lastMsg.text.substring(0, 48) + (c.lastMsg.text.length > 48 ? '\u2026' : ''));
+      rows += `<button class="phone-contact-row${c.hasUnread ? ' phone-contact-row--unread' : ''}" data-phone-nav="thread" data-contact="${c.slot}">`
+        + `<span class="phone-contact-name">${escPhoneText(c.name)}</span>`
+        + `<span class="phone-contact-preview">${preview}</span>`
+        + dot
+        + `</button>`;
+    }
+    if (rows === '') rows = '<div class="phone-empty">No messages.</div>';
+    return buildPhoneStatusBar(timeStr, batteryPct)
+      + `<div class="phone-nav-header"><button class="phone-nav-back" data-phone-nav="home">&#x2039;</button><span class="phone-nav-title">Messages</span></div>`
+      + `<div class="phone-contact-list">${rows}</div>`
+      + `<button class="phone-home-bar" data-phone-action="put_phone_away">&#x2014;</button>`;
+  }
+
+  function buildPhoneThreadScreen(timeStr, batteryPct, inbox, slot) {
+    const name = contactDisplayName(slot);
+    const msgs = contactMessages(inbox, slot);
+    let bubbles = '';
+    for (const msg of msgs) {
+      const isSent = msg.direction === 'sent';
+      const cls = isSent ? 'phone-bubble--sent' : 'phone-bubble--received';
+      const unreadCls = (!msg.read && !isSent) ? ' phone-bubble--unread' : '';
+      const sender = isSent ? 'You' : name.split(' ')[0];
+      bubbles += `<div class="phone-bubble ${cls}${unreadCls}">`
+        + `<div class="phone-bubble-sender">${escPhoneText(sender)}</div>`
+        + `<div class="phone-bubble-text">${escPhoneText(msg.text)}</div>`
+        + `</div>`;
+    }
+    if (bubbles === '') bubbles = '<div class="phone-empty">No messages yet.</div>';
+
+    // Compose row — only for friend threads
+    let compose = '';
+    if (['friend1', 'friend2'].includes(slot)) {
+      const replyInter = Content.getInteraction('reply_to_friend');
+      const writeInter = Content.getInteraction('message_friend');
+      const canReply = replyInter && replyInter.available();
+      const canWrite = writeInter && writeInter.available();
+      if (canReply || canWrite) {
+        compose = '<div class="phone-compose">';
+        if (canReply) compose += `<button class="phone-compose-btn" data-phone-action="reply_to_friend">Reply</button>`;
+        if (canWrite) compose += `<button class="phone-compose-btn" data-phone-action="message_friend">Write</button>`;
+        compose += '</div>';
+      }
+    }
+
+    return buildPhoneStatusBar(timeStr, batteryPct)
+      + `<div class="phone-nav-header"><button class="phone-nav-back" data-phone-nav="messages">&#x2039;</button><span class="phone-nav-title">${escPhoneText(name)}</span></div>`
+      + `<div class="phone-thread-messages" id="phone-thread-scroll">${bubbles}</div>`
+      + compose
+      + `<button class="phone-home-bar" data-phone-action="put_phone_away">&#x2014;</button>`;
+  }
+
+  function renderPhone() {
+    if (!phoneEl) return;
+    phoneEl.removeAttribute('hidden');
+    document.body.classList.add('phone-open');
+
+    const screen = State.get('phone_screen') || 'home';
+    const threadContact = State.get('phone_thread_contact');
+    const battery = State.get('phone_battery');
+    const inbox = State.get('phone_inbox') || [];
+    const timeStr = phoneTimeStr();
+    const dateStr = phoneDateStr();
+
+    let html = '';
+    if (screen === 'messages') {
+      html = buildPhoneMessagesScreen(timeStr, battery, inbox);
+    } else if (screen === 'thread' && threadContact) {
+      html = buildPhoneThreadScreen(timeStr, battery, inbox, threadContact);
+    } else {
+      const unreadCount = inbox.filter(m => !m.read && m.direction !== 'sent').length;
+      html = buildPhoneHomeScreen(timeStr, dateStr, battery, unreadCount);
+    }
+
+    phoneEl.innerHTML = html;
+
+    // Scroll thread to bottom
+    if (screen === 'thread') {
+      const scrollEl = document.getElementById('phone-thread-scroll');
+      if (scrollEl) scrollEl.scrollTop = scrollEl.scrollHeight;
+    }
+
+    // Mark thread messages as read + apply contact timestamp/guilt side-effects
+    if (screen === 'thread' && threadContact && ['friend1', 'friend2'].includes(threadContact)) {
+      const msgs = inbox.filter(m => m.source === threadContact && !m.read && m.direction !== 'sent');
+      for (const msg of msgs) {
+        msg.read = true;
+        const fc = State.get('friend_contact');
+        fc[threadContact] = State.get('time');
+        State.adjustSentiment(threadContact, 'guilt', -0.02);
+      }
+    } else if (screen === 'thread' && threadContact && (threadContact === 'supervisor' || threadContact === 'bank')) {
+      const msgs = contactMessages(inbox, threadContact);
+      for (const msg of msgs) {
+        if (!msg.read) msg.read = true;
+      }
+    }
+
+  }
+
+  function phoneClickHandler(e) {
+    const target = /** @type {HTMLElement} */ (e.target);
+    const btn = target.closest('[data-phone-nav],[data-phone-action]');
+    if (!btn) return;
+
+    const nav = btn.getAttribute('data-phone-nav');
+    const action = btn.getAttribute('data-phone-action');
+
+    if (nav) {
+      e.stopPropagation();
+      if (nav === 'home') {
+        State.set('phone_screen', 'home');
+        State.set('phone_thread_contact', null);
+      } else if (nav === 'messages') {
+        State.set('phone_screen', 'messages');
+        State.set('phone_thread_contact', null);
+      } else if (nav === 'thread') {
+        const contact = btn.getAttribute('data-contact');
+        State.set('phone_screen', 'thread');
+        State.set('phone_thread_contact', contact);
+      }
+      renderPhone();
+    } else if (action) {
+      e.stopPropagation();
+      if (action === 'put_phone_away') {
+        const inter = Content.getInteraction('put_phone_away');
+        if (inter && onAction) onAction(/** @type {Interaction} */ (inter));
+      } else if (action === 'reply_to_friend') {
+        const inter = Content.getInteraction('reply_to_friend');
+        if (inter && onAction) onAction(/** @type {Interaction} */ (inter));
+      } else if (action === 'message_friend') {
+        const inter = Content.getInteraction('message_friend');
+        if (inter && onAction) onAction(/** @type {Interaction} */ (inter));
+      }
+    }
+  }
+
+  function hidePhone() {
+    if (!phoneEl) return;
+    phoneEl.setAttribute('hidden', '');
+    document.body.classList.remove('phone-open');
+  }
+
   // --- Full render ---
 
   function render() {
     if (State.get('viewing_phone')) {
-      showPassage(Content.phoneScreenDescription());
-      showActions(Content.getAvailableInteractions());
+      // Show phone overlay; clear main content areas
+      showPassage('');
+      showActions([]);
       showMovement([]);
+      renderPhone();
       return;
     }
+
+    hidePhone();
 
     const location = World.getLocationId();
     const descFn = /** @type {Record<string, (() => string) | undefined>} */ (Content.locationDescriptions)[location];

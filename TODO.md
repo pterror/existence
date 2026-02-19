@@ -101,7 +101,20 @@ Only 4 weather states, no temperature, no seasonal variation, no weather affecti
 Outfit prose is static per set. No weather-appropriate clothing, no choosing what to wear, no laundry. DESIGN.md describes getting dressed as a transition from "not yet participating in the day" — the outfit reflecting mood, the easy clothes when you can't decide.
 
 ### More phone interactions
-Phone is check-only. No scrolling, no specific apps, no compulsive checking vs avoidance as distinct behaviors. DESIGN.md describes the phone as "sometimes the only private space you have" — a richer object than a message viewer.
+~~Phone is check-only.~~ **Real phone UI incoming.** Phone now renders as a full HTML5 overlay: home screen (time, battery, Messages badge), messages list (per-contact rows, unread dots), threaded conversation view (bubble layout, sent/received), in-thread compose. Navigation (home→list→thread→back) is transient state, not recorded. Only actions with game effect (reply, message_friend, put_phone_away) go through the normal action pipeline.
+
+**Future phone apps (not yet implemented):**
+- **Notes** — player can write/read notes; each note saved as a state object; writing/deleting are recorded actions; pure navigation within the app is not
+- **Alarm** — in-phone alarm clock UI replacing the current interaction-based set/skip flow; multiple alarms, snooze management; setting/cancelling alarms are recorded actions
+- **Calendar** — view upcoming events, work schedule; possibly editable reminders; editing entries is a recorded action
+- **Timer / Stopwatch** — utility app; could feed game mechanics (timed tasks, pomodoro-style focus); start/stop recorded only if they have game effect
+- **General principle**: each in-phone app manipulation that has game effect is a recorded action. Pure navigation within an app is not.
+
+**Personalization layer (not yet implemented):** Phone background (wallpaper image or color), lock screen photo, ringtone/notification sounds — cosmetic player choices that make the phone feel owned. Set via a Settings app. Each change is a recorded action (it changes persistent state, the replay should show it). The right wallpaper is a tiny assertion of selfhood.
+
+**`toggle_phone_silent` temporarily inaccessible** — the old phone-mode action list is gone and silent toggle hasn't been placed in the new UI yet. Should live on the home screen (a small ringer icon or silent indicator the player can tap). Currently the silent state can still be set via replay but not by live play.
+
+**Still missing:** Calling (vs texting), the different way each friend responds to prolonged vs brief absence, reaching out when no guilt exists (purely wanting to connect). Compulsive checking vs avoidance as distinct behavioral patterns.
 
 ### Age-specific content
 age_stage is a number (22–48 default range) but no prose varies by age. DESIGN.md describes radically different daily textures for children, teens, young adults, adults, older adults — different work, different money sources, different phone use, different constraints.

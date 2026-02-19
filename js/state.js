@@ -185,9 +185,12 @@ export function createState(ctx) {
       work_tasks_expected: 4,
 
       // Phone inbox and mode
-      phone_inbox: /** @type {{ type: string, text: string, read: boolean, source?: string, paid?: boolean }[]} */ ([]),
+      phone_inbox: /** @type {{ type: string, text: string, read: boolean, source?: string, direction?: string, timestamp?: number, paid?: boolean }[]} */ ([]),
       phone_silent: false,
       viewing_phone: false,
+      // Phone navigation — transient, reset on put_phone_away, not meaningful in save
+      phone_screen: 'home',            // 'home' | 'messages' | 'thread'
+      phone_thread_contact: /** @type {string | null} */ (null), // 'friend1' | 'friend2' | 'supervisor' | 'bank'
       last_msg_gen_time: 0,     // game time of last generateIncomingMessages call
       work_nagged_today: false, // reset on wake
       // Financial cycle
@@ -673,13 +676,13 @@ export function createState(ctx) {
 
       // Bank notification — qualitative balance after purchase
       const balStr = perceivedMoneyString();
-      addPhoneMessage({ type: 'bank', text: 'Purchase notification. Remaining balance: ' + balStr + '.', read: false });
+      addPhoneMessage({ type: 'bank', source: 'bank', text: 'Purchase notification. Remaining balance: ' + balStr + '.', read: false });
 
       // Threshold warnings
       if (before >= 50 && s.money < 50) {
-        addPhoneMessage({ type: 'bank', text: 'Low balance alert.', read: false });
+        addPhoneMessage({ type: 'bank', source: 'bank', text: 'Low balance alert.', read: false });
       } else if (before >= 20 && s.money < 20) {
-        addPhoneMessage({ type: 'bank', text: 'Your account balance is very low.', read: false });
+        addPhoneMessage({ type: 'bank', source: 'bank', text: 'Your account balance is very low.', read: false });
       }
 
       return true;
@@ -705,7 +708,7 @@ export function createState(ctx) {
     } else {
       text = 'Deposit. Balance: ' + balStr + '.';
     }
-    addPhoneMessage({ type: 'paycheck', text, read: false });
+    addPhoneMessage({ type: 'paycheck', source: 'bank', text, read: false });
   }
 
   /**
@@ -720,6 +723,7 @@ export function createState(ctx) {
       const balStr = perceivedMoneyString();
       addPhoneMessage({
         type: 'bill',
+        source: 'bank',
         text: 'Autopay \u2014 ' + billName + '. ' + balStr + ' remaining.',
         read: false,
         paid: true,
@@ -730,6 +734,7 @@ export function createState(ctx) {
     s.money = 0;
     addPhoneMessage({
       type: 'bill',
+      source: 'bank',
       text: 'Payment declined \u2014 ' + billName + '. Insufficient funds.',
       read: false,
       paid: false,
@@ -741,8 +746,10 @@ export function createState(ctx) {
 
   // --- Phone inbox helpers ---
 
-  /** @param {{ type: string, text: string, read: boolean, source?: string, paid?: boolean }} msg */
+  /** @param {{ type: string, text: string, read: boolean, source?: string, direction?: string, timestamp?: number, paid?: boolean }} msg */
   function addPhoneMessage(msg) {
+    if (msg.direction === undefined) msg.direction = 'received';
+    if (msg.timestamp === undefined) msg.timestamp = s.time;
     s.phone_inbox.push(msg);
   }
 

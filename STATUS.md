@@ -178,6 +178,8 @@ dressed, showered, ate_today, at_work_today, called_in, alarm_set, alarm_went_of
 ### Phone State
 Battery (dual-rate drain: 1%/hr standby, 15%/hr screen-on; tiers: dead/critical/low/fine), silent mode, inbox (messages accumulate whether or not you look). Charges at 30%/hr during sleep at home and via charge_phone interaction. Starting battery 80–100% (chargen RNG). Message sources: friends (flavor-driven frequency), work nag (30min late), paycheck deposits (biweekly), bill auto-pay notifications (rent/utilities/phone, monthly).
 
+**Phone UI:** Full HTML5 phone overlay. Three screens: home (large time + date + Messages app badge), messages list (contacts ordered: friends by recency, then supervisor, then bank; unread dots, preview text), thread view (sent/received bubbles, compose row with Reply/Write when applicable). Navigation (home→list→thread→back) is transient state stored in `phone_screen` + `phone_thread_contact`. Opening a friend thread marks messages as read and applies guilt side-effects. Reply and Write actions go through the normal game pipeline (RNG consumed, action recorded, friend response queued). Old `read_messages` interaction kept for replay compat. All phone messages now carry `source` and `direction` fields (auto-stamped in `addPhoneMessage`).
+
 ### Apartment State
 fridge_food (integer, depletes on eating, restocked by groceries), apartment_mess (0–100, grows passively)
 
@@ -214,8 +216,8 @@ do_work, work_break, talk_to_coworker, check_phone_work
 ### Corner Store (3)
 buy_groceries, buy_cheap_meal, browse_store
 
-### Phone Mode (5, available anywhere)
-read_messages, reply_to_friend, message_friend, toggle_phone_silent, put_phone_away
+### Phone Mode (5, triggered from phone UI)
+read_messages (backward-compat replay only), reply_to_friend, message_friend, toggle_phone_silent (currently inaccessible in new UI — TODO), put_phone_away
 
 ### Global (1, available anywhere with phone)
 call_in (call in sick — morning only, work hours)
