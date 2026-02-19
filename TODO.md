@@ -114,6 +114,10 @@ Outfit prose is static per set. No weather-appropriate clothing, no choosing wha
 
 **`toggle_phone_silent` temporarily inaccessible** — the old phone-mode action list is gone and silent toggle hasn't been placed in the new UI yet. Should live on the home screen (a small ringer icon or silent indicator the player can tap). Currently the silent state can still be set via replay but not by live play.
 
+**Face-down DND** — some phones (and some people) use placing the phone face-down as a temporary "don't interrupt me" gesture. Could be a location-specific interaction (put_phone_facedown at kitchen table, desk, bedside, bathroom counter before shower) that suppresses notifications until the player picks it back up. Different texture from full silent mode — not a setting, just a posture. The phone is still there, still accumulating messages; you're just choosing not to see them right now.
+
+**Shower as a phone-free moment** — the shower is one of the few natural pauses from the phone. Some people bring it in anyway (waterproof case, propped on the shelf, half-watching something). Most don't. Either way there's a texture here: the 10 minutes where you can't check it even if you want to, and what that feels like depending on whether there's something you're waiting for or avoiding. Could feed into compulsive-checking patterns — coming out of the shower and immediately reaching for the phone is a specific gesture worth capturing.
+
 **Still missing:** Calling (vs texting), the different way each friend responds to prolonged vs brief absence, reaching out when no guilt exists (purely wanting to connect). Compulsive checking vs avoidance as distinct behavioral patterns.
 
 ### Age-specific content
