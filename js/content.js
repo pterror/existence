@@ -2566,6 +2566,7 @@ export function createContent(ctx) {
           energyCost = -10;
           stressEffect = -3;
           State.set('work_tasks_done', State.get('work_tasks_done') + 1);
+          State.adjustJobStanding(1); // focused work builds standing
         } else {
           timeCost = Timeline.randomInt(45, 90);
           energyCost = -15;
@@ -3616,6 +3617,22 @@ export function createContent(ctx) {
           { weight: moneyAnx * 6, value: 'There\'s a number in your head. It\'s not the right number, but it\'s close enough to make your stomach tighten.' },
           { weight: moneyAnx * 4, value: 'Rent is due. Or was due. Or will be. The due dates blur together after a while.' },
         );
+        // Upcoming bill awareness
+        const bill = State.nextBillDue();
+        if (bill && bill.daysUntil <= 3) {
+          const timing = bill.daysUntil === 0 ? 'today' : bill.daysUntil === 1 ? 'tomorrow' : 'in a couple days';
+          const label = bill.name === 'rent' ? 'Rent' : 'A bill';
+          thoughts.push({ weight: moneyAnx * 8, value: `${label} is due ${timing}. You know the amount. You don\'t say it.` });
+        }
+        // Upcoming paycheck awareness when tight
+        const mt = State.moneyTier();
+        if (mt === 'broke' || mt === 'scraping' || mt === 'tight') {
+          const paycheckDays = State.nextPaycheckDays();
+          if (paycheckDays <= 4) {
+            const timing = paycheckDays === 0 ? 'today' : paycheckDays === 1 ? 'tomorrow' : `in ${paycheckDays} days`;
+            thoughts.push({ weight: moneyAnx * 7, value: `Paycheck ${timing}. The math between now and then is the only math that matters right now.` });
+          }
+        }
       }
       if (moneyAnx > 0.2) {
         thoughts.push(

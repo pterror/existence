@@ -141,6 +141,9 @@ export function createWorld(ctx) {
           State.set('times_late_this_week', State.get('times_late_this_week') + 1);
           State.adjustJobStanding(-5);
           Events.record('late_for_work', { minutesLate: Math.round(tod - State.get('work_shift_start')) });
+        } else {
+          // On time — demonstrates reliability
+          State.adjustJobStanding(2);
         }
         Events.record('arrived_at_work', { late: tod > State.get('work_shift_start') + 15, minutesLate: Math.round(tod - State.get('work_shift_start')) });
       }
