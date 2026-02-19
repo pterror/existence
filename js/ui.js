@@ -21,12 +21,14 @@ export function createUI(ctx) {
   /** @type {(() => void) | null} */
   let idleCallback = null;
   let idleCount = 0;
+  let lastActivityTime = Date.now();
 
   // Focus state — UI-only, not saved or replayed
   let timeFocus = 0.5;
   let moneyFocus = 0.5;
 
-  const IDLE_DELAY = 25000; // 25 seconds before idle thoughts
+  // How long without any user input before idle thoughts stop firing
+  const ACTIVITY_TIMEOUT = 5 * 60 * 1000; // 5 minutes
 
   // Color interpolation between unfocused and focused
   const FOCUSED_COLOR = { r: 0xc8, g: 0xc0, b: 0xb8 };
@@ -68,6 +70,12 @@ export function createUI(ctx) {
         stopIdleTimer();
       }
     });
+
+    // Track real user presence — any input resets the activity clock.
+    const markActive = () => { lastActivityTime = Date.now(); };
+    document.addEventListener('mousemove', markActive, { passive: true });
+    document.addEventListener('keydown', markActive, { passive: true });
+    document.addEventListener('click', markActive, { passive: true });
   }
 
   // --- Text rendering ---
@@ -225,16 +233,17 @@ export function createUI(ctx) {
   // --- Idle behavior ---
 
   function scheduleNextIdle() {
-    // Escalating silence: one comes, then another, then quiet
-    // 0: 30s, 1: 60s, 2+: done
-    const delays = [30000, 60000];
-    if (idleCount >= delays.length) return; // gone quiet
-    if (State.get('viewing_phone')) return; // actively engaged
+    if (State.get('viewing_phone')) return;
+    // Escalating delays: quick at first, then space out. Plateau at 20 min.
+    const delays = [30000, 60000, 120000, 300000, 1200000];
+    const delay = delays[Math.min(idleCount, delays.length - 1)];
     idleTimer = setTimeout(() => {
+      // If the player has been truly absent, drop silently without rescheduling.
+      if (Date.now() - lastActivityTime > ACTIVITY_TIMEOUT) return;
       if (idleCallback) idleCallback();
       idleCount++;
       scheduleNextIdle();
-    }, delays[idleCount]);
+    }, delay);
   }
 
   function resetIdleTimer() {
