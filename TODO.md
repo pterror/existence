@@ -27,6 +27,21 @@ Three-layer prose shading pattern established (see DESIGN.md "Prose-neurochemist
 
 Everything below is drawn from the gap between DESIGN.md and what's built. Not committed to — just visible.
 
+### System interfaces — all systems
+
+Stable JS method signatures for every simulation system, following the model in [DESIGN-OBJECTS.md](DESIGN-OBJECTS.md). See **[DESIGN-INTERFACES.md](DESIGN-INTERFACES.md)** for the full catalog.
+
+Currently, content.js reaches into `State.get('x')` raw scalars for most systems. Each system should expose a clean interface that hides implementation details from prose. When content reads `State.get('apartment_mess')` directly, it's coupled to the implementation. When it calls `Mess.tier()` or `Dishes.inSinkCount()`, it talks to the contract.
+
+Interfaces are catalogued in order of implementation readiness:
+1. **Domestic objects** — already in DESIGN-OBJECTS.md. Clothing, Dishes, Linens replace `apartment_mess`.
+2. **Food** — `Food.fridgeTier()`, `Food.canEat()` wrappers over the current scalar.
+3. **Finance** — `Finance.canAfford()`, `Finance.nextBillDue()`.
+4. **Job** — `Job.isWorkday()`, `Job.isLate()`, `Job.latenessMinutes()`.
+5. **Weather/Geo** — temperature, season, day length from latitude + date.
+6. **Substances** — caffeine first.
+7. **Health** — one condition to establish the pattern.
+
 ### Mood as its own system
 Full emotional architecture designed in [DESIGN-EMOTIONS.md](DESIGN-EMOTIONS.md). Three layers: neurochemical baseline (ambient mood with inertia), directed sentiments (emotions attached to specific targets — people, concepts, objects, traits), surface mood (emergent from both + physical state + context). Implementation path:
 1. ~~**Neurochemical baseline with inertia**~~ — **IMPLEMENTED.** 28 neurochemical systems with exponential drift, asymmetric rates, biological jitter. moodTone() now reads from serotonin/dopamine/NE/GABA. Sleep, stress, hunger, social feed active systems. Mood has inertia — no more instant-snap.
@@ -97,7 +112,7 @@ Full design in [DESIGN-OBJECTS.md](DESIGN-OBJECTS.md). Mess is not a scalar — 
 **Current state (approximation debt):** `apartment_mess` scalar shapes prose at 4 tiers in bedroom, kitchen, bathroom. `messTier()` in state.js. `apartment_notice` event is NT-shaded. Prose works but is fundamentally limited — "dishes in the sink" comes from a number, not dishes.
 
 **Implementation path (from DESIGN-OBJECTS.md):**
-1. **Define interfaces** — stable method signatures for Clothing, Dishes, Linens. This is the highest-priority step before any implementation.
+1. **Define interfaces** — stable method signatures for Clothing, Dishes, Linens. Defined in [DESIGN-INTERFACES.md](DESIGN-INTERFACES.md).
 2. **Coarse implementations** — count-based backends that replace `apartment_mess`. RunRecord gains `subsystem_versions`.
 3. **Remove `apartment_mess`** — once object systems cover the same ground. `messTier()` becomes derived or removed.
 4. **Full implementations** — per-item tracking, one system at a time. Clothing first (wardrobe generated at chargen, items with location/wear states, undressing shaped by mood/energy).
