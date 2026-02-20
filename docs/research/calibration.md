@@ -713,7 +713,7 @@ The literature does not supply a clean replacement rate. What it supports:
 1. Remove flat 3 pts/hr. Replace with a circadian-modulated base rate — lower in the morning, lower in the evening WMZ, higher in the afternoon trough.
 2. Hunger multipliers: reduce to ~1.1× / 1.3× (directional approximation with better grounding than current 1.3×/1.8×). Still approximation debts.
 3. Document `go_for_walk` energy effect as mechanistically positive at moderate states (cite Puetz 2008).
-4. Add to TODO.md: energy drain needs circadian modulation from time + latitude, not a flat scalar.
+4. Add to ../../TODO.md: energy drain needs circadian modulation from time + latitude, not a flat scalar.
 
 ### Key sources
 

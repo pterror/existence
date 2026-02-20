@@ -18,7 +18,7 @@ Current state of the codebase. Keep this up to date — see CLAUDE.md workflow r
 - **money** (float) — tiers: broke / scraping / tight / careful / okay / comfortable
 - **time** — continuous minutes since game start, never resets
 
-### Neurochemistry (Layer 1 of DESIGN-EMOTIONS.md)
+### Neurochemistry (Layer 1 of docs/design/emotions.md)
 28 neurochemical systems modeled as hidden state variables (0–100 scale). Each drifts toward a target value via exponential approach with asymmetric up/down rates (biological half-lives). Deterministic biological jitter (incommensurate sine waves, no PRNG consumed) creates "some days are harder" variability.
 
 **Active systems (8)** — have target functions fed by current game state:
@@ -129,7 +129,7 @@ Two health tracks: chronic conditions (permanent, per-character) and acute illne
 - **Tolerance + withdrawal** — `caffeine_habit` (0–100) grows +8 per day caffeine peak ≥ 40, fades -5 per day without. `caffeine_withdrawal` builds at ~6 pts/hr (habit=100) when habit > 10 and caffeine_level < 15; clears at 25 pts/hr when caffeinated. Withdrawal raises NE, suppresses dopamine. `withdrawalTier()` — 'none' | 'mild' | 'moderate' | 'severe'. Withdrawal prose at make_coffee / get_coffee_work / buy_coffee_store (relief branch) and idleThoughts (3-tier headache presence).
 - **Receptor upregulation + nausea** — at habit > 30, withdrawal amplifies adenosine accumulation (upregulated receptor sensitivity: up to +2 pts/hr at habit=100/withdrawal=100). At severe withdrawal (withdrawal > 55 + habit > 45), `nausea` state builds via GI adenosine A1/A2A flooding (brainstem chemoreceptor trigger zone, vagus nerve). `nausea` (0–100) is general-purpose across systems. `nauseaTier()` — 'none' | 'queasy' | 'sick' | 'severe'. Idle thoughts: 4-tier nausea presence. Nausea decays 2 pts/hr naturally, 8 pts/hr when caffeinated. Nausea suppresses GABA, raises NE; severe nausea adds adenosine (systemic fog).
 
-### Emotional Inertia (Layer 2 of DESIGN-EMOTIONS.md)
+### Emotional Inertia (Layer 2 of docs/design/emotions.md)
 Per-character trait controlling how sticky moods are. Only affects the four mood-primary systems (serotonin, dopamine, NE, GABA) — physiological rhythms are unaffected by personality.
 
 **Personality parameters** (generated at character creation, stored in state):
@@ -141,7 +141,7 @@ Per-character trait controlling how sticky moods are. Only affects the four mood
 
 **"Worse direction" per system:** serotonin falling, dopamine falling, NE rising, GABA falling.
 
-### Basic Sentiments (Layer 2 of DESIGN-EMOTIONS.md)
+### Basic Sentiments (Layer 2 of docs/design/emotions.md)
 Likes and dislikes generated at character creation. Array of `{target, quality, intensity}` objects stored on character and written to state. 8 categories per character:
 - **Weather** — liked weather (comfort) and disliked weather (irritation) → serotonin target modifiers
 - **Time of day** — morning or evening person → serotonin + dopamine target modifiers
@@ -154,10 +154,10 @@ Likes and dislikes generated at character creation. Array of `{target, quality, 
 
 All effects scale linearly with intensity. Small background forces (max ±3.4 serotonin target shift from weather, vs ±20 from sleep quality). Sentiment-aware prose variants in eat_food, buy_cheap_meal, shower, sit_at_table, go_for_walk, look_out_window, sleep.
 
-### Sleep Emotional Processing (Layer 2 of DESIGN-EMOTIONS.md)
+### Sleep Emotional Processing (Layer 2 of docs/design/emotions.md)
 During sleep, each sentiment's intensity drifts back toward its character baseline (the chargen-generated value). Processing rate = 0.4 * sleepQuality * clamp(sleepMinutes/420, 0.3, 1.0). Good sleep (quality 1.0, 7+ hours) processes ~40% of deviation per night; poor sleep (quality 0.5, 3 hours) processes ~14%. Accumulated sentiments with no character match attenuate toward intensity 0. Called in the sleep interaction after stress reduction, before wakeUp(). No PRNG consumed.
 
-### Accumulating Sentiments (Layer 2 of DESIGN-EMOTIONS.md)
+### Accumulating Sentiments (Layer 2 of docs/design/emotions.md)
 Sentiments that build from repeated experience. The first dynamic sentiments — feelings that emerge from daily friction and connection, not character generation.
 
 **Work sentiments:**
@@ -177,7 +177,7 @@ Sentiments that build from repeated experience. The first dynamic sentiments —
 
 **`State.adjustSentiment(target, quality, amount)`** — mutation function for accumulating sentiments. Finds-or-creates entry, clamps [0, 1]. No PRNG consumed.
 
-### Sentiment Evolution (Layer 2 of DESIGN-EMOTIONS.md)
+### Sentiment Evolution (Layer 2 of docs/design/emotions.md)
 Three mechanics deepening how sentiments change over time:
 
 **Regulation capacity** — `State.regulationCapacity()`. Inverse of emotional inertia, applied during sleep processing. Fluid characters (low neuroticism, high self-esteem, low rumination) process emotions faster; sticky characters process slower. Range 0.5–1.3. At 50/50/50 → 1.0. State penalties for adenosine > 60 and stress > 60.
@@ -186,7 +186,7 @@ Three mechanics deepening how sentiments change over time:
 
 **Habituation** — comfort sentiments (eating, rain_sound, outside, warmth, quiet) lose small amounts of intensity each time they activate (-0.002 to -0.003). Sleep restores toward character baseline. Light use stays stable; heavy use fades slightly. Quiet irritation also habituates (-0.001). Weather/time-of-day prefs and work/coworker sentiments are NOT habituated.
 
-### Friend Absence Effects (Layer 2 of DESIGN-EMOTIONS.md)
+### Friend Absence Effects (Layer 2 of docs/design/emotions.md)
 Friends who reach out and get silence back generate guilt over time. Per-friend contact timestamps track last message engagement.
 
 **Mechanics:**
@@ -256,7 +256,7 @@ Financial anxiety sentiment connects to neurochemistry:
 
 ### Derived Systems
 - **Mood tone** — primarily from neurochemistry (serotonin, dopamine, NE, GABA) with physical state overrides → numb / fraying / heavy / hollow / quiet / clear / present / flat. Same 8 tones, now with inertia instead of instant derivation.
-- **Prose-neurochemistry shading** — three-layer pattern: moodTone() as coarse selector, weighted variant selection via `State.lerp01()` + `Timeline.weightedPick()`, deterministic modifiers (adenosine fog, NE+low-GABA restlessness). **All 67 `Timeline.pick` call sites converted.** Covered: idle thoughts, bedroom description, lie_there, sleep prose (23 branches), look_out_window (7 branches), sit_at_table (6 branches), go_for_walk (12 branches), work events (4 branches), ambient events (5 branches), friend messages (4 flavors), coworker chatter (3 flavors), coworker interactions (3 flavors). No `Timeline.pick` calls remain. See DESIGN.md "Prose-neurochemistry interface" for the full pattern.
+- **Prose-neurochemistry shading** — three-layer pattern: moodTone() as coarse selector, weighted variant selection via `State.lerp01()` + `Timeline.weightedPick()`, deterministic modifiers (adenosine fog, NE+low-GABA restlessness). **All 67 `Timeline.pick` call sites converted.** Covered: idle thoughts, bedroom description, lie_there, sleep prose (23 branches), look_out_window (7 branches), sit_at_table (6 branches), go_for_walk (12 branches), work events (4 branches), ambient events (5 branches), friend messages (4 flavors), coworker chatter (3 flavors), coworker interactions (3 flavors). No `Timeline.pick` calls remain. See docs/design/overview.md "Prose-neurochemistry interface" for the full pattern.
 - **Time period** — deep_night / early_morning / morning / late_morning / midday / afternoon / evening / night
 - **Observation fidelity** — time and money awareness degrade with distance from last check (exact → rounded → vague → sensory/qualitative). Location descriptions (bedroom alarm clock, kitchen microwave) use perceived strings, not raw time. Sensory tier handled separately (full-sentence vs fragment). Idle thoughts include fidelity-aware variants for rough/qualitative money and vague/sensory time.
 - **Season** — derived from latitude + start_timestamp. Tropical: wet/dry. Temperate: four seasons. Hemisphere from sign.

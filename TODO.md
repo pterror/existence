@@ -3,7 +3,7 @@
 ## Backlog
 
 ### NT prose shading — remaining unconverted call sites
-Three-layer prose shading pattern established (see DESIGN.md "Prose-neurochemistry interface"): moodTone() as coarse selector, weighted variant selection via NT values, deterministic modifiers. Converted: `idleThoughts()`, `apartment_bedroom` description, `lie_there` interaction, sleep prose (23 sites), `look_out_window` (7 sites). All `Timeline.pick()` call sites converted to `Timeline.weightedPick()` with NT shading. **67/67 complete.** Priority order:
+Three-layer prose shading pattern established (see docs/design/overview.md "Prose-neurochemistry interface"): moodTone() as coarse selector, weighted variant selection via NT values, deterministic modifiers. Converted: `idleThoughts()`, `apartment_bedroom` description, `lie_there` interaction, sleep prose (23 sites), `look_out_window` (7 sites). All `Timeline.pick()` call sites converted to `Timeline.weightedPick()` with NT shading. **67/67 complete.** Priority order:
 
 **High impact (frequent / atmospheric):**
 - ~~Sleep prose (falling-asleep + waking-up, ~23 pick sites)~~ — **DONE.** Pre-sleep NTs (adenosine, GABA, NE, serotonin) shade falling-asleep; post-sleep NTs (serotonin, NE, GABA, adenosine) shade waking. Key dimensions: adenosine→sleep inertia/crash, GABA→night anxiety/can't-settle, NE→hyper-alertness/sharp edges, serotonin→dread-vs-warmth.
@@ -25,7 +25,7 @@ Three-layer prose shading pattern established (see DESIGN.md "Prose-neurochemist
 
 ## Under Consideration
 
-Everything below is drawn from the gap between DESIGN.md and what's built. Not committed to — just visible.
+Everything below is drawn from the gap between docs/design/overview.md and what's built. Not committed to — just visible.
 
 ### Core simulation calibration debts
 
@@ -45,19 +45,19 @@ The numbers below are marked with `// Approximation debt:` at their code sites (
 - ~~**Social decay: 2 pts/hr after 10 idle actions**~~ — **FIXED 2026-02-20.** Threshold removed; asymptotic decay τ=66h (~7 pts/10h from social=50); neuroticism ±35% scaling. `social_energy` variable added (depleted by interaction, recovered by solitude/sleep). Remaining debts: τ not literature-derived; trait loneliness floor absent (needs chargen param); introversion scaling absent (needs chargen param).
 - ~~**Emotional inertia weights: 0.5/0.3/0.2 (neuroticism/low-SE/rumination)**~~ — **FIXED 2026-02-20.** Corrected to `rumination: 0.40, neuroticism: 0.32, self_esteem: 0.28` per Houben et al. 2015 meta-analysis (PMID 25822133). Asymmetry extended to both neuroticism and rumination.
 - **NT target clamp bounds** — serotonin/dopamine [15–85], NE [10–90], GABA [20–80] — chosen. These set the absolute emotional floor and ceiling regardless of circumstances.
-- **Regulation capacity range [0.5–1.3] and state penalty coefficients** — **RESEARCHED 2026-02-20** (see RESEARCH-CALIBRATION.md §Emotional Inertia State Penalties). Current coefficients in right order of magnitude (Shields 2016: g=−0.197 to −0.300 for stress; Palmer 2024 meta-analysis for sleep loss). Structural gaps: (1) linear-above-threshold is wrong (nonlinear relationship); (2) chronic stress PFC lag absent — structural recovery takes days-weeks but model resets instantly with stress. Not yet implemented.
+- **Regulation capacity range [0.5–1.3] and state penalty coefficients** — **RESEARCHED 2026-02-20** (see docs/research/calibration.md §Emotional Inertia State Penalties). Current coefficients in right order of magnitude (Shields 2016: g=−0.197 to −0.300 for stress; Palmer 2024 meta-analysis for sleep loss). Structural gaps: (1) linear-above-threshold is wrong (nonlinear relationship); (2) chronic stress PFC lag absent — structural recovery takes days-weeks but model resets instantly with stress. Not yet implemented.
 - **Biological jitter frequencies (0.017, 0.0073) and amplitudes (2.0, 1.5)** — chosen to be incommensurate. Real ultradian/infradian rhythms (90 min, ~28 days) could ground the frequencies; amplitudes are arbitrary.
 - **Event probabilities (0.03 weather, 0.10 workplace, 0.06 apartment, 0.08 street)** — per-action rates, chosen. Per-action (not per-hour) framing makes these hard to calibrate against any real source.
 - **Migraine trigger rate (0.003/hr) and 8× risk amplification** — trigger rate is directionally plausible (episodic migraine: 1–14/month) but not derived from triggering threshold data.
 
 ### System interfaces — all systems
 
-Stable JS method signatures for every simulation system, following the model in [DESIGN-OBJECTS.md](DESIGN-OBJECTS.md). See **[DESIGN-INTERFACES.md](DESIGN-INTERFACES.md)** for the full catalog.
+Stable JS method signatures for every simulation system, following the model in [docs/design/objects.md](docs/design/objects.md). See **[docs/design/interfaces.md](docs/design/interfaces.md)** for the full catalog.
 
 Currently, content.js reaches into `State.get('x')` raw scalars for most systems. Each system should expose a clean interface that hides implementation details from prose. When content reads `State.get('apartment_mess')` directly, it's coupled to the implementation. When it calls `Mess.tier()` or `Dishes.inSinkCount()`, it talks to the contract.
 
 Interfaces are catalogued in order of implementation readiness:
-1. **Domestic objects** — already in DESIGN-OBJECTS.md. Clothing, Dishes, Linens replace `apartment_mess`.
+1. **Domestic objects** — already in docs/design/objects.md. Clothing, Dishes, Linens replace `apartment_mess`.
 2. **Food** — `Food.fridgeTier()`, `Food.canEat()` wrappers over the current scalar.
 3. **Finance** — `Finance.canAfford()`, `Finance.nextBillDue()`.
 4. **Job** — `Job.isWorkday()`, `Job.isLate()`, `Job.latenessMinutes()`.
@@ -66,7 +66,7 @@ Interfaces are catalogued in order of implementation readiness:
 7. **Health** — one condition to establish the pattern.
 
 ### Mood as its own system
-Full emotional architecture designed in [DESIGN-EMOTIONS.md](DESIGN-EMOTIONS.md). Three layers: neurochemical baseline (ambient mood with inertia), directed sentiments (emotions attached to specific targets — people, concepts, objects, traits), surface mood (emergent from both + physical state + context). Implementation path:
+Full emotional architecture designed in [docs/design/emotions.md](docs/design/emotions.md). Three layers: neurochemical baseline (ambient mood with inertia), directed sentiments (emotions attached to specific targets — people, concepts, objects, traits), surface mood (emergent from both + physical state + context). Implementation path:
 1. ~~**Neurochemical baseline with inertia**~~ — **IMPLEMENTED.** 28 neurochemical systems with exponential drift, asymmetric rates, biological jitter. moodTone() now reads from serotonin/dopamine/NE/GABA. Sleep, stress, hunger, social feed active systems. Mood has inertia — no more instant-snap.
 2. ~~**Emotional inertia as character trait**~~ — **IMPLEMENTED.** Personality params (neuroticism, self_esteem, rumination) generated at chargen, stored in state. `effectiveInertia()` modifies drift rate for mood-primary systems only. Neuroticism adds asymmetric negative stickiness. State modifiers (sleep deprivation, poor sleep, chronic stress) increase inertia for everyone.
 3. ~~**Basic sentiments**~~ — **IMPLEMENTED.** 8 categories of likes/dislikes generated at chargen (weather, time, food, rain, quiet, outside, warmth, routine). Stored as `{target, quality, intensity}` array on character. Weather/time feed serotonin/dopamine targets continuously. Food, rain, outside, warmth, quiet produce discrete nudges in interactions. Sentiment-aware prose variants in 7 interactions. Routine stored but dormant.
@@ -77,10 +77,10 @@ Full emotional architecture designed in [DESIGN-EMOTIONS.md](DESIGN-EMOTIONS.md)
 5d. ~~**Friend absence effects**~~ — **IMPLEMENTED.** Per-friend contact timestamps track last message engagement. After 1.5-day grace period, guilt accumulates each sleep cycle (~0.005–0.008/night, scaling with duration). Unread messages intensify guilt. Phone screen guilt nudge. Reading resets timer and reduces guilt. Serotonin target penalty at home. Guilt-aware idle thoughts (16 new). Sleep processing factor 0.7.
 6. **Trauma sentiments** — high-intensity, processing-resistant. Connected to trauma system.
 
-**Neurochemistry incompleteness:** 28 of ~76+ human hormones modeled. See [REFERENCE-HORMONES.md](REFERENCE-HORMONES.md). Missing: CRH, ACTH, GnRH, aldosterone, estrone, estriol, androstenedione, NPY, substance P, orexins, CCK, enkephalin, adrenaline, and others. Add as their relevant game systems are built.
+**Neurochemistry incompleteness:** 28 of ~76+ human hormones modeled. See [docs/reference/hormones.md](docs/reference/hormones.md). Missing: CRH, ACTH, GnRH, aldosterone, estrone, estriol, androstenedione, NPY, substance P, orexins, CCK, enkephalin, adrenaline, and others. Add as their relevant game systems are built.
 
 ### Habit system
-Full design in [DESIGN-HABITS.md](DESIGN-HABITS.md). The character develops behavioral momentum from observed play patterns. Implementation path:
+Full design in [docs/design/habits.md](docs/design/habits.md). The character develops behavioral momentum from observed play patterns. Implementation path:
 1. ~~**Decision tree engine + feature extraction + training + prediction**~~ — **IMPLEMENTED.** CART decision trees learn action patterns from ~34 features. One-vs-rest binary trees per action. Recency-weighted training. Trained after replay, retrained every 10 actions.
 2. ~~**Suggested defaults**~~ — **IMPLEMENTED.** Medium-strength habit predictions (>0.5, modulated by routine sentiment) surface as subtle visual distinction on action buttons. Competing habits suppress suggestion.
 3. ~~**Auto-advance**~~ — **IMPLEMENTED.** Predictions at ≥0.75 confidence trigger auto-advance: approaching prose (deterministic, no RNG) + highlighted action + 2500ms delay + auto-fire. Player clicks any action to interrupt. Chains naturally (morning routine flows automatically). Source-weighted training (auto=0.1). Phone mode suppressed. 30 interaction + 7 movement approaching prose functions.
@@ -116,7 +116,7 @@ Full design in [DESIGN-HABITS.md](DESIGN-HABITS.md). The character develops beha
 - Non-formal income patterns (gig work, cash, irregular)
 
 ### More employment types
-Only formal employment exists (office, retail, food_service). DESIGN.md describes: freelance/commissions (irregular work, irregular pay), gig work (apps, deliveries), informal work (cash, no records), unemployed (looking or not), can't work (disability, caregiving, age). Each reshapes what "work" means.
+Only formal employment exists (office, retail, food_service). docs/design/overview.md describes: freelance/commissions (irregular work, irregular pay), gig work (apps, deliveries), informal work (cash, no records), unemployed (looking or not), can't work (disability, caregiving, age). Each reshapes what "work" means.
 
 ### Ending conditions
 Runs never finish. No mechanism for a life ending or the game concluding. What triggers an ending? What does "finished" mean for a game with no win/fail state?
@@ -125,10 +125,10 @@ Runs never finish. No mechanism for a life ending or the game concluding. What t
 **Partially implemented.** Four interactions added: lie_there (stay in bed, bedroom), look_out_window (bedroom), sit_at_table (kitchen), go_for_walk (street). All have mood-dependent effects — the same action produces different mechanical outcomes depending on internal state. Still missing: TV, music, reading, mindless phone scrolling — the media/distraction layer. Also no sitting on the couch (no living room), no aimless browsing, no "do nothing" as a distinct street/bus-stop option.
 
 ### Cooking and food variety
-Only "eat from fridge" and "buy cheap meal." No cooking (time + energy + ingredients), no meals that feel different, no dietary texture. DESIGN.md describes food as deeply personal — comfort food, cultural food, what's in the fridge vs what you need.
+Only "eat from fridge" and "buy cheap meal." No cooking (time + energy + ingredients), no meals that feel different, no dietary texture. docs/design/overview.md describes food as deeply personal — comfort food, cultural food, what's in the fridge vs what you need.
 
 ### ~~Alarm negotiation~~
-~~The alarm fires as an event but there's no snooze, no "turn it off and go back to sleep," no choosing not to set one. DESIGN.md describes the alarm as a negotiation between the person who set it and the person who hears it.~~ — **IMPLEMENTED.** snooze_alarm and dismiss_alarm interactions. Snooze escalates (fog → negotiation → guilt), dismiss varies by snooze count. Sleep debt, melatonin, circadian alignment, REM cycle model all integrated into sleep. See "Deep sleep model" in STATUS.md.
+~~The alarm fires as an event but there's no snooze, no "turn it off and go back to sleep," no choosing not to set one. docs/design/overview.md describes the alarm as a negotiation between the person who set it and the person who hears it.~~ — **IMPLEMENTED.** snooze_alarm and dismiss_alarm interactions. Snooze escalates (fog → negotiation → guilt), dismiss varies by snooze count. Sleep debt, melatonin, circadian alignment, REM cycle model all integrated into sleep. See "Deep sleep model" in STATUS.md.
 
 ### Sleep prose
 **Largely implemented.** Sleep prose now has two phases: falling-asleep (how sleep came) and waking-up (the gradient back to consciousness). Waking prose branches on post-sleep energy, sleep quality, alarm vs natural, time of day, mood, sleep debt, and sleep inertia — ~44 waking + ~22 falling-asleep variants. Alarm negotiation implemented (snooze/dismiss). Slept-through-alarm awareness. Still missing: insomnia/not-sleeping as a distinct experience, dreaming.
@@ -142,12 +142,12 @@ Only "eat from fridge" and "buy cheap meal." No cooking (time + energy + ingredi
 - Sleep apnea (non-restorative sleep mechanic) would require its own cycle disruption model — not assignable at chargen until upstream exists.
 
 ### Domestic object systems
-Full design in [DESIGN-OBJECTS.md](DESIGN-OBJECTS.md). Mess is not a scalar — it's emergent from the states of real objects. The current `apartment_mess` variable is an acknowledged approximation debt. See [PHILOSOPHY.md](PHILOSOPHY.md) for the interface/granularity model that applies here.
+Full design in [docs/design/objects.md](docs/design/objects.md). Mess is not a scalar — it's emergent from the states of real objects. The current `apartment_mess` variable is an acknowledged approximation debt. See [docs/design/philosophy.md](docs/design/philosophy.md) for the interface/granularity model that applies here.
 
 **Current state (approximation debt):** `apartment_mess` scalar shapes prose at 4 tiers in bedroom, kitchen, bathroom. `messTier()` in state.js. `apartment_notice` event is NT-shaded. Prose works but is fundamentally limited — "dishes in the sink" comes from a number, not dishes.
 
-**Implementation path (from DESIGN-OBJECTS.md):**
-1. ~~**Define interfaces**~~ — **DONE.** See [DESIGN-INTERFACES.md](DESIGN-INTERFACES.md).
+**Implementation path (from docs/design/objects.md):**
+1. ~~**Define interfaces**~~ — **DONE.** See [docs/design/interfaces.md](docs/design/interfaces.md).
 2. ~~**Coarse implementations**~~ — **DONE.** `js/dishes.js`, `js/linens.js`, `js/clothing.js` — count-based backends. Wired in context.js + game.js. content.js updated throughout.
 3. ~~**Remove `apartment_mess`**~~ — **DONE.** `apartment_mess` scalar removed from state.js. `messTier()` moved into content.js, computed from Dishes + Linens + Clothing. Bedroom, kitchen, apartment_notice all use local `messTier()`. Four tiers: tidy / cluttered / messy / chaotic. **Maintenance debt:** `messScore()` and `messTier()` are now duplicated verbatim in both `content.js` and `world.js` (world.js needs them for transition-based apartment_notice). If tier thresholds change, both must be updated. Long-term fix: expose via a shared `Mess` context object or pass a `getMessTier` callback from context.js. See note in world.js.
 4. **Full implementations** — per-item tracking, one system at a time. Clothing first (wardrobe generated at chargen, items with location/wear states, undressing shaped by mood/energy).
@@ -156,10 +156,10 @@ Full design in [DESIGN-OBJECTS.md](DESIGN-OBJECTS.md). Mess is not a scalar — 
 **Prose that becomes possible at full granularity:** "the shirt you've worn three days running," "three plates and a mug since Tuesday," specific items on specific surfaces, eating without a clean dish to use.
 
 ### Weather depth
-Only 4 weather states, no temperature, no seasonal variation, no weather affecting what you wear or how movement feels. DESIGN.md describes weather as atmosphere — the grey day that sits on you, rain changing what the street feels like.
+Only 4 weather states, no temperature, no seasonal variation, no weather affecting what you wear or how movement feels. docs/design/overview.md describes weather as atmosphere — the grey day that sits on you, rain changing what the street feels like.
 
 ### Clothing and getting dressed
-Currently: outfit sets selected at chargen, 3 prose variants each (default/low_mood/messy). No item tracking, no laundry, no choosing what to wear. This is superseded by the domestic object systems design — see above and [DESIGN-OBJECTS.md](DESIGN-OBJECTS.md). Getting dressed becomes: `Clothing.canGetDressed()` gates availability, `Clothing.wear()` picks and marks an item, outfit prose derives from what was actually put on.
+Currently: outfit sets selected at chargen, 3 prose variants each (default/low_mood/messy). No item tracking, no laundry, no choosing what to wear. This is superseded by the domestic object systems design — see above and [docs/design/objects.md](docs/design/objects.md). Getting dressed becomes: `Clothing.canGetDressed()` gates availability, `Clothing.wear()` picks and marks an item, outfit prose derives from what was actually put on.
 
 ### More phone interactions
 ~~Phone is check-only.~~ **Real phone UI incoming.** Phone now renders as a full HTML5 overlay: home screen (time, battery, Messages badge), messages list (per-contact rows, unread dots), threaded conversation view (bubble layout, sent/received), in-thread compose. Navigation (home→list→thread→back) is transient state, not recorded. Only actions with game effect (reply, message_friend, put_phone_away) go through the normal action pipeline.
@@ -186,13 +186,13 @@ Currently: outfit sets selected at chargen, 3 prose variants each (default/low_m
 **Phone condition** — ~~cracked screen basic overlay~~ **IMPLEMENTED.** `phone_cracked` boolean on character, generated at chargen from `economic_origin` (precarious 55%, modest 30%, comfortable 8%, secure 1%), 1 charRng call. CSS overlay (`.phone--cracked::after`) — hairline linear-gradient crack lines on the phone element. Condition affects texture, not function. Still pending: screen protector as a middle layer (cheaper than repair, still broken), slow phone (loading spinners between screens), dying battery that won't hold charge past noon, signal layer (bad wifi at home, weak 4G dead spots, prepaid throttling, failed-message indicator with retry). Each a small daily friction that accumulates.
 
 ### Age-specific content
-age_stage is a number (22–48 default range) but no prose varies by age. DESIGN.md describes radically different daily textures for children, teens, young adults, adults, older adults — different work, different money sources, different phone use, different constraints.
+age_stage is a number (22–48 default range) but no prose varies by age. docs/design/overview.md describes radically different daily textures for children, teens, young adults, adults, older adults — different work, different money sources, different phone use, different constraints.
 
 ### Family relationships
-No family exists in the simulation. DESIGN.md describes: supportive / conditional / hostile / absent parents. Financial cutoff. Housing contingent on family. The phone call you dread. Siblings. The weight of family as unchosen.
+No family exists in the simulation. docs/design/overview.md describes: supportive / conditional / hostile / absent parents. Financial cutoff. Housing contingent on family. The phone call you dread. Siblings. The weight of family as unchosen.
 
 ### Content warnings and consent
-No content level configuration. DESIGN.md describes: baseline tier (everyday struggles), full tier (DV, abuse, addiction, etc.), fine-grained toggles per category. Configuration before character generation, revisitable between runs.
+No content level configuration. docs/design/overview.md describes: baseline tier (everyday struggles), full tier (DV, abuse, addiction, etc.), fine-grained toggles per category. Configuration before character generation, revisitable between runs.
 
 ### Health system
 ~~No health conditions exist.~~ Migraines (chronic), acute illness (flu/cold/GI), and dental pain (chronic) implemented. Remaining: chronic conditions (diabetes, chronic pain), mental health as structural, pregnancy.
@@ -229,7 +229,7 @@ No content level configuration. DESIGN.md describes: baseline tier (everyday str
 
 **Still unaddressed: pregnancy system** — prerequisite for morning sickness, stretch marks, and prenatal nutrition needs. Morning sickness would use the existing nausea system; HG (hyperemesis gravidarum) is the severe form requiring hospitalization. Stretch marks are a physical character property (narrative prose on getting dressed, body description) with no mechanical effect.
 
-**Other conditions in the full framework (not yet scheduled):** narcolepsy/cataplexy, fibromyalgia, sleep apnea (non-restorative sleep mechanic), endometriosis, PMDD, lupus (SLE), thyroid disorders (hypothyroidism mimics depression), Raynaud's (cold → circulation cutoff), IBS (stress-triggered GI, shares stomach system), Crohn's/UC, celiac, PCOS, chronic urticaria, prosopagnosia, dyscalculia/dyslexia. Each needs its upstream before chargen assignment. See DESIGN.md "This list is not exhaustive."
+**Other conditions in the full framework (not yet scheduled):** narcolepsy/cataplexy, fibromyalgia, sleep apnea (non-restorative sleep mechanic), endometriosis, PMDD, lupus (SLE), thyroid disorders (hypothyroidism mimics depression), Raynaud's (cold → circulation cutoff), IBS (stress-triggered GI, shares stomach system), Crohn's/UC, celiac, PCOS, chronic urticaria, prosopagnosia, dyscalculia/dyslexia. Each needs its upstream before chargen assignment. See docs/design/overview.md "This list is not exhaustive."
 
 ### Jurisdiction as a character parameter
 Healthcare access, reproductive rights, and legal protections are **legal/political variables**, not geographic ones. Latitude does not predict abortion access, healthcare coverage, drug policy, or trans protections — a character at 59°N in Sweden has near-universal access; one at 52°N in Poland (historically) near-total prohibition. Using latitude as a proxy for US-style regional variation is a US-centric assumption that doesn't survive leaving the country.
@@ -239,13 +239,13 @@ The right model: **jurisdiction** (country + region/state) is a character parame
 **Approximation debt:** Any health/reproductive access gating currently present should be documented as hardcoded, not derived.
 
 ### Mental health as distinct from state
-Stress and energy model some of this but DESIGN.md describes depression, anxiety, bipolar, PTSD, OCD as structural conditions — not "low energy" but "the specific way getting out of bed takes everything you have."
+Stress and energy model some of this but docs/design/overview.md describes depression, anxiety, bipolar, PTSD, OCD as structural conditions — not "low energy" but "the specific way getting out of bed takes everything you have."
 
 ### Neurodivergence
 ADHD (executive dysfunction, time blindness, hyperfocus), autism (sensory processing, masking cost, routine importance). Not illnesses — ways of being that interact with a world not designed for them.
 
 ### Substance system
-~~No substances exist.~~ Caffeine implemented (level, habit, withdrawal, receptor upregulation, nausea). See [SUBSTANCES.md](SUBSTANCES.md) for the full dependency model and design reference.
+~~No substances exist.~~ Caffeine implemented (level, habit, withdrawal, receptor upregulation, nausea). See [docs/reference/substances.md](docs/reference/substances.md) for the full dependency model and design reference.
 
 **Caffeine remaining debts:**
 - ~~Acute tolerance: `consumeCaffeine(50)` gives same boost regardless of habit.~~ — **FIXED.** `consumeCaffeine` now scales intake by `1 - 0.3 * (habit/100)`: full dose at habit=0, ~70% at habit=100. `adenosineBlock()` shifts denominator by `0.4 * habit`, so habituated users need more caffeine to achieve the same receptor block. Both coefficients (0.3 and 0.4) are approximation debts — chosen, not derived from receptor density data.
@@ -273,15 +273,15 @@ ADHD (executive dysfunction, time blindness, hyperfocus), autism (sensory proces
 
 **Next substances to implement (in rough priority order):**
 
-1. **Nicotine** — the break that isn't relaxation, it's withdrawal stopping. Irritability-dominant withdrawal (distinct from caffeine's headache). Dopamine below non-smoker baseline during withdrawal. Social layer: the smoke break as legitimized absence. Smell. Who knows. See SUBSTANCES.md.
+1. **Nicotine** — the break that isn't relaxation, it's withdrawal stopping. Irritability-dominant withdrawal (distinct from caffeine's headache). Dopamine below non-smoker baseline during withdrawal. Social layer: the smoke break as legitimized absence. Smell. Who knows. See docs/reference/substances.md.
 
-2. **Alcohol** — GABA-A agonist. The curve (push → plateau → cost). Sleep disruption despite sedation (suppresses REM). Hangover. Chronic: dangerous withdrawal (seizures, DTs) — **cold turkey from high dependency is medically contraindicated, not just unpleasant.** Nausea already implemented as shared state. See SUBSTANCES.md.
+2. **Alcohol** — GABA-A agonist. The curve (push → plateau → cost). Sleep disruption despite sedation (suppresses REM). Hangover. Chronic: dangerous withdrawal (seizures, DTs) — **cold turkey from high dependency is medically contraindicated, not just unpleasant.** Nausea already implemented as shared state. See docs/reference/substances.md.
 
 3. **Cannabis** — blunts emotional extremes, disrupts REM, mild tolerance. Withdrawal: irritability, insomnia, appetite change — real but less severe than nicotine or alcohol.
 
-4. **Opioids** — prescription pathway (the back pain that became something else), the flu-like withdrawal, harm reduction access. Requires healthcare access system first. See SUBSTANCES.md.
+4. **Opioids** — prescription pathway (the back pain that became something else), the flu-like withdrawal, harm reduction access. Requires healthcare access system first. See docs/reference/substances.md.
 
-**Recovery pathway tasks (cut from first implementation, design in SUBSTANCES.md):**
+**Recovery pathway tasks (cut from first implementation, design in docs/reference/substances.md):**
 - **Cold turkey mechanic** — explicit choice interaction. Prose carries the arc specific to each substance.
 - **Medically supervised tapering** — requires healthcare access system (jurisdiction-dependent). Benzodiazepines for alcohol withdrawal, buprenorphine for opioids.
 - **AA / NA / SMART Recovery** — meeting as an interaction (time, location), sponsor as relationship slot, step-work as slow background process, relapse as physiologically honest (habit re-escalation).
@@ -290,13 +290,13 @@ ADHD (executive dysfunction, time blindness, hyperfocus), autism (sensory proces
 - **Social consequences compound** — job standing, relationship damage, financial drain all interact with the substance state.
 
 ### Drawn lots
-No drawn lots exist. DESIGN.md describes: foster care, domestic violence, CPS, childbearing, fetal alcohol syndrome, instability, caregiving, housing instability, addiction/recovery, legal constraints, grief, language barriers. Each as daily texture, not backstory tags.
+No drawn lots exist. docs/design/overview.md describes: foster care, domestic violence, CPS, childbearing, fetal alcohol syndrome, instability, caregiving, housing instability, addiction/recovery, legal constraints, grief, language barriers. Each as daily texture, not backstory tags.
 
 ### Identity and social landscape
-No identity dimensions affect the simulation. DESIGN.md describes: gender (misogyny as ambient texture, not events), trans experience (visibility, HRT, passing, nonbinary), race/ethnicity (ambient response, code-switching, microaggressions), sexuality (the closet as energy cost, being out), body (weight, height, appearance as social objects).
+No identity dimensions affect the simulation. docs/design/overview.md describes: gender (misogyny as ambient texture, not events), trans experience (visibility, HRT, passing, nonbinary), race/ethnicity (ambient response, code-switching, microaggressions), sexuality (the closet as energy cost, being out), body (weight, height, appearance as social objects).
 
 ### Performance and masking cost
-DESIGN.md describes a shared pattern across identity dimensions: masking (autism/ADHD), code-switching (race/culture), the closet (sexuality), boymoding/girlmoding (trans), body management. All modeled as ambient energy drain that varies by context. Some spaces let you drop it.
+docs/design/overview.md describes a shared pattern across identity dimensions: masking (autism/ADHD), code-switching (race/culture), the closet (sexuality), boymoding/girlmoding (trans), body management. All modeled as ambient energy drain that varies by context. Some spaces let you drop it.
 
 ### Endocrine and biological systems
 Hormonal profile, menstrual cycles, cortisol rhythms, metabolism, drug metabolism (CYP enzyme variation), nutrient processing. Autonomous forces on mood that operate on their own schedule.
@@ -320,7 +320,7 @@ Online friends, long-distance relationships, sick people remotely. The phone as 
 The system exists mechanically but could shape prose more. "Around thirty dollars" vs "$32." "Sometime in the morning" vs "9:15 AM." The experience of not always knowing exactly what's going on because you're tired and distracted.
 
 ### Narration voice variation
-DESIGN.md describes the narration itself changing based on character — personality affecting sentence rhythm, neurodivergence changing attention structure, trauma changing what's loaded. Not just mood-variant prose but character-variant prose.
+docs/design/overview.md describes the narration itself changing based on character — personality affecting sentence rhythm, neurodivergence changing attention structure, trauma changing what's loaded. Not just mood-variant prose but character-variant prose.
 
 ### The world outside the routine
 Only 7 locations. No park, no library, no friend's place, no laundromat, no clinic, no shelter. The world is small on purpose but could be slightly larger — each new place being a specific texture of constrained life.
@@ -334,7 +334,7 @@ Coworkers have flavor-driven chatter but no ongoing relationship state. No cowor
 **Still missing:** Ambient events during the ride (someone's music, overheard conversation, the specific route), in-ride interactions (checking phone on the bus, noticing something out the window).
 
 ### Night shifts and non-standard schedules
-All three jobs are day shifts. DESIGN.md doesn't prescribe this. Being awake at 3 AM when the world is asleep is a specific texture.
+All three jobs are day shifts. docs/design/overview.md doesn't prescribe this. Being awake at 3 AM when the world is asleep is a specific texture.
 
 ### Existing systems that need deepening
 
@@ -348,7 +348,7 @@ All three jobs are day shifts. DESIGN.md doesn't prescribe this. Being awake at 
 - ~~**Asking someone**~~ — **IMPLEMENTED + REVISED.** `ask_for_help`: 7-day cooldown, broke/scraping tier. Probability now flavor-based (sends_things 70%, warm_quiet 65%, checking_in 60%, dry_humor 55%) + warmth bonus (up to +25%) − repeat penalty (−10%/ask) + broke urgency (+5%). Variable amount: $10–40 by flavor range. 4 balanced RNG calls. Prose no longer mentions dollar amounts. Reverse direction: friends occasionally send in-need messages (subtype `'in_need'`, 14-day cooldown, ~0.3%/step, 2 balanced RNG calls). `help_friend` interaction: flavor-deterministic amount ($10–15), builds warmth +0.05, 3 RNG calls. Approximation debts: friend's financial situation not modeled; physical delivery not implemented.
 - **The nothing option** — *prose partially addressed.* 12 idle thoughts added for the compound state: very_hungry/starving + broke/scraping + fridge empty + pantry empty. Time-of-day shading (late night vs. daytime), mood shading (heavy/hollow/numb vs. fraying/flat), NT shading (serotonin for late-night weight, dopamine for bandwidth exhaustion, cortisol for body-vs-situation mismatch). Still pending: narration changes as the state persists (the body's signals flattening over hours), mechanical consequences that accumulate (things getting harder, not just thought-differently-about), and what recovery from this state actually feels like.
 
-**Job standing is mechanical, not social.** Decay: late > 15min = -5, calling in = -8. Recovery added: on-time arrival +2, focused task completion +1. Still no social dynamics (coworker relationships don't affect standing), no variation by job type, no pattern-based assessment (single incident treated same as chronic pattern). Standing should be relational — shaped by what the specific job values, whether someone saw you, whether someone covered for you. See the expanded Work section in DESIGN.md.
+**Job standing is mechanical, not social.** Decay: late > 15min = -5, calling in = -8. Recovery added: on-time arrival +2, focused task completion +1. Still no social dynamics (coworker relationships don't affect standing), no variation by job type, no pattern-based assessment (single incident treated same as chronic pattern). Standing should be relational — shaped by what the specific job values, whether someone saw you, whether someone covered for you. See the expanded Work section in docs/design/overview.md.
 
 **Phone power system could deepen.** Battery now drains by screen time and charges during sleep / via charge_phone interaction. Future: phone model/age affecting battery capacity and drain rate, charge rate varying by charger type (wall vs USB vs car), battery health degrading over the life of the phone. Doesn't meaningfully affect gameplay but deepens the simulation — an old phone with a bad battery is a different daily texture than a new one.
 

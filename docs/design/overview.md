@@ -2,7 +2,7 @@
 
 The simulation behind the prose. None of this is visible to the player. Text carries everything.
 
-See [PHILOSOPHY.md](PHILOSOPHY.md) for the architectural principles that apply across all systems: the interface model, granularity-per-run, and the treatment of scalars as approximation debts.
+See [philosophy.md](philosophy.md) for the architectural principles that apply across all systems: the interface model, granularity-per-run, and the treatment of scalars as approximation debts.
 
 ## Core Principles
 
@@ -873,7 +873,7 @@ This is the game's primary expressive tool. Not mechanics, not UI, not numbers �
 
 ### Mood
 
-> Full emotional architecture: see [DESIGN-EMOTIONS.md](DESIGN-EMOTIONS.md). This section is the high-level vision. That document describes the mechanics — neurochemical baseline, directed sentiments, surface mood emergence, emotional inertia, and how it all connects to substances, endocrine, trauma, and identity.
+> Full emotional architecture: see [emotions.md](emotions.md). This section is the high-level vision. That document describes the mechanics — neurochemical baseline, directed sentiments, surface mood emergence, emotional inertia, and how it all connects to substances, endocrine, trauma, and identity.
 
 Mood isn't derived. It isn't a readout of energy plus stress plus hunger. It's its own thing — a state the body is in that moves on its own timeline.
 
@@ -981,7 +981,7 @@ The visual treatment is itself a simulation readout. The player never sees "you 
 
 ### Habits
 
-> Full design: see [DESIGN-HABITS.md](DESIGN-HABITS.md).
+> Full design: see [habits.md](habits.md).
 
 The character has habits. The character acts. The player interrupts.
 

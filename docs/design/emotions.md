@@ -1,8 +1,8 @@
 # Emotional Architecture
 
-How emotions work in the simulation. This document describes the mechanics underneath the mood system described in DESIGN.md. None of this is visible to the player. The player sees prose.
+How emotions work in the simulation. This document describes the mechanics underneath the mood system described in overview.md. None of this is visible to the player. The player sees prose.
 
-*Citation status: this document contains empirical claims (notably "~60% greater amygdala reactivity", effect sizes d=0.17–0.28 for sex differences in rumination, trait inertia correlations) with no PMC/PMID identifiers. The corresponding calibration research with citations is in RESEARCH-CALIBRATION.md.*
+*Citation status: this document contains empirical claims (notably "~60% greater amygdala reactivity", effect sizes d=0.17–0.28 for sex differences in rumination, trait inertia correlations) with no PMC/PMID identifiers. The corresponding calibration research with citations is in ../research/calibration.md.*
 
 ## The Problem with Derived Mood
 
@@ -34,7 +34,7 @@ Tonic neurotransmitter levels — serotonin, dopamine, norepinephrine — creati
 
 - **Air pressure and light** — barometric pressure affects mood in roughly half of people. The mechanism involves serotonin turnover. The effect is subtle — a nudge, not an override. Sunlight exposure matters on longer timescales (seasonal, circadian). Both are per-character sensitivities, not universal.
 
-- **Substances** — chemical mood alteration that bypasses the normal processing path. Described fully in DESIGN.md (Substances section). The key point: substances push on the baseline directly, and the cost is that the baseline shifts to accommodate them. The mood you had before the substance isn't there anymore.
+- **Substances** — chemical mood alteration that bypasses the normal processing path. Described fully in overview.md (Substances section). The key point: substances push on the baseline directly, and the cost is that the baseline shifts to accommodate them. The mood you had before the substance isn't there anymore.
 
 - **Chronic stress, chronic conditions** — sustained pressure erodes the baseline over weeks. This operates on the slowest timescale — the trajectory that SSRIs take weeks to shift because the change requires downstream neuroplastic adaptation, not just a neurotransmitter adjustment.
 
@@ -97,7 +97,7 @@ Multiple sentiments can activate simultaneously. Eating ramen when ramen carries
 
 - **Events** — some experiences create or intensify sentiments directly. Being yelled at by a boss. A friend who came through when things were bad. The first time a bill overdrafts. These attach emotional weight to their targets immediately, not gradually.
 
-- **Trauma** — described in DESIGN.md's Trauma section. Trauma is a specific kind of sentiment: high-intensity, resistant to attenuation, often attached to targets that are orthogonal to the apparent source. The coworker who's genuinely kind but whose voice carries weight because of someone else. The time of day that's loaded. Trauma sentiments don't attenuate through normal processing — they're the ones sleep can't fully strip.
+- **Trauma** — described in overview.md's Trauma section. Trauma is a specific kind of sentiment: high-intensity, resistant to attenuation, often attached to targets that are orthogonal to the apparent source. The coworker who's genuinely kind but whose voice carries weight because of someone else. The time of day that's loaded. Trauma sentiments don't attenuate through normal processing — they're the ones sleep can't fully strip.
 
 ### How sentiments evolve
 
@@ -160,7 +160,7 @@ Multiple forces can be present. The tone reflects the dominant one, but the pros
 
 ## How This Connects to Existing Systems
 
-### Substances (DESIGN.md)
+### Substances (overview.md)
 
 Substances push on Layer 1 (the baseline) directly, bypassing normal processing:
 - Acute effect: override or modulate the baseline for the duration
@@ -171,19 +171,19 @@ Substances push on Layer 1 (the baseline) directly, bypassing normal processing:
 
 Substances also generate sentiments: the comfort of the ritual, the dread of withdrawal, the craving that's an attachment to the substance itself.
 
-### Endocrine system (DESIGN.md)
+### Endocrine system (overview.md)
 
 Hormonal state modifies Layer 1 mechanics: how fast the baseline moves, how effectively regulation works, whether intrusive sentiments are suppressed or amplified. The endocrine system doesn't create emotions — it changes the processing environment in which emotions happen.
 
-### Trauma (DESIGN.md)
+### Trauma (overview.md)
 
 Trauma is a specific configuration of Layer 2 sentiments: high-intensity, resistant to sleep processing, attached to targets that may be non-obvious. Trauma sentiments activate when triggers are present and push strongly on surface mood. The resistance to processing means they don't attenuate normally — they persist across nights, across weeks, requiring many processing cycles or active therapeutic work (not yet modeled) to reduce.
 
-### Identity and performance (DESIGN.md)
+### Identity and performance (overview.md)
 
 Masking, code-switching, the closet, body management — these are ongoing energy drains that feed into Layer 1 (chronic baseline erosion) and generate Layer 2 sentiments (the resentment of having to perform, the relief of spaces where you don't, the dread of contexts that demand the most performance).
 
-### Health conditions (DESIGN.md)
+### Health conditions (overview.md)
 
 Physical and mental health conditions modify all three layers:
 - Layer 1: depression erodes the baseline directly, chronic pain creates sustained negative pressure, medication affects neurotransmitter dynamics
@@ -194,7 +194,7 @@ Physical and mental health conditions modify all three layers:
 
 This document describes the target architecture. Implementation should be incremental:
 
-1. **Mood as stored value with inertia** — the simplest version of Layer 1. A single value that drifts toward a target derived from physical state, with asymmetric rates (falls faster than rises) and deterministic jitter for biological weather. This alone replaces the current instant-derivation and gives mood the inertia DESIGN.md calls for.
+1. **Mood as stored value with inertia** — the simplest version of Layer 1. A single value that drifts toward a target derived from physical state, with asymmetric rates (falls faster than rises) and deterministic jitter for biological weather. This alone replaces the current instant-derivation and gives mood the inertia overview.md calls for.
 
 2. **Emotional inertia as character trait** — generated at character creation, modifiable by current state. Controls how fast mood moves. Some characters are emotionally sticky, others are more fluid.
 
@@ -204,7 +204,7 @@ This document describes the target architecture. Implementation should be increm
 
 5. **Accumulating sentiments** — sentiments that build from repeated experience. Coworker relationships that develop emotional weight. The job that becomes dreadful through daily friction. Layer 2 becoming dynamic rather than static.
 
-6. **Trauma sentiments** — high-intensity, processing-resistant. Connected to the trauma system described in DESIGN.md.
+6. **Trauma sentiments** — high-intensity, processing-resistant. Connected to the trauma system described in overview.md.
 
 Each step builds on the previous. The first step can be implemented now. The later steps require systems that don't exist yet (richer character generation, event systems, relationship depth).
 
@@ -235,7 +235,7 @@ level = clamp(target + (level - target) * decay, 0, 100)
 
 **Placeholder systems (18):** initialized at baseline 50, drift toward 50 with jitter. Will gain feeders as their game systems are built (menstrual cycle, HRT, substances, etc.).
 
-**Reference material:** `RESEARCH-HORMONES.md` (research summaries), `REFERENCE-HORMONES.md` (full human hormone list).
+**Reference material:** `../research/hormones.md` (research summaries), `../reference/hormones.md` (full human hormone list).
 
 ### Layer 2 step: Emotional Inertia as Character Trait (implemented)
 

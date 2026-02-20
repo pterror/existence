@@ -1,6 +1,6 @@
 # Simulation Interfaces
 
-Every simulation system exposes a stable interface that content and prose talk to. See [PHILOSOPHY.md](PHILOSOPHY.md) for the design principles. This document catalogs the target interfaces for all systems — what they expose, what's already clean, and what's currently an approximation debt.
+Every simulation system exposes a stable interface that content and prose talk to. See [philosophy.md](philosophy.md) for the design principles. This document catalogs the target interfaces for all systems — what they expose, what's already clean, and what's currently an approximation debt.
 
 Content and prose code should call these methods. Raw `State.get('x')` access from content.js is a smell — it means content knows about implementation details it shouldn't.
 
@@ -95,7 +95,7 @@ Sleep.computeQuality(state)   // multiplicative quality from stress/hunger/melat
 
 ## Domestic Objects (Clothing, Dishes, Linens)
 
-Mess is not a scalar — it's emergent from object states. Full design in [DESIGN-OBJECTS.md](DESIGN-OBJECTS.md).
+Mess is not a scalar — it's emergent from object states. Full design in [objects.md](objects.md).
 
 ```js
 // Clothing
@@ -419,7 +419,7 @@ Time.advance(minutes)  // State.advanceTime() ✓
 
 ## Habits
 
-Decision trees trained on observed play. Full design in [DESIGN-HABITS.md](DESIGN-HABITS.md).
+Decision trees trained on observed play. Full design in [habits.md](habits.md).
 
 ```js
 Habits.predict(actionId)      // { strength: 0–1, tier: 'none'|'suggested'|'auto', path: [] }
@@ -471,7 +471,7 @@ Mess.bathroomScore()   // towel state + floor → contribution
 
 Systems closest to implementation-ready (interface designed, approximation debt named):
 
-1. **Domestic objects** — Clothing, Dishes, Linens with coarse implementations. See [DESIGN-OBJECTS.md](DESIGN-OBJECTS.md). Replaces `apartment_mess`.
+1. **Domestic objects** — Clothing, Dishes, Linens with coarse implementations. See [objects.md](objects.md). Replaces `apartment_mess`.
 2. **Food** — `fridgeTier()` wrapper, `canEat()` as proper method.
 3. **Finance** — `canAfford()`, `nextBillDue()`, cleaner accessor pattern.
 4. **Job** — `isWorkday()`, `isLate()`, `latenessMinutes()` as proper methods.

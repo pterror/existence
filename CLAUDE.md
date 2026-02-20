@@ -8,7 +8,7 @@ Text-based HTML5 game. "Power anti-fantasy" — constrained agency without judgm
 
 ## Simulation Architecture
 
-See [PHILOSOPHY.md](PHILOSOPHY.md). Every simulation system is an interface designed for maximum fidelity. Implementations vary per-run; granularity is hotswappable between saves, never mid-run. Scalars that stand in for richer structure are approximation debts — name them, plan to pay them.
+See [docs/design/philosophy.md](docs/design/philosophy.md). Every simulation system is an interface designed for maximum fidelity. Implementations vary per-run; granularity is hotswappable between saves, never mid-run. Scalars that stand in for richer structure are approximation debts — name them, plan to pay them.
 
 ## Architecture
 
@@ -37,7 +37,7 @@ serve.js        # Bun static file server
 scripts/
   download-names.sh  # Downloads raw Census + SSA data into vendor/
   build-names.js     # Processes raw data into js/names.js
-DESIGN.md       # Simulation design vision — what the game should become
+docs/design/overview.md  # Simulation design vision — what the game should become
 STATUS.md       # What's actually implemented right now
 ```
 
@@ -53,14 +53,14 @@ No build step. Plain JS loaded via script tags.
 ## Core Rules
 
 - **Note things down immediately:** problems, tech debt, or issues spotted MUST be added to TODO.md backlog
-- **Capture fundamental principles.** When a design principle is discovered, clarified, or corrected — whether in conversation or during implementation — write it into CLAUDE.md (short rule) and DESIGN.md (full explanation) immediately. Principles are more important than code. Don't let them live only in chat history.
+- **Capture fundamental principles.** When a design principle is discovered, clarified, or corrected — whether in conversation or during implementation — write it into CLAUDE.md (short rule) and docs/design/overview.md (full explanation) immediately. Principles are more important than code. Don't let them live only in chat history.
 - **Serious pushback means a principle is missing.** When the user pushes back hard on a decision — especially if the same class of mistake happens twice — don't just fix the immediate issue. Ask: is the underlying principle actually captured in CLAUDE.md? If not, capture it now. A correction that only fixes the instance and not the rule will repeat.
-- **Write it down if it will ever need to be written down.** If something is discussed — a real-world mechanic, a design option, a system that should exist, a gap in the simulation — and it's the kind of thing that should eventually be built or considered, document it now. Don't wait until it's being implemented. TODO.md, DESIGN.md, and CLAUDE.md exist so nothing lives only in chat history or someone's memory. When in doubt: write it down.
+- **Write it down if it will ever need to be written down.** If something is discussed — a real-world mechanic, a design option, a system that should exist, a gap in the simulation — and it's the kind of thing that should eventually be built or considered, document it now. Don't wait until it's being implemented. TODO.md, docs/design/overview.md, and CLAUDE.md exist so nothing lives only in chat history or someone's memory. When in doubt: write it down.
 - **Write research results down immediately, without asking.** When research is conducted — by subagent or otherwise — persist the results to a document right away. The document can be a DESIGN doc, a RESEARCH doc, or anything else — naming doesn't matter. Include full citations with retrievable identifiers (DOI, PMID, arXiv ID, URL) for every claim so findings are verifiable without re-running the research. Don't let research live only in chat history.
 - **Do the work properly.** Don't leave workarounds or hacks undocumented.
 - **No shortcuts.** When full fidelity isn't achievable right now, don't implement a lower-fidelity version silently. Either do it properly or add it to TODO.md as an explicit approximation debt with a note on what's being lost. Never paper over a gap with a hardcoded assumption — name the assumption, document what should replace it.
 - **Every hardcoded number is a debt until proven otherwise.** When you write a rate, coefficient, threshold, or magnitude in simulation code, ask: is this derived from real-world data, or chosen? If chosen, it is an approximation debt. Mark it with an `// Approximation debt:` comment at the site AND add it to TODO.md. Do not write a comment that sounds like derivation when the number was chosen first — that is the failure mode to avoid. "Needs calibration" is honest. A plausible-sounding rationale invented after the fact is not.
-- **Empirical claims need retrievable citations.** When a research document or code comment states a specific number derived from literature (a rate, prevalence, effect size, half-life, timing), it must include a retrievable identifier — PMC ID, PMID, or DOI. Study name alone is not enough; it must be findable without a search. "Uncited" is acceptable as an explicit flag (`// Uncited — needs source`); silently presenting an unverified number as established fact is not. Existing documents (SUBSTANCES.md, RESEARCH-HORMONES.md, DESIGN-EMOTIONS.md) have widespread uncited empirical claims — treat as known debt, add identifiers when research is done.
+- **Empirical claims need retrievable citations.** When a research document or code comment states a specific number derived from literature (a rate, prevalence, effect size, half-life, timing), it must include a retrievable identifier — PMC ID, PMID, or DOI. Study name alone is not enough; it must be findable without a search. "Uncited" is acceptable as an explicit flag (`// Uncited — needs source`); silently presenting an unverified number as established fact is not. Existing documents (docs/reference/substances.md, docs/research/hormones.md, docs/design/emotions.md) have widespread uncited empirical claims — treat as known debt, add identifiers when research is done.
 
 ## Design Principles
 
@@ -126,7 +126,7 @@ Also: don't mistake a proxy for a cause. Job type is not the driver of illness e
 
 **Money is derived, not primary.** The checking balance is a surface over economic flows: income from employment, obligations from housing/bills, spending from player choices, starting position from life history. Financial anxiety is a sentiment that connects to the neurochemistry engine. The same dollar amount creates different experiences depending on the character's relationship with money.
 
-**Habits emerge from observed play.** The character develops behavioral momentum — habits are state→action associations learned from player behavior via CART decision trees, not prescribed sequences. Habits are ephemeral (derived from the action log each session, no save format changes) and consume no RNG. Routine comfort/irritation sentiments modulate formation threshold. Two tiers: suggested (≥0.6, subtle highlight) and auto (≥0.75, character acts after delay). Prose modulation is deferred. See DESIGN-HABITS.md for the full design.
+**Habits emerge from observed play.** The character develops behavioral momentum — habits are state→action associations learned from player behavior via CART decision trees, not prescribed sequences. Habits are ephemeral (derived from the action log each session, no save format changes) and consume no RNG. Routine comfort/irritation sentiments modulate formation threshold. Two tiers: suggested (≥0.6, subtle highlight) and auto (≥0.75, character acts after delay). Prose modulation is deferred. See docs/design/habits.md for the full design.
 
 **Auto-advance is the character acting.** When habit strength reaches auto tier (≥0.75), approaching prose appears (deterministic, no RNG — moodTone + NT reads only), the predicted action highlights, and after 2500ms the action fires. The player can click any action to interrupt. Auto-advance chains naturally — each auto-fired action re-renders and re-predicts. Suppressed in phone mode. `Content.approachingProse` maps action IDs (and `move:destination` keys) to prose functions.
 
@@ -179,7 +179,7 @@ Also: don't mistake a proxy for a cause. Job type is not the driver of illness e
 
 **Keep STATUS.md current.** Before every commit, check whether the work changes what's implemented — a new interaction, a new state variable, a new system, a structural change. If it does, update STATUS.md to match. STATUS.md is the ground truth for what the codebase actually does right now.
 
-**Keep DESIGN.md and CLAUDE.md current.** When a conversation clarifies design direction, corrects a simplification, or adds nuance to how a system should work — capture it in DESIGN.md (full explanation) and CLAUDE.md (short rule) before committing. Design understanding evolves during implementation. Don't let the documents fall behind the thinking.
+**Keep docs/design/overview.md and CLAUDE.md current.** When a conversation clarifies design direction, corrects a simplification, or adds nuance to how a system should work — capture it in docs/design/overview.md (full explanation) and CLAUDE.md (short rule) before committing. Design understanding evolves during implementation. Don't let the documents fall behind the thinking.
 
 ## Commit Convention
 
