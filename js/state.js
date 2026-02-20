@@ -236,6 +236,9 @@ export function createState(ctx) {
       ebt_balance: 0,           // current spendable EBT balance
       ebt_monthly_amount: 0,    // monthly load amount (0 = not enrolled)
 
+      // Sleep cycle length — personal biology, set by applyToState(). 90 = population mean.
+      sleep_cycle_length: 90,  // minutes (70–120); set by applyToState() from character
+
       // Health conditions
       health_conditions: /** @type {string[]} */ ([]),  // set by applyToState()
       // Migraines — only relevant if health_conditions includes 'migraines'
@@ -1073,23 +1076,31 @@ export function createState(ctx) {
 
   // --- Sleep cycle breakdown ---
   // Models the internal architecture of a sleep episode. Cycle lengths are
-  // variable: first cycle is shorter (~75 min, deep sleep onset is fast),
-  // later cycles lengthen as REM dominates (~90, ~100, ~105 min).
+  // variable: first cycle is shorter (deep sleep onset is fast), later cycles
+  // lengthen as REM dominates. Personal base cycle length is a stable biological
+  // trait generated at chargen (70–120 min, mean ~90 min), stored in state as
+  // sleep_cycle_length and applied by Character.applyToState().
   // Early cycles are deep-sleep heavy; later cycles are REM heavy.
   // No PRNG consumed — purely deterministic from duration.
-  // TODO: add per-character cycle_length_base offset (charRng at chargen).
-  // Individual variation (~±15 min) is a stable biological trait, not noise.
 
   /**
-   * Duration of cycle i (0-indexed).
+   * Duration of cycle i (0-indexed), scaled to the character's personal base length.
+   * Ratios: [0.83, 1.0, 1.11, 1.17] — first cycle is shorter (sleep onset is fast),
+   * later cycles lengthen as REM episodes extend.
+   * Approximation debt: ratios are derived from the population-mean cycle structure
+   * (75/90/100/105 → 0.83/1.0/1.11/1.17 of 90). Real ratio variation across
+   * individuals and nights is unknown. Needs calibration against polysomnography data.
    * @param {number} i
    * @returns {number} minutes
    */
   function cycleDuration(i) {
-    if (i === 0) return 75;
-    if (i === 1) return 90;
-    if (i === 2) return 100;
-    return 105;
+    const base = s.sleep_cycle_length ?? 90;
+    // Approximation debt: ratios approximate population-mean staging; per-character
+    // cycle shape variation (not just length) is not yet modeled.
+    if (i === 0) return Math.round(base * 0.83);
+    if (i === 1) return base;
+    if (i === 2) return Math.round(base * 1.11);
+    return Math.round(base * 1.17);
   }
 
   /**

@@ -218,11 +218,12 @@ ADHD (executive dysfunction, time blindness, hyperfocus), autism (sensory proces
 ~~No substances exist.~~ Caffeine implemented (level, habit, withdrawal, receptor upregulation, nausea). See [SUBSTANCES.md](SUBSTANCES.md) for the full dependency model and design reference.
 
 **Caffeine remaining debts:**
-- Acute tolerance: `consumeCaffeine(50)` gives same boost regardless of habit. At high habit, effective boost should be ~70% (fewer spare receptors to block). Low priority — withdrawal loop already captures dependency experience.
+- ~~Acute tolerance: `consumeCaffeine(50)` gives same boost regardless of habit.~~ — **FIXED.** `consumeCaffeine` now scales intake by `1 - 0.3 * (habit/100)`: full dose at habit=0, ~70% at habit=100. `adenosineBlock()` shifts denominator by `0.4 * habit`, so habituated users need more caffeine to achieve the same receptor block. Both coefficients (0.3 and 0.4) are approximation debts — chosen, not derived from receptor density data.
 - Habit tracking: `+8 / −5 per day` — chosen, not derived from real caffeine tolerance build/fade timescales (real tolerance develops over ~1–2 weeks, fades over similar). Magnitude is an approximation.
 - ~~Withdrawal build rate: `(habit/100) * 6 pts/hr`~~ — **FIXED.** Now `(habit/100) * 1.5 pts/hr`, derived from real onset timing: mild symptoms at ~10h, peak at ~47h, matching the documented 12–24h onset / 20–51h peak range.
 - Withdrawal clear rate: `25 pts/hr` — chosen. Real caffeine relief is noticeable within 30–45 min of dosing; needs calibration against `caffeine_level` half-life.
 - Adenosine sensitivity bonus formula: `(habit/100) * 0.5 * (withdrawal/100)` — chosen, not derived from receptor density data.
+- `consumeCaffeine` tolerance coefficients: 0.3 (intake scaling) and 0.4 (adenosineBlock denominator shift) — chosen, not derived from A1/A2A receptor density or pharmacokinetic data. Needs calibration.
 - Nausea build threshold and rate: `withdrawal > 55, habit > 45, rate * 5 pts/hr` — chosen. Real GI symptoms appear at severe withdrawal in heavy users; thresholds are plausible but uncalibrated.
 - Nausea NT effects: GABA `−1.5 pts/hr`, NE `+1.0 pts/hr` at nausea=100 — chosen magnitudes.
 - Nausea natural decay: `2 pts/hr` — chosen. Caffeine-assisted decay: `8 pts/hr` — chosen. No real-world anchor.

@@ -468,6 +468,12 @@ export function createChargen(ctx) {
     const phone_bill_day_offset = Timeline.charRandomInt(0, 29);
     const ebt_day_offset = Timeline.charRandomInt(0, 29); // day EBT reloads each month
 
+    // Sleep cycle length — stable biological trait. Real range 70–120 min (mean ~90 min).
+    // Approximation debt: no upstream genetics or sleep disorder model yet.
+    // Distribution is uniform across the observed range; real distribution is likely
+    // clustered tighter around 90 min. Needs calibration against polysomnography data.
+    const sleep_cycle_length = 70 + Math.floor(Timeline.charRandom() * 51); // 70–120 min
+
     // Health conditions — generated last to preserve PRNG order of prior systems
     const conditions = /** @type {string[]} */ ([]);
     // Migraines: ~15% prevalence; slightly higher with neurotic/high-stress backstory
@@ -513,6 +519,7 @@ export function createChargen(ctx) {
       phone_bill_day_offset,
       ebt_day_offset,
       conditions,
+      sleep_cycle_length,
     });
   }
 

@@ -115,8 +115,8 @@ Two health tracks: chronic conditions (permanent, per-character) and acute illne
 ### Substances (caffeine)
 - **caffeine_level** (0–100 state var) — one cup ≈ 50 units. Half-life 5h, metabolized in `advanceTime`.
 - `caffeineTier()` — 'none' | 'low' | 'active' | 'high'
-- `consumeCaffeine(amount)` — updates caffeine_level, small acute NE bump
-- `adenosineBlock()` — 0–1 receptor block factor. High caffeine = adenosine still accumulates but isn't felt. Crash hits when caffeine clears.
+- `consumeCaffeine(amount)` — updates caffeine_level, small acute NE bump. **Acute tolerance:** scales intake by `1 - 0.3 * (habit/100)` — full dose at habit=0, ~70% at habit=100. NE bump scaled by same factor.
+- `adenosineBlock()` — 0–1 receptor block factor. High caffeine = adenosine still accumulates but isn't felt. Crash hits when caffeine clears. **Tolerance-adjusted:** denominator shifts to `100 + 0.4 * habit`, so habituated users (habit=100) need ~40% more caffeine to achieve the same block; max achievable block at caffeine=100 is ~71%.
 - `caffeineSleepInterference()` — quality multiplier (0.65–1.0) for sleep execute
 - `make_coffee` interaction at kitchen — available unless caffeineTier is 'high'. Prose shades on mood + adenosine + caffeine.
 - `get_coffee_work` interaction at workplace — available during work hours unless caffeineTier is 'high'. 40 caffeine units (slightly weaker than home coffee). Job-type specific prose (office/retail/food_service).
