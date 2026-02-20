@@ -282,9 +282,55 @@ What tastes like home vs. what tastes foreign is an identity marker, not just a 
 - Texture as part of the eating experience (overlaps with touch)
 
 ## Touch / Tactile
-*— not yet covered in full. revisit.*
 
-**Note before fuller treatment:** empathetic/vicarious physical responses — watching someone get hit in the groin, seeing someone stub their toe, witnessing an injury. Genuine involuntary physical response in the observer. Not your pain but your body responds anyway. Mirror neuron type phenomenon. Connects to empathy, interoception, and the social dimension of sensory experience. Fully involuntary — agency gradient applies.
+*Revisit for fuller treatment — empathetic responses noted below, thermoception overlaps, pain overlaps with nociception.*
+
+### Texture
+
+**Pleasant textures:**
+- Silkiness, smoothness — generally pleasant but too-smooth can be a trigger for some (velvet against the grain, peach skin, squeaky-clean glass); the mechanism isn't fully understood but the aversion is consistent
+- Quality-associated textures: denim, leather — haptic vocabulary for material and craft; touching something well-made feels different
+- Soft textures: cotton, fleece, pet fur (variable — a cat's belly vs. a dog's rough coat)
+- Clean sheets — texture, temperature, and smell arrive together; the full state of the bed
+
+**Aversive/interesting textures:**
+- Grittiness, roughness, sandpaper — especially when abrasive enough to catch or hurt skin
+- Corrugations and ridges — binder spines, cardboard, ribbed surfaces. Running a finger or nail along them produces tactile and sound simultaneously; the two channels are the same event and can't be cleanly separated. Cross-sensory by nature.
+- Carpet burns — friction trauma from ordinary surfaces
+- Wet socks — specific, immediately wrong
+- Wet hands touching dry fibrous material (paper, cardboard) — instant aversion
+- Sticky surfaces
+- Seams in socks, tags in clothing — minor for most, unbearable for some; strong sensory processing dimension
+
+**Heat conductivity:**
+Metal, stone, wood, and fabric at the same ambient temperature feel completely different because of how fast they pull heat from skin. A marble floor in winter. A metal handrail. A wooden table. This is a property of the material, not the environment — worth framing as conductivity, not temperature.
+
+**Weight and pressure:**
+- Heavy blanket vs. thin one — weight as comfort or oppression depending on state
+- The specific coldness of a toilet seat
+- Tight clothing vs. loose
+
+**Itchiness:**
+- From fabric, dry skin, healing wounds, insect bites — varies in character; a healing itch is different from a fabric itch
+
+**Sudden pain from ordinary objects:**
+- Stubbing a toe, catching a nail, a paper cut — disproportionate response to minor contact; familiar enough to be almost comic, sharp enough to break concentration entirely
+
+### Empathetic/vicarious responses
+Watching someone get hit in the groin, seeing someone stub their toe, witnessing an injury — genuine involuntary physical response in the observer. Not your pain but your body responds anyway. Mirror neuron phenomenon. Connects to empathy, interoception, and the social dimension of sensory experience. Fully involuntary — agency gradient applies.
+
+### NT modulation
+- NE high → touch more present; fabric against skin more noticeable; minor irritations harder to ignore
+- GABA low → sensory input harder to filter; texture aversions intensified
+- Cortisol high → physical tension held in body; touch on tense muscles different from touch on relaxed ones
+- Adenosine high → heaviness, the specific weight of tired limbs; surfaces feel further away
+- Depression → touch can feel muted, distant, or conversely the only thing that lands
+
+### Still to think about
+- Thermoception (temperature as a sense) gets its own section — overlaps here but distinct enough
+- Pain gets its own section (nociception)
+- Sensory processing differences (autism, SPD) — some people have globally heightened or dampened tactile sensitivity; seams and tags are the common example but the pattern is broader
+- Touch as social/relational (a hand on the shoulder, a hug, physical contact with another person) — different category from environmental touch
 
 ## Thermoception
 *— not yet covered*
