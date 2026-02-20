@@ -359,10 +359,23 @@ Distinct from touch — not about surface contact but about the ambient thermal 
 - Heat that's pleasant vs. oppressive vs. dangerous
 - Radiant heat (sun, fire, radiator) vs. ambient heat (hot room) — different in character
 
-**Humidity changes everything:**
-- Dry cold is different from damp cold — damp penetrates
-- Dry heat is different from humid heat — humid heat prevents sweat from evaporating, the body's cooling mechanism fails
-- The same 30°C reads completely differently with and without humidity
+**Humidity changes everything** — a modifier on the whole thermal experience, not a separate channel:
+
+*High humidity:*
+- Sweat doesn't evaporate — cooling mechanism fails; you get hotter faster than temperature alone suggests
+- Clothes stick, stay wet, chafe
+- The air feels thick, slightly harder to breathe
+- Hair changes (frizz, curl, volume — character and hair type dependent)
+- Everything feels damp — surfaces, air, yourself
+- High humidity heat exhaustion sneaks up differently from dry heat exhaustion
+
+*Low humidity / arid:*
+- Sweat evaporates immediately — may not notice water loss until dehydrated
+- Skin dries out fast, cracks; lips chap; inside of nose dries and can crack and bleed (nosebleeds as a climate fact)
+- Static electricity builds — door handles, synthetic fabrics, other people
+- The cold in arid climates is different — dry, sharp, penetrates differently from damp cold
+
+Both derive from geography, season, and weather — not a separate parameter to store, a modifier on everything else.
 
 **Seasonal texture:**
 - The specific quality of cold that means winter is actually here
