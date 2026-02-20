@@ -55,7 +55,69 @@ NT modulation of noticeability:
 ---
 
 ## Sight
-*— not yet covered*
+
+### Two layers
+
+**World-side:** what's visually noticeable out there — light quality, glare, movement, people who stand out in context.
+
+**Character-side:** how this character's visual system works — shapes not just noticeability but the entire baseline rendering of the world. Not occasional events; the constant.
+
+### What the game world produces (world-side)
+
+**Light:**
+- Quality: time of day (golden hour, flat noon, dusk, 3am dark), weather (grey flat light vs. harsh sun)
+- Glare: windshields, wet pavement, screens, water surfaces
+- Screen light in a dark room — too bright, specific colour temperature
+
+**Movement:**
+- Things catching peripheral attention: someone passing, a bird, a car pulling out
+- Stillness that should be movement (empty street at a time it shouldn't be)
+
+**People who stand out in context:**
+- Noticeability here is context-dependent and character-dependent — what's unusual in this space, for this character
+- Examples: visible disability, pregnancy, very old age, unusual height, albinism, racial visibility depending on context
+- Not a fixed property of the person — a function of who's noticing and where
+
+**Visual noise / clutter:**
+- Mess in the apartment (visual disorder)
+- A busy environment where too much is competing for attention
+
+### Character's visual system (character-side)
+
+These are constitutional conditions — assigned at chargen, grounded in prevalence. They shape all visual prose for this character, not just notable moments.
+
+- **Myopia** — distance blurs; close vision fine; glasses/contacts as daily object
+- **Presbyopia** — age-related; close things blur; reading glasses
+- **Astigmatism** — blurring, distortion, halos around lights especially at night
+- **Deuteranopia / other colour blindness** — red-green or other channel absent; changes every colour description
+- **Monochromatism (achromatopsia)** — complete colour blindness; world in greyscale
+- **Tetrachromatism** — four cone types instead of three; perceives colour distinctions others don't
+- **Visual snow syndrome** — static overlay on vision, always present; busy environments intensify it
+- **Glaucoma** — peripheral vision loss, tunnel vision; mostly age/circumstance-related (see circumstantial note)
+- **Blindness** — partial or full; prose renders accordingly
+
+**Sensory overload:** for visual snow, or characters with sensory processing differences, a visually busy environment is not just busy — it's actively overwhelming. Distinct from NT-modulated noticeability.
+
+### Cultural/relational conditions
+
+Some conditions that touch on senses are actually cultural and relational — the prose has to know which.
+
+**Deaf / Deaf community:** Not just "can't hear" — what is this character's relationship to sound and to Deaf culture? Grew up signing (BSL, ASL, other)? Oral deaf? Cochlear implant with complicated feelings? Late-deafened? Deaf (capital D, cultural identity) vs. deaf (audiological condition). Affects communication, social costs, which spaces are designed for them. Belongs in identity/culture system as much as senses.
+
+**Language barriers:** A character navigating a language they don't speak fluently — ambient speech becomes texture not content, signs become visual noise, half-understood conversation is actively exhausting. What is their relationship to the language? First-generation immigrant? Grew up bilingual but thinks in one? Accent that marks them in certain spaces? Not just a sensory parameter — cultural and relational.
+
+Both follow the same pattern: the condition shapes sensory experience, but the full picture requires knowing the character's history and identity, not just a flag.
+
+### NT modulation
+- NE high → movement in periphery intrudes; edges sharpen; visual detail too present
+- Adenosine high → colours flatten, edges soften, things recede
+- Dissociation → visual input arriving but not landing; objects losing significance
+- Low dopamine → things that would normally catch attention don't register
+
+### Still to think about
+- How character sentiments affect what they visually notice (someone who loves architecture notices buildings)
+- Glasses/contacts as daily objects with states (lost, dirty, forgotten, broken)
+- How visual conditions interact with environments (astigmatism + night driving; myopia + unfamiliar space)
 
 ## Sound
 
