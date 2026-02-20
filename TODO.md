@@ -304,6 +304,9 @@ Hormonal profile, menstrual cycles, cortisol rhythms, metabolism, drug metabolis
 ### Dietary needs
 Condition-driven (diabetes, celiac, allergies), pregnancy, religious/cultural (halal, kosher, fasting), eating disorders. Poverty making all of it worse — the specialized diet costs more.
 
+### Allergies and immune reactivity
+Allergies as a dynamic system, not a fixed flag. Adult-onset food allergies (someone who ate peanuts safely for 30 years develops a reaction). Allergy desensitisation/immunotherapy. Severity spectrum: mild intolerance → hives → anaphylaxis. MCAS (Mast Cell Activation Syndrome) — mast cells dysregulated, triggering reactions to many stimuli (food, temperature, stress, exercise, smell); related to allergies but broader and harder to pin down. Needs to interact with the dietary, stress, and health systems.
+
 ### Economic dimensions beyond money
 Origin (where you started vs where you are), social capital (who you know), cultural capital (what you know how to do in context), educational background, geographic reality (food deserts, transit deserts). The daily tax of poverty — being poor is expensive in time and energy.
 
