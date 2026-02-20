@@ -261,6 +261,40 @@ Different from sentiment accumulation — needs its own structure:
 
 ---
 
+## Metabolism and pharmacogenomics
+
+The same substance produces different effects in different bodies. This is not RNG — it is deterministic biology derived from genetic variation. The character doesn't know why things hit them the way they do. The body is the experiment.
+
+This layer sits under the substance system: identical inputs → different outputs per character.
+
+### CYP enzyme variation
+
+**CYP1A2** metabolizes caffeine. Ultra-rapid metabolizers clear it in ~2–3 hours. Poor metabolizers retain it for 8–12 hours. Same dose, completely different evening. This is the most common pharmacogenomic variable a character would encounter without knowing it — the person who drinks coffee at 9pm and sleeps fine vs. the one who has a cup at noon and feels it until midnight.
+
+Prevalence varies by ancestry. CYP1A2 ultra-rapid activity is more common in some populations; poor metabolism in others. Until ancestry is a chargen variable with this granularity, this is an approximation debt.
+
+**CYP2D6** metabolizes codeine (converting it to morphine), many antidepressants, some antihistamines. Poor metabolizers get no pain relief from codeine. Ultra-rapid metabolizers may get dangerously high morphine concentrations. This will matter when opioid and medication systems are built.
+
+**CYP2C19** affects PPIs (proton pump inhibitors), some SSRIs, clopidogrel. Poor metabolizers may need different doses of commonly prescribed medications.
+
+### ALDH2 deficiency
+
+Alcohol metabolism goes: ethanol → acetaldehyde (ALDH1) → acetic acid (ALDH2). ALDH2 deficiency means acetaldehyde accumulates. The result: flushing, nausea, rapid heart rate, headache — from the same number of drinks that produce only mild effects in ALDH2-sufficient individuals. Very common in East Asian populations (~35–40% carry at least one deficient allele).
+
+This is invisible to the character as a named condition. They know alcohol makes them feel bad; they may not know why. The same drinks = a completely different night.
+
+When alcohol is implemented: ALDH2 status should be a chargen variable (probabilistic given ancestry, when ancestry is a parameter). Its effect is on the acetaldehyde accumulation rate, not on BAC or subjective intoxication directly.
+
+### Implications for chargen
+
+Pharmacogenomic parameters are **constitutional**, not circumstantial — they arise from genetics, not life history. Random rolls at chargen are appropriate (unlike dental disease or chronic pain, which are circumstantial). Prevalence data exists per ancestry group, though ancestry as a chargen parameter doesn't exist yet.
+
+Until ancestry is built: CYP variant status and ALDH2 status can be rolled from population-average prevalence rates, noted as approximation debts pending ancestry integration.
+
+The player never learns these parameter names. They just notice that coffee hits differently, or that alcohol makes them feel sick fast. The simulation models the mechanism; the character lives with the effect.
+
+---
+
 ## Implementation order
 
 1. **Acute illness** — most tractable. Maps to existing systems. Single state variable per episode.
