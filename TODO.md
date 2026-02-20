@@ -292,6 +292,11 @@ ADHD (executive dysfunction, time blindness, hyperfocus), autism (sensory proces
 ### Drawn lots
 No drawn lots exist. docs/design/overview.md describes: foster care, domestic violence, CPS, childbearing, fetal alcohol syndrome, instability, caregiving, housing instability, addiction/recovery, legal constraints, grief, language barriers. Each as daily texture, not backstory tags.
 
+### Appearance as a social object
+Hygiene state (dandruff, greasy hair, unkempt, gingivitis, body odour), hairstyle (dreads, shaved, natural, dyed, unkempt), fashion choices (alternative, crossdressing, skimpy, formal, worn-out) — all feed into how others respond to the character, which feeds NT state, which feeds how the character feels about their appearance. The loop runs both ways.
+
+Two layers: (1) the character's own relationship to their appearance — pride, indifference, shame, effort, identity expression; (2) the world's response — which varies by context (dreads read differently in a corporate office vs. a festival; alternative fashion reads differently at work vs. among friends). Hygiene degradation connects to the energy/depression system — not showering isn't laziness, it's a symptom. Appearance as identity expression connects to the identity system. Context-dependent social response connects to the ambient social texture system.
+
 ### Identity and social landscape
 No identity dimensions affect the simulation. docs/design/overview.md describes: gender (misogyny as ambient texture, not events), trans experience (visibility, HRT, passing, nonbinary), race/ethnicity (ambient response, code-switching, microaggressions), sexuality (the closet as energy cost, being out), body (weight, height, appearance as social objects).
 
