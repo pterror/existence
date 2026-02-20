@@ -195,12 +195,15 @@ Character-side phenomena, not world-side:
 - Sound as physical sensation (bass, passing trucks) — overlaps with touch/proprioception
 - Character sentiments toward specific sounds (someone who finds rain calming vs. oppressive)
 - The specific texture of silence for a character who lives alone vs. one used to noise
+- **Aversive involuntary responses** — nails on a chalkboard, certain frequencies, styrofoam squeaking. Nearly universal but varies in intensity. Full-body cringe, goosebumps, visceral aversion — the response is partly auditory, partly physical. Misophonia is the extreme end. Connects to the agency gradient: fully involuntary, no choice involved.
 
 ## Taste
 *— not yet covered*
 
 ## Touch / Tactile
-*— not yet covered*
+*— not yet covered in full. revisit.*
+
+**Note before fuller treatment:** empathetic/vicarious physical responses — watching someone get hit in the groin, seeing someone stub their toe, witnessing an injury. Genuine involuntary physical response in the observer. Not your pain but your body responds anyway. Mirror neuron type phenomenon. Connects to empathy, interoception, and the social dimension of sensory experience. Fully involuntary — agency gradient applies.
 
 ## Thermoception
 *— not yet covered*
