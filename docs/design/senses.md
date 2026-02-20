@@ -199,7 +199,21 @@ Character-side phenomena, not world-side:
 
 ## Taste
 
-### What the game world produces
+### The basics
+
+Food tastes good, bad, or somewhere in between, and the character notices:
+- Too salty, too sour, too bitter, too sweet, too bland
+- A mistake in cooking (too much vinegar, burnt edge, underseasoned)
+- Favorite foods — genuinely pleasurable; the specific satisfaction of something you actually wanted
+- Repetition degrading experience — rice and soy sauce is fine; rice and soy sauce every day because it's all you can afford is a small daily grinding. The food hasn't changed; the accumulation has. Connects taste directly to the financial simulation and the poverty of constrained options.
+
+**Texture** is distinct from taste but part of the eating experience:
+- Fat texture (some people can't eat visible fat; the mouthfeel is the problem)
+- Mushy vegetables, gritty, slimy, stringy, chewy, crunchy
+- Temperature (cold chips, lukewarm soup — wrong temperature changes the whole thing)
+- Texture aversions are often strong and non-negotiable; not preference but genuine sensory rejection
+
+### What else the game world produces
 
 Mostly tied to eating and drinking — but not entirely:
 
