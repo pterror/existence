@@ -2,7 +2,7 @@
 
 Research compiled for simulation design. For each finding: what the evidence shows, how strong it is, and what it means for modeling. This is reference material, not a design document.
 
-*Citation status: PMIDs added 2026-02-20 for key named studies. Hormone level ranges (estradiol, progesterone, hCG, etc.) and mechanism claims remain uncited — these are widely-cited reference values but specific primary sources have not been verified for each number. Add identifiers when individual claims are used for calibration.*
+*Citation status: PMIDs added 2026-02-20. All major quantitative claims and mechanism citations now have PMIDs or source identifiers. Several claims corrected during verification (first-trimester estradiol upper-quartile issue, D-MER "2007" date, Mirena initial serum level, EC half-life provenance, 21.9% mood fluctuation attribution). Remaining uncited areas: oral progesterone ALLO metabolite fraction (~80% figure), sublingual estradiol PK curve values, testosterone enanthate peak timing, and minor calibration details in the PK table.*
 
 ---
 
@@ -10,15 +10,15 @@ Research compiled for simulation design. For each finding: what the evidence sho
 
 ### Quantitative Hormone Levels (typical 28-day cycle)
 
-- **Estradiol**: Early follicular ~20-80 pg/mL; pre-ovulatory peak ~200-400 pg/mL (~8-fold rise); mid-luteal ~100-160 pg/mL; premenstrual decline back toward follicular.
-- **Progesterone**: Follicular <1 ng/mL; post-ovulation rises to 5-20 ng/mL; mid-luteal peak 11-29 ng/mL; premenstrual rapid decline.
-- **LH**: Low throughout; pre-ovulatory surge lasting 24-48 hours.
+- **Estradiol**: Early follicular ~20–80 pg/mL; pre-ovulatory peak ~200–400 pg/mL (~8-fold rise); mid-luteal ~100–160 pg/mL; premenstrual decline back toward follicular. (Stricker et al. 2006, PMID 16776638; Anckaert et al. 2021, PMID 33869706 — note: exact bounds vary by assay platform)
+- **Progesterone**: Follicular <1 ng/mL; mid-luteal peak 11–29 ng/mL (Stricker et al. 2006, PMID 16776638; range varies by assay — Anckaert et al. 2021 reports median ~9 ng/mL, 95th percentile ~15 ng/mL); premenstrual rapid decline.
+- **LH**: Low throughout; pre-ovulatory surge lasting 24–48 hours. Estradiol must exceed ~200 pg/mL for ~50 hours to trigger positive feedback LH surge (Hoff, Quigley & Yen 1983, PMID 6411753).
 
 ### Phase-by-Phase Mechanisms
 
 **Early follicular (days 1-7):** Both estradiol and progesterone at nadir. The withdrawal from the previous cycle's progesterone/allopregnanolone is mostly complete. Serotonergic tone lower with low estradiol (estradiol upregulates serotonin synthesis, increases 5-HT2A receptor density, reduces serotonin reuptake). Dopamine synthesis also lower. Despite low levels, mood tends to *improve* during this phase as premenstrual withdrawal resolves. "Clean slate" feeling.
 
-**Late follicular (days 8-13):** Estradiol rises steeply toward ~200-400 pg/mL. Highest estradiol-to-progesterone ratio. Estradiol drives serotonin receptor upregulation, dopamine synthesis increase, and prefrontal cortex dopamine system enhancement. Many women report best mood of the cycle. However: a 2025 meta-analysis (102 articles, N=3,943) found "no systematic robust evidence for significant cycle shifts in *cognitive* performance" — mood effects and cognitive effects are separable.
+**Late follicular (days 8-13):** Estradiol rises steeply toward ~200-400 pg/mL. Highest estradiol-to-progesterone ratio. Estradiol drives serotonin receptor upregulation, dopamine synthesis increase, and prefrontal cortex dopamine system enhancement. Many women report best mood of the cycle. However: a 2025 meta-analysis (102 articles, N=3,943; Jang, Zhang & Elfenbein 2025, PMID 40096188) found "no systematic robust evidence for significant cycle shifts in *cognitive* performance" — mood effects and cognitive effects are separable.
 
 **Ovulation (days 13-15):** Estradiol must exceed ~200 pg/mL for ~50 hours to trigger the positive feedback mechanism. Sustained high estradiol switches hypothalamic signaling, triggering GnRH surge → LH surge → ovulation ~36 hours later. Progesterone begins a small rise even before the LH surge (acts on kisspeptin neurons). Maximum serotonergic and dopaminergic tone.
 
@@ -43,7 +43,7 @@ The DROP matters more than the level. The mechanism is pharmacologically analogo
 
 Women are at low hormone levels during early follicular phase *without* premenstrual symptoms — because there's no withdrawal happening. The rate of change matters, not the absolute level.
 
-**Evidence strength: strong.** ALLO/GABA-A withdrawal mechanism well-replicated. Confirmed by pharmacological studies (blocking ALLO production with 5-alpha-reductase inhibitor reduces PMDD symptoms).
+**Evidence strength: strong.** ALLO/GABA-A withdrawal mechanism well-replicated. Confirmed by pharmacological studies (blocking ALLO production with 5-alpha-reductase inhibitor reduces PMDD symptoms — Martinez et al. 2016, PMID 26272051).
 
 ### PMDD — Altered Receptor Sensitivity, Not Altered Hormones
 
@@ -51,10 +51,10 @@ Prevalence: PMS ~30–40% (Direkvand-Moghadam et al. 2014, PMID 24701496 — poo
 
 **The key finding: women with PMDD have normal hormone levels.** The difference is at the receptor:
 
-- **Paradoxical ALLO response**: healthy women experience sedation from ALLO in the luteal phase; PMDD women do not. Conversely, PMDD women show sedation to ALLO in the follicular phase. The response is inverted.
-- **Impaired subunit adaptation**: lower delta GABA-A receptor subunit expression during luteal phase. Receptors cannot properly adjust to fluctuating neurosteroid levels.
+- **Paradoxical ALLO response**: healthy women experience sedation from ALLO in the luteal phase; PMDD women do not. Conversely, PMDD women show sedation to ALLO in the follicular phase. The response is inverted. (Timby et al. 2016, PMID 26960697)
+- **Impaired subunit adaptation**: lower delta GABA-A receptor subunit expression during luteal phase. Receptors cannot properly adjust to fluctuating neurosteroid levels. (Gideon et al. 2025, PMID 40701967 — note: this measures peripheral blood mononuclear cells, not CNS tissue; no human CNS delta subunit measurement exists yet)
 - **Concentration-dependent inversion**: ALLO may have an inverted U-shaped relationship with symptoms — beneficial at very low and very high concentrations, paradoxically anxiety-promoting at intermediate (endogenous luteal) levels in susceptible women.
-- **Genetic component**: ESC/E(Z) gene complex (epigenetic regulation of gene expression in response to sex hormones) implicated.
+- **Genetic component**: ESC/E(Z) gene complex (epigenetic regulation of gene expression in response to sex hormones) implicated. (Dubey et al. 2017, PMID 28044059)
 
 Therapeutic confirmation: brexanolone (synthetic ALLO at pharmacological doses) and zuranolone (oral GABA-A modulator, FDA approved 2023) are effective, working by providing stable high-level GABA-A modulation that overrides dysfunctional receptor response.
 
@@ -66,9 +66,9 @@ Therapeutic confirmation: brexanolone (synthetic ALLO at pharmacological doses) 
 
 ### First Trimester (weeks 1-13)
 
-- hCG doubles every 48 hours, peaks weeks 7-12 at ~100,000 mIU/mL. Has structural similarity to TSH — weakly stimulates thyroid, causing mild gestational thyrotoxicosis (irritability, anxiety, nausea correlating with hCG peak).
-- Progesterone rises from ~15-25 ng/mL to 10-44 ng/mL. ALLO-mediated GABA-A sedation: significant fatigue, somnolence.
-- Estradiol rising but modest — ~3,000-4,000 pg/mL by end (already 20-30x normal cycle peak).
+- hCG rises rapidly in early pregnancy (clinical teaching: "doubles every 48–72 hours" — strictly 48h only in the fastest-rising phase; some primary sources say ~24h for first 8 weeks), peaks weeks 7–12. Peak ~100,000 mIU/mL is within normal range but toward the high end; median peak is ~50,000–80,000 mIU/mL. (Betz & Fane StatPearls, PMID 30422545; more precise distribution: Barnhart et al. 2004, PMID 14711573) Has structural similarity to TSH — weakly stimulates thyroid, causing mild gestational thyrotoxicosis (irritability, anxiety, nausea correlating with hCG peak).
+- Progesterone rises through first trimester. Soldin et al. 2005 (isotope dilution mass spectrometry, PMID 16169406) reports week-12 mean ~17.5 ng/mL, range 7.4–35 ng/mL. The often-cited "10–44 ng/mL" range appears in aggregated clinical reference compilations (multiple assay methods); 44 ng/mL is the upper bound of the compiled range, not the Soldin primary measurement. ALLO-mediated GABA-A sedation: significant fatigue, somnolence.
+- Estradiol rising but modest. Soldin 2005 reports week-12 mean ~870 pg/mL, range 310–3,000 pg/mL. The "~3,000–4,000 pg/mL by end of first trimester" figure represents the upper quartile, not a representative central value. The often-cited "20–30x normal cycle peak" multiplier is overstated for typical values — ~3–10x more accurate for the mean, ~10–20x plausible at the upper end of the distribution.
 - Emotional lability from rapid hormonal changes + nausea + exhaustion.
 
 ### Second Trimester (weeks 14-27)
@@ -77,20 +77,20 @@ Often the "honeymoon trimester." hCG declining, body adapting to progesterone. H
 
 ### Third Trimester (weeks 28-40)
 
-Peak everything. Progesterone ~150 ng/mL (6-8x mid-luteal). Estradiol 5,000-15,000+ pg/mL (50-100x normal cycle). Prolactin 10x higher. Cortisol significantly elevated (physiological hypercortisolism). Physical discomfort increasingly dominates.
+Peak everything. Progesterone ~150 ng/mL near-term (Bloch et al. 2000, PMID 10831472; Soldin 2005 week-32 mean ~70 ng/mL, rising further to term). Estradiol 5,000–15,000+ pg/mL near-term (Soldin 2005 week-32 range 2,170–13,850 pg/mL; Bloch 2000 states ~15,000 pg/mL at delivery). 50–100x normal cycle: at 15,000 pg/mL vs. ~300 pg/mL cycle peak, ~50x — plausible at the high end. Prolactin 10x higher. Cortisol significantly elevated (physiological hypercortisolism). Physical discomfort increasingly dominates.
 
 **Nesting** peaks in third trimester: driven by rising prolactin and increasing estrogen-to-progesterone ratio. Blocking prolactin reduces nesting in animal models. Oxytocin rise correlates with cessation of nesting and onset of labor/caregiving.
 
 ### Postpartum Crash
 
 The most dramatic hormone withdrawal in normal human physiology:
-- **Estradiol and progesterone drop ~90% within 24 hours of delivery** (placenta removal)
-- Fall from 50-100x normal levels to below-normal in hours to days
+- **Estradiol and progesterone drop ~90% within hours to days of delivery** (placenta removal). For estradiol, ~90% drop within 24 hours is supported by measurement data (Yuen et al. 1973, PMID 4720529; Bloch et al. 2000, PMID 10831472). For progesterone, follicular-phase levels are reached in 2–3 days, not strictly 24h (PMID 4720529).
+- Fall from 50–100x normal levels to below-normal in hours to days
 - ALLO drops in parallel — same GABA-A withdrawal mechanism as premenstrual, but at enormously greater magnitude
 
-**Baby blues**: 50-80% of women, first 1-2 weeks. Transient tearfulness, mood lability, irritability. Resolves by 2-3 weeks as hormones stabilize.
+**Baby blues**: 50–80% of women, first 1–2 weeks. Note: individual study estimates range 13–76%; the meta-analytic pooled estimate is 39% (Rezaie-Keikhaie et al. 2020, PMID 32035973, n=5,667 across 26 studies). The 50–80% figure reflects the published range of individual studies and appears widely in review articles. Onset typically day 3–5, resolution by day 10–14. Transient tearfulness, mood lability, irritability. Resolves as hormones stabilize.
 
-**Postpartum depression**: 10–19%, typically developing over first 3 months (Gavin et al. 2005, PMID 16260528). Mechanism: massive ALLO withdrawal (same as PMDD but at far greater scale) + serotonergic deficit from estradiol crash + HPA axis dysregulation + neuroinflammation. Confirmed by brexanolone/zuranolone efficacy. Prior depression is strongest predictor (prevalence ratio 4.03).
+**Postpartum depression**: 10–19%, typically developing over first 3 months (Gavin et al. 2005, PMID 16260528). Mechanism: massive ALLO withdrawal (same as PMDD but at far greater scale) + serotonergic deficit from estradiol crash + HPA axis dysregulation + neuroinflammation. Confirmed by brexanolone/zuranolone efficacy. Prior depression is strongest predictor (prevalence ratio 4.03 for postpartum depressive symptoms at 9–10 months; Bauman et al. 2023, PMID 37943725 — note: this study measures PDS at 9–10 months postpartum, not clinical PPD diagnosis within standard 4–6 week window; O'Hara & Swain 1996 and Robertson 2004, PMID 15151709, provide broader meta-analytic evidence for prior depression as strongest predictor).
 
 **Evidence strength: strong.** Hormone crash timeline well-quantified. PPD mechanism confirmed by treatment response.
 
@@ -104,17 +104,17 @@ A unique hormonal state unlike any cycle phase:
 - Estrogen and progesterone suppressed below follicular levels (as long as regular suckling continues)
 - Prolactin elevated (10x pre-pregnancy baseline) — promotes well-being, calmness, suppresses HPA axis
 - Oxytocin released in pulses during suckling — anxiolytic, lowers cortisol, activates reward system (dopaminergic)
-- Prolactin inhibits GnRH pulsatility → menstrual cycle suppressed (lactational amenorrhea, typically 6-9 months)
+- Prolactin inhibits GnRH pulsatility → menstrual cycle suppressed (lactational amenorrhea, typically 6–9 months with sustained exclusive breastfeeding; WHO multinational study, n=4,118, PMID 9757873)
 
 Net effect: low estrogen (reduced serotonergic support) counterbalanced by prolactin/oxytocin mood benefits. Varies by individual.
 
 ### D-MER (Dysphoric Milk Ejection Reflex)
 
-Prevalence ~9.1%. Sudden dysphoria, dread, or anxiety beginning just *before* letdown, lasting <5 minutes.
+Prevalence ~9.1% (Ureño et al. 2019, PMID 31393168 — prospective study of breastfeeding women at 6–8 week postpartum visit). Sudden dysphoria, dread, or anxiety beginning just *before* letdown, lasting <5 minutes.
 
 Mechanism (plausible but unconfirmed): prolactin surge requires dopamine drop; in D-MER, the dopamine drop is more abrupt/deeper than normal, producing brief dopaminergic deficit → dysphoria. Timing matches: symptoms onset just before letdown (dopamine drops to allow prolactin), resolve in minutes (dopamine recovers).
 
-**Evidence strength: plausible mechanism, no direct measurement.** Formally described only in 2007.
+**Evidence strength: plausible mechanism, no direct measurement.** Named by lactation consultant Alia Heise in 2007 (not peer-reviewed); first peer-reviewed publication 2011 (Heise & Wiessinger, *International Breastfeeding Journal*, PMID 21645333).
 
 ### Weaning as Withdrawal
 
@@ -133,8 +133,8 @@ Post-weaning depression is clinically recognized. Gradual weaning produces milde
 
 ### Testosterone Diurnal Rhythm
 
-- Peaks 5:30-8:00 AM, nadir ~7-8 PM
-- Young men: morning levels 25-50% higher than evening (some individuals show 63% drop)
+- Peaks 5:30–8:00 AM, nadir ~7–8 PM
+- Young men: morning levels ~25–50% higher than evening (Brambilla et al. 2009, PMID 19088162; Diver et al. 2003, PMID 12780747). Some individuals show larger amplitude; a 63% drop has been reported in a single-subject precision neuroimaging study (Grotzinger et al. 2024, PMID 38627091 — n=1, caveat applies).
 - Amplitude diminishes with age (older men show blunted/absent rhythm)
 - Driven by sleep-entrained pulsatile GnRH/LH secretion
 
@@ -147,7 +147,7 @@ Post-weaning depression is clinically recognized. Gradual weaning produces milde
 
 ### Dual Hormone Hypothesis (testosterone × cortisol)
 
-High testosterone is associated with status-seeking behavior **only when cortisol is low**. When cortisol is high, testosterone-dominance relationship weakens or reverses. Refined version (2020): testosterone promotes status-seeking under low cortisol, status-loss-avoidance under high cortisol. Interaction effect larger in males than females.
+High testosterone is associated with status-seeking behavior **only when cortisol is low**. When cortisol is high, testosterone-dominance relationship weakens or reverses. Refined version (2020): testosterone promotes status-seeking under low cortisol, status-loss-avoidance under high cortisol (Knight et al. 2020, PMID 31863735). Interaction effect appears larger in males than females, though this sex difference is a directional trend with limited power, not a robustly established finding (Dekkers et al. 2019 meta-analysis, 33 studies n=8,538, PMID 30529754).
 
 **Evidence strength: moderate.** Well-established conceptually, some inconsistency across studies.
 
@@ -168,13 +168,13 @@ High testosterone is associated with status-seeking behavior **only when cortiso
 
 ### Combined Oral Contraceptives (COCs)
 
-**Mechanism of suppression**: synthetic estrogen (ethinyl estradiol) + progestin suppress HPO axis. Endogenous estradiol drops to ~20-30 pg/mL (early follicular/near-menopausal range). Endogenous progesterone stays low (no ovulation). Free testosterone decreases substantially (SHBG increases 2-4x). SHBG elevation persists even after discontinuation.
+**Mechanism of suppression**: synthetic estrogen (ethinyl estradiol) + progestin suppress HPO axis. Endogenous estradiol drops to ~20–30 pg/mL (early follicular/near-menopausal range). Endogenous progesterone stays low (no ovulation). Free testosterone decreases substantially (SHBG increases 2–4x; SHBG elevation persists after discontinuation — Panzer et al. 2006, PMID 16409223: SHBG still elevated at >120 days post-cessation vs. never-users).
 
-**Pill-free week**: a monthly withdrawal event with measurable mood effects. A 2023 JAMA Network Open study (n=181) found 12.67% increase in negative affect, 7.42% increase in anxiety, 23.61% increase in mental health symptoms during pill pause vs active phase. More pronounced in women with higher baseline depression. Continuous use eliminates this.
+**Pill-free week**: a monthly withdrawal event with measurable mood effects. A 2023 JAMA Network Open study (n=181; Ramler et al. 2023, PMID 37755829, PMC 10534273) found 12.67% increase in negative affect, 7.42% increase in anxiety, 23.61% increase in mental health symptoms during pill pause vs active phase. More pronounced in women with higher baseline depression (BDI >8: 17.95% increase in negative affect). Continuous use eliminates this.
 
 **Progestin types**: androgenic (levonorgestrel) vs anti-androgenic (drospirenone) — theoretical mood difference is plausible but **not clearly demonstrated** in high-quality trials. Network meta-analysis of RCTs found no difference.
 
-**The Danish registry study (Skovlund et al. 2016, PMID 27680324)**: 1M+ women. COC users RR 1.23 for antidepressant use; progestin-only RR 1.34; patch RR 2.0; ring RR 1.6; LNG-IUD RR 1.4. Adolescents more vulnerable (COC RR 1.8). **However**: observational (not causal), antidepressant prescription as proxy is imperfect, survivorship bias. Swedish replication (Lundin 2022) found **no association** for COCs specifically.
+**The Danish registry study (Skovlund et al. 2016, PMID 27680324)**: 1M+ women. COC users RR 1.23 for antidepressant use; progestin-only RR 1.34; patch RR 2.0; ring RR 1.6; LNG-IUD RR 1.4. Adolescents more vulnerable (COC RR 1.8). **However**: observational (not causal), antidepressant prescription as proxy is imperfect, survivorship bias. Swedish replication (Lundin et al. 2022, PMID 34837324, n=739,585) found **no association** for COCs specifically (RR 0.89 after adjustment); non-oral methods (patch, ring, DMPA, implant) showed increased risk.
 
 **RCT vs observational discrepancy**: RCTs generally find no difference between COC and placebo for depression. Possible explanations: RCTs are short, exclude psychiatric history, dilute a vulnerable subpopulation signal.
 
@@ -184,7 +184,7 @@ High testosterone is associated with status-seeking behavior **only when cortiso
 
 ### Depo-Provera (DMPA)
 
-150mg IM injection every 12-13 weeks. Completely suppresses HPO axis. Creates **hypoestrogenic state** (~50 pg/mL estradiol — low enough to cause bone density loss). Cannot be reversed once injected.
+150mg IM injection every 12–13 weeks. Completely suppresses HPO axis. Creates **hypoestrogenic state** (~50 pg/mL estradiol mean in long-term users, range 10–92 pg/mL — low enough to cause bone density loss; Mishell 1996, PMID 8725700). Cannot be reversed once injected.
 
 Mood reputation exceeds evidence. FDA lists depression as side effect (1-5%). But prospective studies found depression scores *dropped* among continuing users. Survivorship bias is the likely explanation (mood-affected women discontinue). The irreversibility (3-month duration) is the real risk — if it goes badly, you wait.
 
@@ -198,7 +198,7 @@ Etonogestrel rod, 3 years. Burst-and-taper: peak ~813 pg/mL at day 4, declining 
 
 ### Hormonal IUD
 
-Levonorgestrel, local delivery. Mirena (52mg) releases ~20 mcg/day initially, ~10 mcg/day at 5 years. Serum levels: 260 pg/mL initially, 129 pg/mL at 1 year. Most users still ovulate (partial cycle preserved).
+Levonorgestrel, local delivery. Mirena (52mg) releases ~20 mcg/day initially, declining to ~11 mcg/day at 5 years, ~7 mcg/day at 8 years (FDA Mirena label NDA 021225). Serum LNG peak ~180 pg/mL within 2 weeks (FDA label; note: a previously cited figure of "260 pg/mL initially" is not supported by FDA prescribing information — flag as inaccurate). At 1 year ~130–150 pg/mL (PMID 22402256). Most users still ovulate (partial cycle preserved).
 
 **Dose-response signal**: higher-dose Mirena associated with significantly higher depression risk than lower-dose Kyleena/Skyla. This dose-response relationship supports a causal interpretation. Danish registry RR 1.4. Swedish cohort found 57% increased depression risk, greatest in adolescents.
 
@@ -238,11 +238,11 @@ Bypasses liver. Fluctuation index 0.65 (remarkably stable). Near-physiological e
 
 #### Estradiol Valerate Injection
 
-Peak ~2.1 days. Half-life ~3.0 days. **Most pronounced rollercoaster** of injectable esters. Biweekly schedule: substantial peak-trough. Weekly dosing recommended (trough 142 pg/mL vs potentially subtherapeutic biweekly).
+Peak ~2.1 days. Half-life ~3.0 days (primary PK data: Oriowo et al. 1980, PMID 7389356; specific peak-day and half-life values are modeled from the ester PK, not directly measured in a single trial). **Most pronounced rollercoaster** of injectable esters. Biweekly schedule: substantial peak-trough. Weekly dosing recommended (trough ~142 pg/mL; Sloan et al. 2024, PMID 39735380, median trough ~146 pg/mL at weekly 4mg dosing).
 
 #### Estradiol Cypionate Injection
 
-Peak ~4.3 days. Half-life ~6.7 days (roughly double valerate). Gentler rise, later peak, slower decline. Weekly dosing trough 262 pg/mL (vs 142 for valerate). Significantly smoother. Patients commonly report less emotional volatility.
+Peak ~4.3 days. Half-life ~6.7 days (Oriowo et al. 1980, PMID 7389356 for ester comparison; note: published half-life estimates for estradiol cypionate from primary studies are typically 8–10 days, e.g. Cyclofem data PMID 23265980; the "6.7 days" figure appears to derive from secondary curve-fitting rather than a directly measured primary result). Gentler rise, later peak, slower decline. Weekly dosing trough ~262 pg/mL (modeled estimate; Oriowo 1980 and Cyclofem PK data are the primary references). Significantly smoother than valerate. Patients commonly report less emotional volatility.
 
 #### IM vs SubQ
 
@@ -272,7 +272,7 @@ Peak 36-48 hours (earlier than cypionate). Half-life 4-5 days (shorter). Sharper
 
 #### SubQ vs IM for Testosterone
 
-SubQ produces **39% more stable levels**. Lower peak-to-trough ratio. Increasingly recommended.
+SubQ produces more stable levels (lower peak-to-trough ratio; Kaminetsky et al. 2019, PMID 30296416; Spratt et al. 2017, PMID 29264562, PMC 5686655). The "39% more stable" figure is a derived calculation from published peak-to-trough CV data, not a directly reported primary result — treat with caution. Increasingly recommended.
 
 #### Testosterone Gel/Cream
 
@@ -280,7 +280,7 @@ Steady state in 48-72 hours. Peak at 16-22 hours. Minimal fluctuation — stable
 
 #### Testosterone Patches
 
-Peak ~8 hours. Fast clearance after removal. More fluctuation than gel (surprising). **48% application site reaction rate** — skin irritation is the defining limitation. Adequate levels in only 57% of users (vs 75% for gel). Largely superseded by gel.
+Peak ~8 hours. Fast clearance after removal. More fluctuation than gel (surprising). **48% application site reaction rate** — skin irritation is the defining limitation (FDA Androderm prescribing information). Adequate levels in only 57% of users (vs 75–80% for gel) — McNicholas et al. 2003, PMID 12614254, Testim vs. Androderm RCT, n=208. Largely superseded by gel.
 
 #### Testosterone Pellets
 
@@ -304,7 +304,7 @@ Bioidentical progesterone converts to allopregnanolone → GABA-A anxiolysis. Sy
 
 #### Progesterone in Trans Feminine HRT
 
-First RCT (2023) found up to 30% increase in breast volume. Satisfaction significantly higher (71.4% vs 20.8%). 21.9% reported mood fluctuation as side effect. Not routinely recommended by Endocrine Society guidelines but widely prescribed off-label.
+First RCT (2023; Dijkman et al., PMID 38124194, PMC 10734173) found satisfaction with breast development significantly higher (71.4% vs 20.8%, p=0.003). Note: "up to 30% increase in breast volume" was the *defined clinically relevant threshold* for the primary outcome, not the mean observed result — characterizing this as the observed increase is imprecise. The "21.9% reported mood fluctuation" figure does not appear to come from this RCT (which measured different mood outcomes); it likely originates from a separate observational survey of progestogen users and should not be attributed to this trial. Not routinely recommended by Endocrine Society guidelines but widely prescribed off-label.
 
 ### Anti-Androgens
 
