@@ -287,7 +287,7 @@ Zelenski et al. 2020 (PMC7260435): sociable behavior predicted fatigue peaking 2
 ## Stress Creep and HPA Axis Self-Reinforcement
 
 **Applies to:** `tickNeurochemistry()` in `state.js` — the `stress += hours * 1` block (line ~451).
-**Status:** Research complete 2026-02-20. Not yet implemented.
+**Status:** ✓ IMPLEMENTED 2026-02-20. Replaced `+1 pt/hr above 50` with exponential decay toward 0; rate 0.46/hr at baseline (t½ ≈ 90 min), halved at max rumination → 0.23/hr (t½ ≈ 3h), matching Zoccola 2020 PMID 30961457.
 
 **Current debt:** `if (s.stress > 50) { s.stress = Math.min(100, s.stress + hours * 1); }` — a linear rate above a scalar threshold. Both the rate (1 pt/hr) and the threshold (50) are chosen. The approximation debt comment at the site correctly names this as the wrong model — confirmed by the research below.
 
@@ -418,7 +418,7 @@ The exact replacement coefficients remain approximation debts — the literature
 ## NT Rate Constants: Mood-Primary Systems
 
 **Applies to:** `ntRates` table in `state.js` — the `[upRate, downRate]` pairs for `serotonin`, `dopamine`, `norepinephrine`, and `gaba`.
-**Status:** Research complete 2026-02-20. Not yet implemented.
+**Status:** ✓ IMPLEMENTED 2026-02-20. DA raised from `[0.04, 0.06]` → `[0.35, 0.45]` (acute NAc recovery 1-2h; falls faster, downRate > upRate). NE raised and asymmetry corrected from `[0.08, 0.12]` → `[0.55, 0.45]` (rises fast, LC phasic; recovery 45-90 min per PMID 6727569; upRate > downRate). Serotonin and GABA unchanged.
 
 **Current debts:** All four rate pairs are chosen approximations with a note that "the asymmetries match the qualitative biological direction but magnitudes are uncalibrated." This research validates the directions and provides grounding for the magnitudes.
 
@@ -663,7 +663,7 @@ All changed rate constants should be flagged as `// Grounded in literature times
 ## Energy Drain: Base Rate and Hunger Multipliers
 
 **Applies to:** `tickNeurochemistry()` in `state.js` — `energy -= hours * 3 * hungerDrainMultiplier` (lines ~438–441). Multipliers: 1.3× at `hunger > 40`, 1.8× at `hunger > 70`.
-**Status:** Research complete 2026-02-20. Not yet implemented.
+**Status:** ✓ IMPLEMENTED 2026-02-20. Multipliers reduced: 1.8→1.3× (severe hunger), 1.3→1.1× (moderate), per Monk 1996 PMID 8877121 and Gailliot & Baumeister 2007 PMID 17760605. Circadian energy profile remains as approximation debt.
 
 **Current debt:** All three parameters chosen. Direction correct; magnitudes and linearity assumption are wrong.
 

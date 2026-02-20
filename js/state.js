@@ -437,19 +437,24 @@ export function createState(ctx) {
 
     // Energy drain — accelerated by hunger
     // Approximation debt: 3 pts/hr base energy drain is chosen. Real fatigue rate depends on
-    // task load, circadian phase, physical demands — not a simple linear rate. Hunger multipliers
-    // (1.3× at moderate, 1.8× at high hunger) and thresholds (40, 70) are also chosen.
-    // Calibration: human performance literature on sustained operations / sleep deprivation studies.
-    const hungerDrainMultiplier = s.hunger > 70 ? 1.8 : s.hunger > 40 ? 1.3 : 1.0;
+    // task load, circadian phase, physical demands — not a simple linear rate.
+    // Hunger multipliers calibrated to sleep deprivation / caloric restriction literature:
+    // moderate hunger (40-70): 1.1× — small, consistent with mild cognitive impairment only at
+    // extreme restriction (Monk 1996 PMID 8877121); severe hunger (>70): 1.3× — moderate impairment
+    // with glucose depletion (Gailliot & Baumeister 2007 PMID 17760605).
+    const hungerDrainMultiplier = s.hunger > 70 ? 1.3 : s.hunger > 40 ? 1.1 : 1.0;
     s.energy = Math.max(0, s.energy - hours * 3 * hungerDrainMultiplier);
 
-    // Stress creeps up slightly with time if already stressed
-    // Approximation debt: stress self-reinforcement rate (1 pt/hr above threshold 50) is chosen.
-    // Real chronic stress escalation involves HPA axis sensitization and allostatic load — not a
-    // simple linear rate above a scalar threshold. Both the rate and the threshold are chosen.
-    if (s.stress > 50) {
-      s.stress = Math.min(100, s.stress + hours * 1);
-    }
+    // Stress decays toward 0 via HPA negative feedback; impaired by rumination
+    // Real mechanism: cortisol plasma t½ ~70-120 min → decay rate ~0.35-0.60/hr at genuine rest
+    // (Zoccola 2020 PMID 30961457: ruminators show ~2× slower cortisol recovery post-stressor).
+    // The self-escalating "+1 pt/hr above 50" model was wrong — no biological mechanism supports
+    // autonomous HPA escalation within hours. The resistance to recovery IS the real phenomenon:
+    // rumination re-activates the stress response, extending elevated state rather than adding to it.
+    // Base rate 0.46/hr (t½ ≈ 90 min); halved at max rumination → 0.23/hr (t½ ≈ 3h).
+    const rumination = s.rumination ?? 50;
+    const stressDecayRate = 0.46 * (1 - (rumination / 100) * 0.5);
+    s.stress = Math.max(0, s.stress * Math.exp(-hours * stressDecayRate));
 
     // Phone battery drains — screen-on vs standby
     const batteryDrain = s.viewing_phone ? 15 : 1;
@@ -2137,17 +2142,19 @@ export function createState(ctx) {
   // Asymmetric: most systems fall faster than they rise.
   // rate = ln(2) / halflife_hours, scaled to give meaningful drift on 0-100 scale.
   //
-  // Approximation debt: all rate constants below are chosen to approximate documented half-lives
-  // but the scale factor mapping real half-life to the 0-100 simulation scale is itself chosen,
-  // not derived. The asymmetries (down faster than up for serotonin/dopamine, up faster than down
-  // for NE) match the qualitative biological direction but magnitudes are uncalibrated.
-  // Calibration: receptor binding kinetics literature for each neurotransmitter system.
+  // Rate constants: [upRate, downRate] per-hour exponential approach rates.
+  // upRate = rate when level is below target (drifting up); downRate = rate when above target (drifting down).
+  // Dopamine and NE calibrated to acute microdialysis recovery data (RESEARCH-CALIBRATION.md).
+  // Serotonin: days half-life, approximately correct but uncalibrated (see calibration doc).
+  // All other systems: approximation debts — rates chosen, not derived from receptor kinetics.
+  // Approximation debt: scale mapping real t½ to simulation 0-100 scale is itself chosen.
+  // Calibration notes: RESEARCH-CALIBRATION.md § NT Rate Constants: Mood-Primary Systems.
 
   const ntRates = {
     // key:        [upRate,  downRate]  — per-hour exponential approach rates
     serotonin:     [0.015,   0.025],    // days half-life — very slow
-    dopamine:      [0.04,    0.06],     // ~12-24h half-life
-    norepinephrine:[0.08,    0.12],     // hours half-life — responds quickly
+    dopamine:      [0.35,    0.45],     // acute NAc recovery 1-2h (PMID 1606494); falls faster than rises
+    norepinephrine:[0.55,    0.45],     // rises fast (LC phasic); recovery 45-90 min (PMID 6727569); upRate > downRate
     gaba:          [0.03,    0.05],     // ~12-24h, chronic stress mechanism is slow
     glutamate:     [0.015,   0.02],     // days half-life, placeholder
     endorphin:     [0.04,    0.06],     // ~12-24h
