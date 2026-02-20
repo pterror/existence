@@ -415,12 +415,387 @@ The exact replacement coefficients remain approximation debts — the literature
 
 ---
 
+## NT Rate Constants: Mood-Primary Systems
+
+**Applies to:** `ntRates` table in `state.js` — the `[upRate, downRate]` pairs for `serotonin`, `dopamine`, `norepinephrine`, and `gaba`.
+**Status:** Research complete 2026-02-20. Not yet implemented.
+
+**Current debts:** All four rate pairs are chosen approximations with a note that "the asymmetries match the qualitative biological direction but magnitudes are uncalibrated." This research validates the directions and provides grounding for the magnitudes.
+
+---
+
+### The core question
+
+The simulation runs at the behavioral/mood timescale — hourly steps, 0–100 scale. The relevant timescale is **tonic/ambient level recovery**: after a sustained perturbation (stress, social event, bad sleep), how many hours does the system take to return to baseline? Synaptic clearance (seconds via reuptake transporters) is the wrong timescale — it is irrelevant at the hourly step granularity. The simulation models ambient extracellular levels and firing rates, not individual synaptic events.
+
+---
+
+### Serotonin
+
+**Current rates:** `[0.015, 0.025]` — described as "days half-life — very slow"
+
+**Tonic/ambient timescale:**
+
+Ambient 5-HT recovery operates on a timescale set by **synthesis rate**, not clearance. SERT synaptic clearance half-life is ~1 second (millisecond range, saturated at physiological concentrations — mathematical model: PMC2942809). This is irrelevant for the simulation timescale.
+
+The rate-limiting factor for ambient level recovery is **tryptophan hydroxylase 2 (TPH2)** activity. TPH2 is only ~50% saturated at normal tryptophan concentrations, making synthesis rate sensitive to substrate availability. When ambient 5-HT has been depleted (e.g., after sustained stress or sleep deprivation), recovery depends on:
+
+1. **Tryptophan availability at raphe neurons** — recovers over hours as plasma tryptophan normalizes.
+2. **TPH2 synthesis rate** — 5-HT tissue turnover rate in rat brain: **half-life ~15 hours** (PMID 2474630: Serotonin turnover in rat brain during semistarvation with high-protein and high-carbohydrate diets). This is the rate at which newly synthesized 5-HT replaces the pool.
+3. **CSF 5-HIAA nadir** after acute tryptophan depletion: 8–12 hours after the depleting drink; mood effects (at 60%+ depletion) emerge at ~6 hours and dissipate within 24 hours as tryptophan normalizes (PMID 9608574: Tryptophan depletion during continuous CSF sampling; PMC3756112: ATD review).
+
+**Sleep modulation:** Extracellular 5-HT is highest during active wakefulness and lowest during REM sleep — a 2:1 to 3:1 ratio across states measured in dorsal raphe and hippocampus by microdialysis (PMID 7922546: cat DRN microdialysis; PMID 10375707: rat hippocampus). After sleep deprivation, serotonin levels remain elevated during subsequent recovery sleep (PMID 14522011), and 5-HT metabolism increases during REM rebound (PMID 6204343). This means REM sleep facilitates 5-HT turnover and resynthesis — the simulation's existing link between sleep quality and serotonin recovery is mechanistically correct.
+
+**Stress effects:** Uncontrollable stress produces large increases in DRN extracellular 5-HT. Controlled/escapable stress has weaker effects. Region-specific — some regions (BLA, ventral hippocampus, mPFC) show elevated 5-HT 24 hours after inescapable tailshock, indicating that severe stress can produce effects persisting a day or more (source: Serotonin and Stress review, *Neuropsychopharmacology*, PMID not retrieved but cited in search results).
+
+**Asymmetry:** Rises slowly, falls relatively faster — supported by the biology. SERT clearance is fast (seconds) but synthesis through TPH2 is slow (hours). When 5-HT is elevated acutely (e.g., a positive social event), SERT rapidly clears the excess. When depleted, resynthesis is rate-limited by TPH2 and tryptophan availability. This gives a slower-rising, faster-falling profile at the ambient level.
+
+Quantitative: The ATD literature shows plasma tryptophan drops to nadir within 4–6 hours and recovers toward 85% of baseline by 24 hours. CSF 5-HIAA nadir is at 8–12 hours. Behavioral effects detectable at 60%+ depletion, reversing as tryptophan recovers. No specific upRate/downRate measured in ambient level terms — the asymmetry is directional-only from the mechanism.
+
+**Calibration target:**
+
+The current `downRate: 0.025` implies a half-life of ln(2)/0.025 ≈ **28 hours** for falling. The current `upRate: 0.015` implies a half-life of ln(2)/0.015 ≈ **46 hours** for rising. These are in the right range given the ~15-hour tissue turnover (rat), but the simulation's scale factor means the mapping is approximate.
+
+Literature supports: serotonin recovery at the ambient/behavioral timescale is a **multi-hour to ~day** process. The current rates are plausible. The asymmetry direction (downRate > upRate) is empirically supported — falls faster than rises at the ambient level.
+
+**Confidence:** Moderate. The ~15h tissue turnover figure (PMID 2474630) is from rat, not human. TPH2 turnover protein half-life is not the same as ambient level recovery half-life. The directional asymmetry has good mechanistic support; the exact ratio is an approximation debt.
+
+---
+
+### Dopamine
+
+**Current rates:** `[0.04, 0.06]` — described as "~12-24h half-life"
+
+**Tonic/ambient timescale:**
+
+DAT synaptic clearance: fast, seconds to sub-second range (comparable to SERT). Region-dependent: PFC has lower DAT density, so extracellular dopamine clears more slowly there than in striatum (Controls of Tonic and Phasic DA Transmission: PMC2713129). Irrelevant at hourly granularity.
+
+**Acute stress perturbation and recovery:**
+
+In vivo microdialysis during acute restraint stress in rats (nucleus accumbens):
+- Dopamine elevated to ~120–160% of baseline during early stress.
+- **Returns to baseline within 40–60 minutes** while restraint continues — the system habituates mid-stress (PMID 1606494: Repeated stressful experiences and limbic DA; PMID 2018923: DA and ACh during/after stress).
+- After stress cessation, a secondary DA increase occurs (liberation response), lasting ~40 minutes, then returns to baseline.
+
+This gives a **total perturb-and-recover cycle of roughly 1–2 hours** for acute stress-induced dopamine elevation in NAc. This is faster than the current `downRate: 0.06` suggests (implied half-life ≈ 11.5 hours).
+
+**Chronic/repeated stress:** With repeated daily restraint:
+- Days 1–3: DA still rises during stress.
+- Days 4–6: DA response completely abolished during stress (full habituation), but the post-stress liberation increase remains unchanged (PMID 1606494).
+
+This means: acute DA perturbation recovers in **1–2 hours**. Chronic stress suppresses tonic DA capacity over days, not within a session.
+
+**Social defeat:** Dopamine in NAc/mPFC rose to ~130–160% during social threat (PMID 8793094: Social defeat microdialysis). Post-threat recovery: consistent with the ~40–60 min pattern from restraint data, though this paper does not report specific recovery timing.
+
+**Asymmetry:** DA falls faster than it rises under stress conditions — the post-stress liberation is a separate mechanism from the stress-induced elevation. The tonic firing-rate recovery (VTA) after chronic stress operates on days, not hours (stress-induced plasticity changes HCN channel expression, requiring new protein synthesis — timescale: days; PMC9674332: Stressed and Wired review). This means:
+
+- **Acute DA perturbation recovery: 1–2 hours** (NAc, microdialysis)
+- **Tonic VTA firing capacity impaired by chronic stress: days to recover** (different mechanism)
+
+The simulation models both by conflating them into one variable. This is a simplification. The acute recovery (1–2h) argues for higher downRate than current. The chronic suppression by sustained stress is handled separately via the `dopamineTarget()` function.
+
+**Calibration target:**
+
+The acute DA recovery evidence (~1–2 hours to return to baseline from stress peak) suggests:
+- ln(2)/t½ where t½ ≈ 1–2h → rate ≈ 0.35–0.69 per hour
+
+This is dramatically faster than the current `downRate: 0.06`. However, the simulation's dopamine variable must represent both acute perturbation dynamics and tonic/chronic state. If the chronic state is handled by the target function (which drifts toward a lower target under chronic stress), then the rate constant only needs to model acute recovery speed — suggesting it should be much higher than 0.06.
+
+**Confidence:** Moderate. The 40–60 min recovery figure is from rat restraint stress in NAc (not human, not all regions). The VTA firing rate recovery after chronic stress is a different timescale (days) handled separately. The acute-vs-chronic distinction is the key calibration design question.
+
+---
+
+### Norepinephrine
+
+**Current rates:** `[0.08, 0.12]` — described as "hours half-life — responds quickly"
+
+**Tonic/ambient timescale:**
+
+NET clearance: fast, seconds — removes ~80–90% of synaptically released NE (StatPearls: Noradrenergic Synapse; PMC1518795). Glucocorticoids acutely block glial transporter clearance of NE during stress, prolonging extracellular availability.
+
+**Stress-induced NA turnover recovery:**
+
+The most direct quantitative data:
+
+Noradrenaline turnover (measured by MHPG/NA ratio via uHPLC) during cold swim stress in rat brain:
+- MHPG/NA ratio **peaked at 45 minutes** after stress onset.
+- **Returned to baseline within 90 minutes** after stress onset (eLife reviewed preprint: Noradrenaline release from locus coeruleus shapes stress-induced hippocampal gene expression, DOI pending).
+
+This means: after a moderate acute stressor, NE turnover recovers to baseline in approximately **45–90 minutes** total (i.e., ~30–45 minutes after the peak, if peak is at 45 min).
+
+Supporting evidence from the aging study (PMID 6727569: Recovery of stress-induced increases in noradrenaline turnover in old vs. young rats):
+- Young rats (2 months): MHPG-SO4 returned to control levels in **all brain regions within 6 hours** after 3-hour immobilization stress.
+- Old rats (12 months): recovery delayed to >24 hours in hypothalamus, amygdala, pons/medulla, midbrain.
+- This provides an upper bound: young-adult NE recovery from a **3-hour immobilization** is complete within 6 hours.
+
+**Sleep modulation:** LC is completely silent during REM sleep — tonic firing rates: waking > NREM > REM (nearly zero). This NE-free environment during REM is the mechanism for NE "clearance" and recovery. The restoration timescale during sleep cycles with the infra-slow LC oscillations (~50-second cycles gating NREM-REM transitions — *Nature Neuroscience* 2024). After sleep deprivation, NE recovery during subsequent sleep took **10–30 minutes of recovery sleep** in normal animals; 1–2 hours in mTOR-disrupted animals (PMC11244971: Restoration of LC NE transmission during sleep).
+
+**Asymmetry:** NE rises faster under stress than it falls — this is supported. The LC responds within seconds to stressors; return to pre-stress baseline takes 45–90 minutes for moderate stressors, up to several hours after prolonged stress. The current `upRate: 0.08, downRate: 0.12` correctly places downRate > upRate (falls faster than rises), but the asymmetry may actually be inverted: **NE rises very fast** (phasic firing response is near-instantaneous) and **falls more slowly** (requires actual clearance and LC re-quiescence). The simulation's convention where `upRate < downRate` means "rises slower than it falls," which may be wrong for NE direction.
+
+**Important clarification on simulation convention:** In the simulation, `upRate` is the rate at which the level approaches a higher target, and `downRate` is the rate at which it approaches a lower target. For NE:
+- When stressed (target elevated), NE should rise quickly → `upRate` should be high.
+- When calm (target at baseline), NE should return to baseline over ~1–2h → `downRate` should be consistent with that timescale.
+
+The 45–90 minute recovery to baseline for a moderate stressor implies:
+- ln(2) / 1–1.5h ≈ **0.46–0.69 per hour** for the downRate (falling after stress)
+- NE rises to peak very rapidly (minutes), suggesting upRate should also be high, not lower than downRate.
+
+The current `[0.08, 0.12]` is much too slow for what the literature describes (implied half-life: ~8.7h rising, ~5.8h falling). The actual literature-supported timescale is **2–10× faster**.
+
+**Confidence:** Moderate-to-high. The 45–90 minute recovery is from a published but preprint-status paper; the 6-hour bound from PMID 6727569 is peer-reviewed. Direction is well-established; magnitude needs the preprint to be formally published.
+
+---
+
+### GABA
+
+**Current rates:** `[0.03, 0.05]` — described as "~12-24h, chronic stress mechanism is slow"
+
+**Tonic/ambient timescale:**
+
+GABA dynamics at the behavioral timescale are not well-captured by synaptic kinetics. The relevant mechanisms are:
+
+1. **Acute stress: prefrontal GABA decreases by ~18%** within minutes during psychological threat. Measured by 7T/3T MRS in humans. Recovery within the session: partial — difference between threat and safe conditions was significant during blocks 1–3 (0–24 min) but not block 4 (25–32 min), suggesting partial recovery within ~25–30 minutes (PMID 20634372, PMC3107037: Hasler et al. — prefrontal GABA during threat-of-shock).
+
+A second 7T MRS study (PMID 28180078, PMC5280001: Simkovic & Lamm, 7T after TSST) found **no significant GABA change** 30 minutes after the Trier Social Stress Test. This apparent contradiction is likely explained by stressor type: sustained psychological threat (threat-of-shock) vs. post-stressor recovery measurement (TSST ended, then measured 30 min later). The TSST result suggests that by 30 minutes post-stressor, GABA has substantially recovered.
+
+Together: **GABA acutely drops during sustained threat, recovers within ~20–30 minutes after threat cessation.**
+
+2. **Neurosteroid modulation (allopregnanolone):** Acute stress induces allopregnanolone (ALLO) release in the brain within minutes. ALLO is a potent positive allosteric modulator of GABA-A receptors, acting as a homeostatic compensatory mechanism — it increases GABAergic tone to counter stress-induced GABAergic deficits. This ALLO response peaks acutely and functions as a buffering mechanism, not a sustained elevation. Tolerance develops within 90 minutes at anesthetic ALLO doses (tolerance review PMC3031054).
+
+3. **Chronic stress GABA depletion:** This is the slow mechanism correctly identified in the simulation. Chronic stress progressively reduces cortical GABA concentrations (measured by MRS in MDD: reduced anterior cingulate GABA, PMC3758115). This operates on a weeks timescale, not hours.
+
+**Synthesis and transport:** GAD65 (synaptic GABA synthesis) and GAT-1 (reuptake — handles ~80% of synaptic GABA) are the primary regulators of ambient GABA. De novo synthesis from glutamate via GAD is rapid (not rate-limiting in the way TPH2 limits serotonin synthesis). Ambient GABA levels are efficiently maintained by the GAT system; excess GABA is cleared quickly.
+
+**Asymmetry:** During acute stress, GABA falls fast (within minutes, as shown by the threat-of-shock MRS study). Recovery is relatively fast too — within ~20–30 minutes after threat cessation. This suggests GABA at the acute timescale is more symmetric than serotonin, with fast fall and fast recovery for acute perturbations.
+
+The chronic stress GABA depletion (the "slow mechanism") genuinely operates on weeks, not days, and is handled by `gabaTarget()` in the simulation, which is the right architecture.
+
+**Calibration target:**
+
+The current rates are intended for the chronic mechanism. If GABA in the simulation is also responding to acute stressors (which it should — the `adjustNT('gaba', ...)` calls for pain and nausea suggest it does), then the rate constants may be too slow for acute perturbations.
+
+The acute MRS evidence suggests GABA recovers within 20–30 minutes (rate ≈ ln(2)/0.5h ≈ 1.4/hr) from acute drops during sustained threat. But the simulation step is hourly, and the chronic target mechanism is what primarily drives GABA over hours. The acute drops from `adjustNT` calls in the tick function already bypass the exponential drift. So the `ntRates` GABA values may only need to model the slow return to `gabaTarget()`, not acute within-minute drops.
+
+For that purpose (return to chronic target after slow stress-driven depletion), the current `[0.03, 0.05]` is plausible but uncertain — the chronic depletion literature gives timescales of weeks (too slow for any hourly rate). This is likely correct as a "background correction" rate — the simulation doesn't need to model weeks-long structural GABA changes, just day-level fluctuations around the target.
+
+**Confidence:** Low-to-moderate. The acute MRS evidence is the most directly relevant but is from a specific paradigm (threat-of-shock vs. TSST). The chronic mechanism literature doesn't map cleanly to hourly rate constants. The two mechanisms should ideally be separated (acute acute-drop recovery vs. chronic depletion rate), but combining them in a single rate pair is a structural approximation.
+
+---
+
+### Summary table
+
+| System | Current [up, down] | Implied t½ (up/down) | Literature-supported tonic t½ | Asymmetry direction (lit) | Confidence |
+|---|---|---|---|---|---|
+| Serotonin | [0.015, 0.025] | 46h / 28h | ~15h tissue turnover (rat); ~24h behavioral effects | Falls faster than rises (synthesis-limited recovery) | Moderate |
+| Dopamine | [0.04, 0.06] | 17h / 12h | **1–2h acute** (NAc microdialysis); days for chronic tonic | Falls faster (acute returns in 40–60 min) | Moderate |
+| NE | [0.08, 0.12] | 8.7h / 5.8h | **1–2h acute** (NA turnover); 6h upper bound (PMID 6727569) | **Rises fast, falls slower** (LC instantaneous; recovery 45–90 min) | Moderate-high |
+| GABA | [0.03, 0.05] | 23h / 14h | Acute: ~20–30 min recovery; Chronic: weeks | Symmetric for acute; chronic is slow directional | Low-moderate |
+
+---
+
+### Key calibration issues
+
+**1. Dopamine and NE rate constants are dramatically too slow for acute perturbations.**
+
+The acute NAc dopamine recovery (40–60 min) and NA turnover recovery (45–90 min after stress) imply per-hour rates of 0.35–0.69, not 0.04–0.12. The current values would place the half-life at 6–17 hours — an order of magnitude too slow for the acute mechanism.
+
+However, there is a design question: if `dopamineTarget()` and `norepinephrineTarget()` already handle the direction of drift (target falls under stress, so DA/NE fall toward a lower target), then the rate constants control **how quickly the level follows the target**, not how quickly a perturbation dissipates on its own. In that framing, the rate constants are asking: given that the target dropped (because stress started), how fast does the level reach the new target? This is the correct framing for the exponential approach architecture.
+
+In that case: if a stressful event lowers the DA target suddenly, the level should reach the new target within 1–2 hours → rate ≈ ln(2)/1h ≈ 0.69. This argues for substantially higher rates than current.
+
+**2. The NE asymmetry direction may be inverted.**
+
+The current convention `upRate < downRate` means "rises slower, falls faster." For NE under stress: it rises nearly instantaneously (LC phasic firing) but requires 45–90 minutes to clear. This is arguably "rises faster, falls slower" — opposite of the current convention. The comment in the code notes NE "responds quickly" but has `upRate: 0.08, downRate: 0.12`. If upRate means "rate toward higher target" and NE rises toward a high target when stressed, the upRate should be the larger of the two numbers. This should be verified against the actual drift loop logic.
+
+**3. Serotonin rates may be approximately correct in absolute magnitude but the asymmetry direction is right.**
+
+The ~15h tissue turnover in rat, combined with the ATD evidence showing mood effects lasting ~24 hours, is consistent with the current implied half-lives of 28–46 hours (somewhat slower than rat data, but humans may differ). The downRate > upRate asymmetry (falls faster) is empirically supported by the synthesis-limited recovery mechanism.
+
+**4. GABA's rate constants serve two different mechanisms conflated in one variable.**
+
+Acute GABA drops (from pain, nausea, stress) should recover in ~20–30 minutes, but the hourly drift rates can't capture this — it happens within a single step. The chronic depletion mechanism (weeks) isn't well-served by per-hour rates either. The `adjustNT` call architecture handles the acute drops; the target-drift architecture handles the chronic trend. The `ntRates` GABA values probably don't matter much for either — they're the correction rate when the level isn't at target, which in practice is governed by the target function returning to normal more than by the rate constant.
+
+---
+
+### What should change
+
+The most important correction is to **dopamine and norepinephrine**, where the current rates are an order of magnitude too slow for the timescales in the literature. Whether to raise them substantially (to match the acute 1–2h recovery) or leave them slower (to model that tonic baseline recovery after chronic suppression takes longer) is a design decision that depends on how `dopamineTarget()` and `norepinephrineTarget()` are structured.
+
+Recommended approach:
+- Raise NE rates significantly (toward ~0.3–0.5) to capture the known 1–2h acute recovery.
+- Raise dopamine rates similarly for acute perturbations.
+- Accept that the target functions handle the chronic direction — the rate constant should model how fast the level follows a changed target, not how long chronic suppression lasts.
+- Keep serotonin rates as-is or adjust slightly toward faster (literature supports ~15–24h, current implies 28–46h — possibly 1.5–2× faster would be better grounded).
+- GABA rates: low priority given the architectural analysis above.
+
+All changed rate constants should be flagged as `// Grounded in literature timescale; scale factor to 0-100 is still chosen.`
+
+---
+
+### Key sources
+
+- PMID 2474630 — Serotonin turnover (T1/2 ~15h) in rat brain
+- PMC2942809 — Serotonin synthesis/release/reuptake mathematical model (SERT clearance seconds)
+- PMID 9608574 — ATD continuous CSF sampling: CSF TRP nadir 7–10h, 5-HIAA nadir 8–12h
+- PMC3756112 — ATD review: plasma TRP nadir 4–6h, recovery to 85% baseline by 24h; mood effects at 60%+ depletion
+- PMID 7922546 — Cat DRN microdialysis: 5-HT waking 100%, SWS 50%, REM 38%
+- PMID 10375707 — Rat hippocampus 5-HT levels by sleep-wake state
+- PMID 14522011 — Total sleep deprivation increases extracellular 5-HT in rat hippocampus
+- PMID 6204343 — Increased brain serotonin metabolism during REM rebound
+- PMID 1606494 — Repeated stressful experiences: DA returns to baseline 50–60 min into restraint; liberation response 40 min post-stress
+- PMID 2018923 — DA and ACh during/after stress independent of pituitary-adrenocortical axis
+- PMID 8793094 — Social defeat stress: selective mesocorticolimbic DA changes (microdialysis)
+- PMC2713129 — Controls of tonic and phasic DA in dorsal and ventral striatum
+- PMC9674332 — Stressed and Wired: VTA stress response and chronic plasticity
+- PMID 6727569 — Recovery of NA turnover: young rats recover within 6h after 3h immobilization; old rats delayed >24h
+- Elife preprint DOI pending (Noradrenaline release from LC shapes stress-induced hippocampal gene expression) — MHPG/NA peak at 45 min, baseline within 90 min
+- PMC11244971 — Restoration of LC NE transmission during sleep: 10–30 min recovery sleep normal; 1–2h with mTOR disruption
+- *Nature Neuroscience* 2024 (Infraslow LC fluctuations gate NREM-REM cycle) — ~50s LC oscillation; LC quiescent during REM
+- PMID 20634372 / PMC3107037 — Hasler et al.: prefrontal GABA −18% during threat-of-shock; partial recovery by block 4 (~25–32 min)
+- PMID 28180078 / PMC5280001 — 7T MRS after TSST: no significant GABA change 30 min post-stressor
+- PMC3031054 — Allopregnanolone tolerance within 90 min at anesthetic doses
+- PMC3268361 — The reciprocal regulation of stress hormones and GABA-A receptors
+- PMC4303399 — Anxiety disorders and GABA neurotransmission
+- PMC3758115 — Decreased GABA in anterior cingulate in panic disorder (chronic depletion evidence)
+
+---
+
+## Energy Drain: Base Rate and Hunger Multipliers
+
+**Applies to:** `tickNeurochemistry()` in `state.js` — `energy -= hours * 3 * hungerDrainMultiplier` (lines ~438–441). Multipliers: 1.3× at `hunger > 40`, 1.8× at `hunger > 70`.
+**Status:** Research complete 2026-02-20. Not yet implemented.
+
+**Current debt:** All three parameters chosen. Direction correct; magnitudes and linearity assumption are wrong.
+
+### Base fatigue rate
+
+The literature does not supply "energy depletion per hour on a 0–100 scale." What is well-characterized is the **two-process model** of alertness: homeostatic sleep pressure (Process S, driven by adenosine) plus circadian alerting signal (Process C, peaking in late morning and evening). Subjective alertness is the net output — not a flat drain.
+
+**Circadian profile shape (well-established):**
+
+- **Morning rise:** Alertness climbs from sleep inertia through the first 1–2 hours after waking. Process C counteracts accumulating adenosine.
+- **Afternoon trough (14:00–16:00):** A secondary alertness minimum driven by a 12-hour harmonic of the circadian temperature rhythm. Endogenous and independent of meal ingestion — occurs in fasted subjects who don't know the time of day. Amplitude: ~20–30% reduction on monotonic vigilance tasks relative to morning peak. (Monk et al. 1996, PMID 8877121, Chronobiol Int 13(2):123–133; Monk 2005, PMID 15892914, Clin Sports Med 24(2):e17–34.)
+- **Evening wake-maintenance zone (WMZ, ~19:00–21:00):** Process C sends a strong alerting signal opposing rising adenosine; objective performance measurably improves. This is why sleep onset is difficult even when sleep-deprived until this window ends. (PMC3601314, JCSM 2013.)
+- **Rapid decline after WMZ:** Homeostatic pressure wins; sleepiness rises sharply.
+
+**Conclusion for the model:** A flat drain rate cannot represent this structure. The correct fix is a time-of-day-modulated rate, not a different scalar. The cortisol and melatonin systems already in state.js carry most of the circadian signal — energy drain should be modulated by them (or by an explicit circadian function tied to `time` and `latitude`) rather than by a flat constant.
+
+**What the flat rate implies vs. literature:** 3 pts/hr × 16h = 48 pts total drain from full battery. Linearity is inconsistent with the non-uniform profile across the day. Dijk, Duffy & Czeisler 1992 (PMID 10607036) showed the relationship is approximately linear across normal waking hours but becomes nonlinear and steeper past 16–18 hours. Van Dongen & Dinges 2003 (PMID 12683469) quantified chronic restriction effects. Neither study provides a direct pts/hr figure for a 0–100 scale.
+
+**Approximation debt: flat 3 pts/hr is the wrong model shape. The correct structure is circadian-modulated, with activity type as a modifier.**
+
+### Hunger multipliers
+
+**Best available data:** Solianik et al. 2016 (PMID 28025637, PMC5153500) — 48-hour fast in 16 amateur weightlifters. Hunger VAS rose from 42.8 to 77.2 (0–100 scale). Hunger correlated with fatigue (r = 0.62, p = 0.008) and inversely with vigor (r = −0.53, p = 0.028). **Important caveat: this is extreme prolonged fasting, not missing a single meal.**
+
+For single-meal skipping: effects on same-day fatigue in healthy adults are smaller and inconsistent. Breakfast omission studies show subjective deterioration primarily in the late-morning window (10:00–12:00), attenuated by lunch. The signal is real but smaller than the 48-hour fasting data suggests.
+
+**Estimated correction:** At moderate hunger (skipped meal, hunger ~40–60), the fatigue multiplier is probably in the 1.1–1.15× range, not 1.3×. At high hunger (hunger > 70, approaching the 48-hour fast context), 1.3× is more defensible than 1.8×. The current 1.8× substantially overstates the single-session effect.
+
+**Complication: the orexin mechanism runs in the opposite direction.** Postprandial glucose rise *inhibits* orexin neurons, producing the food-coma effect after eating. This means the dominant fatigue mechanism for hunger during normal wakefulness is different from what the multiplier implies — hunger is alerting at low levels (ghrelin rises) and fatiguing at high levels (neuroglycopenic). The threshold-and-multiplier model oversimplifies this.
+
+**Approximation debt: hunger multipliers 1.3×/1.8× are chosen and too large. Directionally supported; better values are ~1.1× / 1.3× at the same thresholds, though thresholds themselves also lack derivation.**
+
+### Activity type matters
+
+Walking (mild exercise, ~40% VO2max) produces a **net energy gain** in subjective energy, not a cost. Puetz et al. 2008 RCT (PMID 18277063, Psychother Psychosom 77(3):167–174) — 36 sedentary adults with persistent fatigue: low-intensity exercise → energy +20%, fatigue −65%. Effect independent of fitness changes.
+
+Sustained cognitive work (60+ minutes) produces task-specific mental fatigue that impairs subsequent physical performance (Marcora et al. 2009, PMID 19131473, J Appl Physiol 106(3):857–864) and accumulates detectably via MRS brain perfusion (PMID 19925871, PMC2830749).
+
+Passive wakefulness (monotony) accelerates alertness degradation — doing nothing is more draining per hour than moderate engagement (PVT time-on-task literature).
+
+**For the simulation:** `go_for_walk` should have a net energy bonus for normal-to-moderate states (the current design already intends mood-state-dependent effects). The background wakefulness drain applies primarily to passive/low-engagement time; interaction-specific energy costs/gains sit on top of it.
+
+### Calibration targets
+
+The literature does not supply a clean replacement rate. What it supports:
+
+1. Remove flat 3 pts/hr. Replace with a circadian-modulated base rate — lower in the morning, lower in the evening WMZ, higher in the afternoon trough.
+2. Hunger multipliers: reduce to ~1.1× / 1.3× (directional approximation with better grounding than current 1.3×/1.8×). Still approximation debts.
+3. Document `go_for_walk` energy effect as mechanistically positive at moderate states (cite Puetz 2008).
+4. Add to TODO.md: energy drain needs circadian modulation from time + latitude, not a flat scalar.
+
+### Key sources
+
+- Dijk, Duffy & Czeisler 1992 — circadian/homeostatic separation of alertness (PMID 10607036, J Sleep Res 1(2):112–117)
+- Dijk & Czeisler 1995 — forced desynchrony: equal contribution of C and S (PMID 7751928, J Neurosci 15:3526–3538)
+- Monk et al. 1996 — circadian determinants of post-lunch dip; 12-hour temperature harmonic (PMID 8877121, Chronobiol Int 13(2):123–133)
+- Monk 2005 — post-lunch dip review; 20–30% performance reduction (PMID 15892914, Clin Sports Med 24(2):e17–34)
+- PMC3601314 — improved neurobehavioral performance during WMZ (JCSM 2013)
+- Van Dongen & Dinges 2003 — chronic restriction dose-response (PMID 12683469, Sleep 26(2):117–126)
+- Solianik et al. 2016 — 48-hour fast hunger-fatigue r=0.62 (PMID 28025637, PMC5153500)
+- Puetz et al. 2008 — low-intensity exercise: energy +20%, fatigue −65% (PMID 18277063, Psychother Psychosom 77(3):167–174)
+- Marcora et al. 2009 — 90 min cognitive work impairs physical endurance (PMID 19131473, J Appl Physiol 106(3):857–864)
+- PMC2830749 — ASL perfusion: cognitive fatigue from 60+ min sustained work (PMID 19925871)
+
+---
+
+## Emotional Inertia State Penalties
+
+**Applies to:** `regulationCapacity()` and `effectiveInertia()` in `state.js` — the adenosine > 60 and stress > 60 penalty terms.
+**Status:** Research complete 2026-02-20. Not yet implemented.
+
+**Current debt:** Penalty coefficients `(adenosine - 60) * 0.004` and `(stress - 60) * 0.004` applied to `regulationCapacity()` (max −0.16 each). Also `(adenosine - 60) * 0.005` and `(stress - 60) * 0.003` in `effectiveInertia()` (max +0.2 and +0.12). Directions correct; magnitudes chosen.
+
+### Sleep deprivation → regulation impairment
+
+**Mechanism (established):** Sleep deprivation produces prefrontal-amygdala decoupling — impaired top-down regulatory control, not simply heightened emotional reactivity. Yoo et al. 2007 (PMID 17956744, DOI 10.1016/j.cub.2007.08.007) — one night total sleep deprivation produced ~60% increase in amygdala reactivity to negative stimuli AND loss of functional connectivity between amygdala and medial PFC. The pathway is structurally impaired, not merely effortful.
+
+Stenson et al. 2021 (PMID 34473768, PMC8412406, PLOS One) — N=60, randomly assigned: sleep-deprived subjects showed less effective regulation of negative emotion while bottom-up emotional processing was unaffected. The impairment is selectively regulatory.
+
+**Effect size data:**
+- Tomaso & Johnson 2021 meta-analysis (PMID 33367799, PMC8193556, Sleep 44(6):zsaa289) — adaptive emotion regulation after sleep restriction: **g = −0.32** (small, statistically significant; 11 effect sizes from 5 studies, youth samples).
+- Palmer et al. 2024 meta-analysis (PMID 38127505, DOI 10.1037/bul0000410, Psychol Bull 150(4)) — 1,338 effect sizes across 154 studies: reduced positive affect SMD −0.27 to −1.14; increased anxiety SMD 0.57–0.63. Effects on negative affect **mixed and nonlinear** — not a clean linear relationship.
+
+**Assessment for the model:** The current coefficient (adenosine > 60, capacity -= (aden-60)*0.004, max −0.16) represents moderate-to-large degradation of overnight processing efficiency. Given the Yoo 2007 mechanism finding and the Palmer SMD range, this is in the right order of magnitude. The Palmer nonlinear dose-response finding argues against the current linear scaling above a threshold — the real relationship is probably nonlinear with diminishing marginal impairment at extreme deprivation. **Coefficient is plausible; threshold linearity is an approximation.**
+
+### Chronic stress → regulation impairment
+
+**Mechanism (established):** Acute stress has **biphasic effects** on reappraisal (Langer et al. 2021, PMID 33460986, Psychoneuroendocrinology) — potentially helpful in early phase (0–20 min), impairing in late phase (20–40 min post-stress). The model's `stress` variable represents chronic/accumulated state, not acute arousal, so the biphasic acute effect is less relevant than the chronic structural changes.
+
+Chronic stress: Arnsten 2009 (PMID 19455173, PMC2907136, Nat Rev Neurosci 10:410–422) — even mild uncontrollable stress causes "rapid and dramatic loss of prefrontal cognitive abilities." Prolonged stress causes dendritic atrophy in PFC and dendritic extension in amygdala — structural reorganization shifting the brain from regulatory to reactive processing.
+
+**Quantitative benchmark:** Shields et al. 2016 meta-analysis (PMID 27371161, PMC5003767, Neurosci Biobehav Rev 68:651–668) — N=2,486 across 51 studies: working memory impaired **g = −0.197**, cognitive flexibility impaired **g = −0.300**. Inhibition: response inhibition enhanced (g = +0.296), cognitive inhibition impaired (g = −0.208).
+
+**Assessment for the model:** The current coefficient (stress > 60, capacity -= (stress-60)*0.004, max −0.16) is in the right range for acute stress effects on PFC-mediated function (Shields g ≈ −0.2 to −0.3). Chronic structural effects may warrant a larger or more persistent penalty — the existing stress variable doesn't distinguish chronic structural PFC degradation from acute arousal. **Coefficient is plausible for acute stress; chronic effects are understated. Known structural approximation debt.**
+
+### Interaction: additive or not?
+
+Dutheil et al. 2023 (PMID 38033613, PMC10685043) — N=101, total sleep deprivation + TSST: counter-intuitive finding that acute social stress *improved* some performance metrics in sleep-deprived participants via arousal compensation. The interaction is **not simply additive** — in some respects antagonistic for performance; inflammatory markers showed non-additive patterns.
+
+However, the temporal/dynamic combined state (chronic sleep debt + chronic stress over days) is worse than either alone via feedback loops (sleep deprivation → dysregulation → stress → sleep disruption). The current additive model is a defensible approximation for chronic combined states.
+
+**The recovery lag problem:** Radley et al. 2005 (PMID 16095592, Exp Neurol 196(1):199–203) — after 3 weeks of stress in rats, PFC dendritic atrophy required ~3 weeks of recovery (no stress) to reverse. Hippocampus recovered in ~10 days; PFC recovery is slower. Human timescales are unknown but likely longer. The current model reads `s.stress` instantaneously — when stress resolves, the penalty disappears immediately. Real PFC structural recovery lags behavioral stress resolution by days to weeks. **This is a structural approximation debt: no "stress debt" variable exists to capture the lag.**
+
+### Calibration verdict
+
+The current penalty coefficients (0.003–0.005 range, max −0.12 to −0.20 off capacity) are in the right order of magnitude given the literature. The specific magnitudes remain approximation debts — the literature provides directional support and SMD ranges but not direct 0–1.3 capacity scale mappings. Primary structural gaps:
+
+1. **Linear above threshold is wrong** — both effects are probably nonlinear (Palmer 2024; Shields 2016 high-load finding)
+2. **Chronic stress lag absent** — structural PFC recovery takes days to weeks after stress resolves; current model resets instantly
+3. **Sex moderation unmodeled** — consistent moderator throughout stress-reappraisal literature; regulation capacity should differ by sex (not yet a character parameter)
+
+### Key sources
+
+- Yoo et al. 2007 — TSD: ~60% amygdala reactivity increase, PFC-amygdala decoupling (PMID 17956744, DOI 10.1016/j.cub.2007.08.007)
+- Stenson et al. 2021 — selective top-down regulatory impairment under TSD (PMID 34473768, PMC8412406)
+- Tomaso & Johnson 2021 — sleep restriction + emotion regulation meta-analysis: g = −0.32 (PMID 33367799, PMC8193556)
+- Palmer et al. 2024 — 154-study meta-analysis; nonlinear dose-response (PMID 38127505, DOI 10.1037/bul0000410)
+- Shields et al. 2016 — acute stress + executive function meta-analysis: g = −0.197 to −0.300 (PMID 27371161, PMC5003767)
+- Arnsten 2009 — structural PFC impairment under chronic stress (PMID 19455173, PMC2907136)
+- Woo et al. 2021 — chronic stress weakens PFC connectivity (PMC8408896)
+- Langer et al. 2021 — biphasic acute stress effects on reappraisal (PMID 33460986)
+- Dutheil et al. 2023 — sleep deprivation × acute stress interaction; non-additive (PMID 38033613, PMC10685043)
+- Radley et al. 2005 — PFC dendritic recovery ~3 weeks after 3-week stress; slower than hippocampus (PMID 16095592)
+- Saito et al. 2017 — 9-day sleep extension restores PFC-amygdala regulation (PMID 28713328, PMC5491935)
+- Van Dongen et al. 2003 — one 10h recovery night insufficient after chronic restriction (PMID 12683469)
+
+---
+
 ## Pending Research
 
 The following calibration debts were identified but not yet researched:
 
-- **NT rate constants table** — all 27 drift rate pairs [upRate, downRate] are chosen approximations. Real receptor binding kinetics per neurotransmitter.
+- **NT rate constants table** — the four mood-primary systems (serotonin, dopamine, NE, GABA) now have research above. The remaining 23 placeholder systems (glutamate, endorphin, acetylcholine, endocannabinoid, histamine, testosterone, DHT, estradiol, progesterone, allopregnanolone, LH, FSH, oxytocin, prolactin, and the physiological rhythms) remain at chosen approximations.
 - **Serotonin/dopamine/NE/GABA target function coefficients** — every coefficient connecting circumstances to NT targets is chosen. No single calibration source — needs ecophysiology literature per system.
-- **Energy drain: 3 pts/hr base, hunger multipliers 1.3×/1.8×** — chosen. Calibration: human performance / sustained operations literature.
-- **Emotional inertia weights: state penalties** (adenosine > 60, stress > 60 reduce regulation capacity) — directions correct, magnitudes chosen.
 - **Event probabilities** (0.03 weather, 0.10 workplace, etc.) — per-action rates, chosen. Hard to calibrate against real sources without converting to per-hour framing.
