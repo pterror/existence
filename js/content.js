@@ -5114,6 +5114,30 @@ export function createContent(ctx) {
       }
     }
 
+    // Nausea — physical misery regardless of source
+    {
+      const nTier = State.nauseaTier();
+      if (nTier === 'severe') {
+        thoughts.push(
+          { weight: 12, value: 'Your stomach is making its feelings known. Loud. Sustained. You stay very still.' },
+          { weight: 10, value: 'The room is fine. Your body is not fine. The two things are happening at the same time.' },
+          { weight: 9, value: 'You breathe through your nose slowly. You have a system now. The system helps.' },
+          { weight: 8, value: 'If you move too fast you\'ll regret it. You\'ve already established this. You stay still.' },
+        );
+      } else if (nTier === 'sick') {
+        thoughts.push(
+          { weight: 7, value: 'Your stomach is unhappy. Not emergency-level unhappy. Just persistently, pointedly unhappy.' },
+          { weight: 6, value: 'Something in your gut is lodging a complaint. You acknowledge it. Move slowly.' },
+          { weight: 5, value: 'Not great. Your body is doing a thing. You\'re trying not to encourage it.' },
+        );
+      } else if (nTier === 'queasy') {
+        thoughts.push(
+          { weight: 3, value: 'Your stomach is doing a thing. Mild. Manageable. Annoying.' },
+          { weight: 2, value: 'A low-grade wrongness in your gut. You note it and move on.' },
+        );
+      }
+    }
+
     // Caffeine withdrawal — background headache pressing in
     {
       const wdTier = State.withdrawalTier();

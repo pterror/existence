@@ -164,8 +164,12 @@ export function createState(ctx) {
       // Tolerance tracking: grows when daily peak ≥ 40, fades when day passes without caffeine.
       caffeine_habit: 0,       // 0-100; habitual use level
       // Withdrawal: builds when habit > 10 and caffeine_level < 15. Clears with caffeine.
-      caffeine_withdrawal: 0,  // 0-100; headache + dopamine suppression
+      caffeine_withdrawal: 0,  // 0-100; headache + dopamine suppression + nausea at severe
       caffeine_today_peak: 0,  // highest caffeine_level this wake period; reset at wakeUp
+
+      // General nausea — shared across systems (withdrawal, illness, alcohol eventually).
+      // Decays naturally; some sources clear faster with treatment.
+      nausea: 0,               // 0-100
 
       // Environment
       // Temperature in celsius. Set by updateWeather() in world.js.
@@ -439,14 +443,46 @@ export function createState(ctx) {
         // Takes ~8–12h to reach moderate (40) at typical habit levels.
         const buildRate = (s.caffeine_habit / 100) * 6;
         s.caffeine_withdrawal = Math.min(100, s.caffeine_withdrawal + buildRate * hours);
+
+        // Receptor upregulation effect: chronic caffeine causes the brain to grow more
+        // adenosine receptors. When caffeine is removed, the same adenosine hits a much
+        // larger/more sensitive receptor population — effective adenosine signal amplified.
+        // Model: extra adenosine accumulation proportional to habit × withdrawal depth.
+        if (s.caffeine_habit > 30) {
+          const sensitivityBonus = (s.caffeine_habit / 100) * 0.5 * (s.caffeine_withdrawal / 100);
+          s.adenosine = clamp(s.adenosine + sensitivityBonus * hours * 4, 0, 100);
+        }
+
+        // Nausea — severe withdrawal + high habit triggers GI symptoms.
+        // Mechanism: adenosine A1/A2A receptors in gut + brainstem chemoreceptor trigger
+        // zone (area postrema) flood with unblocked adenosine. Vagus nerve involvement.
+        if (s.caffeine_withdrawal > 55 && s.caffeine_habit > 45) {
+          const nauseaRate = ((s.caffeine_withdrawal - 55) / 45) * (s.caffeine_habit / 100) * 5;
+          s.nausea = Math.min(100, s.nausea + nauseaRate * hours);
+        }
       } else if (s.caffeine_level >= 25) {
         // Caffeine clears withdrawal quickly once it reaches meaningful levels
         s.caffeine_withdrawal = Math.max(0, s.caffeine_withdrawal - hours * 25);
+        // Caffeine also clears withdrawal nausea (restores receptor block)
+        s.nausea = Math.max(0, s.nausea - hours * 8);
       }
       if (s.caffeine_withdrawal > 0) {
-        // Withdrawal headache signal: elevated NE; suppressed dopamine (low motivation, fog)
+        // Withdrawal headache signal: elevated NE (vascular dilation pain); suppressed dopamine
         adjustNT('norepinephrine', (s.caffeine_withdrawal / 100) * hours * 2.5);
         adjustNT('dopamine', -(s.caffeine_withdrawal / 100) * hours * 2);
+      }
+    }
+
+    // Nausea — NT effects and natural decay
+    if (s.nausea > 0) {
+      // Natural decay: ~2 pts/hr
+      s.nausea = Math.max(0, s.nausea - hours * 2);
+      // Can't settle when nauseated — suppresses GABA; mild NE from body distress
+      adjustNT('gaba', -(s.nausea / 100) * hours * 1.5);
+      adjustNT('norepinephrine', (s.nausea / 100) * hours * 1.0);
+      // Severe nausea: systemic adenosine flood via vagus/brainstem compounds fog
+      if (s.nausea > 60) {
+        adjustNT('adenosine', (s.nausea / 100) * hours * 2);
       }
     }
 
@@ -842,6 +878,15 @@ export function createState(ctx) {
     if (w < 15) return 'none';
     if (w < 40) return 'mild';
     if (w < 70) return 'moderate';
+    return 'severe';
+  }
+
+  /** Qualitative nausea tier. Shared across systems (withdrawal, illness, alcohol). */
+  function nauseaTier() {
+    const n = s.nausea;
+    if (n < 15) return 'none';
+    if (n < 40) return 'queasy';
+    if (n < 70) return 'sick';
     return 'severe';
   }
 
@@ -2068,6 +2113,7 @@ export function createState(ctx) {
     adenosineBlock,
     caffeineSleepInterference,
     withdrawalTier,
+    nauseaTier,
     // Temperature
     seasonalTemperatureBaseline,
     diurnalTemperatureOffset,

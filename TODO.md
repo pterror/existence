@@ -192,7 +192,28 @@ Stress and energy model some of this but DESIGN.md describes depression, anxiety
 ADHD (executive dysfunction, time blindness, hyperfocus), autism (sensory processing, masking cost, routine importance). Not illnesses — ways of being that interact with a world not designed for them.
 
 ### Substance system
-No substances exist. DESIGN.md describes: caffeine (mood/energy floor, withdrawal headache), nicotine (cycle of withdrawal and relief), alcohol (the curve — push, plateau, cost), cannabis, prescription drugs, harder substances. Each with: acute effect, comedown, tolerance, withdrawal, baseline shift.
+~~No substances exist.~~ Caffeine implemented (level, habit, withdrawal, receptor upregulation, nausea). See [SUBSTANCES.md](SUBSTANCES.md) for the full dependency model and design reference.
+
+**Caffeine remaining debts:**
+- Acute tolerance: `consumeCaffeine(50)` gives same boost regardless of habit. At high habit, effective boost should be ~70% (fewer spare receptors to block). Low priority — withdrawal loop already captures dependency experience.
+
+**Next substances to implement (in rough priority order):**
+
+1. **Nicotine** — the break that isn't relaxation, it's withdrawal stopping. Irritability-dominant withdrawal (distinct from caffeine's headache). Dopamine below non-smoker baseline during withdrawal. Social layer: the smoke break as legitimized absence. Smell. Who knows. See SUBSTANCES.md.
+
+2. **Alcohol** — GABA-A agonist. The curve (push → plateau → cost). Sleep disruption despite sedation (suppresses REM). Hangover. Chronic: dangerous withdrawal (seizures, DTs) — **cold turkey from high dependency is medically contraindicated, not just unpleasant.** Nausea already implemented as shared state. See SUBSTANCES.md.
+
+3. **Cannabis** — blunts emotional extremes, disrupts REM, mild tolerance. Withdrawal: irritability, insomnia, appetite change — real but less severe than nicotine or alcohol.
+
+4. **Opioids** — prescription pathway (the back pain that became something else), the flu-like withdrawal, harm reduction access. Requires healthcare access system first. See SUBSTANCES.md.
+
+**Recovery pathway tasks (cut from first implementation, design in SUBSTANCES.md):**
+- **Cold turkey mechanic** — explicit choice interaction. Prose carries the arc specific to each substance.
+- **Medically supervised tapering** — requires healthcare access system (jurisdiction-dependent). Benzodiazepines for alcohol withdrawal, buprenorphine for opioids.
+- **AA / NA / SMART Recovery** — meeting as an interaction (time, location), sponsor as relationship slot, step-work as slow background process, relapse as physiologically honest (habit re-escalation).
+- **Rehab (inpatient)** — 28+ days, cost-gated, removes character from environment and triggers. Character returns to same apartment. That's the hard part.
+- **Craving as attention state** — high withdrawal pushes craving thoughts into idle thought pool, intrudes during other activities. Location-based trigger amplification (the apartment where it happened).
+- **Social consequences compound** — job standing, relationship damage, financial drain all interact with the substance state.
 
 ### Drawn lots
 No drawn lots exist. DESIGN.md describes: foster care, domestic violence, CPS, childbearing, fetal alcohol syndrome, instability, caregiving, housing instability, addiction/recovery, legal constraints, grief, language barriers. Each as daily texture, not backstory tags.
