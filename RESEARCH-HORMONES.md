@@ -2,7 +2,7 @@
 
 Research compiled for simulation design. For each finding: what the evidence shows, how strong it is, and what it means for modeling. This is reference material, not a design document.
 
-*Citation status: PMIDs added 2026-02-20. All major quantitative claims and mechanism citations now have PMIDs or source identifiers. Several claims corrected during verification (first-trimester estradiol upper-quartile issue, D-MER "2007" date, Mirena initial serum level, EC half-life provenance, 21.9% mood fluctuation attribution). Remaining uncited areas: oral progesterone ALLO metabolite fraction (~80% figure), sublingual estradiol PK curve values, testosterone enanthate peak timing, and minor calibration details in the PK table.*
+*Citation status: Complete pass 2026-02-20. All major quantitative claims have PMIDs or source identifiers. Notable accuracy corrections applied: first-trimester estradiol (upper-quartile issue), D-MER "2007" date, Mirena initial serum level, sublingual E2 immunoassay artifact, TC trough range, testosterone enanthate half-life uncertainty, 21.9% mood fluctuation attribution, and others documented inline.*
 
 ---
 
@@ -258,17 +258,17 @@ Most stable method. After initial 1-2 week peak, sustained plateau for 4-6 month
 
 #### Sublingual/Buccal
 
-Peak ~1 hour (dramatically fast). Rapid decline — 450 pg/mL at 1 hour to 85 pg/mL by 3 hours. "Sawtooth" pattern with multiple daily doses. Bypasses first pass partially. Higher bioavailability than oral (1.8x AUC). Some prefer "feeling it kick in"; others find instability distressing.
+Peak ~1 hour (dramatically fast). The often-cited figures of ~450 pg/mL at 1h → ~85 pg/mL by 3h correspond to a **1 mg** sublingual dose (not 0.5 mg). Primary citation: Burnier et al. 1981, PMID 6786097 — established rapid peak ~1–2h and fast decline. Accuracy caveat: Burnier used immunoassay, which overestimates estradiol due to estrone cross-reactivity; modern LC-MS/MS study (Doll et al. 2022, PMID 34781041) measured ~144 pg/mL peak for 1 mg sublingual in transgender women — the 450 pg/mL figure likely reflects assay artifact. Qualitative pattern (fast spike, sawtooth with multiple daily doses) remains accurate. Bypasses first pass partially. Higher bioavailability than oral (~1.8x AUC). Some prefer "feeling it kick in"; others find instability distressing.
 
 ### Testosterone
 
 #### Testosterone Cypionate Injection
 
-Peak 4-5 days. Half-life 7-8 days. 200mg biweekly: supraphysiological peak (~1,112 ng/dL), significant trough (~400 ng/dL). **Weekly dosing increasingly standard** for mood stability. At peak: possible irritability, agitation, anger-hostility. At trough: fatigue, low mood, decreased motivation. Both high and low testosterone produce irritability but different quality — peak = aggressive/short-fused, trough = fatigued/depleted.
+Peak 4–5 days. Half-life 7–8 days. 200mg biweekly: supraphysiological peak (~1,112 ng/dL; consistent with PK modeling, Pastuszak 2022 PMC9293229 and Bhasin 2018 guideline PMID 29562364 — specific value is modeled), trough typically sub-physiological and often below 300 ng/dL in many patients (PMC5182226; literature describes troughs as "sub-physiologic levels 4–6 days prior to next injection"). The "~400 ng/dL" figure is at the upper bound of the reported range; some PK modeling gives ~350–435 ng/dL (PMC5915615) but real-world studies often find troughs closer to 200–350 ng/dL with significant inter-individual variation. **Weekly dosing increasingly standard** for mood stability. At peak: possible irritability, agitation, anger-hostility. At trough: fatigue, low mood, decreased motivation. Both high and low testosterone produce irritability but different quality — peak = aggressive/short-fused, trough = fatigued/depleted.
 
 #### Testosterone Enanthate Injection
 
-Peak 36-48 hours (earlier than cypionate). Half-life 4-5 days (shorter). Sharper peak, faster decline. More volatile curve. Often dosed more frequently (every 5-7 days).
+Peak 36–48 hours (earlier than cypionate) — confirmed across sources including Schulte-Beerbuhl & Nieschlag 1980 (*Fertil Steril* 33:201, no PMID) and PMC5182226 (pharmacology review). Half-life 4–5 days per some primary sources (including Schulte-Beerbuhl 1980 data and Pastuszak 2022, PMC9293229: eugonadal 3.8d, hypogonadal 4.2d); other authoritative sources cite 7–9 days — half-life range is contested, 4–5 days is within range but not universal. Sharper peak, faster decline than cypionate. More volatile curve. Often dosed more frequently (every 5–7 days).
 
 #### SubQ vs IM for Testosterone
 
@@ -290,9 +290,9 @@ Peak ~1 month. Half-life ~2.5 months. Duration 4-6 months. Initial supraphysiolo
 
 #### Oral Micronized Progesterone (Prometrium)
 
-Less than 20% of circulating levels are actually progesterone — ~80% are metabolites, primarily **allopregnanolone**. Functions pharmacologically as a CNS depressant: sedation, anxiolysis, hypnotic effects, mild euphoria in some.
+The majority of circulating steroid after oral micronized progesterone consists of metabolites — estimated ~80%+ are metabolites, primarily **allopregnanolone** (5α-reduced) and pregnanolone (5β-reduced), with less than ~20% being progesterone itself. This is due to extensive first-pass hepatic and intestinal metabolism. (Sitruk-Ware 1987, PMID 3327648 — foundational review; Bixo et al. 2006, PMID 16406399 — quantified metabolite AUCs: ALLO AUC 196% above baseline, pregnanolone 119%, progesterone 127% — confirming metabolite dominance. Note: the "80/20" split is a reasonable approximation; it is not a precisely measured ratio from a single study.) Functions pharmacologically as a CNS depressant: sedation, anxiolysis, hypnotic effects, mild euphoria in some.
 
-Peak progesterone at 2-3 hours. Peak allopregnanolone at ~2 hours, elevated 5-8 hours. Dramatic supraphysiological ALLO spikes (~15-fold fluctuation per dose). Enhanced absorption with food. Higher peaks in older individuals.
+Peak progesterone at 2–3 hours. Peak allopregnanolone at ~2 hours, elevated 5–8 hours. Dramatic supraphysiological ALLO spikes (~15-fold fluctuation per dose). Enhanced absorption with food. Higher peaks in older individuals.
 
 **Taken at bedtime** because sedation is a primary pharmacological action, not a side effect. Morning dosing causes 2-4 hours of cognitive dulling and sleepiness.
 
