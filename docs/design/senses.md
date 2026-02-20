@@ -222,6 +222,13 @@ Food tastes good, bad, or somewhere in between, and the character notices:
 
 Not an exhaustive list — cooking methods are many, and each produces a distinct sensory outcome. Each is also a class and equipment marker: smoking requires time and setup, braising requires time and the right cut, deep frying requires oil volume and temperature control. What methods a character uses reflects their resources, knowledge, and background.
 
+**Food degradation** — food has states, and the wrong state is its own sensory experience:
+- Soggy: something that should be crispy isn't. Cereal in milk too long, fries that sat, bread that absorbed moisture. The crunch was the point.
+- Stale: slow moisture loss. Bread going tough, crackers losing snap, chips going soft. Opposite direction from soggy, similarly wrong.
+- Slightly off: detectable but deniable. Milk that's borderline. The smell when you open something and you know immediately. Food that was fine yesterday and today is wrong in a way you can't place.
+- Visibly spoiled: mould, discolouration, the obvious.
+- The poverty angle: eating something borderline because throwing it out isn't an option. The calculus of risk vs. waste. The game should be honest about this.
+
 **Texture** is distinct from taste but part of the eating experience:
 - Fat texture (some people can't eat visible fat; the mouthfeel is the problem)
 - Mushy vegetables, gritty, slimy, stringy, chewy, crunchy
