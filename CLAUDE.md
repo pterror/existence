@@ -58,6 +58,7 @@ No build step. Plain JS loaded via script tags.
 - **Write it down if it will ever need to be written down.** If something is discussed — a real-world mechanic, a design option, a system that should exist, a gap in the simulation — and it's the kind of thing that should eventually be built or considered, document it now. Don't wait until it's being implemented. TODO.md, DESIGN.md, and CLAUDE.md exist so nothing lives only in chat history or someone's memory. When in doubt: write it down.
 - **Do the work properly.** Don't leave workarounds or hacks undocumented.
 - **No shortcuts.** When full fidelity isn't achievable right now, don't implement a lower-fidelity version silently. Either do it properly or add it to TODO.md as an explicit approximation debt with a note on what's being lost. Never paper over a gap with a hardcoded assumption — name the assumption, document what should replace it.
+- **Every hardcoded number is a debt until proven otherwise.** When you write a rate, coefficient, threshold, or magnitude in simulation code, ask: is this derived from real-world data, or chosen? If chosen, it is an approximation debt. Mark it with an `// Approximation debt:` comment at the site AND add it to TODO.md. Do not write a comment that sounds like derivation when the number was chosen first — that is the failure mode to avoid. "Needs calibration" is honest. A plausible-sounding rationale invented after the fact is not.
 
 ## Design Principles
 
