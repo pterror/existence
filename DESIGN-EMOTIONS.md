@@ -22,7 +22,7 @@ Tonic neurotransmitter levels — serotonin, dopamine, norepinephrine — creati
 
 ### What feeds it
 
-- **Sleep quality** — the strongest lever. REM sleep strips emotional charge from memories in a norepinephrine-free neurochemical environment. The amygdala is literally depotentiated overnight. Good sleep genuinely resets emotional reactivity. Poor sleep preserves yesterday's emotions — the charge doesn't process, the reactivity stays amplified. Sleep-deprived people show ~60% greater amygdala reactivity to negative stimuli. This is the best-supported finding in mood science.
+- **Sleep quality** — the strongest lever. REM sleep strips emotional charge from memories in a norepinephrine-free neurochemical environment. The amygdala is literally depotentiated overnight. Good sleep genuinely resets emotional reactivity. Poor sleep preserves yesterday's emotions — the charge doesn't process, the reactivity stays amplified. Sleep-deprived people show ~60% greater amygdala reactivity to negative stimuli (Yoo et al. 2007, *Current Biology*, PMID 17956744). This is the best-supported finding in mood science.
 
 - **Hormonal state** — hormones don't raise or lower "mood level" directly. They change how emotional regulation works.
   - High progesterone: intrusive memories surface more readily, reappraisal strategies work less well, negative material sticks harder. Not "being moody" — a shift in processing style.
@@ -56,10 +56,10 @@ Not everyone's baseline moves the same way. Emotional inertia — how sticky moo
 
 What predicts emotional inertia:
 
-- **Neuroticism** — the strongest predictor. Higher neuroticism means negative moods persist longer. Linked to weaker prefrontal-amygdala connectivity — less effective top-down regulation.
-- **Self-esteem** — low self-esteem increases emotional inertia across all emotion types, not just negative ones.
+- **Neuroticism** — the strongest predictor. Higher neuroticism means negative moods persist longer. Linked to weaker prefrontal-amygdala connectivity — less effective top-down regulation (Cremers et al. 2010, *NeuroImage*, PMID 19683585; Houben et al. 2015, *Psychological Bulletin*, PMID 25822133).
+- **Self-esteem** — low self-esteem increases emotional inertia across all emotion types, not just negative ones (Kuppens et al. 2010, *Psychological Science*, PMID 20424092).
 - **Depression** — depressed individuals show higher emotional inertia during daily life. This is both symptom and mechanism — the stickiness is part of what makes depression depression.
-- **Rumination tendency** — brooding and reflection both predict increased stress inertia. Individual variation within each sex is vastly larger than between-sex differences (effect sizes d=0.17-0.28 for sex differences in rumination — the distributions overlap almost completely).
+- **Rumination tendency** — brooding and reflection both predict increased stress inertia. Individual variation within each sex is vastly larger than between-sex differences (effect sizes d=0.17–0.24 for sex differences in rumination, Johnson & Whisman 2013, *Personality and Individual Differences*, PMID 24089583, PMC3786159 — the distributions overlap almost completely).
 - **Current state** — effective inertia changes with conditions. Sleep deprivation increases inertia. Acute threat temporarily decreases it (the system mobilizes even when normally sluggish).
 
 The honest model: emotional inertia is a continuous per-character trait shaped by personality, self-concept, and current state. Not a demographic binary. The simulation generates this trait per character from their personality parameters, then modifies it based on current sleep quality, hormonal state, chronic stress level, and whether they're in crisis.

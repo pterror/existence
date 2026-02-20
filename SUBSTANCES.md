@@ -3,7 +3,7 @@
 Design reference for substance mechanics in *existence*. Captures the
 dependency model used for caffeine and the template for future substances.
 
-*Citation status: this document contains specific quantitative claims (half-lives, withdrawal timing, mechanism labels) with no PMC/PMID identifiers. Treat as uncited design rationale until sources are added. The caffeine withdrawal citation (Juliano & Griffiths 2004, PMID 15448977) exists only in state.js, not here.*
+*Citations added 2026-02-20. Key sources listed inline below.*
 
 ---
 
@@ -44,7 +44,7 @@ Every substance follows the same arc:
   → the throbbing, positional caffeine headache (distinct from migraine)
 
 ### State variables
-- `caffeine_level` (0–100): active blood level, half-life ~5h
+- `caffeine_level` (0–100): active blood level, half-life ~5h (Statland & Demas 1980, PMID 7361718; range 3–7h per StatPearls PMID 30137774)
 - `caffeine_habit` (0–100): tolerance tracker; grows +8/day with daily
   peak ≥ 40 units, fades −5/day without
 - `caffeine_withdrawal` (0–100): symptom intensity; builds ~6 pts/hr at
@@ -61,6 +61,7 @@ Every substance follows the same arc:
   suppressed, cognitive fog worse than non-user baseline
 - Hours 18–30: peak. Flu-like. Nausea active. Concentration impossible.
 - Days 3–7: gradual resolution as receptor count downregulates back down
+  *(Juliano & Griffiths 2004, PMID 15448977 — onset 12–24h, peak 20–51h, duration up to 9 days)*
 
 ### Approximation debts
 - No tolerance on the *acute* effect: `consumeCaffeine(50)` always gives
@@ -143,7 +144,7 @@ if (s.{substance}_habit > THRESHOLD) {
 - Withdrawal: dopamine *below* non-smoker baseline (anhedonia), elevated
   irritability, NE dysregulation, intense craving
 - The break isn't relaxation. It's the withdrawal stopping.
-- Half-life: nicotine ~2h, cotinine (metabolite) ~16h
+- Half-life: nicotine ~2h, cotinine (metabolite) ~16h (Benowitz et al. 2009, PMID 19184645, PMC2953858)
 
 ### Withdrawal character
 - Irritability is the dominant feature (not headache like caffeine)
@@ -163,7 +164,7 @@ if (s.{substance}_habit > THRESHOLD) {
 ## Alcohol
 
 ### Mechanism
-- GABA-A agonist + NMDA antagonist → sedation, disinhibition, analgesia
+- GABA-A agonist + NMDA antagonist → sedation, disinhibition, analgesia (Valenzuela 1997, PMID 15704351, PMC6826822)
 - Acute curve: push (loosening) → plateau (sedation) → cost (impairment)
 - Chronic: GABA-A downregulation, NMDA upregulation (excitatory
   compensation)
@@ -174,6 +175,7 @@ if (s.{substance}_habit > THRESHOLD) {
 - Hangover: acetaldehyde, dehydration, sleep architecture disruption
 
 ### Severity arc (alcohol-dependent, cold turkey)
+*(Jesse et al. 2017, PMID 27586815, PMC6084325; Schuckit 2014, PMID 25427113)*
 - Hours 6–24: tremor, sweating, anxiety, insomnia
 - Hours 24–48: peak danger. Seizure risk. Hallucinations (alcoholic
   hallucinosis — distinct from DTs).
@@ -263,6 +265,7 @@ Mechanics:
   alcohol) but subjectively described as the worst experience of a person's
   life. Vomiting, diarrhea, muscle cramps, insomnia, agitation, cold sweats.
   Lasts 5–7 days acute; months of protracted withdrawal (anhedonia, craving).
+  *(Kosten & O'Connor 2003, PMID 12724485; Pergolizzi et al. 2019, PMID 30701615, PMC6590307)*
 
 ### Prescription pathway
 The doctor who cuts you off. The pharmacy that looks at you a certain way.

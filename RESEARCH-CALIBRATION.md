@@ -132,8 +132,8 @@ Future: condition this on environmental noise tier (urban vs. rural) when enviro
 - Renner et al. 2022, *Cerebral Cortex* — PSG with pre-sleep stressor (PMC9758584)
 - Berset et al. 2007, *Behavioral Sleep Medicine* — 63-study PSG review (PMC4266573)
 - Åkerstedt et al. 2012, *Sleep* — naturalistic stress-sleep (PMC4202771)
-- Ferracioli-Oda et al. 2013, *PLoS One* — melatonin meta-analysis
-- Brzezinski et al. 2005, *Sleep Medicine Reviews* — melatonin meta-analysis
+- Ferracioli-Oda et al. 2013, *PLoS One* — melatonin meta-analysis (PMID 23691095, PMC3656905)
+- Brzezinski et al. 2005, *Sleep Medicine Reviews* — melatonin meta-analysis (PMID 15649737)
 - Dijk & Czeisler 1999, *J Physiology* — forced desynchrony PSG (PMC2269279)
 - Messineo et al. 2017, *Frontiers in Neurology* — white noise PSG (PMC5742584)
 - Reichert et al. 2022, *PMC* — adenosine, caffeine, sleep-wake review (PMC9541543)
@@ -191,7 +191,7 @@ Rumination is the strongest predictor of NE inertia, not the weakest.
 - The proposed weight reordering (rumination first) is well-supported directionally; the exact magnitudes remain approximation debts with better grounding than before.
 
 ### Key sources
-- Houben, Van Den Noortgate & Kuppens 2015, *Psychological Bulletin* — meta-analysis (PMC4705270)
+- Houben, Van Den Noortgate & Kuppens 2015, *Psychological Bulletin* — meta-analysis (PMID 25822133; no PMC deposit — note: PMC4705270 is Koval et al. 2016, a different paper)
 - Kuppens et al. 2010, *Psychological Science* — self-esteem and affect autocorrelation (PMC2901421)
 - Koval et al. 2012, *Psychological Medicine* — getting stuck in depression (PubMed 22671768)
 - Wenzel et al. 2025, *JPSP* — neuroticism, reactivity, and recovery (PubMed 41264496)
@@ -262,11 +262,11 @@ Zelenski et al. 2020 (PMC7260435): sociable behavior predicted fatigue peaking 2
 - Trait loneliness (a character property) should set a floor below which `social_need` doesn't fully return to zero — this is a chargen parameter to add
 
 ### Key sources
-- Tomova et al. 2020, *Nature Neuroscience* — 10h isolation = midbrain craving response
-- Ding et al. 2025, *Nature* — hypothalamic social homeostasis circuit
-- Buecker et al. 2020, *European J Personality* — Big Five × loneliness meta-analysis (N=93,668)
+- Tomova et al. 2020, *Nature Neuroscience* — 10h isolation = midbrain craving response (PMID 33230328)
+- Ding et al. 2025, *Nature* — hypothalamic social homeostasis circuit (PMID 40011768)
+- Buecker et al. 2020, *European J Personality* — Big Five × loneliness meta-analysis (N=93,668) (DOI 10.1002/per.2229; no PMID — journal not indexed in MEDLINE)
 - Zelenski et al. 2020, *J Personality* — sociable behavior and fatigue lag (PMC7260435)
-- Sandstrom & Dunn 2014, *Social Psychological and Personality Science* — weak ties and wellbeing
+- Sandstrom & Dunn 2014, *Personality and Social Psychology Bulletin* — weak ties and wellbeing (PMID 24769739)
 - Cacioppo & Cacioppo 2018 — loneliness and social threat detection
 - PMC review — neural circuitry of social homeostasis (PMC8580010)
 
