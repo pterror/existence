@@ -345,7 +345,7 @@ call_in (call in sick — morning only, work hours)
 ## Events (14 types)
 
 - **alarm** — fires at alarm_time in bedroom
-- **late_anxiety** — stress when late for work (capped at 2 surfaces)
+- **late_anxiety** — stress when late for work; fires once per tier crossing (fine→late→very_late); deterministic, no RNG; tracked via `last_surfaced_late_tier`; resets on wakeUp() and on work arrival
 - **hunger_pang** — fires once per tier crossing (hungry → very_hungry → starving); deterministic, no RNG; resets on eating
 - **exhaustion_wave** — fires once per tier crossing (exhausted → depleted); deterministic, no RNG; resets on energy recovery
 - **weather_shift** — random weather change

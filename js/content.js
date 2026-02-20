@@ -3488,6 +3488,64 @@ export function createContent(ctx) {
       },
     },
 
+    graze_break_room: {
+      id: 'graze_break_room',
+      label: 'See what\'s in the break room',
+      location: 'workplace',
+      available: () => {
+        const jobType = Character.get('job_type');
+        return jobType === 'office'
+          && !State.get('grazed_break_room_today')
+          && State.isWorkHours();
+      },
+      execute: () => {
+        State.adjustHunger(-12);
+        State.fillStomach(20, 'solid');
+        State.set('grazed_break_room_today', true);
+        State.advanceTime(8);
+
+        // Dental — sugar/acidity from candy and cake
+        State.dentalSpike(10);
+
+        const mood = State.moodTone();
+        const aden = State.get('adenosine');
+        const ne = State.get('norepinephrine');
+        const hunger = State.hungerTier();
+
+        let prose;
+
+        if (mood === 'hollow' || mood === 'numb') {
+          prose = Timeline.weightedPick([
+            { weight: 1, value: 'You walk to the break room without deciding to. There\'s a quarter of a birthday cake on the counter, three days old, the frosting dried at the edges. You take a slice and eat it standing up. It doesn\'t taste like much. You go back.' },
+            { weight: State.lerp01('serotonin', 0, 35), value: 'The candy dish is on the counter. You take a few pieces and eat them on the walk back. You weren\'t hungry. You\'re not sure why you went.' },
+            { weight: State.lerp01('dopamine', 0, 30), value: 'You get up and walk to the break room because sitting there wasn\'t working anymore. There\'s nothing appealing but you eat a piece of someone\'s leftover cake anyway. The gesture of eating something.' },
+          ]);
+        } else if (mood === 'fraying' || mood === 'heavy') {
+          prose = Timeline.weightedPick([
+            { weight: 1, value: 'Break room. The candy dish. You take a handful and stand there for a moment, which is the real reason you came — not the candy, just the standing somewhere else for a minute. Then you go back.' },
+            { weight: State.lerp01('adenosine', 50, 80) * State.adenosineBlock(), value: 'Mid-afternoon. You get up and walk to the break room on pure instinct. There\'s birthday cake — a few slices left from someone\'s thing yesterday. You eat a piece. It\'s very sweet. It helps a little.' },
+            { weight: State.lerp01('serotonin', 20, 55), value: 'The break room has that communal-space smell: old coffee, someone\'s lunch, the particular silence of a room nobody uses for long. You eat a few pieces of candy from the dish and don\'t run into anyone. That part is fine.' },
+          ]);
+        } else {
+          prose = Timeline.weightedPick([
+            { weight: 1, value: 'You walk to the break room and find the candy dish, which is always there. You take a few pieces and eat them on the way back. This is the shape of the afternoon.' },
+            { weight: State.lerp01('dopamine', 30, 65), value: 'There\'s birthday cake on the counter — leftover from yesterday, maybe the day before. You take the least-sad-looking slice. It\'s fine. Sweet, at least.' },
+            { weight: hunger === 'hungry' ? 1 : 0, value: 'You\'re hungry enough that the candy dish is actually useful. You take a handful and eat them at your desk. Not a solution, but something.' },
+            { weight: State.lerp01('serotonin', 45, 75), value: 'Break room run. The coffee\'s been sitting for two hours and the cake is going dry at the corners but you take a slice anyway, mostly just to have a reason to stand up and walk somewhere.' },
+          ]);
+        }
+
+        // Deterministic modifiers — no RNG
+        if (ne > 65) {
+          prose += ' Your shoulders haven\'t dropped the whole time.';
+        } else if (aden > 60 && State.adenosineBlock() > 0.3) {
+          prose += ' The walk helped more than the food.';
+        }
+
+        return prose;
+      },
+    },
+
     get_coffee_work: {
       id: 'get_coffee_work',
       label: 'Get coffee',
@@ -4635,13 +4693,12 @@ export function createContent(ctx) {
     },
 
     late_anxiety: () => {
-      const n = State.get('surfaced_late');
-      State.set('surfaced_late', n + 1);
       State.adjustStress(5);
-      if (n === 0) {
-        return 'You\'re aware of the time. The kind of awareness that sits in your chest.';
+      const tier = State.get('last_surfaced_late_tier');
+      if (tier === 'very_late') {
+        return 'The time. It\'s still there, pressing against the inside of your ribs. You know. You already know.';
       }
-      return 'The time. It\'s still there, pressing against the inside of your ribs. You know. You already know.';
+      return 'You\'re aware of the time. The kind of awareness that sits in your chest.';
     },
 
     hunger_pang: () => {
@@ -5846,6 +5903,14 @@ export function createContent(ctx) {
       const hunger = State.hungerTier();
       if (hunger === 'starving' || hunger === 'very_hungry') return 'You need to eat. The kitchen is right there.';
       return 'Staff meal.';
+    },
+
+    graze_break_room: () => {
+      const aden = State.get('adenosine');
+      const hunger = State.hungerTier();
+      if (hunger === 'hungry' || hunger === 'very_hungry') return 'The break room. There might be something.';
+      if (aden > 60 && State.adenosineBlock() > 0.3) return 'Break room. You need to move.';
+      return 'See what\'s in the break room.';
     },
 
     get_coffee_work: () => {

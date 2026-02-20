@@ -174,6 +174,8 @@ export function createWorld(ctx) {
     if (destId === 'workplace') {
       if (!State.get('at_work_today')) {
         State.set('at_work_today', true);
+        // Condition resolved — reset late tier tracking so it can fire again next day.
+        State.set('last_surfaced_late_tier', null);
         // Track attendance for paycheck calculation
         State.set('days_worked_this_period', State.get('days_worked_this_period') + 1);
         const tod = State.timeOfDay();
@@ -216,15 +218,17 @@ export function createWorld(ctx) {
       }
     }
 
-    // Late for work stress — fires on crossing into late, then again when very late.
-    // Deterministic: no RNG consumed. Resets each morning in wakeUp().
-    if (State.isLateForWork() && hour < 12) {
-      const late = State.latenessMinutes();
-      const surfacedLate = State.get('surfaced_late');
-      if (surfacedLate === 0) {
-        events.push('late_anxiety');  // first notice — just became late
-      } else if (surfacedLate === 1 && late > 30) {
-        events.push('late_anxiety');  // escalation — now significantly late
+    // Late for work stress — fires once per tier crossing (fine → late → very_late).
+    // Deterministic: no RNG consumed. Resets each morning in wakeUp() and on work arrival.
+    const LATE_TIER_RANK = { fine: 0, late: 1, very_late: 2 };
+    if (hour < 12) {
+      const lTier = State.lateTier();
+      const lastLTier = State.get('last_surfaced_late_tier');
+      const currentLateRank = LATE_TIER_RANK[lTier] ?? 0;
+      const lastLateRank = lastLTier !== null && lastLTier in LATE_TIER_RANK ? LATE_TIER_RANK[lastLTier] : -1;
+      if (lTier !== 'fine' && currentLateRank > lastLateRank) {
+        State.set('last_surfaced_late_tier', lTier);
+        events.push('late_anxiety');
       }
     }
 

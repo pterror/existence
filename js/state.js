@@ -272,10 +272,13 @@ export function createState(ctx) {
       last_surfaced_hunger_tier: /** @type {string|null} */ (null),
       last_surfaced_energy_tier: /** @type {string|null} */ (null),
       last_surfaced_mess_tier: /** @type {string|null} */ (null),
-      surfaced_late: 0,
+      last_surfaced_late_tier: /** @type {string|null} */ (null),
 
       // Daily work meal — food_service workers can eat once per shift
       ate_at_work_today: false,
+
+      // Office break room grazing — once per shift
+      grazed_break_room_today: false,
 
       // Soup kitchen
       ate_at_soup_kitchen_today: false,
@@ -701,10 +704,11 @@ export function createState(ctx) {
     s.alarm_went_off = false;
     s.just_woke_alarm = false;
     s.snooze_count = 0;
-    s.surfaced_late = 0;
+    s.last_surfaced_late_tier = null;
     s.last_surfaced_mess_tier = null;
     s.work_nagged_today = false;
     s.ate_at_work_today = false;
+    s.grazed_break_room_today = false;
     s.ate_at_soup_kitchen_today = false;
     s.daylight_exposure = 0;
     s.illness_medicated = false;
@@ -889,6 +893,17 @@ export function createState(ctx) {
   function latenessMinutes() {
     if (!isLateForWork()) return 0;
     return Math.max(0, Math.round(timeOfDay() - (s.work_shift_start + 15)));
+  }
+
+  /**
+   * Qualitative tier for how late the character is.
+   * Returns 'fine' when not late. Used for transition-based event firing.
+   */
+  function lateTier() {
+    const minutes = latenessMinutes();
+    if (minutes <= 0) return 'fine';
+    if (minutes <= 20) return 'late';
+    return 'very_late';
   }
 
   /** True on Mon–Fri (weekday 1–5). The character's specific schedule may differ, but this is the baseline. */
@@ -2188,6 +2203,7 @@ export function createState(ctx) {
     isLateForWork,
     isWorkday,
     latenessMinutes,
+    lateTier,
     wakeUp,
     energyTier,
     stressTier,
