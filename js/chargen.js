@@ -468,11 +468,54 @@ export function createChargen(ctx) {
     const phone_bill_day_offset = Timeline.charRandomInt(0, 29);
     const ebt_day_offset = Timeline.charRandomInt(0, 29); // day EBT reloads each month
 
-    // Sleep cycle length — stable biological trait. Real range 70–120 min (mean ~90 min).
-    // Approximation debt: no upstream genetics or sleep disorder model yet.
-    // Distribution is uniform across the observed range; real distribution is likely
-    // clustered tighter around 90 min. Needs calibration against polysomnography data.
-    const sleep_cycle_length = 70 + Math.floor(Timeline.charRandom() * 51); // 70–120 min
+    // Sleep cycle length — stable biological trait. Blume et al. 2023 (Sleep Health,
+    // n=6,064 PSG cycles): median 96 min, right-skewed. We use a truncated normal
+    // (mean=93, SD=12, clipped to [70,120]) sampled via inverse CDF — exactly 1 RNG call.
+    // Φ⁻¹ implemented with Peter Acklam's rational approximation (max |error| < 1.15×10⁻⁹).
+    // Approximation debt: rational approximation introduces small tail error (~10⁻⁹ max);
+    // negligible in practice but not exact. See TODO.md.
+    const sleep_cycle_length = (() => {
+      const MEAN = 93, SD = 12, LO = 70, HI = 120;
+      // Φ(x): standard normal CDF via complementary error function
+      function phi(x) {
+        // Abramowitz & Stegun 26.2.17 — erfc rational approximation
+        const t = 1 / (1 + 0.2316419 * Math.abs(x));
+        const poly = t * (0.319381530 + t * (-0.356563782 + t * (1.781477937 + t * (-1.821255978 + t * 1.330274429))));
+        const p = 1 - poly * Math.exp(-0.5 * x * x) / Math.sqrt(2 * Math.PI);
+        return x >= 0 ? p : 1 - p;
+      }
+      // Φ⁻¹(p): probit via Peter Acklam's rational approximation
+      // Approximation debt: rational approximation (max |error| < 1.15×10⁻⁹ over (0,1)).
+      function probit(p) {
+        const a = [-3.969683028665376e+01, 2.209460984245205e+02, -2.759285104469687e+02,
+                    1.383577518672690e+02, -3.066479806614716e+01, 2.506628277459239e+00];
+        const b = [-5.447609879822406e+01, 1.615858368580409e+02, -1.556989798598866e+02,
+                    6.680131188771972e+01, -1.328068155288572e+01];
+        const c = [-7.784894002430293e-03, -3.223964580411365e-01, -2.400758277161838e+00,
+                   -2.549732539343734e+00, 4.374664141464968e+00, 2.938163982698783e+00];
+        const d = [ 7.784695709041462e-03,  3.224671290700398e-01,  2.445134137142996e+00,
+                    3.754408661907416e+00];
+        const pLow = 0.02425, pHigh = 1 - pLow;
+        if (p < pLow) {
+          const q = Math.sqrt(-2 * Math.log(p));
+          return (((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5]) /
+                 ((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1);
+        } else if (p <= pHigh) {
+          const q = p - 0.5, r = q * q;
+          return (((((a[0]*r+a[1])*r+a[2])*r+a[3])*r+a[4])*r+a[5])*q /
+                 (((((b[0]*r+b[1])*r+b[2])*r+b[3])*r+b[4])*r+1);
+        } else {
+          const q = Math.sqrt(-2 * Math.log(1 - p));
+          return -(((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5]) /
+                  ((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1);
+        }
+      }
+      const phiLo = phi((LO - MEAN) / SD);
+      const phiHi = phi((HI - MEAN) / SD);
+      const u = Timeline.charRandom(); // exactly 1 RNG call
+      const p = phiLo + u * (phiHi - phiLo);
+      return Math.round(Math.max(LO, Math.min(HI, MEAN + SD * probit(p))));
+    })();
 
     // Health conditions — generated last to preserve PRNG order of prior systems
     const conditions = /** @type {string[]} */ ([]);

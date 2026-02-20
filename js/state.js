@@ -241,6 +241,8 @@ export function createState(ctx) {
 
       // Sleep cycle length — personal biology, set by applyToState(). 90 = population mean.
       sleep_cycle_length: 90,  // minutes (70–120); set by applyToState() from character
+      // Character age — drives age-dependent physiology (e.g. N3 deep sleep scaling).
+      age_stage: 35,            // years; set by applyToState() from character
 
       // Health conditions
       health_conditions: /** @type {string[]} */ ([]),  // set by applyToState()
@@ -1132,10 +1134,12 @@ export function createState(ctx) {
   // Models the internal architecture of a sleep episode. Cycle lengths are
   // variable: first cycle is shorter (deep sleep onset is fast), later cycles
   // lengthen as REM dominates. Personal base cycle length is a stable biological
-  // trait generated at chargen (70–120 min, mean ~90 min), stored in state as
-  // sleep_cycle_length and applied by Character.applyToState().
+  // trait generated at chargen (truncated normal: mean=93, SD=12, clipped [70,120],
+  // per Blume et al. 2023 PSG data), stored in state as sleep_cycle_length and applied
+  // by Character.applyToState().
   // Early cycles are deep-sleep heavy; later cycles are REM heavy.
-  // No PRNG consumed — purely deterministic from duration.
+  // Deep-sleep (N3) fractions scale with character age (Van Cauter et al. 2000).
+  // No PRNG consumed — purely deterministic from duration and state.
 
   /**
    * Duration of cycle i (0-indexed), scaled to the character's personal base length.
@@ -1144,6 +1148,8 @@ export function createState(ctx) {
    * Approximation debt: ratios are derived from the population-mean cycle structure
    * (75/90/100/105 → 0.83/1.0/1.11/1.17 of 90). Real ratio variation across
    * individuals and nights is unknown. Needs calibration against polysomnography data.
+   * sleep_cycle_length drawn from truncated normal (mean=93, SD=12, [70,120])
+   * per Blume et al. 2023 — replaces old uniform [70,120] draw.
    * @param {number} i
    * @returns {number} minutes
    */
@@ -1183,14 +1189,29 @@ export function createState(ctx) {
     // Approximation debt: k=0.57 (deep decay), slope=0.07 (REM growth), cap=0.55 (REM max),
     // and cycle-0 anchors (deep=0.50, rem=0.10) are chosen to hit the staging targets above,
     // not independently derived from polysomnography mechanistic data. See TODO.md.
-    // Cycle 0: deep ~50%, REM ~10%
+    //
+    // Age-dependent N3 scaling: Van Cauter et al. 2000 (JAMA, n=149) found N3 falls from
+    // ~19% at age 16–25 to ~3–8% at age 36–50 — roughly 80% reduction by midlife.
+    // We linearly interpolate: age ≤ 25 → factor 1.0, age ≥ 50 → factor 0.2.
+    // Approximation debt: real N3-vs-age relationship is non-linear (steep drop in 3rd decade,
+    // plateau later); linear interpolation from two anchor points is an approximation.
+    // Approximation debt: only the deep-sleep anchors (cycle-0 deep and k decay) are scaled;
+    // cycle shape ratios and REM trajectory are not age-adjusted (REM is negligibly affected
+    // over 22–48 per Joffe et al.: −0.6% per decade).
+    // Cycle 0: deep ~50%, REM ~10% (at age ≤ 25; lower at older ages)
     // Cycle 1: deep ~29%, REM ~17%
     // Cycle 2: deep ~16%, REM ~24%
     // Cycle 3: deep ~9%,  REM ~31%
     // Cycle 4: deep ~5%,  REM ~38%
     // Cycle 5+: deep ~2-3%, REM ~45-55%
+    const age = s.age_stage ?? 35;
+    // Linear interpolation: 1.0 at age≤25, 0.2 at age≥50.
+    const ageFactor = Math.max(0.2, Math.min(1.0, 1.0 - (Math.max(0, age - 25) / 25) * 0.8));
     function cycleFracs(i) {
-      const deep = i === 0 ? 0.50 : Math.max(0.50 * Math.pow(0.57, i), 0.02);
+      // Scale both the cycle-0 deep anchor and the k-decay anchor by ageFactor.
+      const deep = i === 0
+        ? 0.50 * ageFactor
+        : Math.max(0.50 * ageFactor * Math.pow(0.57, i), 0.02 * ageFactor);
       const rem  = Math.min(0.10 + i * 0.07, 0.55);
       return { deep, rem };
     }

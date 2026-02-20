@@ -56,6 +56,8 @@ export function createCharacter(ctx) {
     State.set('health_conditions', current.conditions || []);
     // Sleep cycle length — personal biology (70–120 min, default 90 for legacy saves)
     State.set('sleep_cycle_length', current.sleep_cycle_length ?? 90);
+    // Age — drives age-dependent physiology (N3 scaling, etc.). Default 35 for legacy saves.
+    State.set('age_stage', current.age_stage ?? 35);
     // Billing cycle offsets — needed by State.nextPaycheck() / nextBillDue()
     State.set('paycheck_day_offset', current.paycheck_day_offset ?? 7);
     State.set('rent_day_offset', current.rent_day_offset ?? 1);
