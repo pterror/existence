@@ -207,6 +207,12 @@ Food tastes good, bad, or somewhere in between, and the character notices:
 - Favorite foods — genuinely pleasurable; the specific satisfaction of something you actually wanted
 - Repetition degrading experience — rice and soy sauce is fine; rice and soy sauce every day because it's all you can afford is a small daily grinding. The food hasn't changed; the accumulation has. Connects taste directly to the financial simulation and the poverty of constrained options.
 
+**Heat transformation** — cooking method changes the sensory experience fundamentally:
+- Maillard reaction: browning, crust, grill char — deeply appealing, complex, almost universally liked
+- Caramelisation: sugar browning, adjacent chemistry, similar appeal
+- Burnt: the same process pushed too far — acrid, bitter, ruined; the line is thin and specific
+- Boiled everything: what you do when you can't waste anything or lack equipment. Cheaper, safer, but misses the Maillard reaction entirely. A poverty note — dry heat and fat both cost something.
+
 **Texture** is distinct from taste but part of the eating experience:
 - Fat texture (some people can't eat visible fat; the mouthfeel is the problem)
 - Mushy vegetables, gritty, slimy, stringy, chewy, crunchy
