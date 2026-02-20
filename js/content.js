@@ -1421,12 +1421,16 @@ export function createContent(ctx) {
 
         // Quality factor — stress and hunger degrade recovery
         // Approximation debt: all sleep quality multipliers below are chosen, not derived from
-        // polysomnographic data. Directions are physiologically correct; magnitudes are uncalibrated.
+        // polysomnographic data. Directions are physiologically correct; magnitudes are uncalibrated
+        // and likely too aggressive. See RESEARCH-CALIBRATION.md §Sleep Quality Multipliers for
+        // PSG-derived targets (Renner 2022 PMC9758584; Dijk & Czeisler 1999 PMC2269279).
+        // Literature targets: stressed overwhelmed ~0.80-0.85×, strained ~0.90-0.93×;
+        // starving ~0.87-0.90×, very_hungry ~0.93-0.95×.
         let qualityMult = 1.0;
-        if (stress === 'overwhelmed') qualityMult *= 0.5; // Approximation debt: 0.5× for overwhelmed stress chosen
-        else if (stress === 'strained') qualityMult *= 0.7; // Approximation debt: 0.7× for strained stress chosen
-        if (hunger === 'starving') qualityMult *= 0.7; // Approximation debt: 0.7× for starving hunger chosen
-        else if (hunger === 'very_hungry') qualityMult *= 0.85; // Approximation debt: 0.85× for very_hungry chosen
+        if (stress === 'overwhelmed') qualityMult *= 0.5; // Approximation debt: 0.5× chosen; literature ~0.80-0.85×
+        else if (stress === 'strained') qualityMult *= 0.7; // Approximation debt: 0.7× chosen; literature ~0.90-0.93×
+        if (hunger === 'starving') qualityMult *= 0.7; // Approximation debt: 0.7× chosen; literature ~0.87-0.90×
+        else if (hunger === 'very_hungry') qualityMult *= 0.85; // Approximation debt: 0.85× chosen; literature ~0.93-0.95×
 
         // Rain sound comfort — sleeping to rain improves quality slightly
         const rainComfort = State.sentimentIntensity('rain_sound', 'comfort');

@@ -475,9 +475,10 @@ export function createState(ctx) {
     }
 
     // Social isolation increases over time without interaction
-    // Approximation debt: social decay rate (2 pts/hr) and idle-action threshold (10 actions)
-    // are chosen. Real loneliness onset depends on quality of connections, individual need,
-    // and activity substitutes. Calibration: social isolation literature (loneliness onset timescales).
+    // Approximation debt: social decay rate (2 pts/hr) is ~2-4x too fast; idle-action threshold
+    // (10 actions) has no empirical basis; conflates social need and social energy into one scalar.
+    // See RESEARCH-CALIBRATION.md §Social Need Model for calibration targets and split design
+    // (Tomova 2020 PMID 33230328; Ding 2025 PMID 40011768; Buecker 2020 meta-analysis).
     const actionsSinceLastSocial = ctx.timeline.getActionCount() - s.last_social_interaction;
     if (actionsSinceLastSocial > 10) {
       s.social = Math.max(0, s.social - hours * 2);
@@ -2219,7 +2220,7 @@ export function createState(ctx) {
     // At 100/0/100 → n=1, seInv=1, r=1 → weighted=1 → base=1.4 (sticky)
     // Approximation debt: exact magnitude of inertia range (0.6–1.4) is chosen. Relative
     // weights are empirically grounded but derived from separate studies aggregated, not
-    // a single multi-predictor model.
+    // a single multi-predictor model. See RESEARCH-CALIBRATION.md §Emotional Inertia Trait Weights.
     const weighted = n * 0.32 + seInv * 0.28 + r * 0.40;
     let inertia = 0.6 + weighted * 0.8;
 
@@ -2311,10 +2312,9 @@ export function createState(ctx) {
 
     // Adenosine: linear accumulation during wakefulness
     // (cleared proportionally by sleep in content.js)
-    // Approximation debt: 4 pts/hr wakefulness accumulation is chosen. Real adenosine buildup
-    // is driven by ATP catabolism and varies with metabolic rate and activity level. The mapping
-    // from real adenosine concentration to this 0-100 scale is also chosen.
-    // Calibration: Porkka-Heiskanen et al. basal forebrain adenosine measurements during sleep deprivation.
+    // Approximation debt: 4 pts/hr is chosen and linear. Real accumulation is a saturating
+    // exponential (~18h time constant per two-process model). See RESEARCH-CALIBRATION.md
+    // §Adenosine Accumulation Rate for calibration targets (Porkka-Heiskanen 2000; Borbély 2022).
     s.adenosine = clamp(s.adenosine + hours * 4, 0, 100);
 
     // All other systems: exponential drift toward target

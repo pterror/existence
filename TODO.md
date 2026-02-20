@@ -32,18 +32,18 @@ Everything below is drawn from the gap between DESIGN.md and what's built. Not c
 The numbers below are marked with `// Approximation debt:` at their code sites (state.js and content.js). They're collected here so calibration is visible as a class of work, not just scattered inline comments. Each needs real-world literature to replace the chosen value with a derived one.
 
 **High priority — affects core pacing and emotional dynamics:**
-- **Adenosine accumulation: 4 pts/hr** — chosen. Real rate is derived from ATP catabolism, varies with metabolic rate and activity. Calibration: Porkka-Heiskanen et al. basal forebrain adenosine data.
+- **Adenosine accumulation: 4 pts/hr** — chosen; linear when real accumulation is a saturating exponential (~18h time constant). See **RESEARCH-CALIBRATION.md §Adenosine Accumulation Rate** for calibration targets (Porkka-Heiskanen 2000; Borbély 2022). Applies to: `tickNeurochemistry()` in state.js.
 - **Energy drain: 3 pts/hr base, hunger multipliers 1.3×/1.8×** — chosen. Real fatigue rate depends on task load, circadian phase, physical demands. Calibration: human performance / sustained operations literature.
 - **NT rate constants table** — all 27 drift rate pairs [upRate, downRate] are chosen approximations. The asymmetries (mood falls faster than it rises) match the qualitative biological direction but the scale factor mapping real half-life to the 0–100 simulation scale is itself chosen. Calibration: receptor binding kinetics per neurotransmitter.
 - **Serotonin/dopamine/NE/GABA target function coefficients** — every coefficient connecting circumstances (sleep quality, social, hunger, stress, work sentiment, money, guilt) to NT targets is chosen. These weights determine how strongly each life circumstance affects mood. No single calibration source — needs ecophysiology literature per system.
-- **Sleep quality multipliers** (all six in the sleep execute) — directions correct, magnitudes chosen. Calibration: polysomnographic data on sleep quality under stress, hunger, circadian misalignment.
+- **Sleep quality multipliers** (all six in the sleep execute) — directions correct, magnitudes ~2× too aggressive. See **RESEARCH-CALIBRATION.md §Sleep Quality Multipliers** for PSG-derived targets (Renner 2022; Dijk & Czeisler 1999). Calibration targets now in code comments. Applies to: sleep execute in content.js.
 - **Energy recovery: `sleepMinutes / 5`** — divisor 5 (= 0.2 energy per sleep minute) chosen. No derivation for the mapping between sleep duration and functional energy restoration.
 - **Adenosine clearing: `0.9 × (0.4 + 0.6 × deepFrac)`** — max clearance fraction, baseline fraction, and deep-sleep weighting all chosen. Calibration: Xie et al. 2013 (Science) on glymphatic clearance during sleep.
 
 **Medium priority — persistent background effects:**
 - **Stress creep: 1 pt/hr above 50** — chosen. Real mechanism is HPA sensitization, not a linear scalar.
-- **Social decay: 2 pts/hr after 10 idle actions** — both the rate and the action-count threshold are chosen. Calibration: social isolation onset timescales literature.
-- **Emotional inertia weights: 0.5/0.3/0.2 (neuroticism/low-SE/rumination)** — chosen. The relative importance of each trait for mood persistence is an empirical psychometric question.
+- **Social decay: 2 pts/hr after 10 idle actions** — rate ~2-4x too fast, threshold has no empirical basis, conflates two separate systems. See **RESEARCH-CALIBRATION.md §Social Need Model** for redesign targets (Tomova 2020; Ding 2025; Buecker 2020). Applies to: social block in `tickNeurochemistry()` in state.js.
+- ~~**Emotional inertia weights: 0.5/0.3/0.2 (neuroticism/low-SE/rumination)**~~ — **FIXED 2026-02-20.** Corrected to `rumination: 0.40, neuroticism: 0.32, self_esteem: 0.28` per Houben et al. 2015 meta-analysis (PMID 25822133). Asymmetry extended to both neuroticism and rumination.
 - **NT target clamp bounds** — serotonin/dopamine [15–85], NE [10–90], GABA [20–80] — chosen. These set the absolute emotional floor and ceiling regardless of circumstances.
 - **Regulation capacity range [0.5–1.3] and state penalty coefficients** — chosen to mirror effectiveInertia() but not independently calibrated.
 - **Biological jitter frequencies (0.017, 0.0073) and amplitudes (2.0, 1.5)** — chosen to be incommensurate. Real ultradian/infradian rhythms (90 min, ~28 days) could ground the frequencies; amplitudes are arbitrary.

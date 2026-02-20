@@ -8,6 +8,9 @@ Research conducted 2026-02-20 via web search agents across PubMed, PMC, and publ
 
 ## Adenosine Accumulation Rate
 
+**Applies to:** `tickNeurochemistry()` in `state.js` — the `s.adenosine += hours * 4` line.
+**Status:** Not yet implemented. Cross-reference added to debt comment in code.
+
 **Current debt:** `4 pts/hr` linear accumulation (state.js). Acknowledged approximation debt.
 
 ### What the literature says
@@ -57,6 +60,9 @@ Secondary debt to name explicitly: cognitive load modifier on accumulation rate 
 ---
 
 ## Sleep Quality Multipliers
+
+**Applies to:** Sleep execute in `content.js` — all `qualityMult *=` lines in the `sleep` interaction.
+**Status:** Not yet implemented. Calibration targets added inline to debt comments in code.
 
 **Current debts:** Six multiplicative factors in `content.js` sleep execute, all chosen. Current code uses `qualityMult *= factor` for each.
 
@@ -142,6 +148,9 @@ Future: condition this on environmental noise tier (urban vs. rural) when enviro
 
 ## Emotional Inertia Trait Weights
 
+**Applies to:** `effectiveInertia()` and `regulationCapacity()` in `state.js`.
+**Status:** ✓ IMPLEMENTED 2026-02-20. Weights corrected to `rumination: 0.40, neuroticism: 0.32, self_esteem: 0.28`. Negative-direction asymmetry extended to both neuroticism and rumination.
+
 **Current debt:** Weights `neuroticism: 0.5, self_esteem: 0.3, rumination: 0.2` in `effectiveInertia()` (state.js). Chosen without empirical basis.
 
 ### What the literature says
@@ -202,6 +211,9 @@ Rumination is the strongest predictor of NE inertia, not the weakest.
 ---
 
 ## Social Need Model
+
+**Applies to:** Social decay block in `tickNeurochemistry()` in `state.js` (lines ~477–484), and the `social` state variable throughout.
+**Status:** Not yet implemented. Cross-reference and calibration targets added to debt comment in code.
 
 **Current debt:** `social` state variable decays at 2 pts/hr after 10 idle actions without meaningful interaction. Both the rate and threshold are chosen without empirical basis. The model also conflates two distinct systems.
 
