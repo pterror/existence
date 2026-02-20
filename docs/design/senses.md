@@ -333,7 +333,66 @@ Watching someone get hit in the groin, seeing someone stub their toe, witnessing
 - Touch as social/relational (a hand on the shoulder, a hug, physical contact with another person) — different category from environmental touch
 
 ## Thermoception
-*— not yet covered*
+
+Distinct from touch — not about surface contact but about the ambient thermal environment and the body's own thermal state and regulation.
+
+### Ambient temperature
+
+**Cold:**
+- The specific chill of an unheated room
+- Stepping outside into winter — air temperature vs. wind chill (wind strips the warm air layer from skin)
+- Cold that's refreshing vs. cold that's numbing vs. cold that's dangerous
+- Fingers going cold first — vasoconstriction pulls blood to the core; extremities are sacrificed
+
+**Heat:**
+- Summer heat that sits on you and doesn't release at night
+- The first genuinely warm day in spring — same temperature as autumn but reads differently
+- Heat that's pleasant vs. oppressive vs. dangerous
+- Radiant heat (sun, fire, radiator) vs. ambient heat (hot room) — different in character
+
+**Humidity changes everything:**
+- Dry cold is different from damp cold — damp penetrates
+- Dry heat is different from humid heat — humid heat prevents sweat from evaporating, the body's cooling mechanism fails
+- The same 30°C reads completely differently with and without humidity
+
+**Seasonal texture:**
+- The specific quality of cold that means winter is actually here
+- Summer heat accumulating through the day
+- The smell of season change (overlaps with smell — petrichor, dry leaves, frost)
+
+### The body as active regulator
+
+Temperature isn't passively received — the body is constantly working:
+- Shivering (involuntary heat generation)
+- Sweating (the body running hot before conscious awareness catches up)
+- Seeking shade, warmth, water — driven behaviour, not just preference
+- The discomfort that makes you move before you've decided to
+
+### Contact with hot surfaces
+
+A spectrum with different qualities at each point:
+
+- **Pleasantly hot** — a hot shower, warm water on cold hands, heat from a radiator. Sought, deliberate, comforting.
+- **Uncomfortably hot** — the shower slightly too hot but you stay in anyway. The mug too warm to hold but you manage.
+- **Reflex territory** — touching a hot pan, the kettle, a hob. The hand pulls back before the brain has processed it. Spinal reflex arc, not a decision. Zero agency — one of the clearest examples of the body acting without the player. Aftermath: adrenaline spike, shaking hands, checking whether you actually burned yourself, the specific anxiety of having nearly hurt yourself with something ordinary.
+- **Sustained contact** — scalding water you can't immediately escape, open flame. Actual tissue damage. Keeps happening rather than resolving with a reflex.
+- **Pain delay** — serious burns sometimes don't hurt immediately; nerve endings are damaged. The moment of contact feels wrong but not painful, then it catches up. That gap is its own experience.
+
+### NT modulation
+- High cortisol/stress → physical tension affects how temperature registers; cold feels colder
+- Depression → thermal discomfort may not prompt action; staying cold or too hot without moving
+- Adenosine high → less responsive to ambient discomfort; thermal signals don't surface as urgency
+- Anxiety → hot flushes, sweating without thermal cause; the body generating heat from internal state
+
+### Character-side conditions
+- **Raynaud's phenomenon** — vasospasm in extremities triggered by cold or stress; fingers/toes go white then blue then red; painful. Constitutional or secondary to autoimmune conditions.
+- **Anhidrosis** — inability to sweat; dangerous in heat; can be medication side effect or neurological
+- **Heat intolerance / cold intolerance** — associated with thyroid conditions, MS, menopause, various medications
+- **Fever** — not a chronic condition but a state; the specific wrongness of running hot from illness, chills despite warmth, the unreality of high fever
+
+### Still to think about
+- Thermoregulation and sleep (body temperature drops to initiate sleep — connects to sleep system)
+- Acclimatisation — the body adjusting to a new climate over weeks; what was cold becomes normal
 
 ## Proprioception
 *— not yet covered*
