@@ -18,7 +18,10 @@ export function createState(ctx) {
                             // Suppresses hunger signal accumulation. Vomiting empties this, not hunger directly.
       stomach_liquid_fraction: 0, // 0-1. Fraction of stomach_fullness that is liquid. Liquids empty faster (~25 min half-life).
       time: 6 * 60 + 30, // Minutes since game start. Keeps incrementing, never resets.
-      social: 40,       // 0-100. 0 = deeply isolated, 100 = connected.
+      social: 40,         // 0-100. 0 = deeply isolated, 100 = connected.
+      social_energy: 100, // 0-100. Depleted by social interaction, recovered by solitude and sleep.
+                          // Approximation debt: introversion (not yet a chargen param) should scale
+                          // depletion per interaction; currently flat 0.5 coefficient.
       job_standing: 65, // 0-100. How work perceives you.
 
       // Calendar anchor — minutes since Unix epoch. Set once from charRng.
@@ -474,15 +477,20 @@ export function createState(ctx) {
       s.temperature = Math.round((seasonalTemperatureBaseline() + weatherOffset + diurnalTemperatureOffset()) * 10) / 10;
     }
 
-    // Social isolation increases over time without interaction
-    // Approximation debt: social decay rate (2 pts/hr) is ~2-4x too fast; idle-action threshold
-    // (10 actions) has no empirical basis; conflates social need and social energy into one scalar.
-    // See RESEARCH-CALIBRATION.md §Social Need Model for calibration targets and split design
-    // (Tomova 2020 PMID 33230328; Ding 2025 PMID 40011768; Buecker 2020 meta-analysis).
-    const actionsSinceLastSocial = ctx.timeline.getActionCount() - s.last_social_interaction;
-    if (actionsSinceLastSocial > 10) {
-      s.social = Math.max(0, s.social - hours * 2);
-    }
+    // Social connection decays asymptotically toward 0 during isolation.
+    // τ=66h gives ~7 pts decline over 10h from social=50 (vs old linear 2 pts/hr = 20 pts, 2-4× too fast).
+    // Threshold-based onset removed — accumulation is continuous from first isolation
+    // (Tomova 2020 PMID 33230328; Ding et al. 2025 PMID 40011768).
+    // Neuroticism scales rate ±35% (Buecker et al. 2020 meta-analysis N=93,668, DOI 10.1002/per.2229).
+    // Approximation debts: τ=66h not derived from literature (directionally correct, magnitude chosen);
+    // trait loneliness floor absent (needs chargen parameter — floor below which social doesn't
+    // fully recover for high-trait-loneliness characters).
+    // See RESEARCH-CALIBRATION.md §Social Need Model.
+    const neuroMod = 1 + (s.neuroticism - 50) / 50 * 0.35;
+    s.social = s.social * Math.exp(-hours * neuroMod / 66);
+    // Social energy recovers during solitude — background recharge between interactions.
+    // Full recovery from sleep via wakeUp(). Approximation debt: 3 pts/hr chosen.
+    s.social_energy = Math.min(100, s.social_energy + hours * 3);
 
     // Actions since rest
     s.actions_since_rest++;
@@ -776,6 +784,7 @@ export function createState(ctx) {
     s.daylight_exposure = 0;
     s.illness_medicated = false;
     s.pending_vomit = false;  // clear any stale vomit flag — sleep resolves nausea
+    s.social_energy = 100; // sleep fully restores social energy
     // Caffeine habit — update from yesterday's peak, then reset.
     // Build: +5/day → habit reaches 100 in ~20 days of daily use, matching the real
     // 2-week tolerance development timeline (Beaumont et al. 2017, PLOS ONE).
@@ -845,6 +854,16 @@ export function createState(ctx) {
       [55, 'neutral'],
       [75, 'connected'],
       [100, 'warm']
+    ]);
+  }
+
+  function socialEnergyTier() {
+    return tier(s.social_energy, [
+      [20, 'drained'],
+      [40, 'tired'],
+      [65, 'neutral'],
+      [85, 'rested'],
+      [100, 'energized']
     ]);
   }
 
@@ -1456,6 +1475,9 @@ export function createState(ctx) {
     s.social = Math.max(0, Math.min(100, s.social + amount));
     if (amount > 0) {
       s.last_social_interaction = ctx.timeline.getActionCount();
+      // Interaction depletes social energy — the cost of sustained engagement.
+      // Approximation debt: flat 0.5 coefficient; introversion (not yet a chargen param) should scale this.
+      s.social_energy = Math.max(0, s.social_energy - amount * 0.5);
     }
   }
 
@@ -2300,7 +2322,7 @@ export function createState(ctx) {
    *   decay = exp(-rate * hours)
    *   level = clamp(target + (level - target) * decay, 0, 100)
    *
-   * Adenosine is special: accumulates linearly during wakefulness,
+   * Adenosine is special: saturating exponential accumulation (τ=18h) during wakefulness,
    * cleared proportionally by sleep (handled in content.js sleep interaction).
    *
    * @param {number} hours
@@ -2310,12 +2332,14 @@ export function createState(ctx) {
 
     const timeHours = s.time / 60;
 
-    // Adenosine: linear accumulation during wakefulness
-    // (cleared proportionally by sleep in content.js)
-    // Approximation debt: 4 pts/hr is chosen and linear. Real accumulation is a saturating
-    // exponential (~18h time constant per two-process model). See RESEARCH-CALIBRATION.md
-    // §Adenosine Accumulation Rate for calibration targets (Porkka-Heiskanen 2000; Borbély 2022).
-    s.adenosine = clamp(s.adenosine + hours * 4, 0, 100);
+    // Adenosine: saturating exponential accumulation (cleared by sleep in content.js).
+    // Two-process model: τ=18h, ceiling=100 → 16h from cleared baseline → ~59.
+    // Calibrated from Porkka-Heiskanen et al. 2000 (Neuroscience 99:507) and Borbély 2022
+    // (J Sleep Research PMC9540767). Linear 4 pts/hr was close in midrange but understated
+    // early accumulation (hrs 0–4) and overstated late accumulation (hrs 12–16).
+    // Approximation debt: cognitive load modifier absent — high mental demand accelerates
+    // adenosine via ATP hydrolysis / gliotransmission (Phillips et al. 2017 PMC5675465).
+    s.adenosine = 100 - (100 - s.adenosine) * Math.exp(-hours / 18);
 
     // All other systems: exponential drift toward target
     for (const key of Object.keys(ntRates)) {
@@ -2367,6 +2391,7 @@ export function createState(ctx) {
     stressTier,
     hungerTier,
     socialTier,
+    socialEnergyTier,
     fridgeTier,
     pantryTier,
     jobTier,

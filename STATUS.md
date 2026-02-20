@@ -12,7 +12,8 @@ Current state of the codebase. Keep this up to date — see CLAUDE.md workflow r
 - **cortisol_gi_slow** (0–100) — slow-moving filtered cortisol for GI motility effects. Exponential approach toward current cortisol with ~210 min half-life (~3.5h), representing the genomic pathway timescale. Approximation debt: half-life chosen, not derived from GI kinetics literature.
 - **stomach_liquid_fraction** (0–1) — fraction of stomach_fullness that is liquid. Updated by `fillStomach(amount, contentType)` via weighted average. Resets to 0 when stomach empties fully.
 - **hormonal_satiation** (0–100) — post-prandial hormonal hunger suppression (CCK, GLP-1, PYY, ghrelin suppression composite). Set by `fillStomach()` proportional to amount eaten, decays with half-life 150 min (2.5h — midpoint of 2–4h physiological range). Operates independently of stomach emptying: hunger is suppressed by `Math.max(stomachSuppression, hormonalSuppression)` so whichever signal is stronger dominates. Prevents hunger from rising immediately as the stomach physically empties. Approximation debts: half-life is fixed (real duration varies by meal composition); satiation magnitude is proportional to fill (real hormonal response is partly nutrient-dependent); max-suppression simplifies the multi-hormone interaction.
-- **social** (0–100) — tiers: isolated / withdrawn / neutral / connected / warm
+- **social** (0–100) — tiers: isolated / withdrawn / neutral / connected / warm. Decays asymptotically toward 0 during isolation (τ=66h, ~7 pts/10h from social=50). Neuroticism scales rate ±35%. Increased by adjustSocial() calls from social interactions.
+- **social_energy** (0–100) — tiers: drained / tired / neutral / rested / energized. Depleted by social interaction (0.5× the social bonus amount), recovers at 3 pts/hr during solitude, fully reset by sleep. Not yet wired to interaction gates — tracked for habit pattern training and future introversion scaling.
 - **job_standing** (0–100) — tiers: at_risk / shaky / adequate / solid / valued
 - **money** (float) — tiers: broke / scraping / tight / careful / okay / comfortable
 - **time** — continuous minutes since game start, never resets
@@ -32,7 +33,7 @@ Current state of the codebase. Keep this up to date — see CLAUDE.md workflow r
 - **testosterone** — diurnal rhythm (peaks 7AM, nadir evening).
 
 **Accumulation system (1):**
-- **adenosine** — linear accumulation during wakefulness (~4/hr), cleared proportionally by sleep.
+- **adenosine** — saturating exponential accumulation (τ=18h, ceiling=100), cleared proportionally by sleep. At 16h from cleared baseline → ~59. Calibrated to two-process model (Borbély 2022 PMC9540767).
 
 **Placeholder systems (18)** — initialized at baseline 50, drift toward 50 with jitter. Will gain active feeders as their game systems are built:
 glutamate, endorphin, acetylcholine, endocannabinoid, dht, estradiol, progesterone, allopregnanolone, lh, fsh, oxytocin, prolactin, thyroid, insulin, leptin, dhea, hcg (default 0), calcitriol.
@@ -41,7 +42,7 @@ glutamate, endorphin, acetylcholine, endocannabinoid, dht, estradiol, progestero
 - **Sleep debt** — cumulative deficit (cap 4800 min). Ideal 480 min/day. Full deficit accumulation, 33% excess repayment. Tiers: none/mild/moderate/severe. Feeds serotonin/dopamine targets (-8/-10 max), emotional inertia (+0.15 max), energy recovery penalty (1/(1+debt/1200)).
 - **Sleep architecture** — `sleepCycleBreakdown(minutes)`: variable-length cycles scaled to character's `sleep_cycle_length` (truncated normal: mean=93, SD=12, clipped [70,120], per Blume et al. 2023 PSG data — 1 charRng call via probit). Cycle ratios [0.83, 1.0, 1.11, 1.17] × base. Deep/REM ratio shifts across cycles. Deep-sleep (N3) anchors scale with character age: age≤25 → factor 1.0, age≥50 → 0.2, linear interpolation (Van Cauter et al. 2000, JAMA). `age_stage` stored in state, set by `applyToState()`. Adenosine clearing scales with deep sleep fraction. NE clearing scales with REM fraction × quality. Emotional processing quality = qualityMult × (0.4 + 0.6 × remFrac). Sleep inertia from cycle phase at wake (0–0.6). Legacy saves default to 90 min cycle, age 35.
 - **Melatonin behavior** — daylight exposure tracking (outside 1.0, inside 0.15, reset on wake), phone screen suppression (-15 at night), indoor evening suppression (-3), daylight bonus (+10 at night if ≥120 min exposure). Melatonin affects fall-asleep delay (>60 → 0.7x, <20 → 1.4x).
-- **Sleep quality** — seven multiplicative factors: stress, hunger, rain comfort, melatonin at onset (>60 → 1.05x, <25 → 0.85x), circadian alignment (daytime → 0.75x), crash sleep (adenosine >80 → 0.9x), caffeine interference (>30 → 0.65–1.0).
+- **Sleep quality** — six multiplicative factors (adenosine crash penalty removed — mechanistically backward): stress (overwhelmed 0.82×, strained 0.91×), hunger (starving 0.88×, very_hungry 0.94×), rain comfort (up to +0.04), melatonin at onset (>60 → 1.03×, <25 → 0.90×), circadian alignment (daytime 0.75×, early morning 0.90×), caffeine interference. Calibrated from PSG literature (Renner 2022 PMC9758584; Dijk & Czeisler 1999 PMC2269279; Ferracioli-Oda 2013 PMC3656905).
 - **Neurochemistry** — stores quality, clears adenosine (scaled by deep sleep), nudges serotonin (good +3, poor -2), clears NE (scaled by REM × quality).
 
 ### Geography / Environment
@@ -438,7 +439,7 @@ Replay scrubber with significance heatmap. Scene segmentation (by movement). Sna
 ### Habit System (Phase 1 + Auto-Advance)
 CART decision tree engine learns action patterns from observed play. No RNG consumed — pure state reads + ML. Ephemeral — trained from the action log each session, no save format changes.
 
-**Feature extraction:** ~34 features from current game state — energy/stress/hunger/social (continuous), key NT levels (serotonin, dopamine, NE, GABA, adenosine, cortisol), qualitative tiers and mood tone (categorical), daily flags (dressed, showered, ate, etc.), location, weather, sentiments (work dread, routine comfort), money, phone state, time since wake, last action.
+**Feature extraction:** ~35 features from current game state — energy/stress/hunger/social/social_energy (continuous), key NT levels (serotonin, dopamine, NE, GABA, adenosine, cortisol), qualitative tiers and mood tone (categorical), daily flags (dressed, showered, ate, etc.), location, weather, sentiments (work dread, routine comfort), money, phone state, time since wake, last action.
 
 **Training:** One-vs-rest binary trees per action. Recency-weighted (exponential decay, half-life ~7 in-game days). Trained after replay on session load, retrained every 10 actions during live play. Minimum 20 total examples + 3 positive per action to build a tree. Max depth 5.
 

@@ -8,8 +8,8 @@ Research conducted 2026-02-20 via web search agents across PubMed, PMC, and publ
 
 ## Adenosine Accumulation Rate
 
-**Applies to:** `tickNeurochemistry()` in `state.js` — the `s.adenosine += hours * 4` line.
-**Status:** Not yet implemented. Cross-reference added to debt comment in code.
+**Applies to:** `tickNeurochemistry()` in `state.js` — the adenosine accumulation line.
+**Status:** ✓ IMPLEMENTED 2026-02-20. Replaced linear 4 pts/hr with saturating exponential (τ=18h, ceiling=100). At 16h from cleared baseline → ~59.
 
 **Current debt:** `4 pts/hr` linear accumulation (state.js). Acknowledged approximation debt.
 
@@ -62,7 +62,7 @@ Secondary debt to name explicitly: cognitive load modifier on accumulation rate 
 ## Sleep Quality Multipliers
 
 **Applies to:** Sleep execute in `content.js` — all `qualityMult *=` lines in the `sleep` interaction.
-**Status:** Not yet implemented. Calibration targets added inline to debt comments in code.
+**Status:** ✓ IMPLEMENTED 2026-02-20. All six factors recalibrated: overwhelmed 0.5→0.82×, strained 0.7→0.91×, starving 0.7→0.88×, very_hungry 0.85→0.94×, rain comfort 0.10→0.04, melatonin 1.05/0.85→1.03/0.90×. Circadian values unchanged (already within literature range). Adenosine crash penalty was already removed prior to this pass.
 
 **Current debts:** Six multiplicative factors in `content.js` sleep execute, all chosen. Current code uses `qualityMult *= factor` for each.
 
@@ -212,8 +212,8 @@ Rumination is the strongest predictor of NE inertia, not the weakest.
 
 ## Social Need Model
 
-**Applies to:** Social decay block in `tickNeurochemistry()` in `state.js` (lines ~477–484), and the `social` state variable throughout.
-**Status:** Not yet implemented. Cross-reference and calibration targets added to debt comment in code.
+**Applies to:** Social decay block in `tickNeurochemistry()` in `state.js`, the `social` state variable, and new `social_energy` variable.
+**Status:** ✓ IMPLEMENTED 2026-02-20. 10-action threshold removed; linear 2 pts/hr replaced by asymptotic decay (τ=66h, ~7 pts/10h from social=50). Neuroticism scales rate ±35%. `social_energy` variable added: depleted by adjustSocial (0.5× coefficient), recovers at 3 pts/hr during solitude, fully reset by sleep. socialEnergyTier() exported. Habits feature extraction updated. Remaining approximation debts: τ not derived from literature; trait loneliness floor absent (needs chargen param); introversion scaling absent (needs chargen param).
 
 **Current debt:** `social` state variable decays at 2 pts/hr after 10 idle actions without meaningful interaction. Both the rate and threshold are chosen without empirical basis. The model also conflates two distinct systems.
 
