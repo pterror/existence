@@ -5123,6 +5123,76 @@ export function createContent(ctx) {
       );
     }
 
+    // The nothing option — hungry + broke + no food at home
+    // Fires when very hungry or starving, money is broke or scraping,
+    // fridge is empty, and pantry is empty. The compound state of having
+    // no available path to food right now.
+    {
+      const nothingMoney = State.moneyTier();
+      const nothingFridge = State.fridgeTier();
+      const nothingPantry = State.pantryTier();
+      if (
+        (hunger === 'very_hungry' || hunger === 'starving') &&
+        (nothingMoney === 'broke' || nothingMoney === 'scraping') &&
+        nothingFridge === 'empty' &&
+        nothingPantry === 'empty'
+      ) {
+        const tp = State.timePeriod();
+        const isLate = tp === 'evening' || tp === 'night' || tp === 'deep_night';
+        const isDaytime = tp === 'morning' || tp === 'late_morning' || tp === 'midday' || tp === 'afternoon';
+
+        // Core thoughts — the body continuing its bureaucratic routines,
+        // the specific texture of knowing there is nothing until later.
+        thoughts.push(
+          { weight: 8, value: 'Your stomach makes a sound. It\'s been doing that.' },
+          { weight: 8, value: 'Your body keeps sending the signal. You keep receiving it. Nothing changes.' },
+          { weight: 8, value: 'You think about opening the fridge. You already know what\'s in it. You think about it anyway.' },
+          { weight: 7, value: 'The math is simple. There is no food. There is no money for food. That\'s the whole equation.' },
+          { weight: 7, value: 'There\'s nothing to do about it right now. That\'s the thing. Nothing to do.' },
+          // Mind going somewhere else as coping
+          { weight: 6, value: 'You find yourself thinking about a specific meal from a long time ago. The thought has no use. You have it anyway.' },
+          { weight: 6, value: 'You try to remember the last time you weren\'t thinking about this. You can\'t place it.' },
+          // Almost mundane — the settled-in quality
+          { weight: 5, value: 'The hunger is just there. Not urgent anymore. Just settled in.' },
+        );
+
+        // Time-of-day shading
+        if (isLate) {
+          thoughts.push(
+            { weight: 9, value: 'Everything that could have been done today is done or not. The answer is the same until morning.' },
+            { weight: 8, value: 'The food bank opens at nine. That\'s — you do the math. That\'s a long time from now.' },
+            { weight: 7, value: 'You could try to sleep through part of it. That\'s the plan. Sleep through some of it.' },
+            // Low serotonin makes the late-night wait heavier
+            { weight: State.lerp01(ser, 40, 20) * 7, value: 'The night has a specific quality when you\'re hungry and there\'s nothing to do about it. You\'re in it.' },
+          );
+        } else if (isDaytime) {
+          thoughts.push(
+            { weight: 8, value: 'You\'re aware of what time it is and whether the food bank is open and whether you\'ve already been this week.' },
+            { weight: 7, value: 'There are places you could go. You\'re running through whether any of them are options right now.' },
+          );
+        }
+
+        // Mood shading — different registers for the same flat fact
+        if (mood === 'heavy' || mood === 'hollow' || mood === 'numb') {
+          thoughts.push(
+            { weight: 9, value: 'It\'s not dramatic. That\'s the thing. It\'s just — this is what today is.' },
+            // Low dopamine — can't even generate the energy to feel bad about it
+            { weight: State.lerp01(dop, 40, 20) * 7, value: 'You don\'t have the bandwidth to feel bad about this right now. That\'s its own kind of mercy.' },
+          );
+        } else if (mood === 'fraying' || mood === 'flat') {
+          thoughts.push(
+            { weight: 8, value: 'There\'s nothing to negotiate with. You can\'t work harder at this. There\'s just the waiting.' },
+            { weight: 6, value: 'You\'ve been hungry before. Your body knows what to do with it. Neither of you has to like it.' },
+          );
+        }
+
+        // Cortisol — body registering scarcity as emergency; mind has no action to give it
+        thoughts.push(
+          { weight: State.lerp01(State.get('cortisol'), 55, 80) * 6, value: 'Your body is treating this like a problem that requires action. There is no action. The body doesn\'t adjust for that.' },
+        );
+      }
+    }
+
     // Energy
     if (energy === 'depleted') {
       thoughts.push(
