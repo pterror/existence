@@ -13,7 +13,9 @@ export function createState(ctx) {
       energy: 60,       // 0-100. Physical/mental capacity.
       money: 47.50,     // Dollars. Tight but not zero.
       stress: 30,       // 0-100. Accumulated friction.
-      hunger: 25,       // 0-100. 0 = full, 100 = starving.
+      hunger: 25,           // 0-100. Felt hunger signal. 0 = not hungry, 100 = starving.
+      stomach_fullness: 0,  // 0-100. Physical stomach contents. Filled by eating, drained by digestion (~20 pts/hr).
+                            // Suppresses hunger signal accumulation. Vomiting empties this, not hunger directly.
       time: 6 * 60 + 30, // Minutes since game start. Keeps incrementing, never resets.
       social: 40,       // 0-100. 0 = deeply isolated, 100 = connected.
       job_standing: 65, // 0-100. How work perceives you.
@@ -331,10 +333,23 @@ export function createState(ctx) {
     // Passive effects per time passage
     const hours = minutes / 60;
 
-    // Hunger increases over time — illness suppresses appetite
-    const hungerRate = s.illness_severity > 0
-      ? 4 * Math.max(0.3, 1 - s.illness_severity * 0.7)
-      : 4;
+    // Stomach digestion — contents drain at ~20 pts/hr regardless of wakefulness
+    s.stomach_fullness = Math.max(0, s.stomach_fullness - hours * 20);
+
+    // Hunger signal — felt experience, suppressed by stomach fullness, nausea, and illness
+    let hungerRate = 4;
+    // Stomach stretch receptors + hormonal signals suppress hunger when full
+    if (s.stomach_fullness > 10) {
+      hungerRate *= Math.max(0.1, 1 - (s.stomach_fullness / 100) * 0.85);
+    }
+    // Nausea overrides the hunger signal
+    if (s.nausea > 15) {
+      hungerRate *= Math.max(0.15, 1 - (s.nausea / 100) * 0.85);
+    }
+    // Illness suppresses appetite
+    if (s.illness_severity > 0) {
+      hungerRate *= Math.max(0.3, 1 - s.illness_severity * 0.7);
+    }
     s.hunger = Math.min(100, s.hunger + hours * hungerRate);
 
     // Energy drain — accelerated by hunger
@@ -1174,6 +1189,26 @@ export function createState(ctx) {
     s.hunger = Math.max(0, Math.min(100, s.hunger + amount));
     // Eating resets hunger surfacing to current tier — prevents immediate re-fire
     if (amount < 0) s.last_surfaced_hunger_tier = hungerTier();
+  }
+
+  /**
+   * Fill the stomach with physical food/liquid content.
+   * Call alongside adjustHunger() for all eating interactions.
+   * Vomiting empties this; digestion drains it over time.
+   * @param {number} amount
+   */
+  function fillStomach(amount) {
+    s.stomach_fullness = Math.min(100, s.stomach_fullness + amount);
+  }
+
+  /** Qualitative stomach contents tier. Used for vomiting branch (dry heave vs. expulsion). */
+  function stomachTier() {
+    return tier(s.stomach_fullness, [
+      [15, 'empty'],
+      [40, 'light'],
+      [65, 'partial'],
+      [100, 'full'],
+    ]);
   }
 
   /** @param {number} amount */
@@ -2068,6 +2103,8 @@ export function createState(ctx) {
     adjustEnergy,
     adjustStress,
     adjustHunger,
+    fillStomach,
+    stomachTier,
     adjustSocial,
     adjustMoney,
     adjustJobStanding,

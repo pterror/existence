@@ -166,6 +166,13 @@ No content level configuration. DESIGN.md describes: baseline tier (everyday str
 ### Health system
 ~~No health conditions exist.~~ Migraines (chronic), acute illness (flu/cold/GI), and dental pain (chronic) implemented. Remaining: chronic conditions (diabetes, chronic pain), mental health as structural, pregnancy.
 
+**Vomiting event — implement next:**
+`stomach_fullness` and `nausea` are now in place. The vomiting event fires probabilistically in `advanceTime()` when `nausea > 75` (~15–20%/hr, scaling). Needs:
+- Two RNG calls (chance roll + prose pick). Set a pending flag, surface between action renders in game.js (same pattern as idle events).
+- Branch on `stomachTier()`: 'empty' → dry heaving (no hunger change, worse energy/stress drain, minimal nausea relief), else → expulsion (stomach_fullness → ~5, hunger signal unchanged immediately — nausea still suppressing it, partial nausea relief ~25pts).
+- Also clear `ate_today` if stomach was not empty (food didn't stay down).
+- Location-aware prose: bathroom vs. not.
+
 **Dental pain — chargen approximation debts:**
 - Currently assigned from `economic_origin` — jurisdiction/insurance model would make this more accurate (dental access varies enormously by country)
 - No treatment mechanic — can't fix the tooth (dentist visit with cost, appointment system)

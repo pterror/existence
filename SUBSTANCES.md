@@ -72,6 +72,33 @@ Every substance follows the same arc:
 
 ---
 
+## Hunger vs. Stomach Fullness
+
+These are distinct and both matter for substances.
+
+**`hunger`** — the felt signal. Ghrelin-driven, time-accumulating, suppressed by
+stomach stretch receptors and nausea. 0 = not hungry, 100 = starving.
+
+**`stomach_fullness`** — physical contents. 0 = empty, 100 = full. Filled by
+eating, drained by digestion (~20 pts/hr). Suppresses the hunger accumulation
+rate proportionally (empty stomach → hunger builds at full rate; full stomach →
+hunger barely rises). Vomiting empties this, not hunger directly.
+
+**Why the split matters for substances:**
+- Vomiting on a full stomach: expulsion, `stomach_fullness → ~5`, hunger signal
+  unchanged immediately (nausea still suppressing it). Character doesn't feel
+  hungry right after vomiting — the nausea is still there.
+- Dry heaving (stomach empty): the body goes through the motion but nothing
+  comes up. No stomach change, less nausea relief, worse energy cost.
+- Eating when nauseated: `stomach_fullness` rises normally, but the hunger
+  signal doesn't normalize because nausea is still overriding it. The food
+  is in there; the body just isn't registering relief.
+- Future: alcohol on an empty vs. full stomach — absorption rate difference
+  (food in stomach slows alcohol absorption, delays and blunts the curve).
+- Future: medication absorption is also stomach-content-dependent.
+
+---
+
 ## Future Substances
 
 ### Shared infrastructure

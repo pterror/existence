@@ -2410,6 +2410,7 @@ export function createContent(ctx) {
         State.set('fridge_food', State.get('fridge_food') - 1);
         Dishes.use();
         State.adjustHunger(-35);
+        State.fillStomach(60);
         State.set('ate_today', true);
         State.set('consecutive_meals_skipped', 0);
         State.advanceTime(15);
@@ -2499,6 +2500,7 @@ export function createContent(ctx) {
         State.set('pantry_food', State.get('pantry_food') - 1);
         Dishes.use();
         State.adjustHunger(-20);
+        State.fillStomach(35);
         State.set('ate_today', true);
         State.set('consecutive_meals_skipped', 0);
         State.advanceTime(10);
@@ -2549,6 +2551,7 @@ export function createContent(ctx) {
       execute: () => {
         State.adjustEnergy(2);
         State.adjustHunger(-3);
+        State.fillStomach(8);
         State.advanceTime(2);
 
         // NT deterministic variants (no RNG — replay-safe)
@@ -3456,6 +3459,7 @@ export function createContent(ctx) {
       },
       execute: () => {
         State.adjustHunger(-40);
+        State.fillStomach(70);
         State.set('ate_at_work_today', true);
         State.advanceTime(10);
 
@@ -3608,6 +3612,7 @@ export function createContent(ctx) {
         }
 
         State.adjustHunger(-30);
+        State.fillStomach(50);
         State.set('ate_today', true);
         State.set('consecutive_meals_skipped', 0);
         State.advanceTime(5);
@@ -3791,6 +3796,7 @@ export function createContent(ctx) {
       },
       execute: () => {
         State.adjustHunger(-45);
+        State.fillStomach(80);
         State.set('ate_today', true);
         State.set('consecutive_meals_skipped', 0);
         State.set('ate_at_soup_kitchen_today', true);
