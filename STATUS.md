@@ -269,6 +269,8 @@ Battery (dual-rate drain: 1%/hr standby, 15%/hr screen-on; tiers: dead/critical/
 
 **Phone UI:** Full HTML5 phone overlay. Three screens: home (large time + date + Messages app badge), messages list (contacts ordered: friends by recency, then supervisor, then bank; unread dots, preview text), thread view (sent/received bubbles, compose row with Reply/Write when applicable). Navigation (home→list→thread→back) is transient state stored in `phone_screen` + `phone_thread_contact`. Opening a friend thread marks messages as read and applies guilt side-effects. Reply and Write actions go through the normal game pipeline (RNG consumed, action recorded, friend response queued). Old `read_messages` interaction kept for replay compat. All phone messages now carry `source` and `direction` fields (auto-stamped in `addPhoneMessage`).
 
+**Phone condition:** `phone_cracked` boolean on character — cosmetic CSS crack overlay (`.phone--cracked::after`, hairline linear-gradient lines) applied to the phone overlay when true. Generated at chargen from `economic_origin`: precarious 55%, modest 30%, comfortable 8%, secure 1%. Exactly 1 charRng call. Condition affects texture, not function.
+
 ### Apartment State
 
 **Object systems (coarse_v1):** Mess is now emergent from tracked object states, not a single scalar. Three modules:

@@ -1004,6 +1004,43 @@ body.phone-open #game {
   padding: 20px;
 }
 
+/* Cracked screen overlay — cosmetic, derived from economic_origin at chargen */
+#phone.phone--cracked {
+  position: relative;
+}
+
+#phone.phone--cracked::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 200;
+  border-radius: 36px;
+  overflow: hidden;
+  background:
+    /* Primary crack: lower-left corner radiating up-right */
+    linear-gradient(34deg,
+      transparent 18%,
+      rgba(255,255,255,0.18) 18.4%,
+      rgba(255,255,255,0.07) 18.9%,
+      transparent 19.4%
+    ),
+    /* Branch off primary: angles up more steeply */
+    linear-gradient(58deg,
+      transparent 32%,
+      rgba(255,255,255,0.13) 32.3%,
+      rgba(255,255,255,0.05) 32.7%,
+      transparent 33.1%
+    ),
+    /* Short hairline, different origin point */
+    linear-gradient(21deg,
+      transparent 11%,
+      rgba(255,255,255,0.10) 11.3%,
+      rgba(255,255,255,0.04) 11.6%,
+      transparent 12.0%
+    );
+}
+
 /* Scrollbar inside phone */
 #phone ::-webkit-scrollbar {
   width: 2px;

@@ -473,6 +473,13 @@ export function createUI(ctx) {
     phoneEl.removeAttribute('hidden');
     document.body.classList.add('phone-open');
 
+    // Cracked screen — cosmetic overlay, set once from character property
+    if (Character.get('phone_cracked')) {
+      phoneEl.classList.add('phone--cracked');
+    } else {
+      phoneEl.classList.remove('phone--cracked');
+    }
+
     const screen = State.get('phone_screen') || 'home';
     const threadContact = State.get('phone_thread_contact');
     const battery = State.get('phone_battery');

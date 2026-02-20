@@ -461,6 +461,12 @@ export function createChargen(ctx) {
     // Life history — backstory generation (charRng stream)
     const backstory = generateBackstory(age);
 
+    // Phone cracked screen — derived from economic_origin (which itself comes from backstory).
+    // Tight budget + years of use → decent chance of a crack that never got fixed.
+    // Exactly 1 charRng call.
+    const crackedProb = { precarious: 0.55, modest: 0.30, comfortable: 0.08, secure: 0.01 };
+    const phone_cracked = Timeline.charRandom() < (crackedProb[backstory.economic_origin] ?? 0.30);
+
     // Bill day offsets — deterministic per character (charRng)
     const paycheck_day_offset = Timeline.charRandomInt(0, 13);
     const rent_day_offset = Timeline.charRandomInt(0, 29);
@@ -563,6 +569,7 @@ export function createChargen(ctx) {
       ebt_day_offset,
       conditions,
       sleep_cycle_length,
+      phone_cracked,
     });
   }
 
