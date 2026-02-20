@@ -333,17 +333,21 @@ export function createState(ctx) {
     // Passive effects per time passage
     const hours = minutes / 60;
 
-    // Stomach digestion — contents drain over time.
-    // Approximation debt: linear drain (−20 pts/hr). Real gastric emptying is exponential
-    // (proportional to fullness — faster when full, slowing as it empties; ~1.5–2h half-life
-    // for solids). Also missing: stress slows motility; liquid vs. solid content type; fat/
-    // protein content slows via CCK feedback. See TODO.md.
-    s.stomach_fullness = Math.max(0, s.stomach_fullness - hours * 20);
+    // Stomach digestion — exponential decay, half-life ~90 min for solid food.
+    // Derived from real gastric emptying data: solids empty with ~90 min half-life under
+    // normal conditions (faster when full, slowing as it empties — first-order kinetics).
+    // Remaining approximation debts: stress slows motility (not yet modelled); liquids
+    // empty much faster (~20–30 min half-life); fat/protein content slows via CCK feedback;
+    // no content-type tracking. See TODO.md.
+    s.stomach_fullness = Math.max(0, s.stomach_fullness * Math.exp(-Math.LN2 / 90 * minutes));
 
     // Hunger signal — felt experience, suppressed by stomach fullness, nausea, and illness.
-    // Approximation debt: base rate 4 pts/hr is uncalibrated; suppression coefficient 0.85
-    // is chosen not derived. See TODO.md.
-    let hungerRate = 4;
+    // Base rate derived from real hunger return: people typically feel hungry ~3–5h after
+    // a normal meal. Working back through stomach suppression: ~8 pts/hr gives "hungry" tier
+    // (~40 pts above satiated) in ~5h including fullness suppression from a full meal.
+    // Remaining approximation debt: suppression coefficient 0.85 is chosen not derived.
+    // See TODO.md.
+    let hungerRate = 8;
     // Stomach stretch receptors + hormonal signals (GIP, GLP-1, CCK) suppress hunger when full
     if (s.stomach_fullness > 10) {
       hungerRate *= Math.max(0.1, 1 - (s.stomach_fullness / 100) * 0.85);
@@ -462,8 +466,10 @@ export function createState(ctx) {
     // Real onset: ~12–24h after last dose. Real peak: ~20–51h. See TODO.md.
     if (s.caffeine_habit > 10) {
       if (s.caffeine_level < 15) {
-        // Approximation debt: build rate (habit/100)*6 pts/hr is uncalibrated.
-        const buildRate = (s.caffeine_habit / 100) * 6;
+        // Build rate derived from real caffeine withdrawal onset: 12–24h after last dose.
+        // At habit=100: 1.5 pts/hr → mild threshold (15pts) at ~10h, moderate (40pts) at
+        // ~27h, severe (70pts) at ~47h — within the real peak range of 20–51h.
+        const buildRate = (s.caffeine_habit / 100) * 1.5;
         s.caffeine_withdrawal = Math.min(100, s.caffeine_withdrawal + buildRate * hours);
 
         // Receptor upregulation effect: chronic caffeine causes the brain to grow more
