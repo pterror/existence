@@ -494,10 +494,12 @@ export function createState(ctx) {
     // Real onset: ~12–24h after last dose. Real peak: ~20–51h. See TODO.md.
     if (s.caffeine_habit > 10) {
       if (s.caffeine_level < 15) {
-        // Build rate derived from real caffeine withdrawal onset: 12–24h after last dose.
-        // At habit=100: 1.5 pts/hr → mild threshold (15pts) at ~10h, moderate (40pts) at
-        // ~27h, severe (70pts) at ~47h — within the real peak range of 20–51h.
-        const buildRate = (s.caffeine_habit / 100) * 1.5;
+        // Build rate from real caffeine withdrawal onset timing (Juliano & Griffiths 2004,
+        // PMID 15448977): 12–24h onset, 20–51h peak. At habit=100, 1.2 pts/hr →
+        // mild threshold (15pts) at ~12.5h, moderate (40pts) at ~33h, severe (70pts) at
+        // ~58h — onset and peak within the documented real ranges.
+        // Reduced from 1.5 to 1.2 to match the real 12–24h mild onset window.
+        const buildRate = (s.caffeine_habit / 100) * 1.2;
         s.caffeine_withdrawal = Math.min(100, s.caffeine_withdrawal + buildRate * hours);
 
         // Receptor upregulation effect: chronic caffeine causes the brain to grow more
@@ -713,11 +715,16 @@ export function createState(ctx) {
     s.daylight_exposure = 0;
     s.illness_medicated = false;
     s.pending_vomit = false;  // clear any stale vomit flag — sleep resolves nausea
-    // Caffeine habit — update from yesterday's peak, then reset
+    // Caffeine habit — update from yesterday's peak, then reset.
+    // Build: +5/day → habit reaches 100 in ~20 days of daily use, matching the real
+    // 2-week tolerance development timeline (Beaumont et al. 2017, PLOS ONE).
+    // Fade: -4/day → 25-day washout from habit=100, consistent with 7–21 day receptor
+    // normalization for moderate users and up to 25 days for heavy users.
+    // Previous rates (+8/−5) compressed real timelines by ~35%.
     if (s.caffeine_today_peak >= 40) {
-      s.caffeine_habit = Math.min(100, s.caffeine_habit + 8);
+      s.caffeine_habit = Math.min(100, s.caffeine_habit + 5);
     } else {
-      s.caffeine_habit = Math.max(0, s.caffeine_habit - 5);
+      s.caffeine_habit = Math.max(0, s.caffeine_habit - 4);
     }
     s.caffeine_today_peak = 0;
     // Dental — underlying condition means you always wake with at least a dull ache
@@ -937,11 +944,11 @@ export function createState(ctx) {
    * so each dose has diminished effect. At habit=0, full amount. At habit=100, ~70%.
    */
   function consumeCaffeine(amount) {
-    // Approximation debt: 0.3 coefficient (30% reduction at max habit) is chosen, not
-    // derived from adenosine receptor density data. Real tolerance involves receptor
-    // upregulation (more A1/A2A receptors), meaning a given caffeine concentration blocks
-    // a smaller fraction of the total pool. 70% effective dose at max habit is plausible
-    // but uncalibrated against pharmacokinetic data.
+    // The 0.3 coefficient (30% reduction at max habit) is contested. Cross-sectional
+    // meta-analyses (Carvalho 2022) find no significant blunting in habitual vs.
+    // non-habitual consumers. Longitudinal controlled studies (Beaumont 2017) show some
+    // blunting of ~20–30% after weeks of daily use. The 0.3 represents the upper end of
+    // longitudinal estimates. Approximation debt: direction is right, magnitude uncertain.
     const effectiveAmount = amount * (1 - 0.3 * (s.caffeine_habit / 100));
     s.caffeine_level = clamp(s.caffeine_level + effectiveAmount, 0, 100);
     s.caffeine_today_peak = Math.max(s.caffeine_today_peak, s.caffeine_level);
@@ -959,16 +966,17 @@ export function createState(ctx) {
    * The blocking curve is shifted: a habituated user at caffeine_level=50 gets less block
    * than a naive user at the same level.
    *
-   * Approximation debt: the 0.4 denominator shift at max habit is chosen, not derived from
-   * receptor density data. At habit=100, denominator=140, meaning full block requires
-   * caffeine_level=140 (capped at 100 → ~71% max block for a habituated user at peak).
-   * Uncalibrated against real A1/A2A upregulation magnitude.
+   * Tolerance adjustment grounded in Bhagwat 1993 (PMC3437321): chronic caffeine causes
+   * ~20% A1 receptor upregulation in animals. At habit=100, denominator=120, meaning
+   * ~83% max block for a habituated user vs. 100% for a naive user.
+   * Approximation debt: animal data applied to a human model; direct human receptor
+   * density data unavailable. The ~20% figure is the best available estimate.
    */
   function adenosineBlock() {
     // Tolerance shifts the effective denominator upward: more caffeine needed for full block.
-    // At habit=0: denominator=100 (unchanged). At habit=100: denominator=140.
-    // Approximation debt: 0.4 shift coefficient — chosen, not derived from receptor density data.
-    const denominator = 100 + 0.4 * s.caffeine_habit;
+    // At habit=0: denominator=100 (unchanged). At habit=100: denominator=120.
+    // ~20% A1 receptor upregulation (Bhagwat 1993, PMC3437321) — animal data, human approximate.
+    const denominator = 100 + 0.20 * s.caffeine_habit;
     return Math.max(0, 1 - s.caffeine_level / denominator);
   }
 
@@ -1209,12 +1217,30 @@ export function createState(ctx) {
 
     // Sleep inertia: waking mid-deep-sleep in early cycles is worst.
     // Deep sleep fraction drops sharply after cycle 2, so inertia fades quickly.
+    // The 0.6 ceiling is calibrated to worst-case stacking: N3 + early cycle + high
+    // sleep debt + circadian nadir (Dinges: ~41% N3 impairment; Scheer 2008: 3.6×
+    // circadian range; McCauley/Rajaraman PMC6519907: ~2.7× CSR amplification).
     let sleepInertia = 0;
     if (partialCycleFrac > 0 && completeCycles < 3) {
       const depthFactor = cycleFracs(completeCycles).deep;
       // Mid-cycle is worst (peak at 0.3-0.6 of cycle = deep sleep phase)
       const phaseInertia = partialCycleFrac < 0.6 ? partialCycleFrac / 0.6 : (1 - partialCycleFrac) / 0.4;
-      sleepInertia = clamp(depthFactor * phaseInertia * 1.2, 0, 0.6);
+      const baseInertia = depthFactor * phaseInertia * 1.2;
+
+      // Sleep debt amplifier: chronic restriction produces ~2.7× worse inertia magnitude
+      // (McCauley / Rajaraman, PMC6519907). Conservative 1.5× max here since duration
+      // extension (7×) is not modeled — that's a separate approximation debt.
+      const debtAmp = 1 + 0.5 * (s.sleep_debt / 4800);
+
+      // Circadian phase amplifier: waking at biological night (2300–0300) vs afternoon
+      // is ~3.6× worse (Scheer et al. 2008, PMC3130065). Conservative 1.25× max here —
+      // the full 3.6× effect compounds with base inertia and debt, and the 0.6 cap holds.
+      // Cosine peaks at 0100h (biological nadir ~1h from midnight), troughs at 1300h.
+      const todH = timeOfDay() / 60;
+      const circAdj = Math.cos(((todH - 1 + 24) % 24) * 2 * Math.PI / 24);
+      const circAmp = 1 + 0.25 * Math.max(0, circAdj);
+
+      sleepInertia = clamp(baseInertia * debtAmp * circAmp, 0, 0.6);
     }
 
     return { completeCycles, partialCycleFrac, deepSleepFrac, remFrac, sleepInertia };
