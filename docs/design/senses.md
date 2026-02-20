@@ -212,6 +212,15 @@ Food tastes good, bad, or somewhere in between, and the character notices:
 - Caramelisation: sugar browning, adjacent chemistry, similar appeal
 - Burnt: the same process pushed too far — acrid, bitter, ruined; the line is thin and specific
 - Boiled everything: what you do when you can't waste anything or lack equipment. Cheaper, safer, but misses the Maillard reaction entirely. A poverty note — dry heat and fat both cost something.
+- **Rendering** — fat melting out of itself; waxy becomes liquid, leaves crackling behind
+- **Reduction** — liquid cooking down, concentrating flavour; volume shrinks, intensity increases
+- **Smoking** — low and slow, smoke penetrating; the flavour is almost a smell as much as a taste
+- **Searing** — fast, high heat, aggressive surface crust; Maillard but compressed and violent
+- **Braising** — long, wet, low heat; collagen breaking down to gelatin; tough cuts becoming tender
+- **Steaming** — clean, preserves the ingredient's own flavour; nothing added, nothing transformed by browning
+- **Frying** — fat as the cooking medium. Pan frying: shallow oil, Maillard on the contact surface. Deep frying: fully submerged, even crust all around, specific richness. Air frying: forced hot air, minimal oil, crispy but drier and less rich than deep frying — a different result despite the name.
+
+Not an exhaustive list — cooking methods are many, and each produces a distinct sensory outcome. Each is also a class and equipment marker: smoking requires time and setup, braising requires time and the right cut, deep frying requires oil volume and temperature control. What methods a character uses reflects their resources, knowledge, and background.
 
 **Texture** is distinct from taste but part of the eating experience:
 - Fat texture (some people can't eat visible fat; the mouthfeel is the problem)
