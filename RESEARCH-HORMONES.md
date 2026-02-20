@@ -2,7 +2,7 @@
 
 Research compiled for simulation design. For each finding: what the evidence shows, how strong it is, and what it means for modeling. This is reference material, not a design document.
 
-*Citation status: this document names studies inline (e.g. "Schmidt et al. JAMA Psychiatry 2015", "Skovlund 2016") but provides no PMIDs, DOIs, or volume/page numbers. Specific quantitative claims (hormone level ranges, prevalence rates, PK data) are not retrievable without a separate search. Treat as named-but-unverified until identifiers are added.*
+*Citation status: PMIDs added 2026-02-20 for key named studies. Hormone level ranges (estradiol, progesterone, hCG, etc.) and mechanism claims remain uncited — these are widely-cited reference values but specific primary sources have not been verified for each number. Add identifiers when individual claims are used for calibration.*
 
 ---
 
@@ -47,7 +47,7 @@ Women are at low hormone levels during early follicular phase *without* premenst
 
 ### PMDD — Altered Receptor Sensitivity, Not Altered Hormones
 
-Prevalence: PMS ~30-40%; PMDD (severe, predominantly mood) ~3.2% (95% CI: 1.7-5.9%).
+Prevalence: PMS ~30–40% (Direkvand-Moghadam et al. 2014, PMID 24701496 — pooled 47.8% but CI 32.6–62.9%; strict-criteria studies tend toward 30–40%); PMDD (severe, predominantly mood) ~3.2% (95% CI: 1.7–5.9%) (Reilly et al. 2024, PMID 38199397, n=50,659).
 
 **The key finding: women with PMDD have normal hormone levels.** The difference is at the receptor:
 
@@ -73,7 +73,7 @@ Therapeutic confirmation: brexanolone (synthetic ALLO at pharmacological doses) 
 
 ### Second Trimester (weeks 14-27)
 
-Often the "honeymoon trimester." hCG declining, body adapting to progesterone. High stable estradiol provides sustained serotonergic/dopaminergic support. High stable ALLO provides sustained GABAergic tone without withdrawal fluctuations. Brain structural changes begin — a 2024 Nature Neuroscience study showed gray matter volume reductions covering 94% of cortex (synaptic refinement, not pathological loss). Cognitive function between first and second trimester actually *improves*.
+Often the "honeymoon trimester." hCG declining, body adapting to progesterone. High stable estradiol provides sustained serotonergic/dopaminergic support. High stable ALLO provides sustained GABAergic tone without withdrawal fluctuations. Brain structural changes begin — widespread gray matter volume reductions (synaptic refinement, not pathological loss). Pritschet et al. 2024 *Nature Neuroscience* (PMID 39284962) demonstrated this via intensive longitudinal single-subject design. The "94% of cortex" figure specifically is from Servin-Barthet et al. 2025 *Nature Communications* (PMID 39820539, n=110), a larger cohort study reporting a U-shaped GM trajectory affecting 94% of the cortex. Cognitive function between first and second trimester actually *improves*.
 
 ### Third Trimester (weeks 28-40)
 
@@ -90,7 +90,7 @@ The most dramatic hormone withdrawal in normal human physiology:
 
 **Baby blues**: 50-80% of women, first 1-2 weeks. Transient tearfulness, mood lability, irritability. Resolves by 2-3 weeks as hormones stabilize.
 
-**Postpartum depression**: 10-19%, typically developing over first 3 months. Mechanism: massive ALLO withdrawal (same as PMDD but at far greater scale) + serotonergic deficit from estradiol crash + HPA axis dysregulation + neuroinflammation. Confirmed by brexanolone/zuranolone efficacy. Prior depression is strongest predictor (prevalence ratio 4.03).
+**Postpartum depression**: 10–19%, typically developing over first 3 months (Gavin et al. 2005, PMID 16260528). Mechanism: massive ALLO withdrawal (same as PMDD but at far greater scale) + serotonergic deficit from estradiol crash + HPA axis dysregulation + neuroinflammation. Confirmed by brexanolone/zuranolone efficacy. Prior depression is strongest predictor (prevalence ratio 4.03).
 
 **Evidence strength: strong.** Hormone crash timeline well-quantified. PPD mechanism confirmed by treatment response.
 
@@ -153,7 +153,7 @@ High testosterone is associated with status-seeking behavior **only when cortiso
 
 ### Age-Related Decline (Andropause)
 
-~1%/year decline starting ~30-40. By 80, total testosterone ~35% lower, free testosterone ~50% lower (SHBG increases). Mood effects: decreased vitality, depressed mood, irritability, reduced motivation, sleep disturbance, reduced confidence. Testosterone-depression association is moderate and contested — replacement therapy shows inconsistent mood effects in meta-analyses.
+~1%/year decline starting ~30–40. By 80, total testosterone ~35% lower, free testosterone ~50% lower (SHBG increases). (Harman et al. 2001 Baltimore Longitudinal Study, PMID 11158037; Feldman et al. 2002 Massachusetts Male Aging Study, PMID 11836290 — longitudinal rate ~1.6%/yr total T; cross-sectional ~0.8%/yr.) Mood effects: decreased vitality, depressed mood, irritability, reduced motivation, sleep disturbance, reduced confidence. Testosterone-depression association is moderate and contested — replacement therapy shows inconsistent mood effects in meta-analyses.
 
 ### Male Hormonal Cycles Beyond Diurnal
 
@@ -174,7 +174,7 @@ High testosterone is associated with status-seeking behavior **only when cortiso
 
 **Progestin types**: androgenic (levonorgestrel) vs anti-androgenic (drospirenone) — theoretical mood difference is plausible but **not clearly demonstrated** in high-quality trials. Network meta-analysis of RCTs found no difference.
 
-**The Danish registry study (Skovlund 2016)**: 1M+ women. COC users RR 1.23 for antidepressant use; progestin-only RR 1.34; patch RR 2.0; ring RR 1.6; LNG-IUD RR 1.4. Adolescents more vulnerable (COC RR 1.8). **However**: observational (not causal), antidepressant prescription as proxy is imperfect, survivorship bias. Swedish replication (Lundin 2022) found **no association** for COCs specifically.
+**The Danish registry study (Skovlund et al. 2016, PMID 27680324)**: 1M+ women. COC users RR 1.23 for antidepressant use; progestin-only RR 1.34; patch RR 2.0; ring RR 1.6; LNG-IUD RR 1.4. Adolescents more vulnerable (COC RR 1.8). **However**: observational (not causal), antidepressant prescription as proxy is imperfect, survivorship bias. Swedish replication (Lundin 2022) found **no association** for COCs specifically.
 
 **RCT vs observational discrepancy**: RCTs generally find no difference between COC and placebo for depression. Possible explanations: RCTs are short, exclude psychiatric history, dilute a vulnerable subpopulation signal.
 
@@ -192,7 +192,7 @@ Mood reputation exceeds evidence. FDA lists depression as side effect (1-5%). Bu
 
 ### Hormonal Implant (Nexplanon)
 
-Etonogestrel rod, 3 years. Burst-and-taper: peak ~813 pg/mL at day 4, declining to ~200 pg/mL at steady state, ~156 pg/mL by year 3 (~5x higher initially than end-of-life).
+Etonogestrel rod, 3 years. Burst-and-taper: peak ~813 pg/mL at day 4, declining to ~200 pg/mL at steady state, ~156 pg/mL by year 3 (~5x higher initially than end-of-life). (Bennink 2000, PMID 11246602 — PK data for Implanon, same active ingredient as Nexplanon.)
 
 **Evidence strength for mood: poor.** Sparse literature, low methodological quality. Critical review concluded it was "impossible to draw firm conclusions."
 
@@ -330,7 +330,7 @@ Pure androgen receptor antagonist — does NOT reduce testosterone. Testosterone
 
 **Time to emotional steady state:** Weeks 1-4 initial changes. Months 1-3 stabilization. Months 3-6 "new normal." For trans individuals, pharmacological and psychological effects (gender euphoria) are entangled.
 
-**HRT interruption:** Schmidt et al. (JAMA Psychiatry 2015): 79% of depression-prone women developed symptoms within 3 weeks of estradiol withdrawal (vs 8% continuing). 75% who stopped abruptly experienced vasomotor symptoms within 2 weeks (vs 33% with gradual taper). Higher doses = sharper crash. Pills clear in hours; patches in ~24 hours; pellets taper naturally.
+**HRT interruption:** Schmidt et al. (JAMA Psychiatry 2015, PMID 26018333 — note: this study is on perimenopausal depression, not PMDD): 79% of depression-prone women developed symptoms within 3 weeks of estradiol withdrawal (vs 8% continuing). 75% who stopped abruptly experienced vasomotor symptoms within 2 weeks (vs 33% with gradual taper). Higher doses = sharper crash. Pills clear in hours; patches in ~24 hours; pellets taper naturally. For PMDD-specific hormonal challenge evidence, see Schmidt et al. 1998 *NEJM* (PMID 9435325).
 
 **Physiological vs supraphysiological: inverted U.** Subtherapeutic = depression/fatigue. Physiological = optimal. Supraphysiological = paradoxically worsened mood (low mood, anxiety, aggression at truly high levels). Tachyphylaxis (tolerance) documented — dose escalation beyond physiological range makes mood worse.
 
