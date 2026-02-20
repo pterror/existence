@@ -1406,6 +1406,7 @@ export function createContent(ctx) {
           const minutesToAlarm = ((alarmTime - tod) % 1440 + 1440) % 1440;
           if (minutesToAlarm > 0 && minutesToAlarm < fallAsleepDelay + sleepMinutes) {
             // Alarm fires during sleep — chance to sleep through if depleted
+            // Approximation debt: 0.3 probability of sleeping through alarm at depleted energy chosen
             if (energy === 'depleted' && Timeline.chance(0.3)) {
               // Sleep through the alarm
               State.set('alarm_went_off', true);
@@ -1419,32 +1420,34 @@ export function createContent(ctx) {
         }
 
         // Quality factor — stress and hunger degrade recovery
+        // Approximation debt: all sleep quality multipliers below are chosen, not derived from
+        // polysomnographic data. Directions are physiologically correct; magnitudes are uncalibrated.
         let qualityMult = 1.0;
-        if (stress === 'overwhelmed') qualityMult *= 0.5;
-        else if (stress === 'strained') qualityMult *= 0.7;
-        if (hunger === 'starving') qualityMult *= 0.7;
-        else if (hunger === 'very_hungry') qualityMult *= 0.85;
+        if (stress === 'overwhelmed') qualityMult *= 0.5; // Approximation debt: 0.5× for overwhelmed stress chosen
+        else if (stress === 'strained') qualityMult *= 0.7; // Approximation debt: 0.7× for strained stress chosen
+        if (hunger === 'starving') qualityMult *= 0.7; // Approximation debt: 0.7× for starving hunger chosen
+        else if (hunger === 'very_hungry') qualityMult *= 0.85; // Approximation debt: 0.85× for very_hungry chosen
 
         // Rain sound comfort — sleeping to rain improves quality slightly
         const rainComfort = State.sentimentIntensity('rain_sound', 'comfort');
         if (State.get('weather') === 'drizzle' && rainComfort > 0) {
-          qualityMult += rainComfort * 0.1;  // max +0.09 at intensity 0.9
+          qualityMult += rainComfort * 0.1;  // Approximation debt: rain comfort bonus up to +0.1 chosen
         }
 
         // Melatonin at sleep onset — proper melatonin improves architecture
-        if (melatoninAtOnset > 60) qualityMult *= 1.05;
-        else if (melatoninAtOnset < 25) qualityMult *= 0.85;
+        if (melatoninAtOnset > 60) qualityMult *= 1.05; // Approximation debt: 1.05× bonus chosen
+        else if (melatoninAtOnset < 25) qualityMult *= 0.85; // Approximation debt: 0.85× penalty chosen
 
         // Circadian alignment — sleeping at the wrong time degrades quality
         const sleepHour = Math.floor(State.timeOfDay() / 60);
         if (sleepHour >= 10 && sleepHour <= 16) {
-          qualityMult *= 0.75;  // daytime sleep is structurally worse
+          qualityMult *= 0.75;  // Approximation debt: 0.75× for daytime chosen
         } else if (sleepHour >= 6 && sleepHour < 10) {
-          qualityMult *= 0.9;   // late morning sleep is suboptimal
+          qualityMult *= 0.9;   // Approximation debt: 0.90× for early morning chosen
         }
 
         // Crash sleep — emergency shutdown is less restorative
-        if (State.get('adenosine') > 80) qualityMult *= 0.9;
+        if (State.get('adenosine') > 80) qualityMult *= 0.9; // Approximation debt: 0.90× for crash sleep chosen
 
         // Caffeine interference — caffeine at bedtime degrades sleep architecture
         qualityMult *= State.caffeineSleepInterference();
@@ -1452,7 +1455,7 @@ export function createContent(ctx) {
         // Illness — fever and immune activation degrade sleep architecture
         if (State.get('illness_severity') > 0) {
           const sev = State.get('illness_severity');
-          qualityMult *= Math.max(0.5, 1 - sev * 0.35);
+          qualityMult *= Math.max(0.5, 1 - sev * 0.35); // Approximation debt: illness quality penalty coefficient 0.35 chosen
         }
 
         // Sleep debt: ideal 480 min/day. Deficit accumulates fully, excess repays at 33%.
@@ -1465,6 +1468,8 @@ export function createContent(ctx) {
         // Debt penalty on energy recovery: chronic deficit impairs restoration
         const currentDebt = State.get('sleep_debt');
         const debtPenalty = 1 / (1 + currentDebt / 1200);
+        // Approximation debt: divisor 5 (= 0.2 energy per minute of sleep) is chosen.
+        // No derivation for the mapping between sleep duration and energy restoration.
         const energyGain = (sleepMinutes / 5) * qualityMult * debtPenalty;
 
         // Sleep cycle breakdown — determines deep sleep / REM architecture
@@ -1474,9 +1479,16 @@ export function createContent(ctx) {
         // Store sleep quality for serotonin/NE target functions
         State.set('last_sleep_quality', qualityMult);
         // Adenosine: cleared by deep sleep (the clearing mechanism)
+        // Approximation debt: max clearance fraction (0.9), baseline fraction (0.4), deep-sleep
+        // contribution weight (0.6) all chosen. Real adenosine clearance kinetics involve the
+        // glymphatic system and are not simple fractions of current level.
+        // Calibration: Xie et al. 2013 (Science) on glymphatic clearance during sleep.
         const adenosineClear = -(sleepMinutes / 480) * State.get('adenosine') * 0.9 * (0.4 + 0.6 * cycles.deepSleepFrac);
         State.adjustNT('adenosine', adenosineClear);
         // Serotonin: good sleep promotes synthesis, poor sleep impairs
+        // Approximation debt: serotonin sleep adjustments (+3 good sleep / -2 poor sleep) and
+        // thresholds (0.9 / 0.6) chosen. NE clearing coefficient -4 and remFrac threshold 0.15
+        // are chosen. These are direct NT kicks outside the drift system.
         State.adjustNT('serotonin', qualityMult >= 0.9 ? 3 : qualityMult < 0.6 ? -2 : 0);
         // Norepinephrine: REM sleep is the NE-free environment — more REM = better NE clearing
         const neClear = cycles.remFrac * qualityMult;
@@ -1491,6 +1503,7 @@ export function createContent(ctx) {
         }
 
         State.adjustEnergy(energyGain);
+        // Approximation debt: divisor 20 (= 0.05 stress reduction per minute of sleep) chosen.
         State.adjustStress(-sleepMinutes / 20);
         State.set('actions_since_rest', 0);
 
@@ -1502,6 +1515,7 @@ export function createContent(ctx) {
         State.processAbsenceEffects();
 
         // Fridge food slowly goes bad overnight
+        // Approximation debt: 15%/sleep spoilage rate chosen; real rate depends on food type, temperature, storage
         if (State.fridgeTier() !== 'empty' && Timeline.chance(0.15)) {
           State.set('fridge_food', Math.max(0, State.get('fridge_food') - 1));
         }
@@ -1526,6 +1540,9 @@ export function createContent(ctx) {
           }
         } else {
           // Deterministic progression — RNG already consumed above
+          // Approximation debt: illness progression rates (0.18/night unmedicated, 0.07 medicated),
+          // base recovery (0.12 + quality×0.10), work recovery penalty (40%), medicine bonus (0.05)
+          // all chosen. Real illness arc depends heavily on pathogen, immune status, treatment type.
           const illDay    = State.get('illness_day');
           const sev       = State.get('illness_severity');
           const medicated = State.get('illness_medicated');
@@ -2415,8 +2432,7 @@ export function createContent(ctx) {
         Events.record('ate', { what: 'fridge_food' });
 
         // Dental — chewing spikes the ache
-        State.dentalSpike(15);
-
+        State.dentalSpike(15); // Approximation debt: 15pt chewing spike chosen
         // Food comfort sentiment — small serotonin nudge + habituation
         const fc = State.sentimentIntensity('eating', 'comfort');
         if (fc > 0) {
@@ -2505,7 +2521,7 @@ export function createContent(ctx) {
         Events.record('ate', { what: 'pantry_food' });
 
         // Dental — chewing spikes the ache
-        State.dentalSpike(15);
+        State.dentalSpike(15); // Approximation debt: 15pt chewing spike chosen
 
         const mood = State.moodTone();
         const hunger = State.hungerTier();
@@ -2587,7 +2603,7 @@ export function createContent(ctx) {
         State.advanceTime(Timeline.randomInt(5, 8));
 
         // Dental — hot liquid is a significant trigger
-        State.dentalSpike(25);
+        State.dentalSpike(25); // Approximation debt: 25pt hot liquid spike chosen
 
         const mood = State.moodTone();
         const aden = State.get('adenosine');
@@ -2901,7 +2917,7 @@ export function createContent(ctx) {
 
         // Dental — ibuprofen cuts ache by ~35 points; doesn't fix the underlying tooth
         if (dentalTier !== 'none') {
-          State.dentalSpike(-35);
+          State.dentalSpike(-35); // Approximation debt: -35pt relief chosen
         }
         // Migraine — pain reliever cuts intensity by ~35 points
         if (migraineTier !== 'none') {
@@ -3328,7 +3344,7 @@ export function createContent(ctx) {
           energyCost = -10;
           stressEffect = -3;
           State.set('work_tasks_done', State.get('work_tasks_done') + 1);
-          State.adjustJobStanding(1); // focused work builds standing
+          State.adjustJobStanding(1); // focused work builds standing — Approximation debt: +1 for focused work completion chosen
         } else {
           timeCost = Timeline.randomInt(45, 90);
           energyCost = -15;
@@ -3401,6 +3417,7 @@ export function createContent(ctx) {
         const irritation = State.sentimentIntensity(slot, 'irritation');
 
         // Base social/stress effects, modified by accumulated sentiment
+        // Approximation debt: base of 8 social (+ 2 for warmth) for talk_to_coworker chosen
         const socialBonus = 8 + (warmth > 0.3 ? 2 : 0);
         const stressEffect = irritation > 0.4 ? 2 : -3;
         State.adjustSocial(socialBonus);
@@ -3462,7 +3479,7 @@ export function createContent(ctx) {
         State.advanceTime(10);
 
         // Dental — eating spikes the ache
-        State.dentalSpike(15);
+        State.dentalSpike(15); // Approximation debt: 15pt chewing spike chosen
 
         const mood = State.moodTone();
         const hunger = State.hungerTier();
@@ -3558,7 +3575,7 @@ export function createContent(ctx) {
         State.advanceTime(Timeline.randomInt(4, 7));
 
         // Dental — hot coffee is a significant trigger
-        State.dentalSpike(25);
+        State.dentalSpike(25); // Approximation debt: 25pt hot liquid spike chosen
 
         const mood = State.moodTone();
         const aden = State.get('adenosine');
@@ -3680,7 +3697,7 @@ export function createContent(ctx) {
         Events.record('ate', { what: 'cheap_meal' });
 
         // Dental — eating anything spikes the ache
-        State.dentalSpike(15);
+        State.dentalSpike(15); // Approximation debt: 15pt chewing spike chosen
 
         // Food comfort sentiment — weaker than home food + habituation
         const fc = State.sentimentIntensity('eating', 'comfort');
@@ -3799,7 +3816,7 @@ export function createContent(ctx) {
         State.glanceMoney();
 
         // Dental — hot coffee is a trigger
-        State.dentalSpike(25);
+        State.dentalSpike(25); // Approximation debt: 25pt hot liquid spike chosen
 
         const mood = State.moodTone();
         const aden = State.get('adenosine');
@@ -3968,7 +3985,7 @@ export function createContent(ctx) {
           parts.push(msg.text);
           // Apply per-type effects
           if (msg.type === 'friend') {
-            State.adjustSocial(3);
+            State.adjustSocial(3); // Approximation debt: +3 social chosen
             // Reading a friend's message = contact. Reset timer, reduce guilt.
             if (msg.source) {
               const fc = State.get('friend_contact');
@@ -4070,7 +4087,7 @@ export function createContent(ctx) {
         const fc = State.get('friend_contact');
         fc[slot] = State.get('time');
         State.adjustSentiment(slot, 'guilt', -0.06);
-        State.adjustSocial(3);
+        State.adjustSocial(3); // Approximation debt: +3 social chosen
 
         State.advanceTime(5);
         State.adjustBattery(-1);
@@ -4117,7 +4134,7 @@ export function createContent(ctx) {
         const fc = State.get('friend_contact');
         fc[slot] = State.get('time');
         State.adjustSentiment(slot, 'guilt', -0.06);
-        State.adjustSocial(2);
+        State.adjustSocial(2); // Approximation debt: +2 social chosen
 
         State.advanceTime(5);
         State.adjustBattery(-1);
@@ -4662,7 +4679,7 @@ export function createContent(ctx) {
     },
     execute: () => {
       State.set('called_in', true);
-      State.adjustJobStanding(-8);
+      State.adjustJobStanding(-8); // Approximation debt: -8 for calling in chosen
       State.adjustStress(-10);
       State.advanceTime(5);
       Events.record('called_in_sick');
@@ -4755,7 +4772,7 @@ export function createContent(ctx) {
     },
 
     coworker_speaks: () => {
-      State.adjustSocial(3);
+      State.adjustSocial(3); // Approximation debt: +3 social chosen
       const isFirst = Timeline.chance(0.5);
       const slot = isFirst ? 'coworker1' : 'coworker2';
       const coworker = Character.get(slot);

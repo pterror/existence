@@ -433,10 +433,17 @@ export function createState(ctx) {
     s.hunger = Math.min(100, s.hunger + hours * hungerRate);
 
     // Energy drain — accelerated by hunger
+    // Approximation debt: 3 pts/hr base energy drain is chosen. Real fatigue rate depends on
+    // task load, circadian phase, physical demands — not a simple linear rate. Hunger multipliers
+    // (1.3× at moderate, 1.8× at high hunger) and thresholds (40, 70) are also chosen.
+    // Calibration: human performance literature on sustained operations / sleep deprivation studies.
     const hungerDrainMultiplier = s.hunger > 70 ? 1.8 : s.hunger > 40 ? 1.3 : 1.0;
     s.energy = Math.max(0, s.energy - hours * 3 * hungerDrainMultiplier);
 
     // Stress creeps up slightly with time if already stressed
+    // Approximation debt: stress self-reinforcement rate (1 pt/hr above threshold 50) is chosen.
+    // Real chronic stress escalation involves HPA axis sensitization and allostatic load — not a
+    // simple linear rate above a scalar threshold. Both the rate and the threshold are chosen.
     if (s.stress > 50) {
       s.stress = Math.min(100, s.stress + hours * 1);
     }
@@ -468,6 +475,9 @@ export function createState(ctx) {
     }
 
     // Social isolation increases over time without interaction
+    // Approximation debt: social decay rate (2 pts/hr) and idle-action threshold (10 actions)
+    // are chosen. Real loneliness onset depends on quality of connections, individual need,
+    // and activity substitutes. Calibration: social isolation literature (loneliness onset timescales).
     const actionsSinceLastSocial = ctx.timeline.getActionCount() - s.last_social_interaction;
     if (actionsSinceLastSocial > 10) {
       s.social = Math.max(0, s.social - hours * 2);
@@ -480,6 +490,7 @@ export function createState(ctx) {
     if (s.health_conditions.includes('migraines')) {
       if (s.migraine_active) {
         // Decay: slow ramp to peak in first 2h, then decay ~8 pts/hr
+        // Approximation debt: 8 pts/hr decay rate chosen — see intensity range comment at trigger site.
         s.migraine_hours_active += hours;
         if (s.migraine_hours_active > 2) {
           s.migraine_intensity = Math.max(0, s.migraine_intensity - hours * 8);
@@ -497,10 +508,16 @@ export function createState(ctx) {
         const riskScore = (s.adenosine > 60 ? (s.adenosine - 60) / 40 : 0) * 0.4
                         + (s.stress > 55 ? (s.stress - 55) / 45 : 0) * 0.4
                         + (s.sleep_debt > 480 ? Math.min(s.sleep_debt / 4800, 1) : 0) * 0.2;
+        // Approximation debt: 0.003/hr base rate and 8× risk multiplier chosen. Migraine frequency
+        // varies widely per individual (episodic: 1-14/month). The 8× maximum amplification from
+        // combined risk factors is not derived from triggering threshold data.
         const baseChancePerHour = 0.003; // ~3 per 1000 play-hours at baseline
         const triggerChance = baseChancePerHour * (1 + riskScore * 8) * hours;
         if (ctx.timeline.chance(triggerChance)) {
           s.migraine_active = true;
+          // Approximation debt: initial intensity range 30–70 and 8 pts/hr decay rate chosen.
+          // Real migraine duration 4–72h (ICD-11); 8 pts/hr implies ~3.75–8.75h which is within
+          // range but not calibrated to distribution data.
           s.migraine_intensity = 30 + riskScore * 40; // 30-70 depending on risk
           s.migraine_hours_active = 0;
         }
@@ -510,12 +527,13 @@ export function createState(ctx) {
     // Dental pain — NT effects per tick
     if (s.health_conditions.includes('dental_pain') && s.dental_ache > 0) {
       // Passive decay — ache fades slowly (~1.5 pts/hr); lingers for hours after a spike
+      // Approximation debt: 1.5 pts/hr decay rate chosen; real decay depends on underlying condition (caries, abscess, periodontal).
       s.dental_ache = Math.max(0, s.dental_ache - hours * 1.5);
       // Pain signal: low NE raise when aching, stronger when flaring
-      adjustNT('norepinephrine', hours * 2 * (s.dental_ache / 100));
+      adjustNT('norepinephrine', hours * 2 * (s.dental_ache / 100)); // Approximation debt: coefficient 2 chosen
       // Acute flare prevents settling — suppresses GABA
       if (s.dental_ache > 50) {
-        adjustNT('gaba', -hours * 1.5);
+        adjustNT('gaba', -hours * 1.5); // Approximation debt: coefficient 1.5 and threshold 50 chosen
       }
     }
 
@@ -1860,6 +1878,9 @@ export function createState(ctx) {
    * @param {number} seed - unique per system
    */
   function biologicalJitter(timeHours, seed) {
+    // Approximation debt: frequencies (0.017 ≈ 59h period, 0.0073 ≈ 137h period) chosen to be
+    // incommensurate, preventing period-locking. Amplitudes (2.0 and 1.5) chosen. Real biological
+    // rhythms include documented ultradian (~90min) and infradian periods that could ground these choices.
     return Math.sin(timeHours * 0.017 + seed) * 2 +
            Math.sin(timeHours * 0.0073 + seed * 1.7) * 1.5;
   }
@@ -1873,11 +1894,11 @@ export function createState(ctx) {
     let t = 50;
     // Sleep quality is the strongest lever (DESIGN-EMOTIONS.md)
     const sq = s.last_sleep_quality;
-    t += (sq - 0.7) * 20;  // good sleep pushes up, poor sleep pushes down
+    t += (sq - 0.7) * 20;  // good sleep pushes up, poor sleep pushes down // Approximation debt: coefficient 20 and reference 0.7 chosen
     // Social connection
-    t += (s.social - 50) * 0.15;
+    t += (s.social - 50) * 0.15; // Approximation debt: coefficient 0.15 chosen
     // Hunger reduces tryptophan availability (competes for blood-brain transport)
-    if (s.hunger > 60) t -= (s.hunger - 60) * 0.2;
+    if (s.hunger > 60) t -= (s.hunger - 60) * 0.2; // Approximation debt: coefficient 0.2 and threshold 60 chosen
 
     // Sentiments: weather preference
     const wComfort = sentimentIntensity('weather_' + s.weather, 'comfort');
@@ -1901,7 +1922,7 @@ export function createState(ctx) {
     if (s.location === 'workplace') {
       const workDread = sentimentIntensity('work', 'dread');
       const workSat = sentimentIntensity('work', 'satisfaction');
-      t -= workDread * 6;    // dread lowers serotonin target at work
+      t -= workDread * 6;    // dread lowers serotonin target at work // Approximation debt: dread -6, satisfaction +3 chosen
       t += workSat * 3;      // satisfaction gives a small lift
     }
 
@@ -1909,37 +1930,37 @@ export function createState(ctx) {
     if (s.location && s.location.startsWith('apartment')) {
       const g1 = sentimentIntensity('friend1', 'guilt');
       const g2 = sentimentIntensity('friend2', 'guilt');
-      t -= (g1 + g2) * 3;   // max ~6 points at extreme guilt toward both friends
+      t -= (g1 + g2) * 3;   // max ~6 points at extreme guilt toward both friends // Approximation debt: coefficient 3 (max -6 total) chosen
     }
 
     // Financial anxiety at home — the weight of bills you haven't checked
     if (s.location && s.location.startsWith('apartment')) {
       const moneyAnx = sentimentIntensity('money', 'anxiety');
-      t -= moneyAnx * 4;    // max ~3.2 at high anxiety
+      t -= moneyAnx * 4;    // max ~3.2 at high anxiety // Approximation debt: coefficient 4 chosen
     }
 
     // Direct money level effects — being broke hurts regardless of anxiety
     const mt = moneyTier();
     if (mt === 'tight' || mt === 'scraping' || mt === 'broke') {
       // Scale: tight → -1, scraping → -2.5, broke → -3.75
-      if (s.money < 200) t -= (200 - s.money) * 0.019;
+      if (s.money < 200) t -= (200 - s.money) * 0.019; // Approximation debt: coefficient 0.019 and threshold 200 chosen
     }
 
     // Sleep debt — cumulative deficit erodes serotonin baseline
     if (s.sleep_debt > 240) {
-      t -= Math.min((s.sleep_debt - 240) * 0.005, 8);  // max -8 at extreme debt
+      t -= Math.min((s.sleep_debt - 240) * 0.005, 8);  // max -8 at extreme debt // Approximation debt: coefficient 0.005, cap 8 chosen
     }
 
-    return clamp(t, 15, 85);
+    return clamp(t, 15, 85); // Approximation debt: target floor/ceiling chosen — sets emotional floor and ceiling for all characters
   }
 
   /** Dopamine target: energy, general vitality, sentiments */
   function dopamineTarget() {
     let t = 50;
     // Energy reflects capacity for engagement
-    t += (s.energy - 50) * 0.25;
+    t += (s.energy - 50) * 0.25; // Approximation debt: coefficient 0.25 chosen
     // Chronic stress depletes dopamine
-    if (s.stress > 60) t -= (s.stress - 60) * 0.2;
+    if (s.stress > 60) t -= (s.stress - 60) * 0.2; // Approximation debt: coefficient 0.2 and threshold 60 chosen
 
     // Sentiments: time-of-day preference
     const hour = Math.floor(timeOfDay() / 60);
@@ -1958,20 +1979,20 @@ export function createState(ctx) {
     if (s.location === 'workplace') {
       const workDread = sentimentIntensity('work', 'dread');
       const workSat = sentimentIntensity('work', 'satisfaction');
-      t -= workDread * 5;    // dread kills motivation
+      t -= workDread * 5;    // dread kills motivation // Approximation debt: dread -5, satisfaction +4 chosen
       t += workSat * 4;      // satisfaction supports engagement
 
       // Financial anxiety at work — working for money you'll never keep
       const moneyAnx = sentimentIntensity('money', 'anxiety');
-      t -= moneyAnx * 2;
+      t -= moneyAnx * 2; // Approximation debt: coefficient 2 chosen
     }
 
     // Sleep debt — cumulative deficit kills motivation
     if (s.sleep_debt > 240) {
-      t -= Math.min((s.sleep_debt - 240) * 0.006, 10);  // max -10 at extreme debt
+      t -= Math.min((s.sleep_debt - 240) * 0.006, 10);  // max -10 at extreme debt // Approximation debt: coefficient 0.006, cap 10 chosen
     }
 
-    return clamp(t, 15, 85);
+    return clamp(t, 15, 85); // Approximation debt: target floor/ceiling chosen — sets emotional floor and ceiling for all characters
   }
 
   /** Norepinephrine target: stress, sleep quality.
@@ -1979,20 +2000,20 @@ export function createState(ctx) {
   function norepinephrineTarget() {
     let t = 40;
     // Stress is the primary driver
-    t += (s.stress - 30) * 0.3;
+    t += (s.stress - 30) * 0.3; // Approximation debt: stress coefficient 0.3 and baseline 30 chosen
     // Poor sleep elevates NE (unprocessed emotional charge)
     const sq = s.last_sleep_quality;
-    t -= (sq - 0.5) * 15;  // good sleep lowers, poor sleep raises
-    return clamp(t, 10, 90);
+    t -= (sq - 0.5) * 15;  // good sleep lowers, poor sleep raises // Approximation debt: sleep quality coefficient 15 and reference 0.5 chosen
+    return clamp(t, 10, 90); // Approximation debt: target floor/ceiling chosen — sets emotional floor and ceiling for all characters
   }
 
   /** GABA target: chronic stress slowly erodes. ALLO crosslink (placeholder). */
   function gabaTarget() {
     let t = 55;
     // Chronic stress depletes GABA (slow mechanism)
-    if (s.stress > 50) t -= (s.stress - 50) * 0.15;
+    if (s.stress > 50) t -= (s.stress - 50) * 0.15; // Approximation debt: stress threshold 50 and coefficient 0.15 chosen
     // ALLO modulates GABA-A — when implemented, allopregnanolone will feed here
-    return clamp(t, 20, 80);
+    return clamp(t, 20, 80); // Approximation debt: target floor/ceiling chosen — sets emotional floor and ceiling for all characters
   }
 
   /** Cortisol target: diurnal rhythm + stress.
@@ -2005,11 +2026,11 @@ export function createState(ctx) {
     // Using cosine shifted so peak=8AM: cos((hour - 8) * pi/12)
     const diurnal = Math.cos((hourFrac - 8) * Math.PI / 12);
     // Map diurnal [-1,1] to [25,65]
-    let t = 45 + diurnal * 20;
+    let t = 45 + diurnal * 20; // Approximation debt: diurnal amplitude 20 chosen (plausible for ~±8 µg/dL swing but uncalibrated)
     // Stress pushes cortisol above rhythm
-    if (s.stress > 40) t += (s.stress - 40) * 0.3;
+    if (s.stress > 40) t += (s.stress - 40) * 0.3; // Approximation debt: stress coefficient 0.3 and threshold 40 chosen
     // Very low money — financial stress adds cortisol
-    if (s.money < 50) t += 3;
+    if (s.money < 50) t += 3; // Approximation debt: money broke penalty +3 chosen
     return clamp(t, 10, 95);
   }
 
@@ -2027,12 +2048,15 @@ export function createState(ctx) {
 
     // Good daylight exposure strengthens nighttime melatonin peak
     // Saturates at 120 min of bright light (outside daytime)
+    // Approximation debt: 120 min saturation threshold chosen (ignores illuminance — real melatonin
+    // phase effects require lux, not just minutes).
     const daylightBonus = Math.min(s.daylight_exposure / 120, 1.0) * 10;
     if (hourFrac >= 20 || hourFrac <= 6) {
       t += daylightBonus;  // up to +10 at night if you got enough light
     }
 
     // Phone screen suppression at night — blue light blocks melatonin
+    // Approximation debt: phone suppression -15, indoor delay -3 chosen.
     if (s.viewing_phone && (hourFrac >= 21 || hourFrac <= 5)) {
       t -= 15;
     }
@@ -2045,6 +2069,9 @@ export function createState(ctx) {
       }
     }
 
+    // Approximation debt: fall-asleep delay multipliers (0.7× high melatonin, 1.4× low) chosen.
+    // Applied in content.js sleep interaction, derived from this target. Not calibrated to
+    // measured sleep-onset latency data.
     return clamp(t, 5, 90);
   }
 
@@ -2052,6 +2079,9 @@ export function createState(ctx) {
    *  Stomach produces ghrelin when empty, suppressed after eating. */
   function ghrelinTarget() {
     // Hunger 0-100 maps to ghrelin 15-85
+    // Approximation debt: linear mapping of hunger→ghrelin (range 15-85) chosen. In reality
+    // ghrelin drives hunger (not the reverse) and has its own circadian rhythm and meal-entrainment.
+    // Direction of causality is reversed here as a proxy until a proper ghrelin model exists.
     return 15 + (s.hunger / 100) * 70;
   }
 
@@ -2062,6 +2092,8 @@ export function createState(ctx) {
     const hourFrac = tod / 60;
     // Follows wakefulness: peaks midday (~14:00), low at night
     const wake = Math.cos((hourFrac - 14) * Math.PI / 12);
+    // Approximation debt: amplitude 30 and peak hour chosen. Real histaminergic firing is tonic
+    // during wakefulness, not simply cosine-shaped.
     return clamp(50 + wake * 30, 10, 80);
   }
 
@@ -2081,6 +2113,12 @@ export function createState(ctx) {
   // Per-system up/down rates (per hour) derived from biological half-lives.
   // Asymmetric: most systems fall faster than they rise.
   // rate = ln(2) / halflife_hours, scaled to give meaningful drift on 0-100 scale.
+  //
+  // Approximation debt: all rate constants below are chosen to approximate documented half-lives
+  // but the scale factor mapping real half-life to the 0-100 simulation scale is itself chosen,
+  // not derived. The asymmetries (down faster than up for serotonin/dopamine, up faster than down
+  // for NE) match the qualitative biological direction but magnitudes are uncalibrated.
+  // Calibration: receptor binding kinetics literature for each neurotransmitter system.
 
   const ntRates = {
     // key:        [upRate,  downRate]  — per-hour exponential approach rates
@@ -2175,6 +2213,10 @@ export function createState(ctx) {
     // At 50/50/50 → n=0.5, seInv=0.5, r=0.5 → weighted=0.5 → base=1.0
     // At 0/100/0 → n=0, seInv=0, r=0 → weighted=0 → base=0.6 (fluid)
     // At 100/0/100 → n=1, seInv=1, r=1 → weighted=1 → base=1.4 (sticky)
+    // Approximation debt: personality trait weights (neuroticism 0.5, low self-esteem 0.3,
+    // rumination 0.2) and inertia range (0.6–1.4) are chosen. The relative importance of
+    // each trait for mood persistence is an empirical psychometric question.
+    // Calibration: ecological momentary assessment studies linking trait measures to mood inertia.
     const weighted = n * 0.5 + seInv * 0.3 + r * 0.2;
     let inertia = 0.6 + weighted * 0.8;
 
@@ -2185,6 +2227,9 @@ export function createState(ctx) {
     }
 
     // State modifiers — current conditions can increase inertia.
+    // Approximation debt: all four modifier coefficients (adenosine 0.005, sleep quality 0.3,
+    // stress 0.005, debt 0.0003) and thresholds (60, 0.5, 60, 240) are chosen. The McCauley/
+    // Rajaraman citation supports the debt effect direction but doesn't derive the coefficient.
     // Sleep deprivation (adenosine > 60): tired brain processes mood slower.
     if (s.adenosine > 60) {
       inertia += (s.adenosine - 60) * 0.005;  // up to +0.2 at adenosine=100
@@ -2220,6 +2265,9 @@ export function createState(ctx) {
     // At 50/50/50 → weighted=0.5 → capacity=1.0
     // At 0/100/0 → weighted=0 → capacity=1.3 (fluid)
     // At 100/0/100 → weighted=1 → capacity=0.5 (sticky)
+    // Approximation debt: regulation capacity range (0.5–1.3), penalty coefficients (0.004 each
+    // for adenosine and stress above 60), and thresholds are chosen to mirror effectiveInertia()
+    // but have no independent empirical calibration.
     const weighted = n * 0.5 + (1 - se) * 0.3 + r * 0.2;
     let capacity = 1.3 - weighted * 0.8;
 
@@ -2258,6 +2306,10 @@ export function createState(ctx) {
 
     // Adenosine: linear accumulation during wakefulness
     // (cleared proportionally by sleep in content.js)
+    // Approximation debt: 4 pts/hr wakefulness accumulation is chosen. Real adenosine buildup
+    // is driven by ATP catabolism and varies with metabolic rate and activity level. The mapping
+    // from real adenosine concentration to this 0-100 scale is also chosen.
+    // Calibration: Porkka-Heiskanen et al. basal forebrain adenosine measurements during sleep deprivation.
     s.adenosine = clamp(s.adenosine + hours * 4, 0, 100);
 
     // All other systems: exponential drift toward target
