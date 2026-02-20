@@ -72,6 +72,14 @@ export function createState(ctx) {
       // Chronic stress flattens diurnal rhythm (DESIGN-EMOTIONS.md).
       // Ref: dual hormone hypothesis — high cortisol suppresses testosterone behavioral effects (RESEARCH-HORMONES.md Part 4)
       cortisol: 50,
+      // Cortisol GI slow pathway — filtered cortisol for gastric motility effects.
+      // Cortisol acts on GI motility via the genomic pathway (hours), unlike NE which acts
+      // via fast synaptic transmission (minutes). This variable tracks a slow-moving
+      // exponential average of cortisol to model that distinction.
+      // Initialized equal to cortisol baseline (50) at game start.
+      // Approximation debt: time constant (~210 min, ~3.5h half-life) is chosen to represent
+      // the hours-long genomic pathway, not derived from measured GI motility kinetics. See TODO.md.
+      cortisol_gi_slow: 50,
 
       // Circadian
       // Melatonin: sleep/wake regulator. Diurnal — rises in darkness, suppressed by light.
@@ -349,6 +357,13 @@ export function createState(ctx) {
     // Passive effects per time passage
     const hours = minutes / 60;
 
+    // Cortisol GI slow pathway — exponential approach toward current cortisol.
+    // Cortisol acts on GI motility via the slow genomic pathway (hours), not the fast
+    // synaptic pathway like NE (minutes). Half-life ~210 min (~3.5h) represents that delay.
+    // Approximation debt: the 210 min half-life is chosen to represent the genomic pathway
+    // timescale, not derived from measured cortisol GI kinetics literature. See TODO.md.
+    s.cortisol_gi_slow = s.cortisol_gi_slow + (s.cortisol - s.cortisol_gi_slow) * (1 - Math.exp(-minutes / 210));
+
     // Stomach digestion — exponential decay with content-type blending.
     // Liquid half-life ~25 min derived from real gastric emptying data for fluids
     // (simple liquids clear the stomach in ~20–30 min under normal conditions).
@@ -356,19 +371,22 @@ export function createState(ctx) {
     // (first-order kinetics, slowing as it empties).
     // High sympathetic tone (NE, cortisol) suppresses GI motility via inhibition of the
     // enteric nervous system. Stressed characters digest more slowly.
-    // Approximation debt: the scaling coefficients (0.5 for NE, 0.3 for cortisol) and
-    // baseline threshold (50) are chosen. At NE=100, cortisol=100 the factor is 1.8×
-    // (not 2× — the coefficients sum to 0.8, giving 1.0+0.8=1.8 max). Not derived from
-    // real GI physiology data. See TODO.md.
+    // NE: fast pathway (synaptic, minutes) — uses instant NE value. Correct.
+    // Cortisol: slow pathway (genomic, hours) — uses cortisol_gi_slow, not instant cortisol.
+    //   Acute cortisol spikes have minimal immediate GI effect; sustained elevation does.
+    // Approximation debt: the scaling coefficients (0.5 for NE, 0.3 for cortisol_gi_slow)
+    // and baseline threshold (50) are chosen. At NE=100, cortisol_gi_slow=100 the factor
+    // is 1.8× (not 2× — the coefficients sum to 0.8, giving 1.0+0.8=1.8 max). Not derived
+    // from real GI physiology data. See TODO.md.
     // Approximation debt: blending by stomach_liquid_fraction is a simplified linear mix.
     // Real stomachs partition contents heterogeneously; liquids float above solids and
     // drain through the pylorus preferentially. A full two-pool model would track separate
     // liquid and solid compartments, each with its own emptying curve. See TODO.md.
     const ne = s.norepinephrine;
-    const cort = s.cortisol;
+    const cortGiSlow = s.cortisol_gi_slow;
     const gastricSlowFactor = 1
       + 0.5 * Math.max(0, Math.min(1, (ne - 50) / 50))
-      + 0.3 * Math.max(0, Math.min(1, (cort - 50) / 50));
+      + 0.3 * Math.max(0, Math.min(1, (cortGiSlow - 50) / 50));
     const liqFrac = s.stomach_liquid_fraction || 0;
     const baseHalfLife = liqFrac * 25 + (1 - liqFrac) * 90;
     const gastricHalfLife = baseHalfLife * gastricSlowFactor;
