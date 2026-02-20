@@ -6,11 +6,13 @@ This feeds the prose compositor system (see docs/research/prose-construction.md)
 
 ---
 
-## Core principle
+## Core principles
 
 **Noticeability, not intensity.** The threshold for prose mentioning a sensory fact is not that it's strong — it's that it's *noticeable*. Salience, not magnitude. Petrichor isn't intense but it surfaces to attention. The smell of your own apartment after days away is subtle but tells you something.
 
 **Noticeability is relational.** The same sensory fact is more or less noticeable depending on the character's current state. This is not a fixed property of the stimulus — it's a relationship between stimulus and state.
+
+**Senses are the surface; meaning is relational and historical.** What a character notices, and what it means when they do, depends on who they are and where they've been. Meeting someone from a different culture, noticing someone who stands out, navigating a language barrier — these are sensory experiences with a relational and cultural layer underneath. The prose has to know both. A flag ("is deaf", "speaks accented English", "grew up elsewhere") is not enough — the character's history and identity shape what the sensory fact costs them, what it means, how they carry it. This applies across all senses: the condition is the surface, the relationship to it is the substance.
 
 NT modulation of noticeability:
 - Hunger → food smells and sights surface that would otherwise be ignored
