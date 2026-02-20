@@ -131,6 +131,11 @@ export function createState(ctx) {
       // Ghrelin: hunger hormone. Active — maps to hunger state.
       // Stomach produces when empty. Rises before meals, drops after eating.
       ghrelin: 40,
+      // Post-prandial hormonal satiation (CCK, GLP-1, PYY, ghrelin suppression composite).
+      // Rises on eating proportional to amount ingested; decays independently of stomach emptying.
+      // Represents the 2–4h hormonal phase that keeps hunger suppressed after a meal even as
+      // the stomach physically empties. Default 0 (fasted / no recent meal).
+      hormonal_satiation: 0,
 
       // Other
       // DHEA (dehydroepiandrosterone): anti-cortisol, precursor to sex hormones. Placeholder.
@@ -371,6 +376,15 @@ export function createState(ctx) {
     // When stomach empties fully, reset liquid fraction
     if (s.stomach_fullness <= 0) s.stomach_liquid_fraction = 0;
 
+    // Post-prandial hormonal satiation — exponential decay independent of stomach emptying.
+    // Represents CCK, GLP-1, PYY persistence and ghrelin suppression after a meal.
+    // Approximation debt: half-life 150 min (2.5h) is the midpoint of the physiological
+    // 2–4h range. Real duration varies by meal composition: protein and fat extend it (up to
+    // 4h), simple carbohydrates shorten it (~2h). No nutrient differentiation yet. See TODO.md.
+    if (s.hormonal_satiation > 0) {
+      s.hormonal_satiation = Math.max(0, s.hormonal_satiation * Math.pow(0.5, hours / 2.5));
+    }
+
     // Hunger signal — felt experience, suppressed by stomach fullness, nausea, and illness.
     // Base rate derived from real hunger return: people typically feel hungry ~3–5h after
     // a normal meal. Working back through stomach suppression: ~8 pts/hr gives "hungry" tier
@@ -378,9 +392,17 @@ export function createState(ctx) {
     // Remaining approximation debt: suppression coefficient 0.85 is chosen not derived.
     // See TODO.md.
     let hungerRate = 8;
-    // Stomach stretch receptors + hormonal signals (GIP, GLP-1, CCK) suppress hunger when full
-    if (s.stomach_fullness > 10) {
-      hungerRate *= Math.max(0.1, 1 - (s.stomach_fullness / 100) * 0.85);
+    // Stomach stretch receptors suppress hunger when full (physical volume signal)
+    const stomachSuppression = s.stomach_fullness > 10 ? (s.stomach_fullness / 100) * 0.85 : 0;
+    // Hormonal satiation suppresses hunger independently of stomach volume (CCK, GLP-1, PYY)
+    // Approximation debt: same 0.85 coefficient applied to hormonal_satiation as to stomach
+    // fullness. Real hormonal contribution has different weights per hormone and is additive
+    // with volume signals, not interchangeable. Using max() rather than multiplication to avoid
+    // over-suppression when both are high; real interaction is more complex. See TODO.md.
+    const hormonalSuppression = (s.hormonal_satiation / 100) * 0.85;
+    const hungerSuppression = Math.max(stomachSuppression, hormonalSuppression);
+    if (hungerSuppression > 0) {
+      hungerRate *= Math.max(0.1, 1 - hungerSuppression);
     }
     // Nausea overrides the hunger signal
     if (s.nausea > 15) {
@@ -1370,6 +1392,16 @@ export function createState(ctx) {
       s.stomach_liquid_fraction = (prevFull * (s.stomach_liquid_fraction || 0) + added * addedLiqFrac) / newFull;
     }
     s.stomach_fullness = newFull;
+
+    // Post-prandial hormonal satiation — rises proportional to amount eaten.
+    // Approximation debt: proportional-to-stomach-fill is a simplification. Real ghrelin
+    // suppression and CCK/GLP-1/PYY release are partly volume-dependent and partly
+    // nutrient-dependent (protein and fat trigger stronger and longer hormonal responses
+    // than simple carbohydrates). No nutrient differentiation yet — `contentType` is not
+    // used here because the hormonal response to a liquid vs. solid of the same caloric
+    // density differs mainly in timing, not magnitude, at this level of approximation.
+    // A full meal (~100 stomach units) gives ~100 satiation (full suppression). See TODO.md.
+    s.hormonal_satiation = Math.min(100, s.hormonal_satiation + amount);
   }
 
   /** Qualitative stomach contents tier. Used for vomiting branch (dry heave vs. expulsion). */
