@@ -4,28 +4,7 @@ export function createWorld(ctx) {
   const State = ctx.state;
   const Timeline = ctx.timeline;
   const Events = ctx.events;
-  const Dishes = ctx.dishes;
-  const Linens = ctx.linens;
-  const Clothing = ctx.clothing;
-
-  // Mess tier — same formula as content.js messTier(), kept in sync manually.
-  // Thresholds: tidy < 20, cluttered < 45, messy < 70, chaotic >= 70.
-  function messScore() {
-    const dishScore = Math.min(5, Dishes.inSinkCount()) * 9;
-    const bedScore = Linens.bedState() === 'messy' ? 15 : Linens.bedState() === 'unmade' ? 5 : 0;
-    const towelScore = Linens.towelState() === 'on_floor' ? 8 : 0;
-    const clothingBedScore = Clothing.itemsOnFloor('bedroom').length * 8;
-    const clothingBathScore = Clothing.itemsOnFloor('bathroom').length * 5;
-    return Math.min(100, dishScore + bedScore + towelScore + clothingBedScore + clothingBathScore);
-  }
-
-  function messTier() {
-    const score = messScore();
-    if (score >= 70) return 'chaotic';
-    if (score >= 45) return 'messy';
-    if (score >= 20) return 'cluttered';
-    return 'tidy';
-  }
+  const Mess = ctx.mess;
 
   const MESS_TIER_RANK = { tidy: 0, cluttered: 1, messy: 2, chaotic: 3 };
 
@@ -285,7 +264,7 @@ export function createWorld(ctx) {
       // apartment_notice fires when mess tier has worsened since last surfacing.
       // Deterministic: no RNG consumed. Resets when cleaning or on wake.
       // Ignore tidy — no notice warranted when things are tidy.
-      const currentMessTier = messTier();
+      const currentMessTier = Mess.tier();
       const lastSurfaced = State.get('last_surfaced_mess_tier');
       const currentRank = MESS_TIER_RANK[currentMessTier] ?? 0;
       const lastRank = lastSurfaced !== null ? (MESS_TIER_RANK[lastSurfaced] ?? 0) : -1;

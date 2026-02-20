@@ -10,26 +10,7 @@ export function createContent(ctx) {
   const Dishes = ctx.dishes;
   const Linens = ctx.linens;
   const Clothing = ctx.clothing;
-
-  // --- Mess tier — derived from object systems ---
-  // Replaces apartment_mess scalar. Computed from Dishes + Linens + Clothing.
-
-  function messScore() {
-    const dishScore = Math.min(5, Dishes.inSinkCount()) * 9;
-    const bedScore = Linens.bedState() === 'messy' ? 15 : Linens.bedState() === 'unmade' ? 5 : 0;
-    const towelScore = Linens.towelState() === 'on_floor' ? 8 : 0;
-    const clothingBedScore = Clothing.itemsOnFloor('bedroom').length * 8;
-    const clothingBathScore = Clothing.itemsOnFloor('bathroom').length * 5;
-    return Math.min(100, dishScore + bedScore + towelScore + clothingBedScore + clothingBathScore);
-  }
-
-  function messTier() {
-    const score = messScore();
-    if (score >= 70) return 'chaotic';
-    if (score >= 45) return 'messy';
-    if (score >= 20) return 'cluttered';
-    return 'tidy';
-  }
+  const Mess = ctx.mess;
 
   // --- Relationship prose tables ---
   // Keyed on flavor archetype. Name is the only dynamic part.
@@ -749,7 +730,7 @@ export function createContent(ctx) {
     apartment_bedroom: () => {
       const energy = State.energyTier();
       const time = State.timePeriod();
-      const mess = messTier();
+      const mess = Mess.tier();
       const mood = State.moodTone();
 
       // NT values for continuous shading (no RNG consumed)
@@ -896,7 +877,7 @@ export function createContent(ctx) {
     apartment_kitchen: () => {
       const hunger = State.hungerTier();
       const fridge = State.fridgeTier();
-      const mess = messTier();
+      const mess = Mess.tier();
       const mood = State.moodTone();
       const time = State.timePeriod();
 
@@ -982,7 +963,7 @@ export function createContent(ctx) {
       const energy = State.energyTier();
       const mood = State.moodTone();
       const showered = State.get('showered');
-      const mess = messTier();
+      const mess = Mess.tier();
 
       let desc = 'The bathroom. Mirror, sink, shower.';
 
@@ -4808,7 +4789,7 @@ export function createContent(ctx) {
     },
 
     apartment_notice: () => {
-      const mess = messTier();
+      const mess = Mess.tier();
       // Record the tier at which this surfaced — world.js won't fire again until it worsens.
       State.set('last_surfaced_mess_tier', mess);
       const ser = State.get('serotonin');
