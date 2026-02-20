@@ -12,6 +12,8 @@ This feeds the prose compositor system (see docs/research/prose-construction.md)
 
 **Noticeability is relational.** The same sensory fact is more or less noticeable depending on the character's current state. This is not a fixed property of the stimulus — it's a relationship between stimulus and state.
 
+**Agency is on a gradient.** When a stimulus is ambiguous or NT state doesn't clearly determine a response, the player gets a choice. But trauma can override that choice — the response fires regardless of player intent, probability scaling with trauma intensity, resolved by PRNG (deterministic/replayable but not guaranteed). NT state mediates the baseline: high cortisol/NE primes threat response, making involuntary firing more likely even without trauma. Full voluntary control at one end, fully involuntary at the other — NT state and trauma determine where on that spectrum a given moment lands.
+
 **Senses are the surface; meaning is relational and historical.** What a character notices, and what it means when they do, depends on who they are and where they've been. Meeting someone from a different culture, noticing someone who stands out, navigating a language barrier — these are sensory experiences with a relational and cultural layer underneath. The prose has to know both. A flag ("is deaf", "speaks accented English", "grew up elsewhere") is not enough — the character's history and identity shape what the sensory fact costs them, what it means, how they carry it. This applies across all senses: the condition is the surface, the relationship to it is the substance.
 
 NT modulation of noticeability:
@@ -116,10 +118,36 @@ Both follow the same pattern: the condition shapes sensory experience, but the f
 - Dissociation → visual input arriving but not landing; objects losing significance
 - Low dopamine → things that would normally catch attention don't register
 
+### Floaters, afterimages, light sensitivity
+
+Character-side phenomena, not world-side:
+
+- **Floaters** — vitreous floaters; nearly universal but mostly filtered out. Surface to attention against bright uniform backgrounds (sky, white wall, screen). A nice example of noticeability-is-relational: always there, usually invisible.
+- **Afterimages** — complementary colour image persisting after staring at something bright. Universal.
+- **Light sensitivity (photophobia)** — constitutional for some characters; circumstantial for others (migraine, hangover, certain medications). At its worst, bright light is actively painful.
+
+### What surfaces to attention (world-side, continued)
+
+**Light conditions:**
+- Dense fog — limits the visual field structurally; the world ends earlier than expected
+- Streetlights at night — pools of orange/white light, the specific quality of artificial light on wet pavement
+- Shade under a tree — coolness implied by the visual, dappled movement
+- Dark alley — limited visibility plus immediate threat assessment
+
+**Visually significant things:**
+- Sculptures, art installations, landmarks (natural or artificial) — catch attention because they're visually distinct from context
+- Seasonal: cherry blossoms, autumn leaves, flower gardens — distinct enough to surface unprompted
+- Parades, public events — visual density, movement, colour
+
+**Threat detection:**
+- Someone following behind you — starts as a visual pattern, something unresolved in peripheral vision (same person appearing twice, a gait that matches yours too closely). Becomes a threat response.
+- The response is not fixed: NT state (high cortisol/NE primes it), trauma (can trigger involuntary response regardless of player intent, probability by PRNG), and absent either, the player gets a choice. The same visual fact reads completely differently depending on who's noticing and where — a function of history, context, and current state.
+
 ### Still to think about
 - How character sentiments affect what they visually notice (someone who loves architecture notices buildings)
 - Glasses/contacts as daily objects with states (lost, dirty, forgotten, broken)
 - How visual conditions interact with environments (astigmatism + night driving; myopia + unfamiliar space)
+- Environment as visual context (urban/rural, architecture era, season) — this is world design but meets senses at the point of what's salient
 
 ## Sound
 

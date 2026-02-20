@@ -74,6 +74,8 @@ This is distinct from "no numbers ever appear." The world contains quantities th
 
 **Gradients, not binaries.** State shapes experience continuously. Nothing switches on or off at a threshold. There's always something you can do at every point along every spectrum — it just changes in character, cost, and texture. The simulation never dead-ends at an extreme.
 
+**Agency is on a gradient.** When a stimulus is ambiguous or NT state doesn't clearly determine a response, the player gets a choice. But trauma can override that choice — the response fires regardless of player intent, probability scaling with trauma intensity, resolved by PRNG (deterministic/replayable but not guaranteed). NT state mediates the baseline: high cortisol/NE primes threat response, making involuntary firing more likely even without trauma. Full voluntary control at one end, fully involuntary at the other — NT state and trauma determine where a given moment lands.
+
 **There is no single path.** The same need has different solutions for different characters. Laundry means in-unit machines, or building laundry, or a laundromat trip, or hand-washing when money is tight. Getting food means cooking, or the corner store, or the food bank, or nothing. When designing a mechanic, ask: what does this look like for someone with fewer resources, worse options? That version is as real as the comfortable one — often more real, for more people. Never assume one universal path.
 
 **Text carries everything.** Prose tone, word choice, what's mentioned and what isn't = the "UI". The same moment reads differently depending on hidden state.
