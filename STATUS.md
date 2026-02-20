@@ -342,7 +342,7 @@ read_messages (backward-compat replay only), reply_to_friend, message_friend, he
 ### Global (1, available anywhere with phone)
 call_in (call in sick — morning only, work hours)
 
-## Events (13 types)
+## Events (14 types)
 
 - **alarm** — fires at alarm_time in bedroom
 - **late_anxiety** — stress when late for work (capped at 2 surfaces)
@@ -356,6 +356,7 @@ call_in (call in sick — morning only, work hours)
 - **apartment_notice** — mess awareness; fires on tier worsening (tidy→cluttered→messy→chaotic); deterministic, no RNG; resets on cleaning or wake
 - **street_ambient** — cars, buses, sirens
 - **someone_passes** — people on street
+- **vomit** — fires when `pending_vomit` flag is set (set probabilistically in `advanceTime()` when nausea > 75; rate 0–0.2/hr scaling 75–100). Deterministic fire in `checkEvents()`, no RNG at fire site. Branches: `stomachTier()` empty → dry heave (−8 energy, +6 stress, −8 nausea); else → expulsion (stomach_fullness −75, ate_today cleared, −5 energy, +4 stress, −25 nausea). Location-aware: bathroom vs. not. NT-shaded prose: adenosine (fog/dissociation), NE (crisis sharpness), GABA (loss of control). `wakeUp()` clears stale flag.
 
 ## Content
 

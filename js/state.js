@@ -173,6 +173,8 @@ export function createState(ctx) {
       // General nausea — shared across systems (withdrawal, illness, alcohol eventually).
       // Decays naturally; some sources clear faster with treatment.
       nausea: 0,               // 0-100
+      // Vomiting — set in advanceTime() when nausea > 75, cleared in checkEvents() on fire.
+      pending_vomit: false,
 
       // Environment
       // Temperature in celsius. Set by updateWeather() in world.js.
@@ -539,6 +541,18 @@ export function createState(ctx) {
       }
     }
 
+    // Vomiting — probabilistic when nausea is severe.
+    // Guard on !pending_vomit: once the flag is set, skip further rolls until it fires and clears.
+    // RNG is only consumed when nausea > 75 and flag is not set — predictable from state.
+    // Approximation debt: rate 0.2/hr at nausea=100 is chosen. Real emesis probability
+    // at severe nausea is highly context-dependent (substance, illness, individual). See TODO.md.
+    if (s.nausea > 75 && !s.pending_vomit) {
+      const vomitRate = ((s.nausea - 75) / 25) * 0.2; // 0–0.2 per hour at nausea 75–100
+      if (ctx.timeline.chance(vomitRate * hours)) {
+        s.pending_vomit = true;
+      }
+    }
+
     // Neurochemistry drift — levels approach targets with inertia
     driftNeurochemistry(hours);
   }
@@ -693,6 +707,7 @@ export function createState(ctx) {
     s.ate_at_soup_kitchen_today = false;
     s.daylight_exposure = 0;
     s.illness_medicated = false;
+    s.pending_vomit = false;  // clear any stale vomit flag — sleep resolves nausea
     // Caffeine habit — update from yesterday's peak, then reset
     if (s.caffeine_today_peak >= 40) {
       s.caffeine_habit = Math.min(100, s.caffeine_habit + 8);

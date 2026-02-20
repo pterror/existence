@@ -297,6 +297,13 @@ export function createWorld(ctx) {
       }
     }
 
+    // Vomiting — pending flag set in advanceTime() when nausea exceeds threshold.
+    // Deterministic: no RNG consumed here. Fires and clears the flag.
+    if (State.get('pending_vomit')) {
+      State.set('pending_vomit', false);
+      events.push('vomit');
+    }
+
     return /** @type {string[]} */ (events.filter(e => e !== undefined));
   }
 

@@ -4828,6 +4828,74 @@ export function createContent(ctx) {
         { weight: weather === 'snow' ? 1.5 : 0, value: 'Someone goes past in a big coat, head down against the cold. Everyone out here looks like they\'re getting somewhere fast.' },
       ]);
     },
+
+    vomit: () => {
+      const stomach = State.stomachTier();
+      const location = World.getLocationId();
+      const inBathroom = location === 'apartment_bathroom';
+      const aden = State.get('adenosine');
+      const ne = State.get('norepinephrine');
+      const gaba = State.get('gaba');
+
+      if (stomach === 'empty') {
+        // Dry heave — nothing to bring up
+        State.adjustEnergy(-8);
+        State.adjustStress(6);
+        State.set('nausea', Math.max(0, State.get('nausea') - 8));
+
+        if (inBathroom) {
+          return Timeline.weightedPick([
+            { weight: 1, value: 'Your body tries to expel something that isn\'t there. You\'re hunched over the toilet, hands braced on the seat, and nothing comes. The heaving is its own particular indignity — all the effort, none of the relief.' },
+            { weight: 1, value: 'Dry heaves. Your stomach clenches hard on empty and your throat burns anyway. You wait for it to stop. Eventually it does.' },
+            { weight: 1, value: 'You make it to the bathroom. You lean over the toilet and your body goes through the motions with nothing to show for it. The muscles ache after. The nausea doesn\'t really let up.' },
+            // High NE — adrenaline sharpness, body crisis registering acutely
+            { weight: State.lerp01(ne, 50, 75), value: 'Everything is very immediate and sharp. Your knuckles are white on the rim of the toilet. Your body is doing something it needs to do and you are along for it, helpless, hyperaware of every muscle.' },
+            // High adenosine — dissociation, foggy distance from the body
+            { weight: State.lerp01(aden, 55, 80) * State.adenosineBlock(), value: 'You\'re in the bathroom somehow. The heaving happens and there\'s a delay between the sensation and registering it — your body running ahead of you, your mind catching up.' },
+          ]);
+        } else {
+          return Timeline.weightedPick([
+            { weight: 1, value: 'The nausea crests and then your body decides — here, now, wherever you are. Dry heaves. Nothing comes up. Your eyes water. You wait until it\'s over.' },
+            { weight: 1, value: 'There\'s no time to go anywhere. You bend forward and your stomach clenches on empty, twice, three times. The sounds you make are humiliating. Nothing comes.' },
+            { weight: 1, value: 'It hits fast. You go still and breathe through it and your body heaves anyway, on its own timeline. Nothing comes up. The nausea barely shifts.' },
+            // Low GABA — loss of control feeling, helplessness
+            { weight: State.lerp01(gaba, 45, 25), value: 'Your body stops being yours for a moment. You can\'t do anything but go with it — the heave, the nothing, the slow return. You had no control over that and it shows.' },
+            // High NE — the body crisis as sharp, sensory-acute experience
+            { weight: State.lerp01(ne, 50, 75), value: 'Sudden, total, and there\'s no part of you that isn\'t involved. Dry heaves — your whole body braces and produces nothing. It leaves you shaking.' },
+          ]);
+        }
+      } else {
+        // Expulsion — stomach has contents
+        const newFullness = Math.max(0, State.get('stomach_fullness') - 75);
+        State.set('stomach_fullness', newFullness);
+        State.set('ate_today', false);  // food didn't stay down
+        State.set('nausea', Math.max(0, State.get('nausea') - 25));
+        State.adjustEnergy(-5);
+        State.adjustStress(4);
+
+        if (inBathroom) {
+          return Timeline.weightedPick([
+            { weight: 1, value: 'You make it to the bathroom in time. You lean over the toilet and your body takes care of the rest. Afterward you sit on the floor for a while with your back against the tub. The nausea has backed off a little. Not gone. Just less.' },
+            { weight: 1, value: 'The nausea peaks and then everything comes up, fast and hard. When it\'s over you rinse your mouth at the sink and look at yourself in the mirror for a moment before you look away.' },
+            { weight: 1, value: 'It happens quickly. There\'s almost nothing to decide — your body decides for you, and then it\'s over, and you\'re sitting on the bathroom floor, washed out, lighter in a bad way.' },
+            // High NE — adrenaline, the body crisis as hyper-acute physical experience
+            { weight: State.lerp01(ne, 50, 75), value: 'Your hands are cold and you\'re sweating slightly and everything comes up at once. The bathroom tiles are very specific while you\'re down there. Afterward your body feels wrong in a new way, hollowed out.' },
+            // High adenosine — fog-wrapped, processing delayed
+            { weight: State.lerp01(aden, 55, 80) * State.adenosineBlock(), value: 'The event happens — bathroom, toilet, the whole of it — and there\'s a layer of fog over it even as it\'s happening. You know what\'s going on. You just can\'t quite be present for it. Afterward you\'re empty and tired.' },
+          ]);
+        } else {
+          return Timeline.weightedPick([
+            { weight: 1, value: 'You don\'t make it anywhere. You bend forward and everything comes up right where you are. When it\'s done you stay still for a moment, hands on your knees, and then you deal with it.' },
+            { weight: 1, value: 'There\'s no warning that isn\'t also already happening. It\'s fast and it\'s there and then it\'s over and you\'re standing in a mess of your own making, shaking slightly, stomach clenched around nothing.' },
+            { weight: 1, value: 'The nausea spills over all at once. Not here, not like this — but here, like this. You clean up as best you can. You don\'t feel better. You feel emptied out.' },
+            // Low GABA — the loss of control landing hard
+            { weight: State.lerp01(gaba, 45, 25), value: 'Your body does what it does and you have no say. Afterward — the shame of the mess, the fact of the location, the way you couldn\'t stop it — you file that away and clean up without thinking about it too hard.' },
+            // High NE — the body crisis raw, un-muffled
+            { weight: State.lerp01(ne, 50, 75), value: 'Fast and total and you\'re not in the bathroom. It\'s just — out, all of it, and you\'re left shaking with the after-adrenaline of it, hyper-present in the worst way.' },
+          ]);
+        }
+      }
+    },
   };
 
   // --- Idle thoughts ---

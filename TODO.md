@@ -171,12 +171,11 @@ No content level configuration. DESIGN.md describes: baseline tier (everyday str
 ### Health system
 ~~No health conditions exist.~~ Migraines (chronic), acute illness (flu/cold/GI), and dental pain (chronic) implemented. Remaining: chronic conditions (diabetes, chronic pain), mental health as structural, pregnancy.
 
-**Vomiting event — implement next:**
-`stomach_fullness` and `nausea` are now in place. The vomiting event fires probabilistically in `advanceTime()` when `nausea > 75` (~15–20%/hr, scaling). Needs:
-- Two RNG calls (chance roll + prose pick). Set a pending flag, surface between action renders in game.js (same pattern as idle events).
-- Branch on `stomachTier()`: 'empty' → dry heaving (no hunger change, worse energy/stress drain, minimal nausea relief), else → expulsion (stomach_fullness → ~5, hunger signal unchanged immediately — nausea still suppressing it, partial nausea relief ~25pts).
-- Also clear `ate_today` if stomach was not empty (food didn't stay down).
-- Location-aware prose: bathroom vs. not.
+~~**Vomiting event — implement next:**~~ **FIXED.**
+`pending_vomit` flag in state. Chance roll in `advanceTime()` when `nausea > 75` (rate 0–0.2/hr, scaling with nausea 75–100). `checkEvents()` in world.js fires and clears the flag — deterministic, no RNG at fire site. `eventText.vomit` in content.js: branches on `stomachTier()` (empty → dry heave, else → expulsion) and location (bathroom vs. not). Prose: `Timeline.weightedPick()` with NT shading (adenosine fog, NE adrenaline sharpness, GABA loss-of-control). `wakeUp()` clears stale flag.
+
+**Remaining approximation debts:**
+- Vomiting rate (0.2/hr at nausea=100) — chosen. Real emesis probability is highly context-dependent (substance type, illness mechanism, individual tolerance). Needs real-world calibration data.
 
 **Dental pain — chargen approximation debts:**
 - Currently assigned from `economic_origin` — jurisdiction/insurance model would make this more accurate (dental access varies enormously by country)
