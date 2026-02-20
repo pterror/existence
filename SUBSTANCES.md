@@ -3,6 +3,8 @@
 Design reference for substance mechanics in *existence*. Captures the
 dependency model used for caffeine and the template for future substances.
 
+*Citation status: this document contains specific quantitative claims (half-lives, withdrawal timing, mechanism labels) with no PMC/PMID identifiers. Treat as uncited design rationale until sources are added. The caffeine withdrawal citation (Juliano & Griffiths 2004, PMID 15448977) exists only in state.js, not here.*
+
 ---
 
 ## Core Model

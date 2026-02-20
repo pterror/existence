@@ -2,6 +2,8 @@
 
 How emotions work in the simulation. This document describes the mechanics underneath the mood system described in DESIGN.md. None of this is visible to the player. The player sees prose.
 
+*Citation status: this document contains empirical claims (notably "~60% greater amygdala reactivity", effect sizes d=0.17–0.28 for sex differences in rumination, trait inertia correlations) with no PMC/PMID identifiers. The corresponding calibration research with citations is in RESEARCH-CALIBRATION.md.*
+
 ## The Problem with Derived Mood
 
 The current implementation computes mood from state variables every time it's asked: low energy + high stress = numb, good energy + low stress = clear. Mood snaps instantly to match conditions. Eat a sandwich and your mood changes. This is wrong in every way that matters.

@@ -2,6 +2,8 @@
 
 Research compiled for simulation design. For each finding: what the evidence shows, how strong it is, and what it means for modeling. This is reference material, not a design document.
 
+*Citation status: this document names studies inline (e.g. "Schmidt et al. JAMA Psychiatry 2015", "Skovlund 2016") but provides no PMIDs, DOIs, or volume/page numbers. Specific quantitative claims (hormone level ranges, prevalence rates, PK data) are not retrievable without a separate search. Treat as named-but-unverified until identifiers are added.*
+
 ---
 
 ## Part 1: The Menstrual Cycle
