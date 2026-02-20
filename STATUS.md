@@ -8,6 +8,7 @@ Current state of the codebase. Keep this up to date — see CLAUDE.md workflow r
 - **energy** (0–100) — tiers: depleted / exhausted / tired / okay / rested / alert
 - **stress** (0–100) — tiers: calm / baseline / tense / strained / overwhelmed
 - **hunger** (0–100) — tiers: satisfied / fine / hungry / very_hungry / starving
+- **stomach_fullness** (0–100) — physical stomach contents. Filled by eating. Exponential decay, base half-life 90 min (solid food). High NE or cortisol slows gastric emptying: `halfLife = 90 × (1 + 0.5×clamp((NE−50)/50,0,1) + 0.3×clamp((cortisol−50)/50,0,1))` — up to ~2× at max stress. Suppresses hunger signal and accelerates satiety.
 - **social** (0–100) — tiers: isolated / withdrawn / neutral / connected / warm
 - **job_standing** (0–100) — tiers: at_risk / shaky / adequate / solid / valued
 - **money** (float) — tiers: broke / scraping / tight / careful / okay / comfortable

@@ -230,7 +230,7 @@ ADHD (executive dysfunction, time blindness, hyperfocus), autism (sensory proces
 **Hunger/stomach approximation debts:**
 - ~~Gastric emptying is **linear**~~ — **FIXED.** Now exponential, half-life 90 min, derived from real gastric emptying data for solid food.
 - ~~Hunger base rate: `4 pts/hr`~~ — **FIXED.** Now 8 pts/hr, derived from real hunger return (~3–5h after a normal meal working back through stomach suppression).
-- No stress modifier on gastric emptying: high NE/cortisol suppresses GI motility (sympathetic inhibition of the enteric nervous system). A stressed character should digest more slowly.
+- ~~No stress modifier on gastric emptying~~ — **FIXED.** NE and cortisol now slow gastric emptying via `gastricSlowFactor`. Approximation debt: coefficients (0.5 NE, 0.3 cortisol) and threshold (50) are chosen to give ~2× half-life at max stress, not derived from real GI physiology data. Needs calibration against measured GI motility studies.
 - No content-type variation: liquids (coffee, water) empty in 20–30 min half-life; fatty/protein-dense food holds much longer (~3–4h half-life). `fillStomach()` uses a flat amount regardless of what was eaten.
 - Stomach → hunger suppression coefficient: `0.85` — chosen. Represents the weight of stretch receptor + hormonal feedback; uncalibrated.
 

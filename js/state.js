@@ -336,10 +336,18 @@ export function createState(ctx) {
     // Stomach digestion — exponential decay, half-life ~90 min for solid food.
     // Derived from real gastric emptying data: solids empty with ~90 min half-life under
     // normal conditions (faster when full, slowing as it empties — first-order kinetics).
-    // Remaining approximation debts: stress slows motility (not yet modelled); liquids
-    // empty much faster (~20–30 min half-life); fat/protein content slows via CCK feedback;
-    // no content-type tracking. See TODO.md.
-    s.stomach_fullness = Math.max(0, s.stomach_fullness * Math.exp(-Math.LN2 / 90 * minutes));
+    // High sympathetic tone (NE, cortisol) suppresses GI motility via inhibition of the
+    // enteric nervous system. Stressed characters digest more slowly.
+    // Approximation debt: the scaling coefficients (0.5 for NE, 0.3 for cortisol) and
+    // baseline threshold (50) are chosen to give a plausible ~2× half-life at max stress,
+    // not derived from real GI physiology data. See TODO.md.
+    const ne = s.norepinephrine;
+    const cort = s.cortisol;
+    const gastricSlowFactor = 1
+      + 0.5 * Math.max(0, Math.min(1, (ne - 50) / 50))
+      + 0.3 * Math.max(0, Math.min(1, (cort - 50) / 50));
+    const gastricHalfLife = 90 * gastricSlowFactor;
+    s.stomach_fullness = Math.max(0, s.stomach_fullness * Math.exp(-Math.LN2 / gastricHalfLife * minutes));
 
     // Hunger signal — felt experience, suppressed by stomach fullness, nausea, and illness.
     // Base rate derived from real hunger return: people typically feel hungry ~3–5h after
@@ -875,21 +883,44 @@ export function createState(ctx) {
    * Blocks adenosine receptors — adenosine still accumulates behind the block.
    * Crash hits when caffeine clears and all that accumulated adenosine is felt.
    * Small acute NE bump from sympathomimetic effect.
+   *
+   * Acute tolerance: at high habit, fewer spare receptors are available to block,
+   * so each dose has diminished effect. At habit=0, full amount. At habit=100, ~70%.
    */
   function consumeCaffeine(amount) {
-    s.caffeine_level = clamp(s.caffeine_level + amount, 0, 100);
+    // Approximation debt: 0.3 coefficient (30% reduction at max habit) is chosen, not
+    // derived from adenosine receptor density data. Real tolerance involves receptor
+    // upregulation (more A1/A2A receptors), meaning a given caffeine concentration blocks
+    // a smaller fraction of the total pool. 70% effective dose at max habit is plausible
+    // but uncalibrated against pharmacokinetic data.
+    const effectiveAmount = amount * (1 - 0.3 * (s.caffeine_habit / 100));
+    s.caffeine_level = clamp(s.caffeine_level + effectiveAmount, 0, 100);
     s.caffeine_today_peak = Math.max(s.caffeine_today_peak, s.caffeine_level);
-    // Acute sympathomimetic effect: small NE boost
-    adjustNT('norepinephrine', amount * 0.2);
+    // Acute sympathomimetic effect: small NE boost, also tolerance-scaled
+    adjustNT('norepinephrine', effectiveAmount * 0.2);
   }
 
   /**
    * Adenosine receptor block factor. 0 = fully blocked (caffeine=100), 1 = unblocked (no caffeine).
    * Multiply lerp01(adenosine, ...) weights by this before using them in prose.
    * High caffeine → adenosine still accumulates but isn't felt — crash hits when caffeine clears.
+   *
+   * Tolerance adjustment: at high habit, the receptor pool is upregulated — more receptors
+   * exist, so the same caffeine_level blocks a smaller fraction of total receptor capacity.
+   * The blocking curve is shifted: a habituated user at caffeine_level=50 gets less block
+   * than a naive user at the same level.
+   *
+   * Approximation debt: the 0.4 denominator shift at max habit is chosen, not derived from
+   * receptor density data. At habit=100, denominator=140, meaning full block requires
+   * caffeine_level=140 (capped at 100 → ~71% max block for a habituated user at peak).
+   * Uncalibrated against real A1/A2A upregulation magnitude.
    */
   function adenosineBlock() {
-    return Math.max(0, 1 - s.caffeine_level / 100);
+    // Tolerance shifts the effective denominator upward: more caffeine needed for full block.
+    // At habit=0: denominator=100 (unchanged). At habit=100: denominator=140.
+    // Approximation debt: 0.4 shift coefficient — chosen, not derived from receptor density data.
+    const denominator = 100 + 0.4 * s.caffeine_habit;
+    return Math.max(0, 1 - s.caffeine_level / denominator);
   }
 
   /**
