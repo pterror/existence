@@ -3504,7 +3504,9 @@ export function createContent(ctx) {
         State.set('grazed_break_room_today', true);
         State.advanceTime(8);
 
-        // Dental — sugar/acidity from candy and cake
+        // Dental — sugar/acidity from candy and cake.
+        // Approximation debt: 10 pts chosen (less than full meals at 15) on the
+        // reasoning that this is small amounts, less mastication. Uncalibrated.
         State.dentalSpike(10);
 
         const mood = State.moodTone();
@@ -5125,10 +5127,10 @@ export function createContent(ctx) {
       );
     }
 
-    // The nothing option — hungry + broke + no food at home
+    // The nothing option — hungry + broke + no food at home + no EBT
     // Fires when very hungry or starving, money is broke or scraping,
-    // fridge is empty, and pantry is empty. The compound state of having
-    // no available path to food right now.
+    // fridge is empty, pantry is empty, and EBT balance is also depleted.
+    // The compound state of having no available path to food right now.
     {
       const nothingMoney = State.moneyTier();
       const nothingFridge = State.fridgeTier();
@@ -5137,9 +5139,12 @@ export function createContent(ctx) {
         (hunger === 'very_hungry' || hunger === 'starving') &&
         (nothingMoney === 'broke' || nothingMoney === 'scraping') &&
         nothingFridge === 'empty' &&
-        nothingPantry === 'empty'
+        nothingPantry === 'empty' &&
+        State.get('ebt_balance') < 5  // EBT must also be depleted — $5 minimum for buy_groceries
       ) {
         const tp = State.timePeriod();
+        // Late = evening/night when food bank and most stores are closed.
+        // Daytime = morning through afternoon when resources are still accessible.
         const isLate = tp === 'evening' || tp === 'night' || tp === 'deep_night';
         const isDaytime = tp === 'morning' || tp === 'late_morning' || tp === 'midday' || tp === 'afternoon';
 

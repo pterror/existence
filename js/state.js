@@ -898,6 +898,10 @@ export function createState(ctx) {
   /**
    * Qualitative tier for how late the character is.
    * Returns 'fine' when not late. Used for transition-based event firing.
+   * Approximation debt: thresholds (0 min, 20 min) are chosen — not derived from
+   * real workplace tolerance data. Real grace windows vary by industry and employer
+   * (5–30 min). A missed-punch system or manager relationship would provide the
+   * right upstream variable.
    */
   function lateTier() {
     const minutes = latenessMinutes();
