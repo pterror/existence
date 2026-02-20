@@ -203,6 +203,20 @@ ADHD (executive dysfunction, time blindness, hyperfocus), autism (sensory proces
 
 **Caffeine remaining debts:**
 - Acute tolerance: `consumeCaffeine(50)` gives same boost regardless of habit. At high habit, effective boost should be ~70% (fewer spare receptors to block). Low priority — withdrawal loop already captures dependency experience.
+- Habit tracking: `+8 / −5 per day` — chosen, not derived from real caffeine tolerance build/fade timescales (real tolerance develops over ~1–2 weeks, fades over similar). Magnitude is an approximation.
+- Withdrawal build rate: `(habit/100) * 6 pts/hr` — chosen. Real caffeine withdrawal onset ~12–24h after last dose; the rate should be calibrated against that target.
+- Withdrawal clear rate: `25 pts/hr` — chosen. Real caffeine relief is noticeable within 30–45 min of dosing; needs calibration against `caffeine_level` half-life.
+- Adenosine sensitivity bonus formula: `(habit/100) * 0.5 * (withdrawal/100)` — chosen, not derived from receptor density data.
+- Nausea build threshold and rate: `withdrawal > 55, habit > 45, rate * 5 pts/hr` — chosen. Real GI symptoms appear at severe withdrawal in heavy users; thresholds are plausible but uncalibrated.
+- Nausea NT effects: GABA `−1.5 pts/hr`, NE `+1.0 pts/hr` at nausea=100 — chosen magnitudes.
+- Nausea natural decay: `2 pts/hr` — chosen. Caffeine-assisted decay: `8 pts/hr` — chosen. No real-world anchor.
+
+**Hunger/stomach approximation debts:**
+- Gastric emptying is **linear** (`stomach_fullness − 20 * hours`) — should be **exponential** (proportional to current fullness: faster when full, slower as it empties). Half-life ~1.5–2h for a solid meal is the real-world anchor.
+- No stress modifier on gastric emptying: high NE/cortisol suppresses GI motility (sympathetic inhibition of the enteric nervous system). A stressed character should digest more slowly.
+- No content-type variation: liquids (coffee, water) empty in 20–30 min; fatty/protein-dense food holds much longer. `fillStomach()` uses a flat amount regardless of what was eaten.
+- Hunger base rate: `4 pts/hr` — chosen. Real hunger varies enormously by metabolism, meal size, composition. Needs calibration.
+- Stomach → hunger suppression coefficient: `0.85` — chosen. Represents the weight of stretch receptor + hormonal feedback; uncalibrated.
 
 **Next substances to implement (in rough priority order):**
 

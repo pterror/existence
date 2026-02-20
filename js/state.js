@@ -333,12 +333,18 @@ export function createState(ctx) {
     // Passive effects per time passage
     const hours = minutes / 60;
 
-    // Stomach digestion — contents drain at ~20 pts/hr regardless of wakefulness
+    // Stomach digestion — contents drain over time.
+    // Approximation debt: linear drain (−20 pts/hr). Real gastric emptying is exponential
+    // (proportional to fullness — faster when full, slowing as it empties; ~1.5–2h half-life
+    // for solids). Also missing: stress slows motility; liquid vs. solid content type; fat/
+    // protein content slows via CCK feedback. See TODO.md.
     s.stomach_fullness = Math.max(0, s.stomach_fullness - hours * 20);
 
-    // Hunger signal — felt experience, suppressed by stomach fullness, nausea, and illness
+    // Hunger signal — felt experience, suppressed by stomach fullness, nausea, and illness.
+    // Approximation debt: base rate 4 pts/hr is uncalibrated; suppression coefficient 0.85
+    // is chosen not derived. See TODO.md.
     let hungerRate = 4;
-    // Stomach stretch receptors + hormonal signals suppress hunger when full
+    // Stomach stretch receptors + hormonal signals (GIP, GLP-1, CCK) suppress hunger when full
     if (s.stomach_fullness > 10) {
       hungerRate *= Math.max(0.1, 1 - (s.stomach_fullness / 100) * 0.85);
     }
@@ -451,18 +457,20 @@ export function createState(ctx) {
       adjustNT('dopamine', -sev * hours * 2 * medFactor);
     }
 
-    // Caffeine withdrawal — builds when habitual user goes without caffeine
+    // Caffeine withdrawal — builds when habitual user goes without caffeine.
+    // Approximation debt: all rates below are chosen, not derived from real pharmacokinetics.
+    // Real onset: ~12–24h after last dose. Real peak: ~20–51h. See TODO.md.
     if (s.caffeine_habit > 10) {
       if (s.caffeine_level < 15) {
-        // Withdrawal builds proportional to habit strength. At habit=100: ~6 pts/hr.
-        // Takes ~8–12h to reach moderate (40) at typical habit levels.
+        // Approximation debt: build rate (habit/100)*6 pts/hr is uncalibrated.
         const buildRate = (s.caffeine_habit / 100) * 6;
         s.caffeine_withdrawal = Math.min(100, s.caffeine_withdrawal + buildRate * hours);
 
         // Receptor upregulation effect: chronic caffeine causes the brain to grow more
         // adenosine receptors. When caffeine is removed, the same adenosine hits a much
         // larger/more sensitive receptor population — effective adenosine signal amplified.
-        // Model: extra adenosine accumulation proportional to habit × withdrawal depth.
+        // Approximation debt: sensitivity bonus formula (habit/100 * 0.5 * withdrawal/100)
+        // is chosen, not derived from receptor density data.
         if (s.caffeine_habit > 30) {
           const sensitivityBonus = (s.caffeine_habit / 100) * 0.5 * (s.caffeine_withdrawal / 100);
           s.adenosine = clamp(s.adenosine + sensitivityBonus * hours * 4, 0, 100);
@@ -471,26 +479,28 @@ export function createState(ctx) {
         // Nausea — severe withdrawal + high habit triggers GI symptoms.
         // Mechanism: adenosine A1/A2A receptors in gut + brainstem chemoreceptor trigger
         // zone (area postrema) flood with unblocked adenosine. Vagus nerve involvement.
+        // Approximation debt: thresholds (withdrawal>55, habit>45) and rate *5 are chosen.
         if (s.caffeine_withdrawal > 55 && s.caffeine_habit > 45) {
           const nauseaRate = ((s.caffeine_withdrawal - 55) / 45) * (s.caffeine_habit / 100) * 5;
           s.nausea = Math.min(100, s.nausea + nauseaRate * hours);
         }
       } else if (s.caffeine_level >= 25) {
-        // Caffeine clears withdrawal quickly once it reaches meaningful levels
+        // Approximation debt: clear rates (25 pts/hr withdrawal, 8 pts/hr nausea) are chosen.
+        // Real relief noticeable within 30–45 min of dosing.
         s.caffeine_withdrawal = Math.max(0, s.caffeine_withdrawal - hours * 25);
-        // Caffeine also clears withdrawal nausea (restores receptor block)
         s.nausea = Math.max(0, s.nausea - hours * 8);
       }
       if (s.caffeine_withdrawal > 0) {
-        // Withdrawal headache signal: elevated NE (vascular dilation pain); suppressed dopamine
+        // Approximation debt: NE +2.5 and dopamine −2 pts/hr at withdrawal=100 are chosen.
         adjustNT('norepinephrine', (s.caffeine_withdrawal / 100) * hours * 2.5);
         adjustNT('dopamine', -(s.caffeine_withdrawal / 100) * hours * 2);
       }
     }
 
-    // Nausea — NT effects and natural decay
+    // Nausea — NT effects and natural decay.
+    // Approximation debt: decay 2 pts/hr, NT magnitudes (GABA −1.5, NE +1.0, adenosine +2)
+    // are all chosen with no real-world anchor. See TODO.md.
     if (s.nausea > 0) {
-      // Natural decay: ~2 pts/hr
       s.nausea = Math.max(0, s.nausea - hours * 2);
       // Can't settle when nauseated — suppresses GABA; mild NE from body distress
       adjustNT('gaba', -(s.nausea / 100) * hours * 1.5);
