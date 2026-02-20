@@ -110,6 +110,11 @@ Only "eat from fridge" and "buy cheap meal." No cooking (time + energy + ingredi
 ### Sleep prose
 **Largely implemented.** Sleep prose now has two phases: falling-asleep (how sleep came) and waking-up (the gradient back to consciousness). Waking prose branches on post-sleep energy, sleep quality, alarm vs natural, time of day, mood, sleep debt, and sleep inertia — ~44 waking + ~22 falling-asleep variants. Alarm negotiation implemented (snooze/dismiss). Slept-through-alarm awareness. Still missing: insomnia/not-sleeping as a distinct experience, dreaming.
 
+**Sleep cycle approximation debts:**
+- `sleep_cycle_length` is drawn uniformly from 70–120 min. Real distribution is likely clustered tighter around 90 min (polysomnography studies show most adults in ~85–95 min range, with shorter and longer tails). Needs calibration against real PSG data.
+- Cycle shape ratios `[0.83, 1.0, 1.11, 1.17]` are derived from the population-mean structure (75/90/100/105 min ÷ 90). Real per-character cycle shape variation (not just length) is unknown — some people's first cycle is relatively longer, some shorter. Calibration needs per-cycle PSG staging data.
+- Sleep apnea (non-restorative sleep mechanic) would require its own cycle disruption model — not assignable at chargen until upstream exists.
+
 ### Domestic object systems
 Full design in [DESIGN-OBJECTS.md](DESIGN-OBJECTS.md). Mess is not a scalar — it's emergent from the states of real objects. The current `apartment_mess` variable is an acknowledged approximation debt. See [PHILOSOPHY.md](PHILOSOPHY.md) for the interface/granularity model that applies here.
 
