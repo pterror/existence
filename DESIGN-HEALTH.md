@@ -267,6 +267,8 @@ The same substance produces different effects in different bodies. This is not R
 
 This layer sits under the substance system: identical inputs → different outputs per character.
 
+*Note: this section has no citations yet. The design direction is sound but specific prevalence numbers (e.g. ALDH2 frequency) need literature before being used in chargen.*
+
 ### CYP enzyme variation
 
 **CYP1A2** metabolizes caffeine. Ultra-rapid metabolizers clear it in ~2–3 hours. Poor metabolizers retain it for 8–12 hours. Same dose, completely different evening. This is the most common pharmacogenomic variable a character would encounter without knowing it — the person who drinks coffee at 9pm and sleeps fine vs. the one who has a cup at noon and feels it until midnight.
