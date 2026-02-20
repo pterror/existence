@@ -2350,6 +2350,7 @@ export function createState(ctx) {
     moneyFidelity,
     perceivedTimeString,
     perceivedMoneyString,
+    vagueTimeString,
     lerp01,
     sentimentIntensity,
     adjustSentiment,

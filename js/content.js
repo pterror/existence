@@ -853,10 +853,16 @@ export function createContent(ctx) {
       }
       // 'unmade' is the default, already implied — no additional sentence
 
-      // Alarm detail
+      // Alarm detail — perceived, not exact (location description, not a direct check)
       if (State.get('alarm_set') && !State.get('alarm_went_off')
           && (time === 'early_morning' || time === 'deep_night' || time === 'morning')) {
-        desc += ' The alarm clock on the nightstand shows ' + State.getTimeString() + '.';
+        const tf = State.timeFidelity();
+        if (tf === 'exact' || tf === 'rounded') {
+          desc += ' The alarm clock on the nightstand shows ' + State.perceivedTimeString() + '.';
+        } else if (tf === 'vague') {
+          desc += ' The alarm clock is set. The number on it hasn\'t registered yet.';
+        }
+        // sensory: the character isn't reading details — omit
       }
 
       if (!State.get('dressed') && time !== 'deep_night' && time !== 'night') {
@@ -926,8 +932,19 @@ export function createContent(ctx) {
         desc += ' The counter has its own layer — things set down and left, the kind that stops registering once it\'s been there long enough.';
       }
 
-      // Microwave clock — the kitchen always tells you the time
-      desc += ' The microwave clock reads ' + State.getTimeString() + '.';
+      // Microwave clock — perceived, not exact (location description, not a direct check)
+      {
+        const tf = State.timeFidelity();
+        if (tf === 'exact' || tf === 'rounded') {
+          desc += ' The microwave clock reads ' + State.perceivedTimeString() + '.';
+        } else if (tf === 'vague') {
+          const v = State.vagueTimeString();
+          desc += ' The microwave clock. ' + v.charAt(0).toUpperCase() + v.slice(1) + '.';
+        } else {
+          // sensory — character is barely registering the clock face
+          desc += ' The microwave clock is there. You\'re not reading it.';
+        }
+      }
 
       // NT deterministic modifiers (no RNG — location descriptions called from UI.render)
       const aden = State.get('adenosine');
@@ -4573,7 +4590,9 @@ export function createContent(ctx) {
 
     // Time — glance when looking at phone
     State.glanceTime();
-    desc += State.perceivedTimeString() + '.';
+    const timeStr = State.perceivedTimeString();
+    // Sensory tier returns full sentences (already punctuated); others are fragments
+    desc += timeStr.endsWith('.') ? timeStr : timeStr + '.';
 
     // Messages
     if (unread.length > 0) {
@@ -4668,7 +4687,7 @@ export function createContent(ctx) {
 
   const eventText = {
     alarm: () => {
-      State.glanceTime();
+      State.observeTime();  // The alarm clock IS the clock — this is a full observation
       const timeStr = State.getTimeString();
       const energy = State.energyTier();
       if (energy === 'depleted' || energy === 'exhausted') {
@@ -5247,6 +5266,38 @@ export function createContent(ctx) {
         thoughts.push(
           { weight: moneyAnx * 5, value: 'You think about the account balance without checking. The not-checking is its own kind of checking.' },
           { weight: moneyAnx * 5, value: 'Every purchase is a small negotiation. Not with anyone. Just with the feeling in your chest.' },
+        );
+      }
+      // Money fidelity — the experience of knowing-but-not-quite when finances are anxious
+      if (moneyAnx > 0.1) {
+        const mf = State.moneyFidelity();
+        if (mf === 'rough' || mf === 'qualitative') {
+          thoughts.push(
+            { weight: moneyAnx * 5, value: 'You try to picture the account balance. You get a shape, not a number. Something in the vicinity of not enough.' },
+            { weight: moneyAnx * 4, value: 'You haven\'t checked in a while. You know roughly. Roughly is what you have right now.' },
+          );
+        } else if (mf === 'approximate') {
+          thoughts.push(
+            { weight: moneyAnx * 3, value: 'Around something. The number is in your head but it\'s soft at the edges.' },
+          );
+        }
+      }
+    }
+
+    // Time fidelity — the experience of not quite knowing when it is
+    {
+      const tf = State.timeFidelity();
+      const aden = State.get('adenosine');
+      const adWeight = State.lerp01(aden, 45, 70) * State.adenosineBlock();
+      if (tf === 'sensory') {
+        thoughts.push(
+          { weight: 3 + adWeight * 4, value: 'You\'ve lost track of the time. Not dramatically. Just — lost it somewhere.' },
+          { weight: 2 + adWeight * 3, value: 'You could find out what time it is. You haven\'t needed to yet.' },
+          { weight: adWeight * 4, value: 'The light says something. You\'re not translating it into a number.' },
+        );
+      } else if (tf === 'vague') {
+        thoughts.push(
+          { weight: 1 + adWeight * 2, value: 'It\'s been a while since you\'ve checked the time. You have a rough idea. Rough is fine.' },
         );
       }
     }
