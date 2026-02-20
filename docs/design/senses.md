@@ -198,7 +198,52 @@ Character-side phenomena, not world-side:
 - **Aversive involuntary responses** — nails on a chalkboard, certain frequencies, styrofoam squeaking. Nearly universal but varies in intensity. Full-body cringe, goosebumps, visceral aversion — the response is partly auditory, partly physical. Misophonia is the extreme end. Connects to the agency gradient: fully involuntary, no choice involved.
 
 ## Taste
-*— not yet covered*
+
+### What the game world produces
+
+Mostly tied to eating and drinking — but not entirely:
+
+- **Morning mouth** — taste before the day starts, before food or drink
+- **Dry mouth** — caffeine, dehydration, anxiety, certain medications
+- **Metallic taste** — anxiety, blood (bitten cheek, split lip), some medications, low blood sugar
+- **Medication aftertaste** — specific and often unpleasant; lingers
+- **Smoke** — cigarettes, someone else's smoke
+- **Tap water** — flat, slightly mineral, varies by place; bottled water tastes different; filtered water different again
+- **Nausea making things aversive** — even neutral tastes become wrong
+
+### Acquired tastes
+
+Acquired tastes are the *opposite* of habituation. The comfort sentiment system diminishes with repeated exposure; acquired tastes invert — aversion becomes tolerance becomes preference through repeated exposure.
+
+Examples: durian, bitter gourd, spice, red wine, beer, coffee, olives, blue cheese. What counts as "acquired" is relative to upbringing — someone who grew up eating bitter gourd doesn't experience it as acquired, it's just food.
+
+The process is social as well as physiological — you're more likely to acquire a taste for something consumed in positive social contexts. The association attaches to the substance via the experience.
+
+**Spice is a special case:** capsaicin tolerance is partly physiological — repeated exposure desensitises TRPV1 receptors. Spice "acquisition" is a literal change in how the body processes the stimulus, not just a preference shift. Reverses with extended absence — tolerance drops without maintenance.
+
+Mechanically: acquired tastes need the sentiment system to handle both directions (habituation down, acquisition up). Food sentiments generated at chargen reflect upbringing and culture; acquired tastes are the mechanism by which those sentiments change through play.
+
+### Cultural dimension
+
+What tastes like home vs. what tastes foreign is an identity marker, not just a preference. A character eating food from their culture of origin in a context where it's not available experiences something different from just "eating familiar food." What tastes wrong (too sweet, too bland, wrong spices) is determined by what the character grew up with.
+
+### NT modulation
+- Adenosine high → taste flattens; everything slightly muted
+- Hunger → taste sharpens; first bite when genuinely hungry is different from eating out of habit
+- Depression/anhedonia → taste flattens; food loses its quality (this is a real symptom, not metaphor)
+- Nausea → neutral tastes become aversive; the texture of things changes
+- Anxiety → metallic edge; appetite suppressed
+
+### Character-side conditions
+- **Anosmia** (no smell) — guts taste significantly since smell and taste are deeply linked; most of what we call "taste" is actually retronasal smell
+- **Ageusia** — no taste
+- **Hypogeusia** — reduced taste
+- **Phantogeusia** — taste that isn't there, often metallic or bitter; can be medication side effect, neurological, or COVID-related
+
+### Still to think about
+- Full interaction with the food/cooking system
+- Taste memory — specific tastes tied to specific memories (Proustian, same as smell)
+- Texture as part of the eating experience (overlaps with touch)
 
 ## Touch / Tactile
 *— not yet covered in full. revisit.*
