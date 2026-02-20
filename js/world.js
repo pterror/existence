@@ -4,6 +4,30 @@ export function createWorld(ctx) {
   const State = ctx.state;
   const Timeline = ctx.timeline;
   const Events = ctx.events;
+  const Dishes = ctx.dishes;
+  const Linens = ctx.linens;
+  const Clothing = ctx.clothing;
+
+  // Mess tier — same formula as content.js messTier(), kept in sync manually.
+  // Thresholds: tidy < 20, cluttered < 45, messy < 70, chaotic >= 70.
+  function messScore() {
+    const dishScore = Math.min(5, Dishes.inSinkCount()) * 9;
+    const bedScore = Linens.bedState() === 'messy' ? 15 : Linens.bedState() === 'unmade' ? 5 : 0;
+    const towelScore = Linens.towelState() === 'on_floor' ? 8 : 0;
+    const clothingBedScore = Clothing.itemsOnFloor('bedroom').length * 8;
+    const clothingBathScore = Clothing.itemsOnFloor('bathroom').length * 5;
+    return Math.min(100, dishScore + bedScore + towelScore + clothingBedScore + clothingBathScore);
+  }
+
+  function messTier() {
+    const score = messScore();
+    if (score >= 70) return 'chaotic';
+    if (score >= 45) return 'messy';
+    if (score >= 20) return 'cluttered';
+    return 'tidy';
+  }
+
+  const MESS_TIER_RANK = { tidy: 0, cluttered: 1, messy: 2, chaotic: 3 };
 
   // --- Location definitions ---
   // Each location has an id, connections, and travel times (in minutes)
@@ -247,13 +271,22 @@ export function createWorld(ctx) {
     // Apartment ambient
     if (locations[location]?.area === 'apartment') {
       if (Timeline.chance(0.06)) {
-        const picked = Timeline.pick(['apartment_sound', 'apartment_notice']);
-        // apartment_notice caps after surfacing enough — fall back to sound
-        if (picked === 'apartment_notice' && State.get('surfaced_mess') >= 2) {
-          events.push('apartment_sound');
-        } else {
-          events.push(picked);
-        }
+        // Always push apartment_sound for the ambient chance roll.
+        // apartment_notice fires separately — deterministically on tier worsening.
+        // Explicit balance call: preserves RNG consumption vs. the old Timeline.pick() that
+        // chose between apartment_sound and apartment_notice on this path.
+        Timeline.random();
+        events.push('apartment_sound');
+      }
+      // apartment_notice fires when mess tier has worsened since last surfacing.
+      // Deterministic: no RNG consumed. Resets when cleaning or on wake.
+      // Ignore tidy — no notice warranted when things are tidy.
+      const currentMessTier = messTier();
+      const lastSurfaced = State.get('last_surfaced_mess_tier');
+      const currentRank = MESS_TIER_RANK[currentMessTier] ?? 0;
+      const lastRank = lastSurfaced !== null ? (MESS_TIER_RANK[lastSurfaced] ?? 0) : -1;
+      if (currentMessTier !== 'tidy' && currentRank > lastRank) {
+        events.push('apartment_notice');
       }
     }
 

@@ -280,7 +280,7 @@ Battery (dual-rate drain: 1%/hr standby, 15%/hr screen-on; tiers: dead/critical/
 
 **fridge_food** (integer) — depletes on eating, restocked by groceries. Still a scalar (appropriate — no item identity needed for food units).
 
-**apartment_notice** — event fires randomly in apartment (6% per action, max 2/day). NT-shaded: low serotonin reads mess as evidence; high adenosine makes it blur; low dopamine surfaces the knowing-doing gap.
+**apartment_notice** — fires deterministically when mess tier worsens (tidy→cluttered→messy→chaotic). Tracked via `last_surfaced_mess_tier` (null on wake, reset to null by cleaning). The 6% ambient chance still fires `apartment_sound` only; notice is separate and RNG-free. NT-shaded: low serotonin reads mess as evidence; high adenosine makes it blur; low dopamine surfaces the knowing-doing gap.
 
 ### Location Description NT Shading
 Deterministic NT modifiers added to all 7 locations (no RNG — location descriptions called from UI.render). Pattern: NE > 65 → sensory overload / everything too present; adenosine > 65 → fog / dissociation; GABA < 35 → restlessness / can't settle.
@@ -352,7 +352,7 @@ call_in (call in sick — morning only, work hours)
 - **work_task_appears** — job-specific
 - **break_room_noise** — job-specific ambient
 - **apartment_sound** — pipes, fridge, footsteps
-- **apartment_notice** — mess awareness (capped at 2)
+- **apartment_notice** — mess awareness; fires on tier worsening (tidy→cluttered→messy→chaotic); deterministic, no RNG; resets on cleaning or wake
 - **street_ambient** — cars, buses, sirens
 - **someone_passes** — people on street
 

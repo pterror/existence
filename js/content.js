@@ -2237,7 +2237,7 @@ export function createContent(ctx) {
       available: () => Linens.bedState() !== 'made' && State.energyTier() !== 'depleted',
       execute: () => {
         Linens.makeBed();
-        State.set('surfaced_mess', 0);
+        State.set('last_surfaced_mess_tier', null);  // reset so next tier change is noticed
         State.adjustEnergy(-3);
         State.adjustStress(-2);
         State.advanceTime(5);
@@ -2365,7 +2365,7 @@ export function createContent(ctx) {
       available: () => Clothing.itemsOnFloor('bedroom').length > 0 && State.energyTier() !== 'depleted',
       execute: () => {
         Clothing.moveToBasket('bedroom');
-        State.set('surfaced_mess', 0);
+        State.set('last_surfaced_mess_tier', null);  // reset so next tier change is noticed
         State.adjustEnergy(-4);
         State.advanceTime(5);
 
@@ -2410,7 +2410,7 @@ export function createContent(ctx) {
         State.set('fridge_food', State.get('fridge_food') - 1);
         Dishes.use();
         State.adjustHunger(-35);
-        State.fillStomach(60);
+        State.fillStomach(60, 'solid');
         State.set('ate_today', true);
         State.set('consecutive_meals_skipped', 0);
         State.advanceTime(15);
@@ -2500,7 +2500,7 @@ export function createContent(ctx) {
         State.set('pantry_food', State.get('pantry_food') - 1);
         Dishes.use();
         State.adjustHunger(-20);
-        State.fillStomach(35);
+        State.fillStomach(35, 'solid');
         State.set('ate_today', true);
         State.set('consecutive_meals_skipped', 0);
         State.advanceTime(10);
@@ -2551,7 +2551,7 @@ export function createContent(ctx) {
       execute: () => {
         State.adjustEnergy(2);
         State.adjustHunger(-3);
-        State.fillStomach(8);
+        State.fillStomach(8, 'liquid');
         State.advanceTime(2);
 
         // NT deterministic variants (no RNG — replay-safe)
@@ -2656,7 +2656,7 @@ export function createContent(ctx) {
       available: () => Dishes.dirtyCount() > 0 && State.energyTier() !== 'depleted',
       execute: () => {
         Dishes.wash();
-        State.set('surfaced_mess', 0);
+        State.set('last_surfaced_mess_tier', null);  // reset so next tier change is noticed
         State.adjustEnergy(-8);
         State.adjustStress(-5);
         State.advanceTime(15);
@@ -3459,7 +3459,7 @@ export function createContent(ctx) {
       },
       execute: () => {
         State.adjustHunger(-40);
-        State.fillStomach(70);
+        State.fillStomach(70, 'solid');
         State.set('ate_at_work_today', true);
         State.advanceTime(10);
 
@@ -3612,7 +3612,7 @@ export function createContent(ctx) {
         }
 
         State.adjustHunger(-30);
-        State.fillStomach(50);
+        State.fillStomach(50, 'solid');
         State.set('ate_today', true);
         State.set('consecutive_meals_skipped', 0);
         State.advanceTime(5);
@@ -3796,7 +3796,7 @@ export function createContent(ctx) {
       },
       execute: () => {
         State.adjustHunger(-45);
-        State.fillStomach(80);
+        State.fillStomach(80, 'mixed');
         State.set('ate_today', true);
         State.set('consecutive_meals_skipped', 0);
         State.set('ate_at_soup_kitchen_today', true);
@@ -4747,9 +4747,9 @@ export function createContent(ctx) {
     },
 
     apartment_notice: () => {
-      const n = State.get('surfaced_mess');
-      State.set('surfaced_mess', n + 1);
       const mess = messTier();
+      // Record the tier at which this surfaced — world.js won't fire again until it worsens.
+      State.set('last_surfaced_mess_tier', mess);
       const ser = State.get('serotonin');
       const aden = State.get('adenosine');
       const dop = State.get('dopamine');

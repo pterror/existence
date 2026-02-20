@@ -16,6 +16,7 @@ export function createState(ctx) {
       hunger: 25,           // 0-100. Felt hunger signal. 0 = not hungry, 100 = starving.
       stomach_fullness: 0,  // 0-100. Physical stomach contents. Filled by eating, drained by digestion (~20 pts/hr).
                             // Suppresses hunger signal accumulation. Vomiting empties this, not hunger directly.
+      stomach_liquid_fraction: 0, // 0-1. Fraction of stomach_fullness that is liquid. Liquids empty faster (~25 min half-life).
       time: 6 * 60 + 30, // Minutes since game start. Keeps incrementing, never resets.
       social: 40,       // 0-100. 0 = deeply isolated, 100 = connected.
       job_standing: 65, // 0-100. How work perceives you.
@@ -268,8 +269,8 @@ export function createState(ctx) {
       // Reset when the condition resolves (eating, resting).
       last_surfaced_hunger_tier: /** @type {string|null} */ (null),
       last_surfaced_energy_tier: /** @type {string|null} */ (null),
+      last_surfaced_mess_tier: /** @type {string|null} */ (null),
       surfaced_late: 0,
-      surfaced_mess: 0,
 
       // Daily work meal — food_service workers can eat once per shift
       ate_at_work_today: false,
@@ -336,21 +337,31 @@ export function createState(ctx) {
     // Passive effects per time passage
     const hours = minutes / 60;
 
-    // Stomach digestion — exponential decay, half-life ~90 min for solid food.
-    // Derived from real gastric emptying data: solids empty with ~90 min half-life under
-    // normal conditions (faster when full, slowing as it empties — first-order kinetics).
+    // Stomach digestion — exponential decay with content-type blending.
+    // Liquid half-life ~25 min derived from real gastric emptying data for fluids
+    // (simple liquids clear the stomach in ~20–30 min under normal conditions).
+    // Solid half-life ~90 min derived from real gastric emptying data for solid food
+    // (first-order kinetics, slowing as it empties).
     // High sympathetic tone (NE, cortisol) suppresses GI motility via inhibition of the
     // enteric nervous system. Stressed characters digest more slowly.
     // Approximation debt: the scaling coefficients (0.5 for NE, 0.3 for cortisol) and
     // baseline threshold (50) are chosen to give a plausible ~2× half-life at max stress,
     // not derived from real GI physiology data. See TODO.md.
+    // Approximation debt: blending by stomach_liquid_fraction is a simplified linear mix.
+    // Real stomachs partition contents heterogeneously; liquids float above solids and
+    // drain through the pylorus preferentially. A full two-pool model would track separate
+    // liquid and solid compartments, each with its own emptying curve. See TODO.md.
     const ne = s.norepinephrine;
     const cort = s.cortisol;
     const gastricSlowFactor = 1
       + 0.5 * Math.max(0, Math.min(1, (ne - 50) / 50))
       + 0.3 * Math.max(0, Math.min(1, (cort - 50) / 50));
-    const gastricHalfLife = 90 * gastricSlowFactor;
+    const liqFrac = s.stomach_liquid_fraction || 0;
+    const baseHalfLife = liqFrac * 25 + (1 - liqFrac) * 90;
+    const gastricHalfLife = baseHalfLife * gastricSlowFactor;
     s.stomach_fullness = Math.max(0, s.stomach_fullness * Math.exp(-Math.LN2 / gastricHalfLife * minutes));
+    // When stomach empties fully, reset liquid fraction
+    if (s.stomach_fullness <= 0) s.stomach_liquid_fraction = 0;
 
     // Hunger signal — felt experience, suppressed by stomach fullness, nausea, and illness.
     // Base rate derived from real hunger return: people typically feel hungry ~3–5h after
@@ -676,7 +687,7 @@ export function createState(ctx) {
     s.just_woke_alarm = false;
     s.snooze_count = 0;
     s.surfaced_late = 0;
-    s.surfaced_mess = 0;
+    s.last_surfaced_mess_tier = null;
     s.work_nagged_today = false;
     s.ate_at_work_today = false;
     s.ate_at_soup_kitchen_today = false;
@@ -1254,9 +1265,26 @@ export function createState(ctx) {
    * Call alongside adjustHunger() for all eating interactions.
    * Vomiting empties this; digestion drains it over time.
    * @param {number} amount
+   * @param {'solid' | 'liquid' | 'mixed'} [contentType='solid']
+   *   'solid' — solid food (~90 min half-life).
+   *   'liquid' — water, coffee, broth (~25 min half-life).
+   *   'mixed' — soup, stew: 30% liquid fraction (~74 min effective half-life when full).
    */
-  function fillStomach(amount) {
-    s.stomach_fullness = Math.min(100, s.stomach_fullness + amount);
+  function fillStomach(amount, contentType = 'solid') {
+    const prevFull = s.stomach_fullness;
+    const newFull = Math.min(100, prevFull + amount);
+    const added = newFull - prevFull;
+
+    // Liquid fraction of the added portion
+    const addedLiqFrac = contentType === 'liquid' ? 1.0
+      : contentType === 'mixed' ? 0.3
+      : 0.0;
+
+    // Weighted average: blend existing liquid fraction with added portion's fraction
+    if (newFull > 0) {
+      s.stomach_liquid_fraction = (prevFull * (s.stomach_liquid_fraction || 0) + added * addedLiqFrac) / newFull;
+    }
+    s.stomach_fullness = newFull;
   }
 
   /** Qualitative stomach contents tier. Used for vomiting branch (dry heave vs. expulsion). */
