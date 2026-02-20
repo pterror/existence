@@ -58,7 +58,51 @@ NT modulation of noticeability:
 *— not yet covered*
 
 ## Sound
-*— not yet covered*
+
+### What the game world produces
+
+**Ambient indoor — present but filtered:**
+- Appliances: fridge hum, coil whine from electronics, heating/AC
+- Building: pipes, elevator, neighbors (footsteps, music, voices through walls)
+- Own space: TV on in another room, radio, the specific quality of silence in a familiar room
+
+**Ambient outdoor:**
+- Traffic: general road noise, passing trucks (felt as much as heard — physical pressure, brief vibration)
+- Weather: rain on windows, wind
+- Nature: birds (time of day, season)
+- People: street conversations, music from a passing car
+
+**Overwhelming environments** — where sound is the dominant physical fact, changes behavior:
+- Busy road: a passing truck makes conversation impossible for three seconds; you lean in to talk
+- Concert: bass felt in the sternum, crowd heat and press, sound as a physical environment not just a perception
+
+**Latent-until-noticed** — always present, surfaces when state crosses a threshold:
+- Coil whine (electronics)
+- Fridge hum
+- HVAC / building ventilation
+- Tinnitus (for characters who have it — always there, louder in quiet)
+
+**Social/communicative:**
+- Phone notifications
+- Alarm
+- Someone's phone on speaker nearby (public)
+- Overheard conversation (transit, café)
+
+**Silence** — the absence of expected sound is itself a sensory fact:
+- 3am quiet
+- Coming home to an empty apartment
+- The moment after a loud environment
+
+### NT modulation
+- NE high → sounds intrude; edges sharpen; small sounds too present; harder to screen out
+- GABA low → can't filter; the fridge hum, the coil whine, all of it competing
+- Adenosine high → sounds recede; things that would normally register don't
+- Dissociation → sounds present but not landing, arriving from a distance
+
+### Still to think about
+- Sound as physical sensation (bass, passing trucks) — overlaps with touch/proprioception
+- Character sentiments toward specific sounds (someone who finds rain calming vs. oppressive)
+- The specific texture of silence for a character who lives alone vs. one used to noise
 
 ## Taste
 *— not yet covered*
