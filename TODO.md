@@ -298,6 +298,9 @@ No identity dimensions affect the simulation. docs/design/overview.md describes:
 ### Performance and masking cost
 docs/design/overview.md describes a shared pattern across identity dimensions: masking (autism/ADHD), code-switching (race/culture), the closet (sexuality), boymoding/girlmoding (trans), body management. All modeled as ambient energy drain that varies by context. Some spaces let you drop it.
 
+### Nostalgia and its NT effects
+Nostalgia produces genuine neurochemical responses — serotonin and dopamine — not just mood coloring. It buffers against loneliness and low social connection (relevant to the social system). Bittersweet by nature: warmth and loss are simultaneous, which is mechanically interesting — serotonin rises while something else sits underneath. Triggered by sensory cues (smell, taste, sound especially) — connects to the sensory prose system. Needs research before implementation.
+
 ### Endocrine and biological systems
 Hormonal profile, menstrual cycles, cortisol rhythms, metabolism, drug metabolism (CYP enzyme variation), nutrient processing. Autonomous forces on mood that operate on their own schedule.
 
