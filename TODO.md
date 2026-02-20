@@ -113,6 +113,7 @@ Only "eat from fridge" and "buy cheap meal." No cooking (time + energy + ingredi
 **Sleep cycle approximation debts:**
 - `sleep_cycle_length` is drawn uniformly from 70–120 min. Real distribution is likely clustered tighter around 90 min (polysomnography studies show most adults in ~85–95 min range, with shorter and longer tails). Needs calibration against real PSG data.
 - Cycle shape ratios `[0.83, 1.0, 1.11, 1.17]` are derived from the population-mean structure (75/90/100/105 min ÷ 90). Real per-character cycle shape variation (not just length) is unknown — some people's first cycle is relatively longer, some shorter. Calibration needs per-cycle PSG staging data.
+- `cycleFracs()` coefficients — `k=0.57` (deep decay), slope=`0.07` (REM growth), cap=`0.55` (REM max), cycle-0 anchors (`deep=0.50`, `rem=0.10`) — are chosen to fit the staging targets (20% deep, 25% REM for 8h sleep), not derived from mechanistic data. The comment was corrected to say "fitted" not "calibrated against." Needs PSG mechanistic grounding.
 - Sleep apnea (non-restorative sleep mechanic) would require its own cycle disruption model — not assignable at chargen until upstream exists.
 
 ### Domestic object systems
@@ -123,7 +124,7 @@ Full design in [DESIGN-OBJECTS.md](DESIGN-OBJECTS.md). Mess is not a scalar — 
 **Implementation path (from DESIGN-OBJECTS.md):**
 1. ~~**Define interfaces**~~ — **DONE.** See [DESIGN-INTERFACES.md](DESIGN-INTERFACES.md).
 2. ~~**Coarse implementations**~~ — **DONE.** `js/dishes.js`, `js/linens.js`, `js/clothing.js` — count-based backends. Wired in context.js + game.js. content.js updated throughout.
-3. ~~**Remove `apartment_mess`**~~ — **DONE.** `apartment_mess` scalar removed from state.js. `messTier()` moved into content.js, computed from Dishes + Linens + Clothing. Bedroom, kitchen, apartment_notice all use local `messTier()`. Four tiers: tidy / cluttered / messy / chaotic.
+3. ~~**Remove `apartment_mess`**~~ — **DONE.** `apartment_mess` scalar removed from state.js. `messTier()` moved into content.js, computed from Dishes + Linens + Clothing. Bedroom, kitchen, apartment_notice all use local `messTier()`. Four tiers: tidy / cluttered / messy / chaotic. **Maintenance debt:** `messScore()` and `messTier()` are now duplicated verbatim in both `content.js` and `world.js` (world.js needs them for transition-based apartment_notice). If tier thresholds change, both must be updated. Long-term fix: expose via a shared `Mess` context object or pass a `getMessTier` callback from context.js. See note in world.js.
 4. **Full implementations** — per-item tracking, one system at a time. Clothing first (wardrobe generated at chargen, items with location/wear states, undressing shaped by mood/energy).
 5. **Laundry mechanic** — currently stubbed as 3 interactions (start_laundry / move_to_dryer / fold_laundry) in apartment_bedroom, assuming in-unit machines. This is an approximation debt: laundry path should derive from housing situation (in-unit machines → current flow; building laundry room → separate location; laundromat → travel + location; hand-wash → sink interaction). Multiple paths, not one universal. Housing type not yet a backstory parameter.
 

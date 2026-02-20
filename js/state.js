@@ -347,8 +347,9 @@ export function createState(ctx) {
     // High sympathetic tone (NE, cortisol) suppresses GI motility via inhibition of the
     // enteric nervous system. Stressed characters digest more slowly.
     // Approximation debt: the scaling coefficients (0.5 for NE, 0.3 for cortisol) and
-    // baseline threshold (50) are chosen to give a plausible ~2× half-life at max stress,
-    // not derived from real GI physiology data. See TODO.md.
+    // baseline threshold (50) are chosen. At NE=100, cortisol=100 the factor is 1.8×
+    // (not 2× — the coefficients sum to 0.8, giving 1.0+0.8=1.8 max). Not derived from
+    // real GI physiology data. See TODO.md.
     // Approximation debt: blending by stomach_liquid_fraction is a simplified linear mix.
     // Real stomachs partition contents heterogeneously; liquids float above solids and
     // drain through the pylorus preferentially. A full two-pool model would track separate
@@ -1150,10 +1151,11 @@ export function createState(ctx) {
       }
     }
 
-    // Per-cycle deep/REM fractions calibrated against real staging data:
+    // Per-cycle deep/REM fractions fitted to match real staging targets:
     // 8-hour sleep → ~20% deep, ~25% REM (fractions of total sleep time).
-    // Deep decays exponentially (k≈0.57), floors near 0 by cycle 4-5.
-    // REM grows linearly, caps at 55% (late REM-dominant cycles in extended sleep).
+    // Approximation debt: k=0.57 (deep decay), slope=0.07 (REM growth), cap=0.55 (REM max),
+    // and cycle-0 anchors (deep=0.50, rem=0.10) are chosen to hit the staging targets above,
+    // not independently derived from polysomnography mechanistic data. See TODO.md.
     // Cycle 0: deep ~50%, REM ~10%
     // Cycle 1: deep ~29%, REM ~17%
     // Cycle 2: deep ~16%, REM ~24%
@@ -1291,6 +1293,8 @@ export function createState(ctx) {
     const added = newFull - prevFull;
 
     // Liquid fraction of the added portion
+    // Approximation debt: mixed=0.3 is chosen. Real gastric partitioning for mixed meals
+    // (e.g. soup) depends on solid:liquid ratio, viscosity, and particle size. See TODO.md.
     const addedLiqFrac = contentType === 'liquid' ? 1.0
       : contentType === 'mixed' ? 0.3
       : 0.0;
