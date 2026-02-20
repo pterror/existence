@@ -417,7 +417,58 @@ A spectrum with different qualities at each point:
 - Acclimatisation — the body adjusting to a new climate over weeks; what was cold becomes normal
 
 ## Proprioception
-*— not yet covered*
+
+The sense of where your body is in space — position, movement, the felt sense of your own limbs without looking at them. Mostly invisible; surfaces to attention when something is off.
+
+### When it surfaces
+
+**Proprioceptive model failing:**
+- Miscounting stairs — expecting a step that isn't there, or misjudging height. The lurch, the stomach drop. The body had a model of the stairs and reality didn't match it. One of the most universal sudden-shock experiences.
+- Stepping off a moving walkway or escalator — the floor feeling wrong for a moment
+- Getting off a boat — the ground still moving
+- After alcohol — can't judge where the body is; the nose-touch test failing
+
+**Physical state shaping movement:**
+- Fatigue changing gait — shuffling, dragging, the effort of lifting feet
+- Adenosine high — limbs feel heavy, further away than usual, movement costs more than expected
+- Muscle soreness — awareness of specific muscles you don't normally notice; the body suddenly has regions
+- Carrying weight — a heavy bag shifting centre of gravity, the body compensating without deciding to
+- Illness — the loose, unreliable quality of a sick body, joints feeling wrong
+
+**Limb falling asleep:**
+- The strange absence before pins and needles — you have to look at it to use it
+- The return of sensation — prickling, then normal, then you forget it happened
+
+**Skill and familiarity:**
+- Expert proprioception — a musician's fingers, a dancer's body awareness, a tradesperson's hands. The body knowing where it is with high precision.
+- Unfamiliar body — after significant weight change, injury, growth spurt; the body behaving unexpectedly
+
+**Physical pleasure and capability:**
+- Going up stairs 2-3 at a time — small physical satisfaction; only happens when you have it in you. A mood and energy indicator.
+- Narrow steps, ladder rungs — risk varies by coordination, foot size, footwear, fatigue; fear as a component
+
+### Hand-eye coordination as a character variable
+Affects physical interactions generally — catching something thrown, threading a needle, pouring without spilling. Varies by person, fatigue, age, practice. A character variable that modulates outcomes of physical tasks.
+
+### Minor physical affordances and tactile pleasures
+A category of small incidental physical interactions that aren't "actions" in the game sense but are part of the texture of being a body:
+- Tactile objects: lego (the click, the specific texture of the studs), kinetic sand (deeply tactile, almost hypnotic), fidget spinners (weight, spin, resistance), spinning tops, trading cards (the feel of card stock)
+- Some explicitly calming or regulating — fidget objects, kinetic sand; connects to sensory seeking (ADHD, anxiety)
+- Physical social rituals: rock paper scissors, tag, telephone — partly physical, partly social
+- The game should have room for this texture — small affordances of objects, brief physical pleasures that aren't major interactions
+
+### NT modulation
+- Adenosine high → proprioceptive precision drops; misjudging distances, catching things poorly
+- Alcohol → proprioception directly disrupted; the body becomes unreliable
+- Cortisol/anxiety → body held tense; proprioceptive awareness of that tension; braced posture
+- Depression → the body feels distant, heavy, a thing being moved rather than inhabited
+
+### Vestibular (spinning, dizziness)
+Spinning in a chair, dizziness, the world continuing to move after you stop — flagged here but belongs in the vestibular section.
+
+### Character-side conditions
+- **Dyspraxia / developmental coordination disorder** — difficulty with motor coordination and proprioceptive integration; everyday physical tasks require more conscious attention
+- **Proprioceptive seeking** — some people actively seek deep pressure and proprioceptive input (weighted blankets, tight clothing, physical impact); common in autism and sensory processing differences
 
 ## Interoception
 *— not yet covered*
