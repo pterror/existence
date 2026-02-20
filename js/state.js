@@ -2209,21 +2209,27 @@ export function createState(ctx) {
     const seInv = 1 - (s.self_esteem / 100);  // inverted: low SE → high inertia
     const r = s.rumination / 100;
 
-    // Base inertia: weighted combination of personality traits
+    // Base inertia: weighted combination of personality traits.
+    // Weights derived from Houben et al. 2015 meta-analysis (PMID 25822133) meta-analytic r
+    // with NE inertia: rumination r=0.26, neuroticism r=0.21, self-esteem r=0.18.
+    // Previous weights (neuroticism 0.5, self-esteem 0.3, rumination 0.2) were empirically
+    // backward — rumination is the strongest predictor, not the weakest.
     // At 50/50/50 → n=0.5, seInv=0.5, r=0.5 → weighted=0.5 → base=1.0
     // At 0/100/0 → n=0, seInv=0, r=0 → weighted=0 → base=0.6 (fluid)
     // At 100/0/100 → n=1, seInv=1, r=1 → weighted=1 → base=1.4 (sticky)
-    // Approximation debt: personality trait weights (neuroticism 0.5, low self-esteem 0.3,
-    // rumination 0.2) and inertia range (0.6–1.4) are chosen. The relative importance of
-    // each trait for mood persistence is an empirical psychometric question.
-    // Calibration: ecological momentary assessment studies linking trait measures to mood inertia.
-    const weighted = n * 0.5 + seInv * 0.3 + r * 0.2;
+    // Approximation debt: exact magnitude of inertia range (0.6–1.4) is chosen. Relative
+    // weights are empirically grounded but derived from separate studies aggregated, not
+    // a single multi-predictor model.
+    const weighted = n * 0.32 + seInv * 0.28 + r * 0.40;
     let inertia = 0.6 + weighted * 0.8;
 
-    // Neuroticism negative-direction bonus: negative moods stick harder
-    // for neurotic characters. Up to +0.2 at neuroticism=100.
+    // Negative-direction asymmetry: neuroticism and rumination both show stronger associations
+    // with NE inertia than PE inertia (Houben 2015). Self-esteem is symmetric (Kuppens 2010,
+    // PMID 20424092 — similar inertia effect for both valences).
+    // Neuroticism NE/PE ratio: r=0.21/0.13 → ~38% asymmetry.
+    // Rumination NE/PE ratio: r=0.26/0.16 → ~38% asymmetry. Similar magnitude.
     if (isNegativeDirection) {
-      inertia += n * 0.2;
+      inertia += n * 0.12 + r * 0.15;
     }
 
     // State modifiers — current conditions can increase inertia.
@@ -2261,14 +2267,13 @@ export function createState(ctx) {
     const se = s.self_esteem / 100;
     const r = s.rumination / 100;
 
-    // Inverse of inertia weighting: low n, high se, low r → high regulation
+    // Inverse of inertia weighting: low n, high se, low r → high regulation.
+    // Weights match effectiveInertia() — derived from Houben et al. 2015 (PMID 25822133).
     // At 50/50/50 → weighted=0.5 → capacity=1.0
     // At 0/100/0 → weighted=0 → capacity=1.3 (fluid)
     // At 100/0/100 → weighted=1 → capacity=0.5 (sticky)
-    // Approximation debt: regulation capacity range (0.5–1.3), penalty coefficients (0.004 each
-    // for adenosine and stress above 60), and thresholds are chosen to mirror effectiveInertia()
-    // but have no independent empirical calibration.
-    const weighted = n * 0.5 + (1 - se) * 0.3 + r * 0.2;
+    // Approximation debt: regulation capacity range (0.5–1.3) and penalty coefficients are chosen.
+    const weighted = n * 0.32 + (1 - se) * 0.28 + r * 0.40;
     let capacity = 1.3 - weighted * 0.8;
 
     // State penalties — current conditions reduce processing capacity

@@ -1446,8 +1446,12 @@ export function createContent(ctx) {
           qualityMult *= 0.9;   // Approximation debt: 0.90× for early morning chosen
         }
 
-        // Crash sleep — emergency shutdown is less restorative
-        if (State.get('adenosine') > 80) qualityMult *= 0.9; // Approximation debt: 0.90× for crash sleep chosen
+        // Note: high adenosine at sleep onset was previously penalized (0.9×) but that is
+        // mechanistically backward. High adenosine drives more SWS and stronger SWA rebound —
+        // it is the homeostatic signal *for* deep sleep. The downsides of crash sleep (sleep
+        // inertia, missed REM from short duration) are already modeled in sleepCycleBreakdown().
+        // Adenosine crash penalty removed per RESEARCH-CALIBRATION.md (Reichert et al. 2022,
+        // PMC9541543; Porkka-Heiskanen et al. 2000, PMID: see calibration doc).
 
         // Caffeine interference — caffeine at bedtime degrades sleep architecture
         qualityMult *= State.caffeineSleepInterference();
