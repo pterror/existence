@@ -276,6 +276,15 @@ What tastes like home vs. what tastes foreign is an identity marker, not just a 
 - **Hypogeusia** — reduced taste
 - **Phantogeusia** — taste that isn't there, often metallic or bitter; can be medication side effect, neurological, or COVID-related
 
+### Chemical and thermal mouth sensations
+
+Taste/touch overlap — physical sensations that happen inside the mouth during eating:
+
+- **Bromelain (fresh pineapple)** — the enzyme digests soft tissue; the tongue and roof of the mouth go tingly and slightly raw after eating enough. The pineapple eating you back. Cooking or canning deactivates it — only fresh pineapple does this.
+- **Scalding (coffee, tea, hot food)** — burning the tongue or roof of the mouth from not waiting. Inside, can't pull away, damage already done. The roof of the mouth goes slightly numb and peely for a day or two. Impatience made physical. Almost universal experience.
+- **Capsaicin** — chemical irritant, not just heat perception; triggers the same TRPV1 receptors as actual heat; the burn is real even though nothing is hot. Builds tolerance with exposure (see acquired tastes).
+- **Carbonation** — CO2 dissolving into carbonic acid on the tongue; the tingle is mild chemical irritation, not just bubbles
+
 ### Still to think about
 - Full interaction with the food/cooking system
 - Taste memory — specific tastes tied to specific memories (Proustian, same as smell)
