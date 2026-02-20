@@ -165,6 +165,22 @@ Each condition has its own texture:
 - Blood pressure: the silent one. The medication that makes you tired. The salt math at every meal. Nothing feels wrong until something is very wrong.
 - Chronic pain: the thing that's always there. Good days mean it's quiet. Bad days mean it's everything. The negotiation between pain medication and being present. The things you used to do without thinking.
 
+**The connective tissue triad: hEDS, POTS, MCAS**
+
+Hypermobile Ehlers-Danlos syndrome (hEDS), Postural Orthostatic Tachycardia Syndrome (POTS), and Mast Cell Activation Syndrome (MCAS) frequently co-occur. They are constitutional — arising from underlying connective tissue and immune regulation differences — and their comorbidity structure matters at chargen: generating one raises the probability of the others. This isn't three independent rolls.
+
+*hEDS* — hypermobile joints that sublux (partially dislocate) under ordinary stress. The shoulder clicking out putting on a coat. The wrist that gives out carrying groceries. Chronic pain from joints working harder to stay in place; proprioception that's expensive because the body can't trust where its parts are. The fatigue isn't laziness — it's the cost of doing what everyone else does, done by a body that has to actively maintain what other bodies do passively. Diagnosis comes late because the flexibility looks like a gift. "I'm just double-jointed" for years, then decades. The diagnostic journey — the doctor who finally believes you, after everyone else called it anxiety — is its own texture.
+
+*POTS* — standing up changes everything. The heart rate spikes to compensate for blood pooling away from the brain. Sustained upright posture is the problem: standing in line at the grocery checkout, doing dishes at the sink, waiting for the bus. Sitting or lying down helps. Salt loading, compression garments, fluids are management. Heat worsens it significantly. Often misdiagnosed as anxiety or deconditioning for years ("your heart rate goes up because you're anxious" — condescending and backwards). The standing world isn't designed to notice that standing is a variable.
+
+*MCAS* — mast cells overreact to triggers that differ per person: food, temperature changes, emotion, exercise, smells, medications, stress. Reactions range from flushing and hives to GI distress to anaphylaxis risk. Trigger management is its own part-time job: food diary, preemptive antihistamines, avoidance, pattern recognition over months. Hard to diagnose because there's no definitive test — it's clinical, by pattern, by exclusion. The person who seems to react to everything and gets told it's hypochondria.
+
+**Post-viral conditions: Long COVID, ME/CFS**
+
+*Long COVID* — the infection that doesn't end. Post-exertional malaise (PEM): activity causes a crash that may not arrive until hours later or the next day. Brain fog: word-finding gaps, poor concentration, thinking through cotton. Orthostatic intolerance (often POTS-like). Fatigue that doesn't respond to rest. The disorientation of having been functional and now not being functional, with no clear timeline for improvement. Some people recover in months. Some don't recover. The uncertainty is its own weight. Circumstantial — needs a prior illness event in the character's backstory; not a dice roll.
+
+*ME/CFS* — similar profile to Long COVID, and Long COVID may be a variant of it. Often triggered by viral illness. The defining feature is PEM: push past your envelope and the cost is disproportionate and delayed. The ceiling on function moves depending on recent activity — a better week means you did more, which means a worse week follows. Not depression, not deconditioning — a specific dysfunction of energy metabolism. Usually dismissed for years. Most people with ME/CFS had lives before the illness and know the difference.
+
 **Injury** — temporary or permanent. A broken wrist changes what you can do for weeks. Chronic back pain changes it forever. The simulation adjusts what's available, how long things take, what the prose notices.
 
 **Illness** — getting sick, the days of not being able to do anything, the slow return. Not dramatic — just the reality of being in a body that sometimes stops cooperating.
@@ -223,11 +239,27 @@ The body's blueprint, and what happens when it varies.
 
 **Anxiety** — beyond stress. The constant hum, the avoidance, the physical symptoms. The difference between "stressed about work" and "unable to open the email because opening the email means knowing."
 
+**Eating disorders** — the relationship to food is the condition. These aren't in the Dietary needs section because they're not primarily about what the body can eat — they're about what the mind does with eating. They are circumstantial: they emerge from specific personality conditions and sometimes life history events, not from a random roll.
+
+*Anorexia nervosa*: restriction as control. The internal logic that makes not eating feel like the only available power. Fatigue, cold sensitivity, cardiac risk — the physical consequences arrive but feel less real than the compulsion that produced them. Needs upstream: personality parameters (perfectionism, anxiety, need for control, low self-esteem) and possibly life history events. The hunger system already exists; anorexia modifies what the character does with it — the signal is present, the relationship to it is different.
+
+*Bulimia nervosa*: cycles. Eating beyond satiety, then the attempt to undo it — vomiting, laxatives, excessive exercise. Secrecy is a defining feature; harder to detect than anorexia. Different personality profile: more impulsive, more ambivalent about food than averse to it. The vomiting system already exists. Purging disrupts electrolytes, which would interact with NT and energy systems. Dental erosion over time.
+
+*Binge eating disorder*: eating past satiety without purging. The fullness that's present and overridden. Shame, not relief, afterward.
+
+*ARFID* (Avoidant/Restrictive Food Intake Disorder): not about body image — about texture, smell, color, what the food looks like, what it might do. Often autistic or anxiety-adjacent. The safe food list is short. The grocery store has a hundred options and maybe three of them are possible.
+
+All eating disorders interact with body image (not yet a state variable), with food availability, with social eating situations. Recovery is daily and not linear.
+
 ### Neurodivergence
 
 **ADHD** — executive dysfunction, time blindness, hyperfocus, the gap between wanting to do something and being able to start. The game's "can't focus at work" already touches this. As a trait, it's not situational — it's structural. Some days the medication works, some days it doesn't, some days you forgot to take it.
 
-**Autism** — sensory processing, social interaction patterns, the importance of routine, the cost of masking. The world is loud and bright and expects a specific kind of social performance. Meeting those expectations is work the game can model.
+**Autism** — sensory processing, social interaction patterns, the importance of routine, the cost of masking. The world is loud and bright and expects a specific kind of social performance. Meeting those expectations is work the game can model. *Echolalia* — the repetition of heard speech, immediate or delayed — is a specific autistic trait with prose implications: the inner voice might echo, a phrase from the morning appearing in the afternoon's narration, a fragment from a TV ad surfacing as self-talk. In a text-based game this is renderable. Masking echolalia costs the same energy as other masking.
+
+**Tourette syndrome** — tics: involuntary, semi-suppressible motor and vocal movements. Blinking, throat-clearing, head movements, sounds. Suppression is possible and exhausting — hold it through a meeting, release it when alone. The suppression economy is the mechanical layer: sustained suppression in social contexts drains energy and stress; private space pays the debt back.
+
+*Coprolalia* — involuntary vocalization of obscene or socially prohibited words or phrases, affecting roughly 10% of people with Tourette syndrome. Not the character choosing to say things. The prose renders it as something that happens: the word in the air, the silence after it, the familiar machinery of explaining that's already forming. The character's inner voice knows what occurred. What the text doesn't do is treat it as chosen. The social consequences — jobs, public situations, relationships — are real and asymmetric: the person managing the condition does all the work of navigating a world that didn't build in accommodation.
 
 These aren't illnesses to treat. They're ways of being that interact with a world not designed for them.
 
@@ -246,6 +278,8 @@ Not all conditions are there from the start. Some happen to you.
 **Accidents** — outside work, outside anyone's control. A fall, a car, a thing that just happened. The body was one way and now it's another. Recovery if recovery is possible. Adaptation if it isn't.
 
 **Deterioration** — the slow version. Eyesight worsening. Joints getting worse. The thing that wasn't a problem becoming a problem so gradually you didn't notice until you did. Age-related but not only age-related — stress, poverty, poor nutrition, lack of healthcare all accelerate it.
+
+**Gastritis** — inflammation of the stomach lining, usually from H. pylori infection, NSAID overuse, alcohol, or sustained high-cortisol periods. The stomach system already exists; gastritis modifies it: gnawing pain when empty (hunger that also hurts), nausea that food temporarily relieves before making worse, slower emptying, sensitivity to spicy or acidic food. Stress worsens it directly via cortisol and NE suppressing GI motility. H. pylori is bacterial — a drawn lot potentially connected to housing history or travel. NSAID-related gastritis derives from pain management patterns (what do you take for chronic pain?). Stress gastritis derives from sustained high-cortisol periods. All circumstantial paths — each needs its upstream.
 
 These aren't plot twists. They're things that happen to bodies. The game models the transition: the before, the event (if sudden), the after. The after is the new terrain.
 
@@ -269,6 +303,19 @@ Health conditions are part of who the character is (like age and job type). They
 ### Good days and bad days
 
 Chronic conditions aren't constant. They fluctuate. Some days you almost forget. Some days it's the only thing. The simulation should model this variation — not as random good/bad dice rolls, but as the interaction between the condition, sleep, stress, medication adherence, and the specific demands of the day.
+
+### This list is not exhaustive
+
+The conditions above are examples, not a complete catalog. The full range of bodies this game models includes: narcolepsy and cataplexy, fibromyalgia, sleep apnea, endometriosis, PMDD, lupus (SLE), hypothyroidism and hyperthyroidism (Hashimoto's, Graves'), Raynaud's phenomenon, IBS, Crohn's and ulcerative colitis, celiac disease, PCOS, chronic urticaria, prosopagnosia, dyscalculia, dyslexia, PMDD, type 1 diabetes (constitutional) vs. type 2 (more circumstantial), and many others. Each has a texture that's specific to it — specific interactions it removes, specific costs it adds, specific things the prose notices.
+
+The framework is what scales:
+- Constitutional vs. circumstantial determines the chargen model (probabilistic roll vs. backstory derivation)
+- Comorbidity structure matters — conditions cluster (connective tissue triad, eating disorders + anxiety, Long COVID + POTS)
+- Two kinds of effect: texture (ambient weight) and concrete changes (what's gone)
+- Good days and bad days are driven by the interaction of the condition with sleep, stress, medication, and current demands
+- The diagnosis journey is often part of the experience — having a condition without a name for it, being dismissed, the relief and grief of finally knowing
+
+Individual conditions get added to the simulation as their upstream systems are ready. No approximation debts get papered over with random rolls.
 
 ## Biology & the Endocrine System
 
