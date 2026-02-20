@@ -237,7 +237,9 @@ ADHD (executive dysfunction, time blindness, hyperfocus), autism (sensory proces
 - ~~Gastric emptying is **linear**~~ — **FIXED.** Now exponential, half-life 90 min, derived from real gastric emptying data for solid food.
 - ~~Hunger base rate: `4 pts/hr`~~ — **FIXED.** Now 8 pts/hr, derived from real hunger return (~3–5h after a normal meal working back through stomach suppression).
 - ~~No stress modifier on gastric emptying~~ — **FIXED.** NE and cortisol now slow gastric emptying via `gastricSlowFactor`. Approximation debt: coefficients (0.5 NE, 0.3 cortisol) and threshold (50) are chosen to give ~2× half-life at max stress, not derived from real GI physiology data. Needs calibration against measured GI motility studies.
-- No content-type variation: liquids (coffee, water) empty in 20–30 min half-life; fatty/protein-dense food holds much longer (~3–4h half-life). `fillStomach()` uses a flat amount regardless of what was eaten.
+- ~~No content-type variation~~ — **FIXED.** `fillStomach(amount, contentType)` now takes `'solid'` (90 min half-life), `'liquid'` (25 min), or `'mixed'` (30% liquid fraction, ~74 min effective). Remaining approximation debts:
+  - **Fraction model is simplified** — blending by `stomach_liquid_fraction` is a linear weighted average. Real stomachs partition contents heterogeneously: liquids float above solids and drain through the pylorus preferentially. A proper two-pool model would track separate liquid and solid compartments, each with its own independent emptying curve. `stomach_liquid_fraction` is an approximation of that structure.
+  - **No fat/protein differentiation** — fatty/protein-dense foods empty more slowly (~3–4h half-life) than simple carbs. Currently all solid food uses the same 90 min half-life. The `contentType` parameter could be extended with `'fatty'` etc. when diet composition tracking is added.
 - Stomach → hunger suppression coefficient: `0.85` — chosen. Represents the weight of stretch receptor + hormonal feedback; uncalibrated.
 
 **Next substances to implement (in rough priority order):**
