@@ -52,6 +52,16 @@ The solution is never to make the prose less specific. It's to deepen the simula
 
 ---
 
+## Emergence over flags
+
+The simulation doesn't label or declare. Personality isn't a flag; it's a configuration of continuous parameters that produces behavior. Mood isn't switched on; it emerges from neurochemistry over time. Habits aren't prescribed; they form from the accumulated weight of observed choices. Clinical patterns aren't diagnosed; they arise when parameters land in certain configurations.
+
+This applies everywhere: to character generation, to behavioral systems, to prose. The simulation never announces what it's doing. It sets conditions; the rest follows. If the prose needs to capture that a character is behaving in a recognizable way, it does so by rendering the behavior — not by naming it.
+
+The test: *is this quality being declared, or does it emerge from how the underlying parameters interact?* Declaration is a shortcut. Emergence is what makes the simulation feel real.
+
+---
+
 ## The goal
 
 A simulation detailed enough that every sentence the prose might want to say is something the simulation actually knows. Not soon. But that's the direction.

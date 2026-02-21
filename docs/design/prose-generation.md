@@ -170,6 +170,7 @@ Sanitizing characters into supportive, well-meaning presences makes them feel li
 - **Passive aggression**: ostensibly fine, edge underneath. "No, it's fine." The surface is cooperative; the content isn't
 - **One-upping**: responds to your situation by immediately relating it to their own worse situation. Often from anxiety, not malice
 - **Deflection**: changes subject when things get uncomfortable, sometimes so smoothly they don't notice they're doing it
+- **People-pleasing**: two distinct types. The first genuinely enjoys making others happy — attentive, warm, reads people well; this is a real and positive personality configuration, not pathological. The second is validation-seeking: they please people because they need the approval, not because the act itself is rewarding. The problem at scale: can't prioritize across multiple relationships or circles because prioritizing one risks losing approval from another. Has been doing everything right — there for everyone — and people are still dissatisfied, because no one can be everything to everyone. The frustration and confusion are genuine: "I've done everything right, why isn't it working?" The gap between effort and outcome is real; the failure to see why is also real.
 - **Weaponized concern**: "I'm just worried about you" functioning as criticism or control
 - **Condescension**: over-explains things the listener knows, talks down without registering that they're doing it
 - **Toxic positivity**: "at least—", "everything happens for a reason," "have you tried just—"
