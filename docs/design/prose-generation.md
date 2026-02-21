@@ -239,6 +239,48 @@ Separate from spoken register — its own conventions:
 
 Voice parameters should be generated at chargen from backstory, not authored per-character.
 
+## Narration: tone, pacing, flow
+
+### Baseline register
+
+The game's narration has a specific baseline that holds across all NT states, even as sentence structure and word choice vary within it:
+
+- **Observational, not editorial.** The prose notices things; it does not explain them. Abstract emotional nouns do not appear — "her anxiety," "the sadness," "a sense of dread." The state is carried by what gets noticed, in what order, with what weight. Never by naming it.
+- **No decoration.** Adjective strings, manner adverbs (quickly, carefully, slowly — usually), similes that call attention to themselves, authorial intrusion — none of these. Plain without being flat.
+- **Specific over general.** "A crescent of toast crust" not "the remains of breakfast." Specificity is free and earns trust.
+- **Point of view**: close second ("your hands") or close third ("she pushed the chair") — the game uses both. When and why is worth specifying further. Not omniscient; always anchored in the character's immediate perception.
+- **Tense**: past tense for narration (consistent with the Carver/Robinson register).
+
+### Pacing
+
+How fast the prose moves through observations, and how much it dwells.
+
+- **Short sentences** create urgency (anxious) or flatness (depressed) depending on context. The same structure reads differently in different states.
+- **Long sentences** create immersion, accumulation, sometimes exhaustion. Under overwhelm they enact flooding; under calm they enact sustained attention.
+- **What gets a full sentence vs. subordination vs. omission** is a pacing decision shaped by NT state. Under flat mood, things are skimmed. Under heightened, things are dwelt on.
+- **Omission is expressive.** The prose doesn't cover everything in the scene. What it doesn't mention is as meaningful as what it does. A character who doesn't notice the mess anymore, or notices only the mess and nothing else — both are states communicated through selection.
+
+### Flow
+
+Sentence-to-sentence movement and rhythm across a passage:
+
+- **Building vs. juxtaposition.** Sentences can zoom in (each one adding detail to the same observation) or be placed side by side with no explicit connection (equal weight, no causality). Building creates immersion; juxtaposition creates dissociation or accumulation.
+- **Repetition as device.** "The fridge hums. It doesn't stop. You stop noticing, then notice again." Repetition is available and deliberate — not to fill space but to enact duration, persistence, intrusion. Used sparingly.
+- **Sentence length variety.** The mix of lengths across a passage matters more than any single sentence. Uniform length (all short or all long) feels mechanical. Variation — especially a very short sentence after several longer ones — creates emphasis.
+- **The final clause as indicator.** What the passage ends on signals what the character did with the experience: interpretation (calm), flat observation (depressed), failed action (withdrawal), body sensation (sensation won). The last sentence is not incidental.
+
+### What should not appear
+
+- Abstract emotional nouns ("the anxiety," "her sadness," "a feeling of dread")
+- Adjective strings ("the cold, dark, empty room")
+- Manner adverbs that substitute for strong verbs ("she walked slowly" — find the verb)
+- Similes that call attention to themselves as literary devices
+- Authorial commentary on the character's state
+- Anticipation ("little did she know") or retrospective framing
+- Sentences that explain what a previous sentence already showed
+
+---
+
 ## What the system does NOT do
 
 - Call an LLM at runtime
