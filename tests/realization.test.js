@@ -41,7 +41,7 @@ const coldObs = {
   channels: ['thermal', 'touch'],
   salience: 0.7,
   properties: {
-    thermal: { celsius: 10, tier: 'cold', immediate: false },
+    thermal: { celsius: 10, cold: true, warm: false, very_cold: false, immediate: false },
   },
 };
 
@@ -50,7 +50,7 @@ const veryColObs = {
   channels: ['thermal'],
   salience: 0.9,
   properties: {
-    thermal: { celsius: 2, tier: 'very_cold', immediate: true },
+    thermal: { celsius: 2, cold: true, warm: false, very_cold: true, immediate: true },
   },
 };
 
@@ -59,7 +59,7 @@ const fatigueObs = {
   channels: ['interoception'],
   salience: 0.75,
   properties: {
-    interoception: { adenosine: 72, tier: 'heavy', quality: 'weighted' },
+    interoception: { adenosine: 72 },
   },
 };
 
@@ -68,7 +68,7 @@ const hungerObs = {
   channels: ['interoception'],
   salience: 0.6,
   properties: {
-    interoception: { hunger: 72, tier: 'very_hungry', quality: 'gnawing', irritability: true },
+    interoception: { gnawing: true, hollow: false, low_grade: false, irritable: true },
   },
 };
 
@@ -77,7 +77,7 @@ const anxietyObs = {
   channels: ['interoception'],
   salience: 0.65,
   properties: {
-    interoception: { gaba: 30, ne: 70, character: 'unsettled' },
+    interoception: { gaba: 30, ne: 70 },
   },
 };
 

@@ -710,16 +710,10 @@ export function createSenses(ctx) {
       },
       properties: {
         thermal: {
-          celsius: s => s.get('temperature'),
-          tier: s => {
-            const t = s.get('temperature');
-            if (t < 5)  return 'very_cold';
-            if (t < 12) return 'cold';
-            if (t < 16) return 'cool';
-            if (t > 35) return 'very_hot';
-            if (t > 30) return 'hot';
-            return 'warm';
-          },
+          celsius:   s => s.get('temperature'),
+          cold:      s => s.get('temperature') < 16,
+          warm:      s => s.get('temperature') > 26,
+          very_cold: s => s.get('temperature') < 5,
         },
       },
     },
@@ -733,20 +727,6 @@ export function createSenses(ctx) {
       properties: {
         interoception: {
           adenosine: s => s.get('adenosine'),
-          tier: s => {
-            const a = s.get('adenosine');
-            if (a > 85) return 'crushing';
-            if (a > 70) return 'heavy';
-            if (a > 55) return 'present';
-            return 'none';
-          },
-          // Character of the fatigue — what it feels like, not just how much
-          quality: s => {
-            const a = s.get('adenosine');
-            if (a > 80) return 'gravitational'; // pulling toward horizontal
-            if (a > 65) return 'weighted';       // weight in the limbs
-            return 'dull';                       // background drag
-          },
         },
       },
     },
@@ -759,22 +739,10 @@ export function createSenses(ctx) {
       salience: s => State.lerp01(s.get('hunger'), 45, 90) * 0.7,
       properties: {
         interoception: {
-          hunger: s => s.get('hunger'),
-          tier: s => {
-            const h = s.get('hunger');
-            if (h > 80) return 'starving';
-            if (h > 65) return 'very_hungry';
-            if (h > 45) return 'hungry';
-            return 'none';
-          },
-          quality: s => {
-            const h = s.get('hunger');
-            if (h > 75) return 'hollow';    // emptied out
-            if (h > 60) return 'gnawing';   // active discomfort
-            return 'low_grade';             // background signal
-          },
-          // Whether hunger is bleeding into mood — behavioral, not just physical
-          irritability: s => s.get('hunger') > 65,
+          hollow:    s => s.get('hunger') > 75,
+          gnawing:   s => s.get('hunger') > 60 && s.get('hunger') <= 75,
+          low_grade: s => s.get('hunger') > 45 && s.get('hunger') <= 60,
+          irritable: s => s.get('hunger') > 65,
         },
       },
     },
@@ -796,15 +764,6 @@ export function createSenses(ctx) {
         interoception: {
           gaba: s => s.get('gaba'),
           ne: s => s.get('norepinephrine'),
-          // Qualitative character of the anxiety state
-          character: s => {
-            const gaba = s.get('gaba');
-            const ne = s.get('norepinephrine');
-            if (gaba < 30 && ne > 70) return 'overwhelmed'; // both systems
-            if (ne > 65) return 'keyed_up';                 // NE-dominant: hyperalert
-            if (gaba < 35) return 'unsettled';              // GABA-dominant: can't settle
-            return 'restless';
-          },
         },
       },
     },
@@ -855,16 +814,10 @@ export function createSenses(ctx) {
       },
       properties: {
         thermal: {
-          celsius: s => s.get('temperature'),
-          tier: s => {
-            const t = s.get('temperature');
-            if (t < 0)  return 'freezing';
-            if (t < 5)  return 'very_cold';
-            if (t < 10) return 'cold';
-            if (t > 35) return 'very_hot';
-            if (t > 28) return 'hot';
-            return 'warm';
-          },
+          celsius:   s => s.get('temperature'),
+          cold:      s => s.get('temperature') < 10,
+          warm:      s => s.get('temperature') > 28,
+          very_cold: s => s.get('temperature') < 0,
           // Very cold hits immediately; warmth you notice more gradually
           immediate: s => s.get('temperature') < 8,
         },
@@ -896,7 +849,7 @@ export function createSenses(ctx) {
       salience: () => 0.6,
       properties: {
         sound:  { quality: () => 'rain' },
-        touch:  { quality: () => 'wet' },
+        touch:  { wet: () => true, cold: s => s.get('temperature') < 12 },
         sight:  { quality: () => 'grey' },
       },
     },
@@ -918,16 +871,11 @@ export function createSenses(ctx) {
       },
       properties: {
         sight: {
-          condition: () => {
-            const h = State.getHour();
-            const rain = State.get('rain');
-            if (h < 6 || h >= 22)  return 'dark';
-            if (h >= 6 && h < 8)   return rain ? 'grey_morning' : 'early_light';
-            if (h >= 17 && h < 20) return rain ? 'grey_evening' : 'dimming';
-            if (rain) return 'overcast';
-            return 'daylight';
-          },
-          rain: () => State.get('rain'),
+          dark:        () => { const h = State.getHour(); return h < 6 || h >= 22; },
+          grey:        () => { const h = State.getHour(); return State.get('rain') && h >= 6 && h < 22; },
+          early_light: () => { const h = State.getHour(); return !State.get('rain') && h >= 6 && h < 8; },
+          dimming:     () => { const h = State.getHour(); return !State.get('rain') && h >= 17 && h < 20; },
+          rain:        () => State.get('rain'),
         },
       },
     },
@@ -963,21 +911,7 @@ export function createSenses(ctx) {
       salience: s => State.lerp01(s.get('stress'), 50, 90) * 0.65,
       properties: {
         interoception: {
-          stress: s => s.get('stress'),
-          tier: s => {
-            const st = s.get('stress');
-            if (st > 80) return 'overwhelmed';
-            if (st > 65) return 'strained';
-            return 'elevated';
-          },
-          // Where the body holds the tension — a somatic location, not an emotional one
-          location: s => {
-            const ne = s.get('norepinephrine');
-            const gaba = s.get('gaba');
-            if (ne > 65) return 'jaw';       // hyperalert: jaw clenching, bracing
-            if (gaba < 35) return 'chest';   // GABA depleted: tight chest, shallow breath
-            return 'shoulders';              // default: load-bearing tension
-          },
+          high: s => s.get('stress') > 65,
         },
       },
     },
@@ -993,14 +927,9 @@ export function createSenses(ctx) {
       },
       properties: {
         interoception: {
-          caffeine: s => s.get('caffeine_level'),
-          quality: s => {
-            const c = s.get('caffeine_level');
-            const ne = s.get('norepinephrine');
-            if (c > 75 && ne > 65) return 'jitter';  // too much: shaky, running hot
-            if (c > 50) return 'sharp';               // working: focused edge
-            return 'edge';                            // low dose: present but subtle
-          },
+          jitter: s => s.get('caffeine_level') > 75 && s.get('norepinephrine') > 65,
+          sharp:  s => s.get('caffeine_level') > 50,
+          edge:   s => s.get('caffeine_level') > 30 && s.get('caffeine_level') <= 50,
         },
       },
     },

@@ -35,14 +35,14 @@ function wpick(items, r) {
 
 /**
  * Pick text from a pool using NT-weighted items.
- * Each pool item: string | { text: string|null, w: number | (ntCtx) => number }
+ * Each pool item: string | { text: string|null, w: number | (nt, obs) => number }
  * Returns string or null (null items represent "no modifier").
  */
-function pickText(pool, ntCtx, r) {
+function pickText(pool, nt, obs, r) {
   if (!pool || pool.length === 0) return null;
   const items = pool.map(item => {
     if (typeof item === 'string') return { weight: 1, value: item };
-    const w = typeof item.w === 'function' ? item.w(ntCtx) : (item.w ?? 1);
+    const w = typeof item.w === 'function' ? item.w(nt, obs) : (item.w ?? 1);
     return { weight: Math.max(0, w), value: item.text };
   });
   return wpick(items, r);
@@ -192,45 +192,45 @@ const LEX = {
       { text: 'the room', w: 1.0 },
       { text: 'the apartment', w: 0.6 },
       { text: 'the air', w: 0.8 },
-      { text: 'the floor', w: nt => nt._temp_cold ? 0.7 : 0.2 },
-      { text: 'the window', w: nt => nt._temp_cold ? 0.5 : 0.2 },
+      { text: 'the floor', w: (nt, obs) => obs.properties.thermal?.cold ? 0.7 : 0.2 },
+      { text: 'the window', w: (nt, obs) => obs.properties.thermal?.cold ? 0.5 : 0.2 },
     ],
     predicates: [
-      { text: 'is cold', w: nt => nt._temp_cold ? 1.0 : 0 },
-      { text: "hasn't warmed up", w: nt => nt._temp_cold ? 0.7 : 0 },
-      { text: 'holds the cold', w: nt => nt._temp_cold ? 0.8 : 0 },
-      { text: 'is cold in the morning way', w: nt => nt._temp_cold ? 0.6 : 0 },
-      { text: 'is warm', w: nt => nt._temp_warm ? 1.0 : 0 },
-      { text: 'holds the heat', w: nt => nt._temp_warm ? 0.8 : 0 },
-      { text: 'is close', w: nt => nt._temp_warm ? 0.7 : 0 },
-      { text: 'is stuffy', w: nt => nt._temp_warm && nt.gaba < 0.4 ? 1.0 : 0 },
+      { text: 'is cold', w: (nt, obs) => obs.properties.thermal?.cold ? 1.0 : 0 },
+      { text: "hasn't warmed up", w: (nt, obs) => obs.properties.thermal?.cold ? 0.7 : 0 },
+      { text: 'holds the cold', w: (nt, obs) => obs.properties.thermal?.cold ? 0.8 : 0 },
+      { text: 'is cold in the morning way', w: (nt, obs) => obs.properties.thermal?.cold ? 0.6 : 0 },
+      { text: 'is warm', w: (nt, obs) => obs.properties.thermal?.warm ? 1.0 : 0 },
+      { text: 'holds the heat', w: (nt, obs) => obs.properties.thermal?.warm ? 0.8 : 0 },
+      { text: 'is close', w: (nt, obs) => obs.properties.thermal?.warm ? 0.7 : 0 },
+      { text: 'is stuffy', w: (nt, obs) => obs.properties.thermal?.warm && nt.gaba < 0.4 ? 1.0 : 0 },
     ],
     modifiers: [
       { text: null, w: 2.0 },
-      { text: 'still', w: nt => nt._temp_cold ? 0.7 : 0 },
-      { text: 'through the blanket', w: nt => nt._temp_cold ? 0.5 : 0 },
+      { text: 'still', w: (nt, obs) => obs.properties.thermal?.cold ? 0.7 : 0 },
+      { text: 'through the blanket', w: (nt, obs) => obs.properties.thermal?.cold ? 0.5 : 0 },
     ],
     body_subjects: [
-      { text: 'the cold', w: nt => nt._temp_cold ? 1.5 : 0.1 },
-      { text: 'cold', w: nt => nt._temp_cold && nt.aden > 0.6 ? 1.2 : 0.4 },
-      { text: 'the warmth', w: nt => nt._temp_warm ? 1.5 : 0.1 },
-      { text: 'heat', w: nt => nt._temp_warm && nt.gaba < 0.4 ? 1.2 : 0.2 },
+      { text: 'the cold', w: (nt, obs) => obs.properties.thermal?.cold ? 1.5 : 0.1 },
+      { text: 'cold', w: (nt, obs) => obs.properties.thermal?.cold && nt.aden > 0.6 ? 1.2 : 0.4 },
+      { text: 'the warmth', w: (nt, obs) => obs.properties.thermal?.warm ? 1.5 : 0.1 },
+      { text: 'heat', w: (nt, obs) => obs.properties.thermal?.warm && nt.gaba < 0.4 ? 1.2 : 0.2 },
     ],
     body_predicates: [
       { text: 'sits in the room', w: 1.0 },
       { text: 'has settled in', w: 0.8 },
       { text: 'finds its way through', w: nt => nt.ne > 0.5 ? 1.0 : 0.4 },
-      { text: 'finds the face first', w: nt => nt._temp_cold ? 0.8 : 0.2 },
-      { text: 'comes from the floor', w: nt => nt._temp_cold ? 0.7 : 0.1 },
-      { text: 'is everywhere at once', w: nt => nt._temp_warm && nt.gaba < 0.4 ? 1.5 : 0.1 },
-      { text: 'presses in', w: nt => nt._temp_warm && nt.gaba < 0.4 ? 1.0 : 0.1 },
+      { text: 'finds the face first', w: (nt, obs) => obs.properties.thermal?.cold ? 0.8 : 0.2 },
+      { text: 'comes from the floor', w: (nt, obs) => obs.properties.thermal?.cold ? 0.7 : 0.1 },
+      { text: 'is everywhere at once', w: (nt, obs) => obs.properties.thermal?.warm && nt.gaba < 0.4 ? 1.5 : 0.1 },
+      { text: 'presses in', w: (nt, obs) => obs.properties.thermal?.warm && nt.gaba < 0.4 ? 1.0 : 0.1 },
     ],
     fragments: [
-      { text: 'cold', w: nt => nt._temp_cold ? 2.5 : 0 },
-      { text: 'warm in here', w: nt => nt._temp_warm ? 2.5 : 0 },
+      { text: 'cold', w: (nt, obs) => obs.properties.thermal?.cold ? 2.5 : 0 },
+      { text: 'warm in here', w: (nt, obs) => obs.properties.thermal?.warm ? 2.5 : 0 },
       { text: 'the room', w: 0.3 },
-      { text: 'cold floor', w: nt => nt._temp_cold ? 0.8 : 0 },
-      { text: 'stuffy', w: nt => nt._temp_warm && nt.gaba < 0.4 ? 1.0 : 0 },
+      { text: 'cold floor', w: (nt, obs) => obs.properties.thermal?.cold ? 0.8 : 0 },
+      { text: 'stuffy', w: (nt, obs) => obs.properties.thermal?.warm && nt.gaba < 0.4 ? 1.0 : 0 },
     ],
   },
 
@@ -239,13 +239,13 @@ const LEX = {
       { text: 'something', w: nt => nt.aden > 0.7 ? 1.5 : 0.5 },
       { text: 'the body', w: 0.6 },
       { text: 'it', w: nt => nt.aden > 0.7 ? 0.8 : 0.2 },
-      { text: 'the weight of it', w: nt => nt._quality_gravitational ? 1.0 : 0.1 },
+      { text: 'the weight of it', w: nt => nt.aden > 0.80 ? 1.0 : 0.1 },
     ],
     predicates: [
       { text: 'has weight to it', w: 1.0 },
       { text: "doesn't lift", w: nt => nt.aden > 0.7 ? 1.0 : 0.3 },
       { text: 'is there', w: nt => nt.aden > 0.6 ? 0.8 : 0.3 },
-      { text: 'sits in the limbs', w: nt => nt._quality_weighted ? 1.2 : 0.3 },
+      { text: 'sits in the limbs', w: nt => nt.aden > 0.65 ? 1.2 : 0.3 },
       { text: "hasn't cleared", w: nt => nt.aden > 0.65 ? 1.0 : 0.3 },
       { text: 'stays', w: nt => nt.serotonin < 0.4 ? 0.8 : 0.2 },
     ],
@@ -256,89 +256,89 @@ const LEX = {
     ],
     body_subjects: [
       { text: 'something', w: nt => nt.aden > 0.7 ? 1.5 : 0.8 },
-      { text: 'weight', w: nt => nt._quality_weighted ? 1.5 : 0.5 },
-      { text: 'everything', w: nt => nt._quality_crushing ? 1.2 : 0.2 },
-      { text: 'the arms', w: nt => nt._quality_weighted ? 0.8 : 0.2 },
+      { text: 'weight', w: nt => nt.aden > 0.65 ? 1.5 : 0.5 },
+      { text: 'everything', w: nt => nt.aden > 0.85 ? 1.2 : 0.2 },
+      { text: 'the arms', w: nt => nt.aden > 0.65 ? 0.8 : 0.2 },
       { text: 'the body', w: 0.5 },
     ],
     body_predicates: [
-      { text: 'pulls toward horizontal', w: nt => nt._quality_gravitational ? 2.0 : 0.3 },
-      { text: 'has the density of something real', w: nt => nt._quality_gravitational ? 1.5 : 0.1 },
-      { text: 'settles into the shoulders', w: nt => nt._quality_weighted ? 2.0 : 0.4 },
-      { text: 'sits in the chest', w: nt => nt._quality_weighted ? 1.0 : 0.3 },
+      { text: 'pulls toward horizontal', w: nt => nt.aden > 0.80 ? 2.0 : 0.3 },
+      { text: 'has the density of something real', w: nt => nt.aden > 0.80 ? 1.5 : 0.1 },
+      { text: 'settles into the shoulders', w: nt => nt.aden > 0.65 ? 2.0 : 0.4 },
+      { text: 'sits in the chest', w: nt => nt.aden > 0.65 ? 1.0 : 0.3 },
       { text: 'is just there', w: 0.8 },
       { text: 'makes itself heavy', w: nt => nt.aden > 0.6 ? 1.0 : 0.3 },
       { text: 'refuses to lift', w: nt => nt.aden > 0.75 ? 1.5 : 0.2 },
-      { text: 'wants to lie down', w: nt => nt._quality_gravitational ? 1.5 : 0.3 },
+      { text: 'wants to lie down', w: nt => nt.aden > 0.80 ? 1.5 : 0.3 },
     ],
     fragments: [
-      { text: 'heavy', w: nt => (nt._quality_weighted || nt._quality_gravitational) ? 1.5 : 0.7 },
+      { text: 'heavy', w: nt => nt.aden > 0.65 ? 1.5 : 0.7 },
       { text: 'something', w: nt => nt.aden > 0.7 ? 1.0 : 0.3 },
-      { text: 'the body, heavy', w: nt => nt._quality_gravitational ? 1.0 : 0.1 },
+      { text: 'the body, heavy', w: nt => nt.aden > 0.80 ? 1.0 : 0.1 },
       { text: 'still tired', w: nt => nt.aden > 0.65 ? 0.8 : 0.1 },
     ],
   },
 
   hunger_signal: {
     subjects: [
-      { text: 'something', w: nt => nt._quality_low_grade ? 1.5 : 0.5 },
-      { text: 'hunger', w: nt => (nt._quality_gnawing || nt._quality_hollow) ? 1.5 : 0.7 },
-      { text: 'an emptiness', w: nt => nt._quality_hollow ? 2.0 : 0.2 },
-      { text: 'an irritability', w: nt => nt._irritable ? 1.5 : 0.1 },
-      { text: 'the stomach', w: nt => nt._quality_gnawing ? 1.2 : 0.4 },
-      { text: 'it', w: nt => nt._quality_low_grade ? 0.8 : 0.2 },
+      { text: 'something', w: (nt, obs) => obs.properties.interoception?.low_grade ? 1.5 : 0.5 },
+      { text: 'hunger', w: (nt, obs) => (obs.properties.interoception?.gnawing || obs.properties.interoception?.hollow) ? 1.5 : 0.7 },
+      { text: 'an emptiness', w: (nt, obs) => obs.properties.interoception?.hollow ? 2.0 : 0.2 },
+      { text: 'an irritability', w: (nt, obs) => obs.properties.interoception?.irritable ? 1.5 : 0.1 },
+      { text: 'the stomach', w: (nt, obs) => obs.properties.interoception?.gnawing ? 1.2 : 0.4 },
+      { text: 'it', w: (nt, obs) => obs.properties.interoception?.low_grade ? 0.8 : 0.2 },
     ],
     predicates: [
       { text: 'is there', w: 0.8 },
-      { text: 'makes itself known', w: nt => nt._quality_gnawing ? 1.5 : 0.5 },
-      { text: 'is going', w: nt => nt._quality_low_grade ? 1.5 : 0.5 },
-      { text: 'is starting', w: nt => nt._quality_low_grade ? 1.0 : 0.2 },
-      { text: 'is audible', w: nt => nt._quality_gnawing ? 1.2 : 0.2 },
-      { text: 'is specific', w: nt => nt._quality_hollow ? 1.0 : 0.2 },
+      { text: 'makes itself known', w: (nt, obs) => obs.properties.interoception?.gnawing ? 1.5 : 0.5 },
+      { text: 'is going', w: (nt, obs) => obs.properties.interoception?.low_grade ? 1.5 : 0.5 },
+      { text: 'is starting', w: (nt, obs) => obs.properties.interoception?.low_grade ? 1.0 : 0.2 },
+      { text: 'is audible', w: (nt, obs) => obs.properties.interoception?.gnawing ? 1.2 : 0.2 },
+      { text: 'is specific', w: (nt, obs) => obs.properties.interoception?.hollow ? 1.0 : 0.2 },
     ],
     modifiers: [
       { text: null, w: 2.0 },
     ],
     body_subjects: [
-      { text: 'hunger', w: nt => (nt._quality_gnawing || nt._quality_hollow) ? 1.5 : 0.7 },
+      { text: 'hunger', w: (nt, obs) => (obs.properties.interoception?.gnawing || obs.properties.interoception?.hollow) ? 1.5 : 0.7 },
       { text: 'something', w: 0.8 },
-      { text: 'an emptiness', w: nt => nt._quality_hollow ? 1.5 : 0.2 },
-      { text: 'the stomach', w: nt => nt._quality_gnawing ? 1.2 : 0.3 },
+      { text: 'an emptiness', w: (nt, obs) => obs.properties.interoception?.hollow ? 1.5 : 0.2 },
+      { text: 'the stomach', w: (nt, obs) => obs.properties.interoception?.gnawing ? 1.2 : 0.3 },
     ],
     body_predicates: [
-      { text: "hasn't found a target yet", w: nt => nt._irritable ? 1.5 : 0.3 },
-      { text: "won't stop", w: nt => nt._quality_gnawing ? 1.5 : 0.3 },
-      { text: 'makes itself specific', w: nt => nt._quality_hollow ? 1.0 : 0.3 },
-      { text: 'is in the background', w: nt => nt._quality_low_grade ? 1.5 : 0.3 },
-      { text: 'is starting', w: nt => nt._quality_low_grade ? 1.0 : 0.2 },
-      { text: 'is audible now', w: nt => nt._quality_gnawing ? 1.2 : 0.2 },
-      { text: 'has been going for a while', w: nt => nt._quality_gnawing ? 1.0 : 0.2 },
-      { text: 'presents itself', w: nt => nt._quality_hollow ? 0.8 : 0.2 },
+      { text: "hasn't found a target yet", w: (nt, obs) => obs.properties.interoception?.irritable ? 1.5 : 0.3 },
+      { text: "won't stop", w: (nt, obs) => obs.properties.interoception?.gnawing ? 1.5 : 0.3 },
+      { text: 'makes itself specific', w: (nt, obs) => obs.properties.interoception?.hollow ? 1.0 : 0.3 },
+      { text: 'is in the background', w: (nt, obs) => obs.properties.interoception?.low_grade ? 1.5 : 0.3 },
+      { text: 'is starting', w: (nt, obs) => obs.properties.interoception?.low_grade ? 1.0 : 0.2 },
+      { text: 'is audible now', w: (nt, obs) => obs.properties.interoception?.gnawing ? 1.2 : 0.2 },
+      { text: 'has been going for a while', w: (nt, obs) => obs.properties.interoception?.gnawing ? 1.0 : 0.2 },
+      { text: 'presents itself', w: (nt, obs) => obs.properties.interoception?.hollow ? 0.8 : 0.2 },
     ],
     fragments: [
-      { text: 'hungry', w: nt => nt._quality_gnawing ? 1.5 : 0.8 },
-      { text: 'something', w: nt => nt._quality_low_grade ? 1.5 : 0.5 },
-      { text: 'hollow', w: nt => nt._quality_hollow ? 1.5 : 0.1 },
-      { text: 'the stomach', w: nt => nt._quality_gnawing ? 0.8 : 0.2 },
+      { text: 'hungry', w: (nt, obs) => obs.properties.interoception?.gnawing ? 1.5 : 0.8 },
+      { text: 'something', w: (nt, obs) => obs.properties.interoception?.low_grade ? 1.5 : 0.5 },
+      { text: 'hollow', w: (nt, obs) => obs.properties.interoception?.hollow ? 1.5 : 0.1 },
+      { text: 'the stomach', w: (nt, obs) => obs.properties.interoception?.gnawing ? 0.8 : 0.2 },
     ],
   },
 
   anxiety_signal: {
     subjects: [
       { text: 'something', w: 1.2 },
-      { text: 'the body', w: nt => nt._char_keyed_up ? 1.0 : 0.4 },
-      { text: 'an unease', w: nt => nt._char_unsettled ? 1.0 : 0.3 },
-      { text: 'a tightness', w: nt => nt._char_unsettled || nt._char_keyed_up ? 0.8 : 0.2 },
+      { text: 'the body', w: nt => nt.ne > 0.65 ? 1.0 : 0.4 },
+      { text: 'an unease', w: nt => nt.gaba < 0.35 ? 1.0 : 0.3 },
+      { text: 'a tightness', w: nt => nt.gaba < 0.35 || nt.ne > 0.65 ? 0.8 : 0.2 },
       { text: 'the chest', w: nt => nt.gaba < 0.35 ? 0.8 : 0.1 },
     ],
     predicates: [
-      { text: "can't settle", w: nt => nt._char_unsettled ? 2.0 : 0.3 },
-      { text: 'is running faster than it should', w: nt => nt._char_keyed_up ? 2.0 : 0.2 },
-      { text: 'is ahead of wherever this is going', w: nt => nt._char_keyed_up ? 1.0 : 0.2 },
-      { text: 'needs something to fix on', w: nt => nt._char_restless ? 1.5 : 0.3 },
+      { text: "can't settle", w: nt => nt.gaba < 0.35 ? 2.0 : 0.3 },
+      { text: 'is running faster than it should', w: nt => nt.ne > 0.65 ? 2.0 : 0.2 },
+      { text: 'is ahead of wherever this is going', w: nt => nt.ne > 0.65 ? 1.0 : 0.2 },
+      { text: 'needs something to fix on', w: nt => nt.ne > 0.52 && nt.gaba < 0.45 ? 1.5 : 0.3 },
       { text: 'is there and unreasonable', w: nt => nt.gaba < 0.4 ? 1.0 : 0.2 },
-      { text: 'has no object', w: nt => nt._char_unsettled ? 0.8 : 0.1 },
-      { text: 'braces', w: nt => nt._char_keyed_up ? 0.8 : 0.2 },
+      { text: 'has no object', w: nt => nt.gaba < 0.35 ? 0.8 : 0.1 },
+      { text: 'braces', w: nt => nt.ne > 0.65 ? 0.8 : 0.2 },
     ],
     modifiers: [
       { text: null, w: 2.0 },
@@ -349,18 +349,18 @@ const LEX = {
       { text: 'a tightness', w: nt => nt.gaba < 0.4 ? 1.0 : 0.3 },
     ],
     body_predicates: [
-      { text: "can't settle", w: nt => nt._char_unsettled ? 2.0 : 0.5 },
-      { text: 'is already ahead of this', w: nt => nt._char_keyed_up ? 1.5 : 0.3 },
-      { text: 'keeps looking for the thing', w: nt => nt._char_restless ? 1.5 : 0.3 },
+      { text: "can't settle", w: nt => nt.gaba < 0.35 ? 2.0 : 0.5 },
+      { text: 'is already ahead of this', w: nt => nt.ne > 0.65 ? 1.5 : 0.3 },
+      { text: 'keeps looking for the thing', w: nt => nt.ne > 0.52 && nt.gaba < 0.45 ? 1.5 : 0.3 },
       { text: 'is running without direction', w: 0.7 },
       { text: 'is somewhere in the chest', w: nt => nt.gaba < 0.4 ? 1.0 : 0.3 },
-      { text: 'has no object for this', w: nt => nt._char_unsettled ? 0.8 : 0.2 },
-      { text: 'is bracing against something', w: nt => nt._char_keyed_up ? 0.8 : 0.2 },
+      { text: 'has no object for this', w: nt => nt.gaba < 0.35 ? 0.8 : 0.2 },
+      { text: 'is bracing against something', w: nt => nt.ne > 0.65 ? 0.8 : 0.2 },
     ],
     fragments: [
-      { text: "can't settle", w: nt => nt._char_unsettled ? 1.5 : 0.8 },
+      { text: "can't settle", w: nt => nt.gaba < 0.35 ? 1.5 : 0.8 },
       { text: 'something', w: 0.6 },
-      { text: 'braced', w: nt => nt._char_keyed_up ? 1.0 : 0.2 },
+      { text: 'braced', w: nt => nt.ne > 0.65 ? 1.0 : 0.2 },
       { text: 'the chest, tight', w: nt => nt.gaba < 0.35 ? 1.0 : 0.1 },
     ],
   },
@@ -432,39 +432,39 @@ const LEX = {
   outdoor_temperature: {
     subjects: [
       { text: 'the air', w: 0.8 },
-      { text: 'the cold', w: nt => nt._temp_cold ? 1.5 : 0 },
-      { text: 'the warmth', w: nt => nt._temp_warm ? 1.5 : 0 },
+      { text: 'the cold', w: (nt, obs) => obs.properties.thermal?.cold ? 1.5 : 0 },
+      { text: 'the warmth', w: (nt, obs) => obs.properties.thermal?.warm ? 1.5 : 0 },
     ],
     predicates: [
-      { text: 'hits immediately', w: nt => nt._immediate ? 1.5 : 0.2 },
-      { text: 'is cold', w: nt => nt._temp_cold ? 1.0 : 0 },
-      { text: 'is warm', w: nt => nt._temp_warm ? 1.0 : 0 },
-      { text: 'has stayed warm', w: nt => nt._temp_warm ? 0.7 : 0 },
-      { text: "doesn't let up", w: nt => nt._temp_warm && nt.ne > 0.55 ? 0.8 : 0 },
-      { text: 'is colder than expected', w: nt => nt._temp_cold && nt.gaba > 0.5 ? 0.6 : 0 },
+      { text: 'hits immediately', w: (nt, obs) => obs.properties.thermal?.immediate ? 1.5 : 0.2 },
+      { text: 'is cold', w: (nt, obs) => obs.properties.thermal?.cold ? 1.0 : 0 },
+      { text: 'is warm', w: (nt, obs) => obs.properties.thermal?.warm ? 1.0 : 0 },
+      { text: 'has stayed warm', w: (nt, obs) => obs.properties.thermal?.warm ? 0.7 : 0 },
+      { text: "doesn't let up", w: (nt, obs) => obs.properties.thermal?.warm && nt.ne > 0.55 ? 0.8 : 0 },
+      { text: 'is colder than expected', w: (nt, obs) => obs.properties.thermal?.cold && nt.gaba > 0.5 ? 0.6 : 0 },
     ],
     modifiers: [
       { text: null, w: 2.0 },
     ],
     body_subjects: [
-      { text: 'the cold', w: nt => nt._temp_cold ? 1.5 : 0.1 },
-      { text: 'cold', w: nt => nt._temp_cold && nt.aden > 0.6 ? 1.2 : 0.3 },
-      { text: 'the warmth', w: nt => nt._temp_warm ? 1.5 : 0.1 },
-      { text: 'heat', w: nt => nt._temp_warm && nt.ne > 0.5 ? 0.8 : 0.1 },
+      { text: 'the cold', w: (nt, obs) => obs.properties.thermal?.cold ? 1.5 : 0.1 },
+      { text: 'cold', w: (nt, obs) => obs.properties.thermal?.cold && nt.aden > 0.6 ? 1.2 : 0.3 },
+      { text: 'the warmth', w: (nt, obs) => obs.properties.thermal?.warm ? 1.5 : 0.1 },
+      { text: 'heat', w: (nt, obs) => obs.properties.thermal?.warm && nt.ne > 0.5 ? 0.8 : 0.1 },
     ],
     body_predicates: [
-      { text: 'hits immediately', w: nt => nt._immediate ? 2.0 : 0.3 },
+      { text: 'hits immediately', w: (nt, obs) => obs.properties.thermal?.immediate ? 2.0 : 0.3 },
       { text: 'sits on the back of the neck', w: 1.0 },
       { text: 'finds the face first', w: 0.8 },
-      { text: 'goes through the coat', w: nt => nt._temp_very_cold ? 1.5 : 0.3 },
-      { text: 'sits on the arms', w: nt => nt._temp_warm ? 1.2 : 0.1 },
-      { text: 'comes from the pavement', w: nt => nt._temp_warm ? 0.7 : 0.1 },
+      { text: 'goes through the coat', w: (nt, obs) => obs.properties.thermal?.very_cold ? 1.5 : 0.3 },
+      { text: 'sits on the arms', w: (nt, obs) => obs.properties.thermal?.warm ? 1.2 : 0.1 },
+      { text: 'comes from the pavement', w: (nt, obs) => obs.properties.thermal?.warm ? 0.7 : 0.1 },
     ],
     fragments: [
-      { text: 'cold', w: nt => nt._temp_cold ? 1.5 : 0 },
-      { text: 'warm out', w: nt => nt._temp_warm ? 1.5 : 0 },
+      { text: 'cold', w: (nt, obs) => obs.properties.thermal?.cold ? 1.5 : 0 },
+      { text: 'warm out', w: (nt, obs) => obs.properties.thermal?.warm ? 1.5 : 0 },
       { text: 'the air', w: 0.5 },
-      { text: 'heat', w: nt => nt._temp_warm ? 0.7 : 0 },
+      { text: 'heat', w: (nt, obs) => obs.properties.thermal?.warm ? 0.7 : 0 },
     ],
   },
 
@@ -532,7 +532,7 @@ const LEX = {
     body_subjects: [
       { text: 'something', w: 0.7 },
       { text: 'the wet', w: nt => nt.ne > 0.55 ? 1.2 : 0.4 },
-      { text: 'cold', w: nt => nt._temp_cold ? 1.0 : 0.2 },
+      { text: 'cold', w: (nt, obs) => obs.properties.touch?.cold ? 1.0 : 0.2 },
     ],
     body_predicates: [
       { text: 'finds the back of the neck', w: 0.8 },
@@ -558,42 +558,42 @@ const LEX = {
   window_light: {
     subjects: [
       { text: 'the window', w: 0.8 },
-      { text: 'grey light', w: nt => nt._condition_grey ? 2.0 : 0 },
-      { text: 'morning light', w: nt => nt._condition_early_light ? 2.0 : 0 },
-      { text: 'afternoon light', w: nt => nt._condition_dimming ? 0.8 : 0 },
-      { text: 'daylight', w: nt => !nt._condition_dark && !nt._condition_grey ? 0.7 : 0 },
-      { text: 'the light', w: nt => !nt._condition_dark ? 1.0 : 0.1 },
+      { text: 'grey light', w: (nt, obs) => obs.properties.sight?.grey ? 2.0 : 0 },
+      { text: 'morning light', w: (nt, obs) => obs.properties.sight?.early_light ? 2.0 : 0 },
+      { text: 'afternoon light', w: (nt, obs) => obs.properties.sight?.dimming ? 0.8 : 0 },
+      { text: 'daylight', w: (nt, obs) => !obs.properties.sight?.dark && !obs.properties.sight?.grey ? 0.7 : 0 },
+      { text: 'the light', w: (nt, obs) => !obs.properties.sight?.dark ? 1.0 : 0.1 },
     ],
     predicates: [
-      { text: 'is still dark', w: nt => nt._condition_dark ? 3.0 : 0 },
-      { text: 'is grey', w: nt => nt._condition_grey ? 2.0 : 0 },
-      { text: 'is flat', w: nt => nt._condition_grey ? 1.5 : 0 },
-      { text: 'has arrived', w: nt => nt._condition_early_light ? 2.0 : 0 },
-      { text: 'is going', w: nt => nt._condition_dimming ? 2.0 : 0 },
-      { text: 'comes through', w: nt => !nt._condition_dark ? 1.0 : 0 },
-      { text: 'sits in the room', w: nt => !nt._condition_dark && nt.gaba > 0.5 ? 0.7 : 0 },
+      { text: 'is still dark', w: (nt, obs) => obs.properties.sight?.dark ? 3.0 : 0 },
+      { text: 'is grey', w: (nt, obs) => obs.properties.sight?.grey ? 2.0 : 0 },
+      { text: 'is flat', w: (nt, obs) => obs.properties.sight?.grey ? 1.5 : 0 },
+      { text: 'has arrived', w: (nt, obs) => obs.properties.sight?.early_light ? 2.0 : 0 },
+      { text: 'is going', w: (nt, obs) => obs.properties.sight?.dimming ? 2.0 : 0 },
+      { text: 'comes through', w: (nt, obs) => !obs.properties.sight?.dark ? 1.0 : 0 },
+      { text: 'sits in the room', w: (nt, obs) => !obs.properties.sight?.dark && nt.gaba > 0.5 ? 0.7 : 0 },
       { text: 'is outside', w: 0.3 },
     ],
     modifiers: [
       { text: null, w: 2.5 },
-      { text: 'flat', w: nt => nt.serotonin < 0.4 && nt._condition_grey ? 1.5 : 0 },
-      { text: 'without warmth', w: nt => nt._condition_grey && nt.serotonin < 0.45 ? 1.0 : 0 },
-      { text: 'through the blinds', w: nt => !nt._condition_dark ? 0.5 : 0 },
-      { text: 'already', w: nt => nt._condition_early_light && nt.aden > 0.5 ? 1.0 : 0 },
+      { text: 'flat', w: (nt, obs) => nt.serotonin < 0.4 && obs.properties.sight?.grey ? 1.5 : 0 },
+      { text: 'without warmth', w: (nt, obs) => obs.properties.sight?.grey && nt.serotonin < 0.45 ? 1.0 : 0 },
+      { text: 'through the blinds', w: (nt, obs) => !obs.properties.sight?.dark ? 0.5 : 0 },
+      { text: 'already', w: (nt, obs) => obs.properties.sight?.early_light && nt.aden > 0.5 ? 1.0 : 0 },
     ],
     escapes: [
-      { text: 'it was morning', w: nt => nt._condition_early_light ? 1.5 : 0.3 },
-      { text: 'the day had started', w: nt => nt._condition_early_light ? 1.0 : 0.3 },
+      { text: 'it was morning', w: (nt, obs) => obs.properties.sight?.early_light ? 1.5 : 0.3 },
+      { text: 'the day had started', w: (nt, obs) => obs.properties.sight?.early_light ? 1.0 : 0.3 },
       { text: 'it was just the light', w: 1.0 },
-      { text: 'it was getting dark', w: nt => nt._condition_dimming ? 1.5 : 0.3 },
+      { text: 'it was getting dark', w: (nt, obs) => obs.properties.sight?.dimming ? 1.5 : 0.3 },
     ],
     fragments: [
-      { text: 'grey', w: nt => nt._condition_grey ? 2.5 : 0 },
-      { text: 'dark', w: nt => nt._condition_dark ? 2.5 : 0 },
-      { text: 'morning', w: nt => nt._condition_early_light ? 2.0 : 0 },
-      { text: 'light', w: nt => !nt._condition_dark ? 0.8 : 0 },
+      { text: 'grey', w: (nt, obs) => obs.properties.sight?.grey ? 2.5 : 0 },
+      { text: 'dark', w: (nt, obs) => obs.properties.sight?.dark ? 2.5 : 0 },
+      { text: 'morning', w: (nt, obs) => obs.properties.sight?.early_light ? 2.0 : 0 },
+      { text: 'light', w: (nt, obs) => !obs.properties.sight?.dark ? 0.8 : 0 },
       { text: 'the window', w: 0.5 },
-      { text: 'going dark', w: nt => nt._condition_dimming ? 1.2 : 0 },
+      { text: 'going dark', w: (nt, obs) => obs.properties.sight?.dimming ? 1.2 : 0 },
     ],
   },
 
@@ -645,51 +645,51 @@ const LEX = {
   stress_signal: {
     subjects: [
       { text: 'something', w: 0.8 },
-      { text: 'the shoulders', w: nt => nt._stress_loc_shoulders ? 2.0 : 0.1 },
-      { text: 'the jaw', w: nt => nt._stress_loc_jaw ? 2.0 : 0.1 },
-      { text: 'the chest', w: nt => nt._stress_loc_chest ? 2.0 : 0.1 },
-      { text: 'the neck', w: nt => nt._stress_loc_shoulders ? 1.2 : 0.1 },
-      { text: 'a tension', w: nt => nt._stress_high ? 0.8 : 0.3 },
+      { text: 'the shoulders', w: nt => nt.ne <= 0.65 && nt.gaba >= 0.35 ? 2.0 : 0.1 },
+      { text: 'the jaw', w: nt => nt.ne > 0.65 ? 2.0 : 0.1 },
+      { text: 'the chest', w: nt => nt.gaba < 0.35 ? 2.0 : 0.1 },
+      { text: 'the neck', w: nt => nt.ne <= 0.65 && nt.gaba >= 0.35 ? 1.2 : 0.1 },
+      { text: 'a tension', w: (nt, obs) => obs.properties.interoception?.high ? 0.8 : 0.3 },
     ],
     predicates: [
-      { text: 'is carrying something', w: nt => nt._stress_loc_shoulders ? 1.5 : 0.3 },
-      { text: 'is braced', w: nt => nt._stress_loc_jaw ? 1.5 : 0.3 },
-      { text: 'is tight', w: nt => nt._stress_loc_chest ? 1.5 : 0.5 },
-      { text: "won't let go", w: nt => nt._stress_high ? 1.5 : 0.3 },
+      { text: 'is carrying something', w: nt => nt.ne <= 0.65 && nt.gaba >= 0.35 ? 1.5 : 0.3 },
+      { text: 'is braced', w: nt => nt.ne > 0.65 ? 1.5 : 0.3 },
+      { text: 'is tight', w: nt => nt.gaba < 0.35 ? 1.5 : 0.5 },
+      { text: "won't let go", w: (nt, obs) => obs.properties.interoception?.high ? 1.5 : 0.3 },
       { text: 'is holding', w: 0.8 },
       { text: 'is specific', w: 0.5 },
-      { text: 'has been there', w: nt => nt._stress_high ? 1.0 : 0.3 },
+      { text: 'has been there', w: (nt, obs) => obs.properties.interoception?.high ? 1.0 : 0.3 },
     ],
     modifiers: [
       { text: null, w: 2.0 },
-      { text: 'all the way up', w: nt => nt._stress_loc_shoulders ? 0.8 : 0 },
+      { text: 'all the way up', w: nt => nt.ne <= 0.65 && nt.gaba >= 0.35 ? 0.8 : 0 },
       { text: 'without reason', w: nt => nt.serotonin < 0.4 ? 0.6 : 0.1 },
-      { text: 'without letting go', w: nt => nt._stress_high ? 0.7 : 0.1 },
-      { text: 'since this morning', w: nt => nt._stress_high ? 0.5 : 0.1 },
+      { text: 'without letting go', w: (nt, obs) => obs.properties.interoception?.high ? 0.7 : 0.1 },
+      { text: 'since this morning', w: (nt, obs) => obs.properties.interoception?.high ? 0.5 : 0.1 },
     ],
     body_subjects: [
-      { text: 'the shoulders', w: nt => nt._stress_loc_shoulders ? 2.0 : 0.3 },
-      { text: 'the jaw', w: nt => nt._stress_loc_jaw ? 2.0 : 0.1 },
-      { text: 'the neck', w: nt => nt._stress_loc_shoulders || nt._stress_loc_jaw ? 1.2 : 0.1 },
-      { text: 'the chest', w: nt => nt._stress_loc_chest ? 1.8 : 0.2 },
+      { text: 'the shoulders', w: nt => nt.ne <= 0.65 && nt.gaba >= 0.35 ? 2.0 : 0.3 },
+      { text: 'the jaw', w: nt => nt.ne > 0.65 ? 2.0 : 0.1 },
+      { text: 'the neck', w: nt => nt.ne <= 0.65 || nt.ne > 0.65 ? 1.2 : 0.1 },
+      { text: 'the chest', w: nt => nt.gaba < 0.35 ? 1.8 : 0.2 },
       { text: 'something', w: 0.8 },
     ],
     body_predicates: [
-      { text: 'has been holding this whole time', w: nt => nt._stress_high ? 1.5 : 0.5 },
+      { text: 'has been holding this whole time', w: (nt, obs) => obs.properties.interoception?.high ? 1.5 : 0.5 },
       { text: "won't release", w: 1.0 },
-      { text: 'is braced against something', w: nt => nt._stress_loc_jaw || nt.ne > 0.6 ? 1.5 : 0.3 },
-      { text: 'goes up around the ears', w: nt => nt._stress_loc_shoulders ? 1.2 : 0.1 },
-      { text: 'is tight in a specific way', w: nt => nt._stress_loc_chest ? 1.0 : 0.2 },
-      { text: 'runs up the back of the neck', w: nt => nt._stress_loc_shoulders || nt.ne > 0.6 ? 1.3 : 0.2 },
-      { text: 'never quite unclips', w: nt => nt._stress_high ? 1.2 : 0.3 },
-      { text: 'has been like this since morning', w: nt => nt._stress_high ? 0.9 : 0.1 },
+      { text: 'is braced against something', w: nt => nt.ne > 0.65 ? 1.5 : 0.3 },
+      { text: 'goes up around the ears', w: nt => nt.ne <= 0.65 && nt.gaba >= 0.35 ? 1.2 : 0.1 },
+      { text: 'is tight in a specific way', w: nt => nt.gaba < 0.35 ? 1.0 : 0.2 },
+      { text: 'runs up the back of the neck', w: nt => nt.ne <= 0.65 || nt.ne > 0.6 ? 1.3 : 0.2 },
+      { text: 'never quite unclips', w: (nt, obs) => obs.properties.interoception?.high ? 1.2 : 0.3 },
+      { text: 'has been like this since morning', w: (nt, obs) => obs.properties.interoception?.high ? 0.9 : 0.1 },
     ],
     fragments: [
-      { text: 'tight', w: nt => nt._stress_high ? 1.5 : 0.8 },
+      { text: 'tight', w: (nt, obs) => obs.properties.interoception?.high ? 1.5 : 0.8 },
       { text: 'holding', w: 0.7 },
-      { text: 'braced', w: nt => nt._stress_loc_jaw || nt.ne > 0.6 ? 1.2 : 0.4 },
-      { text: 'the neck', w: nt => nt._stress_loc_shoulders ? 0.9 : 0.2 },
-      { text: 'the shoulders', w: nt => nt._stress_loc_shoulders ? 1.0 : 0.2 },
+      { text: 'braced', w: nt => nt.ne > 0.65 ? 1.2 : 0.4 },
+      { text: 'the neck', w: nt => nt.ne <= 0.65 && nt.gaba >= 0.35 ? 0.9 : 0.2 },
+      { text: 'the shoulders', w: nt => nt.ne <= 0.65 && nt.gaba >= 0.35 ? 1.0 : 0.2 },
       { text: 'something', w: 0.5 },
     ],
   },
@@ -698,44 +698,44 @@ const LEX = {
 
   caffeine_signal: {
     subjects: [
-      { text: 'something', w: nt => nt._caffeine_jitter ? 1.0 : 0.5 },
-      { text: 'the body', w: nt => nt._caffeine_jitter ? 1.5 : 0.4 },
-      { text: 'everything', w: nt => nt._caffeine_sharp ? 1.2 : 0.2 },
-      { text: 'a sharpness', w: nt => nt._caffeine_sharp || nt._caffeine_edge ? 1.2 : 0.2 },
-      { text: 'the edges', w: nt => nt._caffeine_sharp ? 1.0 : 0.2 },
+      { text: 'something', w: (nt, obs) => obs.properties.interoception?.jitter ? 1.0 : 0.5 },
+      { text: 'the body', w: (nt, obs) => obs.properties.interoception?.jitter ? 1.5 : 0.4 },
+      { text: 'everything', w: (nt, obs) => obs.properties.interoception?.sharp ? 1.2 : 0.2 },
+      { text: 'a sharpness', w: (nt, obs) => obs.properties.interoception?.sharp || obs.properties.interoception?.edge ? 1.2 : 0.2 },
+      { text: 'the edges', w: (nt, obs) => obs.properties.interoception?.sharp ? 1.0 : 0.2 },
     ],
     predicates: [
-      { text: 'is running a little fast', w: nt => nt._caffeine_sharp ? 1.5 : 0.4 },
-      { text: "won't quite settle", w: nt => nt._caffeine_jitter ? 1.5 : 0.3 },
-      { text: 'has an edge to it', w: nt => nt._caffeine_edge ? 1.5 : 0.4 },
-      { text: 'is a little sharper than usual', w: nt => nt._caffeine_sharp ? 1.0 : 0.2 },
-      { text: 'is clearer than usual', w: nt => nt._caffeine_sharp && !nt._caffeine_jitter ? 1.3 : 0.2 },
-      { text: 'comes in', w: nt => nt._caffeine_edge ? 0.8 : 0.2 },
+      { text: 'is running a little fast', w: (nt, obs) => obs.properties.interoception?.sharp ? 1.5 : 0.4 },
+      { text: "won't quite settle", w: (nt, obs) => obs.properties.interoception?.jitter ? 1.5 : 0.3 },
+      { text: 'has an edge to it', w: (nt, obs) => obs.properties.interoception?.edge ? 1.5 : 0.4 },
+      { text: 'is a little sharper than usual', w: (nt, obs) => obs.properties.interoception?.sharp ? 1.0 : 0.2 },
+      { text: 'is clearer than usual', w: (nt, obs) => obs.properties.interoception?.sharp && !obs.properties.interoception?.jitter ? 1.3 : 0.2 },
+      { text: 'comes in', w: (nt, obs) => obs.properties.interoception?.edge ? 0.8 : 0.2 },
     ],
     modifiers: [
       { text: null, w: 2.0 },
-      { text: 'today', w: nt => nt._caffeine_sharp ? 0.5 : 0.1 },
-      { text: 'in a way', w: nt => nt._caffeine_edge ? 0.4 : 0.1 },
+      { text: 'today', w: (nt, obs) => obs.properties.interoception?.sharp ? 0.5 : 0.1 },
+      { text: 'in a way', w: (nt, obs) => obs.properties.interoception?.edge ? 0.4 : 0.1 },
     ],
     body_subjects: [
       { text: 'something', w: 1.0 },
-      { text: 'the hands', w: nt => nt._caffeine_jitter ? 1.5 : 0.1 },
-      { text: 'the mind', w: nt => nt._caffeine_sharp ? 1.3 : 0.2 },
-      { text: 'the eyes', w: nt => nt._caffeine_sharp || nt._caffeine_edge ? 0.8 : 0.2 },
+      { text: 'the hands', w: (nt, obs) => obs.properties.interoception?.jitter ? 1.5 : 0.1 },
+      { text: 'the mind', w: (nt, obs) => obs.properties.interoception?.sharp ? 1.3 : 0.2 },
+      { text: 'the eyes', w: (nt, obs) => obs.properties.interoception?.sharp || obs.properties.interoception?.edge ? 0.8 : 0.2 },
     ],
     body_predicates: [
-      { text: "won't quite stop moving", w: nt => nt._caffeine_jitter ? 2.0 : 0.2 },
-      { text: 'is running at a slightly different frequency', w: nt => nt._caffeine_sharp ? 1.5 : 0.3 },
+      { text: "won't quite stop moving", w: (nt, obs) => obs.properties.interoception?.jitter ? 2.0 : 0.2 },
+      { text: 'is running at a slightly different frequency', w: (nt, obs) => obs.properties.interoception?.sharp ? 1.5 : 0.3 },
       { text: 'is running just a little fast', w: 0.8 },
-      { text: 'is running clean', w: nt => nt._caffeine_sharp && !nt._caffeine_jitter ? 1.4 : 0.2 },
-      { text: 'takes note of everything', w: nt => nt._caffeine_sharp ? 1.0 : 0.2 },
-      { text: 'is sharp today', w: nt => nt._caffeine_sharp ? 1.2 : 0.2 },
+      { text: 'is running clean', w: (nt, obs) => obs.properties.interoception?.sharp && !obs.properties.interoception?.jitter ? 1.4 : 0.2 },
+      { text: 'takes note of everything', w: (nt, obs) => obs.properties.interoception?.sharp ? 1.0 : 0.2 },
+      { text: 'is sharp today', w: (nt, obs) => obs.properties.interoception?.sharp ? 1.2 : 0.2 },
     ],
     fragments: [
-      { text: 'running fast', w: nt => nt._caffeine_sharp || nt._caffeine_jitter ? 1.5 : 0.4 },
-      { text: 'sharp', w: nt => nt._caffeine_sharp ? 1.5 : 0.3 },
-      { text: 'alert', w: nt => nt._caffeine_sharp && !nt._caffeine_jitter ? 1.2 : 0.2 },
-      { text: 'clear', w: nt => nt._caffeine_sharp && !nt._caffeine_jitter ? 1.0 : 0.2 },
+      { text: 'running fast', w: (nt, obs) => obs.properties.interoception?.sharp || obs.properties.interoception?.jitter ? 1.5 : 0.4 },
+      { text: 'sharp', w: (nt, obs) => obs.properties.interoception?.sharp ? 1.5 : 0.3 },
+      { text: 'alert', w: (nt, obs) => obs.properties.interoception?.sharp && !obs.properties.interoception?.jitter ? 1.2 : 0.2 },
+      { text: 'clear', w: (nt, obs) => obs.properties.interoception?.sharp && !obs.properties.interoception?.jitter ? 1.0 : 0.2 },
       { text: 'something', w: 0.5 },
     ],
   },
@@ -786,7 +786,7 @@ const LEX = {
     ],
     predicates: [
       'hum',
-      { text: 'flicker slightly', w: nt => nt._light_flicker ? 2.0 : 0 },
+      { text: 'flicker slightly', w: (nt, obs) => obs.properties.sight?.flicker === true ? 2.0 : 0 },
       { text: 'have a quality', w: nt => nt.aden > 0.5 ? 1.0 : 0.3 },
       { text: 'are going', w: 0.4 },
       { text: 'wash everything out', w: nt => nt.aden > 0.5 ? 0.8 : 0.2 },
@@ -807,13 +807,13 @@ const LEX = {
     body_subjects: [
       { text: 'the back of the eyes', w: nt => nt.ne > 0.6 || nt.aden > 0.6 ? 1.5 : 0.2 },
       { text: 'something behind the eyes', w: nt => nt.ne > 0.6 ? 1.2 : 0.2 },
-      { text: 'the eyes', w: nt => nt._light_flicker ? 1.3 : 0.4 },
+      { text: 'the eyes', w: (nt, obs) => obs.properties.sight?.flicker === true ? 1.3 : 0.4 },
     ],
     body_predicates: [
       { text: 'registers it', w: nt => nt.ne > 0.6 ? 1.5 : 0.4 },
-      { text: 'tightens', w: nt => nt.ne > 0.6 || nt._light_flicker ? 1.5 : 0.3 },
+      { text: 'tightens', w: (nt, obs) => nt.ne > 0.6 || obs.properties.sight?.flicker === true ? 1.5 : 0.3 },
       { text: 'has been doing this all day', w: nt => nt.aden > 0.6 ? 1.2 : 0.2 },
-      { text: 'is going slightly', w: nt => nt._light_flicker || nt.aden > 0.5 ? 1.0 : 0.2 },
+      { text: 'is going slightly', w: (nt, obs) => obs.properties.sight?.flicker === true || nt.aden > 0.5 ? 1.0 : 0.2 },
     ],
     fragments: [
       { text: 'the lights', w: 1.0 },
@@ -830,37 +830,37 @@ const LEX = {
       { text: 'keyboards', w: 0.6 },
       { text: 'the office', w: 0.5 },
       { text: 'something', w: nt => nt.aden > 0.5 ? 1.0 : 0.3 },
-      { text: 'a conversation', w: nt => nt._voices_intelligible ? 1.5 : 0.3 },
-      { text: 'someone', w: nt => nt._voices_intelligible ? 1.2 : 0.3 },
+      { text: 'a conversation', w: (nt, obs) => obs.properties.sound?.intelligible === true ? 1.5 : 0.3 },
+      { text: 'someone', w: (nt, obs) => obs.properties.sound?.intelligible === true ? 1.2 : 0.3 },
       { text: 'the whole room', w: nt => nt.ne > 0.6 ? 1.0 : 0.3 },
     ],
     predicates: [
       'in the background',
       { text: 'at a remove', w: nt => nt.aden > 0.5 ? 1.2 : 0.4 },
       { text: 'carrying on', w: nt => nt.serotonin > 0.5 ? 1.0 : 0.3 },
-      { text: 'keep going', w: nt => nt._voices_intelligible ? 1.0 : 0.2 },
-      { text: 'nearby', w: nt => nt._voices_intelligible || nt.ne > 0.6 ? 1.2 : 0.3 },
-      { text: 'going on across the room', w: nt => nt._voices_intelligible ? 1.0 : 0.2 },
+      { text: 'keep going', w: (nt, obs) => obs.properties.sound?.intelligible === true ? 1.0 : 0.2 },
+      { text: 'nearby', w: (nt, obs) => obs.properties.sound?.intelligible === true || nt.ne > 0.6 ? 1.2 : 0.3 },
+      { text: 'going on across the room', w: (nt, obs) => obs.properties.sound?.intelligible === true ? 1.0 : 0.2 },
       { text: 'not stopping', w: nt => nt.ne > 0.6 || nt.aden > 0.5 ? 1.0 : 0.2 },
     ],
     modifiers: [
       { text: null, w: 2.0 },
-      { text: 'from across the room', w: nt => nt._voices_intelligible ? 0.8 : 0.1 },
+      { text: 'from across the room', w: (nt, obs) => obs.properties.sound?.intelligible === true ? 0.8 : 0.1 },
       { text: 'not stopping', w: nt => nt.ne > 0.6 ? 0.7 : 0.1 },
       { text: 'without pause', w: nt => nt.ne > 0.6 || nt.aden > 0.5 ? 0.5 : 0.1 },
     ],
     ambiguity_alts: [
       { text: 'the hallway', w: 0.8 },
-      { text: 'someone on the phone', w: nt => nt._voices_intelligible ? 1.2 : 0.4 },
+      { text: 'someone on the phone', w: (nt, obs) => obs.properties.sound?.intelligible === true ? 1.2 : 0.4 },
     ],
     fragments: [
       'voices',
       { text: 'keyboards', w: 0.5 },
       { text: 'the office', w: 0.6 },
-      { text: 'someone talking', w: nt => nt._voices_intelligible ? 1.5 : 0.2 },
-      { text: 'a conversation somewhere', w: nt => nt._voices_intelligible ? 1.2 : 0.3 },
+      { text: 'someone talking', w: (nt, obs) => obs.properties.sound?.intelligible === true ? 1.5 : 0.2 },
+      { text: 'a conversation somewhere', w: (nt, obs) => obs.properties.sound?.intelligible === true ? 1.2 : 0.3 },
       { text: 'laughter', w: nt => nt.serotonin < 0.4 ? 0.8 : 0.3 },
-      { text: 'someone talking nearby', w: nt => nt._voices_intelligible && nt.ne > 0.6 ? 1.5 : 0.2 },
+      { text: 'someone talking nearby', w: (nt, obs) => obs.properties.sound?.intelligible === true && nt.ne > 0.6 ? 1.5 : 0.2 },
     ],
   },
 
@@ -873,21 +873,21 @@ const LEX = {
   stale_air: {
     subjects: [
       'the air',
-      { text: 'something in the air', w: nt => nt._smell_intense ? 1.5 : 0.5 },
+      { text: 'something in the air', w: (nt, obs) => (obs.properties.smell?.intensity ?? 0) > 0.60 ? 1.5 : 0.5 },
       { text: 'the room', w: 0.5 },
       { text: 'something', w: nt => nt.aden > 0.5 ? 1.0 : 0.3 },
     ],
     predicates: [
       "hasn't moved",
-      { text: 'has been sitting', w: nt => nt._smell_intense ? 1.5 : 0.5 },
+      { text: 'has been sitting', w: (nt, obs) => (obs.properties.smell?.intensity ?? 0) > 0.60 ? 1.5 : 0.5 },
       { text: 'is close', w: nt => nt.gaba < 0.4 ? 1.0 : 0.4 },
       { text: "hasn't changed", w: nt => nt.serotonin < 0.4 ? 1.0 : 0.2 },
-      { text: 'is stuffy', w: nt => nt._smell_intense ? 1.2 : 0.2 },
+      { text: 'is stuffy', w: (nt, obs) => (obs.properties.smell?.intensity ?? 0) > 0.60 ? 1.2 : 0.2 },
     ],
     modifiers: [
       { text: null, w: 2.5 },
       { text: 'still', w: nt => nt.aden > 0.5 ? 0.7 : 0.2 },
-      { text: 'a little', w: nt => !nt._smell_intense ? 0.8 : 0 },
+      { text: 'a little', w: (nt, obs) => (obs.properties.smell?.intensity ?? 0) <= 0.60 ? 0.8 : 0 },
     ],
     body_subjects: [
       { text: 'something', w: 1.2 },
@@ -897,15 +897,15 @@ const LEX = {
     body_predicates: [
       { text: 'registers the closed-in quality', w: 1.0 },
       { text: 'recognizes this particular staleness', w: nt => nt.aden > 0.5 ? 1.2 : 0.4 },
-      { text: "hasn't moved in here", w: nt => nt._smell_intense ? 1.5 : 0.4 },
+      { text: "hasn't moved in here", w: (nt, obs) => (obs.properties.smell?.intensity ?? 0) > 0.60 ? 1.5 : 0.4 },
       { text: 'is the same as yesterday', w: nt => nt.serotonin < 0.4 ? 1.0 : 0.3 },
-      { text: 'has a particular density', w: nt => nt._smell_intense ? 1.0 : 0.2 },
+      { text: 'has a particular density', w: (nt, obs) => (obs.properties.smell?.intensity ?? 0) > 0.60 ? 1.0 : 0.2 },
     ],
     fragments: [
       'stale',
       { text: 'close', w: nt => nt.gaba < 0.4 ? 1.5 : 0.5 },
       { text: 'the same air', w: nt => nt.serotonin < 0.4 ? 1.0 : 0.2 },
-      { text: 'stuffy', w: nt => nt._smell_intense ? 1.2 : 0.2 },
+      { text: 'stuffy', w: (nt, obs) => (obs.properties.smell?.intensity ?? 0) > 0.60 ? 1.2 : 0.2 },
       { text: 'the room', w: 0.3 },
     ],
   },
@@ -919,14 +919,14 @@ const LEX = {
     ],
     predicates: [
       'is there',
-      { text: 'has been there', w: nt => nt._smell_intense ? 1.5 : 0.4 },
-      { text: 'is specific', w: nt => nt._smell_intense ? 1.2 : 0.3 },
-      { text: "won't leave", w: nt => nt._smell_intense ? 1.0 : 0.2 },
-      { text: 'has settled in', w: nt => nt._smell_intense ? 0.8 : 0.2 },
+      { text: 'has been there', w: (nt, obs) => (obs.properties.smell?.intensity ?? 0) > 0.60 ? 1.5 : 0.4 },
+      { text: 'is specific', w: (nt, obs) => (obs.properties.smell?.intensity ?? 0) > 0.60 ? 1.2 : 0.3 },
+      { text: "won't leave", w: (nt, obs) => (obs.properties.smell?.intensity ?? 0) > 0.60 ? 1.0 : 0.2 },
+      { text: 'has settled in', w: (nt, obs) => (obs.properties.smell?.intensity ?? 0) > 0.60 ? 0.8 : 0.2 },
     ],
     modifiers: [
       { text: null, w: 2.5 },
-      { text: 'sour', w: nt => nt._smell_intense ? 0.8 : 0.15 },
+      { text: 'sour', w: (nt, obs) => (obs.properties.smell?.intensity ?? 0) > 0.60 ? 0.8 : 0.15 },
     ],
     body_subjects: [
       { text: 'something', w: 1.5 },
@@ -936,14 +936,14 @@ const LEX = {
     body_predicates: [
       { text: 'reaches before you register it', w: 1.2 },
       { text: 'lands', w: 0.8 },
-      { text: 'is specific in the bad way', w: nt => nt._smell_intense ? 1.5 : 0.3 },
-      { text: "doesn't leave", w: nt => nt._smell_intense ? 1.0 : 0.2 },
+      { text: 'is specific in the bad way', w: (nt, obs) => (obs.properties.smell?.intensity ?? 0) > 0.60 ? 1.5 : 0.3 },
+      { text: "doesn't leave", w: (nt, obs) => (obs.properties.smell?.intensity ?? 0) > 0.60 ? 1.0 : 0.2 },
       { text: 'registers', w: nt => nt.aden > 0.5 ? 1.0 : 0.5 },
     ],
     fragments: [
       'the dishes',
       { text: 'the sink', w: 0.7 },
-      { text: 'something sour', w: nt => nt._smell_intense ? 1.0 : 0.1 },
+      { text: 'something sour', w: (nt, obs) => (obs.properties.smell?.intensity ?? 0) > 0.60 ? 1.0 : 0.1 },
       { text: 'something in the kitchen', w: 0.7 },
     ],
   },
@@ -983,13 +983,13 @@ const LEX = {
   cold_air_smell: {
     subjects: [
       'the air',
-      { text: 'cold air', w: nt => nt._smell_sharp ? 1.5 : 0.8 },
-      { text: 'something sharp', w: nt => nt._smell_sharp ? 1.2 : 0.3 },
-      { text: 'something clean', w: nt => !nt._smell_sharp ? 1.0 : 0.2 },
+      { text: 'cold air', w: (nt, obs) => obs.properties.smell?.sharp === true ? 1.5 : 0.8 },
+      { text: 'something sharp', w: (nt, obs) => obs.properties.smell?.sharp === true ? 1.2 : 0.3 },
+      { text: 'something clean', w: (nt, obs) => obs.properties.smell?.sharp !== true ? 1.0 : 0.2 },
     ],
     predicates: [
       'is clean',
-      { text: 'is sharp', w: nt => nt._smell_sharp ? 2.0 : 0.2 },
+      { text: 'is sharp', w: (nt, obs) => obs.properties.smell?.sharp === true ? 2.0 : 0.2 },
       { text: 'is almost nothing', w: nt => nt.aden > 0.5 ? 0.8 : 0.3 },
       { text: 'is empty in a specific way', w: nt => nt.aden > 0.5 ? 0.7 : 0.2 },
       { text: 'is cold', w: 0.7 },
@@ -999,19 +999,19 @@ const LEX = {
     ],
     body_subjects: [
       { text: 'cold', w: 1.5 },
-      { text: 'something sharp', w: nt => nt._smell_sharp ? 1.5 : 0.3 },
+      { text: 'something sharp', w: (nt, obs) => obs.properties.smell?.sharp === true ? 1.5 : 0.3 },
       { text: 'the air', w: 0.5 },
     ],
     body_predicates: [
       { text: 'finds the nose first', w: 1.0 },
-      { text: 'registers before anything else', w: nt => nt._smell_sharp ? 1.2 : 0.5 },
+      { text: 'registers before anything else', w: (nt, obs) => obs.properties.smell?.sharp === true ? 1.2 : 0.5 },
       { text: 'is clean in the back of the throat', w: 1.0 },
-      { text: 'hits sharp', w: nt => nt._smell_sharp ? 1.5 : 0.3 },
+      { text: 'hits sharp', w: (nt, obs) => obs.properties.smell?.sharp === true ? 1.5 : 0.3 },
     ],
     fragments: [
       'cold air',
-      { text: 'sharp', w: nt => nt._smell_sharp ? 1.5 : 0.3 },
-      { text: 'clean', w: nt => !nt._smell_sharp ? 1.0 : 0.2 },
+      { text: 'sharp', w: (nt, obs) => obs.properties.smell?.sharp === true ? 1.5 : 0.3 },
+      { text: 'clean', w: (nt, obs) => obs.properties.smell?.sharp !== true ? 1.0 : 0.2 },
       { text: 'the cold', w: 0.5 },
     ],
   },
@@ -1019,52 +1019,52 @@ const LEX = {
   seasonal_outside_smell: {
     subjects: [
       { text: 'something', w: 1.5 },
-      { text: 'the smell of cut grass', w: nt => nt._smell_cut_grass ? 1.8 : 0 },
+      { text: 'the smell of cut grass', w: (nt, obs) => obs.properties.smell?.season_type === 'cut_grass' ? 1.8 : 0 },
       { text: 'something in the air', w: nt => nt.aden > 0.5 ? 0.6 : 0.3 },
-      { text: 'something blooming', w: nt => nt._smell_bloom ? 1.5 : 0 },
-      { text: 'the smell of leaves', w: nt => nt._smell_leaf_decay ? 1.5 : 0 },
+      { text: 'something blooming', w: (nt, obs) => obs.properties.smell?.season_type === 'bloom' ? 1.5 : 0 },
+      { text: 'the smell of leaves', w: (nt, obs) => obs.properties.smell?.season_type === 'leaf_decay' ? 1.5 : 0 },
       { text: 'a smell', w: 0.5 },
     ],
     predicates: [
-      { text: 'is out', w: nt => nt._smell_cut_grass ? 1.5 : 0.3 },
+      { text: 'is out', w: (nt, obs) => obs.properties.smell?.season_type === 'cut_grass' ? 1.5 : 0.3 },
       { text: 'carries', w: 0.8 },
-      { text: 'is turning', w: nt => nt._smell_leaf_decay ? 1.5 : 0.2 },
-      { text: 'is decaying somewhere', w: nt => nt._smell_leaf_decay ? 1.2 : 0 },
-      { text: 'is coming through', w: nt => nt._smell_bloom ? 1.0 : 0.3 },
+      { text: 'is turning', w: (nt, obs) => obs.properties.smell?.season_type === 'leaf_decay' ? 1.5 : 0.2 },
+      { text: 'is decaying somewhere', w: (nt, obs) => obs.properties.smell?.season_type === 'leaf_decay' ? 1.2 : 0 },
+      { text: 'is coming through', w: (nt, obs) => obs.properties.smell?.season_type === 'bloom' ? 1.0 : 0.3 },
       { text: 'comes through', w: 0.5 },
     ],
     modifiers: [
       { text: null, w: 2.0 },
-      { text: 'everywhere', w: nt => nt._smell_cut_grass ? 0.8 : 0.1 },
-      { text: 'nearby', w: nt => nt._smell_bloom ? 0.7 : 0.1 },
+      { text: 'everywhere', w: (nt, obs) => obs.properties.smell?.season_type === 'cut_grass' ? 0.8 : 0.1 },
+      { text: 'nearby', w: (nt, obs) => obs.properties.smell?.season_type === 'bloom' ? 0.7 : 0.1 },
     ],
     body_subjects: [
       { text: 'something', w: 1.0 },
       { text: 'the air', w: 0.6 },
-      { text: 'autumn', w: nt => nt._smell_leaf_decay ? 1.5 : 0 },
-      { text: 'spring', w: nt => nt._smell_bloom ? 1.2 : 0 },
-      { text: 'summer', w: nt => nt._smell_cut_grass ? 1.2 : 0 },
+      { text: 'autumn', w: (nt, obs) => obs.properties.smell?.season_type === 'leaf_decay' ? 1.5 : 0 },
+      { text: 'spring', w: (nt, obs) => obs.properties.smell?.season_type === 'bloom' ? 1.2 : 0 },
+      { text: 'summer', w: (nt, obs) => obs.properties.smell?.season_type === 'cut_grass' ? 1.2 : 0 },
     ],
     body_predicates: [
       { text: 'is in the air now', w: 1.0 },
       { text: 'is here already', w: nt => nt.aden > 0.5 ? 1.0 : 0.4 },
       { text: 'registers', w: 0.7 },
-      { text: 'has arrived', w: nt => nt._smell_bloom || nt._smell_cut_grass ? 1.0 : 0.2 },
-      { text: 'is going', w: nt => nt._smell_leaf_decay ? 1.2 : 0.2 },
+      { text: 'has arrived', w: (nt, obs) => (obs.properties.smell?.season_type === 'bloom' || obs.properties.smell?.season_type === 'cut_grass') ? 1.0 : 0.2 },
+      { text: 'is going', w: (nt, obs) => obs.properties.smell?.season_type === 'leaf_decay' ? 1.2 : 0.2 },
     ],
     escapes: [
-      { text: 'it was autumn', w: nt => nt._smell_leaf_decay ? 2.0 : 0 },
-      { text: 'it was summer', w: nt => nt._smell_cut_grass ? 2.0 : 0 },
-      { text: 'spring was here', w: nt => nt._smell_bloom ? 2.0 : 0 },
+      { text: 'it was autumn', w: (nt, obs) => obs.properties.smell?.season_type === 'leaf_decay' ? 2.0 : 0 },
+      { text: 'it was summer', w: (nt, obs) => obs.properties.smell?.season_type === 'cut_grass' ? 2.0 : 0 },
+      { text: 'spring was here', w: (nt, obs) => obs.properties.smell?.season_type === 'bloom' ? 2.0 : 0 },
       { text: 'it was just the air', w: 0.5 },
     ],
     fragments: [
-      { text: 'cut grass', w: nt => nt._smell_cut_grass ? 2.5 : 0 },
-      { text: 'leaves', w: nt => nt._smell_leaf_decay ? 2.0 : 0 },
-      { text: 'something blooming', w: nt => nt._smell_bloom ? 2.0 : 0 },
-      { text: 'autumn', w: nt => nt._smell_leaf_decay ? 1.5 : 0 },
-      { text: 'spring', w: nt => nt._smell_bloom ? 1.2 : 0 },
-      { text: 'summer', w: nt => nt._smell_cut_grass ? 1.2 : 0 },
+      { text: 'cut grass', w: (nt, obs) => obs.properties.smell?.season_type === 'cut_grass' ? 2.5 : 0 },
+      { text: 'leaves', w: (nt, obs) => obs.properties.smell?.season_type === 'leaf_decay' ? 2.0 : 0 },
+      { text: 'something blooming', w: (nt, obs) => obs.properties.smell?.season_type === 'bloom' ? 2.0 : 0 },
+      { text: 'autumn', w: (nt, obs) => obs.properties.smell?.season_type === 'leaf_decay' ? 1.5 : 0 },
+      { text: 'spring', w: (nt, obs) => obs.properties.smell?.season_type === 'bloom' ? 1.2 : 0 },
+      { text: 'summer', w: (nt, obs) => obs.properties.smell?.season_type === 'cut_grass' ? 1.2 : 0 },
       { text: 'the air', w: 0.3 },
     ],
   },
@@ -1107,85 +1107,6 @@ const LEX = {
   },
 };
 
-// --- Observation property augmentation ---
-//
-// Before picking lexical items for a source, augment the base ntCtx with
-// property flags derived from the observation. These _flags are only
-// meaningful in the weight functions of that source's lexical pool.
-
-function augmentNT(base, obs) {
-  const a = { ...base };
-
-  const sound = obs.properties.sound;
-  if (sound) {
-    a._perceived_intensity  = sound.perceived_intensity ?? 0.5;
-    a._voices_intelligible  = sound.intelligible === true;
-  }
-
-  const thermal = obs.properties.thermal;
-  if (thermal) {
-    const tier = thermal.tier;
-    a._temp_cold      = ['freezing', 'very_cold', 'cold', 'cool'].includes(tier);
-    a._temp_warm      = ['warm', 'hot', 'very_hot'].includes(tier);
-    a._temp_very_cold = ['freezing', 'very_cold'].includes(tier);
-    a._immediate      = thermal.immediate === true;
-  }
-
-  const sight = obs.properties.sight;
-  if (sight) {
-    const cond = sight.condition;
-    a._condition_dark        = cond === 'dark';
-    a._condition_grey        = cond === 'grey_morning' || cond === 'overcast' || cond === 'grey_evening';
-    a._condition_early_light = cond === 'early_light';
-    a._condition_dimming     = cond === 'dimming';
-    a._light_flicker         = sight.flicker === true;
-  }
-
-  const smell = obs.properties.smell;
-  if (smell) {
-    // Dimensions that vary and cross-cut source identity
-    a._smell_intensity  = smell.intensity ?? 0.5;
-    a._smell_intense    = (smell.intensity ?? 0.5) > 0.60;
-    a._smell_pleasant   = (smell.hedonics  ?? 0.5) > 0.55;
-    a._smell_unpleasant = (smell.hedonics  ?? 0.5) < 0.40;
-    a._smell_sharp      = smell.sharp === true;
-    // season_type: only set for seasonal_outside_smell; needed because one source = three smells
-    const st            = smell.season_type ?? null;
-    a._smell_cut_grass  = st === 'cut_grass';
-    a._smell_leaf_decay = st === 'leaf_decay';
-    a._smell_bloom      = st === 'bloom';
-  }
-
-  const i = obs.properties.interoception;
-  if (i) {
-    // Fatigue
-    a._quality_gravitational = i.quality === 'gravitational';
-    a._quality_weighted      = i.quality === 'weighted';
-    a._quality_crushing      = i.tier === 'crushing';
-    // Hunger
-    a._quality_gnawing       = i.quality === 'gnawing';
-    a._quality_hollow        = i.quality === 'hollow';
-    a._quality_low_grade     = i.quality === 'low_grade';
-    a._irritable             = i.irritability === true;
-    // Anxiety
-    a._char_keyed_up         = i.character === 'keyed_up';
-    a._char_unsettled        = i.character === 'unsettled';
-    a._char_restless         = i.character === 'restless';
-    a._char_overwhelmed      = i.character === 'overwhelmed';
-    // Stress
-    a._stress_loc_jaw        = i.location === 'jaw';
-    a._stress_loc_shoulders  = i.location === 'shoulders';
-    a._stress_loc_chest      = i.location === 'chest';
-    a._stress_high           = i.tier === 'overwhelmed' || i.tier === 'strained';
-    // Caffeine
-    a._caffeine_jitter       = i.quality === 'jitter';
-    a._caffeine_sharp        = i.quality === 'sharp';
-    a._caffeine_edge         = i.quality === 'edge';
-  }
-
-  return a;
-}
-
 // --- Architecture builders ---
 //
 // Each builder consumes the pre-rolled values r2, r3, r4 (r1 is for
@@ -1194,38 +1115,38 @@ function augmentNT(base, obs) {
 // — this keeps total RNG consumption fixed at 4 per observation.
 
 /** "The fridge hums." / "The fridge hums, too loud." */
-function buildShortDeclarative(obs, augNT, r2, r3, r4) {
+function buildShortDeclarative(obs, nt, r2, r3, r4) {
   const lex = LEX[obs.sourceId];
   if (!lex?.subjects || !lex?.predicates) return null;
-  const subject   = pickText(lex.subjects,   augNT, r2);
-  const predicate = pickText(lex.predicates, augNT, r3);
+  const subject   = pickText(lex.subjects,   nt, obs, r2);
+  const predicate = pickText(lex.predicates, nt, obs, r3);
   if (!subject || !predicate) return null;
-  const modifier = lex.modifiers ? pickText(lex.modifiers, augNT, r4) : null;
+  const modifier = lex.modifiers ? pickText(lex.modifiers, nt, obs, r4) : null;
   if (modifier) return `${cap(subject)} ${predicate}, ${modifier}.`;
   return `${cap(subject)} ${predicate}.`;
 }
 
 /** "Heavy." / "The fridge." — uses r2, discards r3/r4 */
-function buildBareFragment(obs, augNT, r2, _r3, _r4) {
+function buildBareFragment(obs, nt, r2, _r3, _r4) {
   const lex = LEX[obs.sourceId];
   if (!lex) return null;
   const pool = lex.fragments ?? lex.subjects;
-  const text = pickText(pool, augNT, r2);
+  const text = pickText(pool, nt, obs, r2);
   return text ? `${cap(text)}.` : null;
 }
 
 /** "Cold sits on the back of the neck." — uses r2, r3, discards r4 */
-function buildBodyAsSubject(obs, augNT, r2, r3, _r4) {
+function buildBodyAsSubject(obs, nt, r2, r3, _r4) {
   const lex = LEX[obs.sourceId];
   if (!lex?.body_subjects || !lex?.body_predicates) return null;
-  const subject   = pickText(lex.body_subjects,   augNT, r2);
-  const predicate = pickText(lex.body_predicates, augNT, r3);
+  const subject   = pickText(lex.body_subjects,   nt, obs, r2);
+  const predicate = pickText(lex.body_predicates, nt, obs, r3);
   if (!subject || !predicate) return null;
   return `${cap(subject)} ${predicate}.`;
 }
 
 /** "Something — the fridge, maybe, or the heat — hums." — uses r2, r3, discards r4 */
-function buildSourceAmbiguity(obs, augNT, r2, r3, _r4) {
+function buildSourceAmbiguity(obs, nt, r2, r3, _r4) {
   const lex = LEX[obs.sourceId];
   if (!lex?.ambiguity_alts || !lex?.predicates) return null;
   const altIdx    = Math.floor(r2 * lex.ambiguity_alts.length);
@@ -1233,18 +1154,18 @@ function buildSourceAmbiguity(obs, augNT, r2, r3, _r4) {
   const primary   = typeof lex.subjects[0] === 'string'
     ? lex.subjects[0]
     : lex.subjects[0].text;
-  const predicate = pickText(lex.predicates, augNT, r3);
+  const predicate = pickText(lex.predicates, nt, obs, r3);
   if (!predicate) return null;
   return `Something — ${primary}, maybe, or ${alt} — ${predicate}.`;
 }
 
 /** "The fridge hums, and the sound was just a sound." — uses r2, r3, r4 */
-function buildInterpretiveEscape(obs, augNT, r2, r3, r4) {
+function buildInterpretiveEscape(obs, nt, r2, r3, r4) {
   const lex = LEX[obs.sourceId];
-  if (!lex?.escapes) return buildShortDeclarative(obs, augNT, r2, r3, r4);
-  const subject   = pickText(lex.subjects,   augNT, r2);
-  const predicate = pickText(lex.predicates, augNT, r3);
-  const escape    = pickText(lex.escapes,    augNT, r4);
+  if (!lex?.escapes) return buildShortDeclarative(obs, nt, r2, r3, r4);
+  const subject   = pickText(lex.subjects,   nt, obs, r2);
+  const predicate = pickText(lex.predicates, nt, obs, r3);
+  const escape    = pickText(lex.escapes,    nt, obs, r4);
   if (!subject || !predicate || !escape) return null;
   return `${cap(subject)} ${predicate}, and ${escape}.`;
 }
@@ -1307,7 +1228,6 @@ function realizeOne(obs, hint, ntCtx, r1, r2, r3, r4) {
   const lex    = LEX[obs.sourceId];
   if (!lex) return null;
 
-  const augNT  = augmentNT(ntCtx, obs);
   const w      = ARCH_WEIGHTS[hint] ?? ARCH_WEIGHTS.calm;
 
   // Build eligible architecture list; gate body/ambig on lex availability
@@ -1323,15 +1243,15 @@ function realizeOne(obs, hint, ntCtx, r1, r2, r3, r4) {
 
   let result;
   switch (arch) {
-    case 'body':   result = buildBodyAsSubject(obs, augNT, r2, r3, r4);    break;
-    case 'bare':   result = buildBareFragment(obs, augNT, r2, r3, r4);     break;
-    case 'ambig':  result = buildSourceAmbiguity(obs, augNT, r2, r3, r4);  break;
-    case 'escape': result = buildInterpretiveEscape(obs, augNT, r2, r3, r4); break;
-    default:       result = buildShortDeclarative(obs, augNT, r2, r3, r4); break;
+    case 'body':   result = buildBodyAsSubject(obs, ntCtx, r2, r3, r4);    break;
+    case 'bare':   result = buildBareFragment(obs, ntCtx, r2, r3, r4);     break;
+    case 'ambig':  result = buildSourceAmbiguity(obs, ntCtx, r2, r3, r4);  break;
+    case 'escape': result = buildInterpretiveEscape(obs, ntCtx, r2, r3, r4); break;
+    default:       result = buildShortDeclarative(obs, ntCtx, r2, r3, r4); break;
   }
 
   // Fallback: if chosen architecture couldn't build (missing lex fields), use short declarative
-  return result ?? buildShortDeclarative(obs, augNT, r2, r3, r4);
+  return result ?? buildShortDeclarative(obs, ntCtx, r2, r3, r4);
 }
 
 // --- Main entry point ---
