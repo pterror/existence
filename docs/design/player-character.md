@@ -167,6 +167,40 @@ retrospect, when the player notices they've been reading "the person at the fron
 desk" for three visits while other characters get names. The uncanny emerges from
 the pattern, not from a marker.
 
+**Co-fronting**
+
+Two or more alters present simultaneously — not a clean switch but a blended
+state where knowledge, emotional tone, and relational memory overlap and sometimes
+contradict. Not averaging: co-fronting isn't a midpoint between two alters, it's
+two voices with different information and different relationships to the same
+situation, both present at once.
+
+The current single-alter model assumes one personality parameter set driving the
+simulation at a time. Co-fronting would require something more complex than a
+weighted blend — specific things it produces that would need modelling:
+
+- **Partial access:** one alter knows who this person is, the other doesn't. The
+  result isn't `???` or full knowledge — it's almost-recognition. A name that's
+  almost there. Familiarity without content. The prose renders this differently
+  from clean absence.
+- **Emotional contradiction:** one alter's sentiment toward a situation conflicts
+  with another's. Not blended into a middle tone but genuinely split — ambivalence
+  as simultaneous rather than sequential. The NT model would need to express two
+  competing targets rather than one.
+- **Inter-alter negotiation:** co-fronting is sometimes how alters communicate or
+  work out who handles what. One surfaces to manage something the other can't.
+  The internal experience isn't necessarily smooth — it can be effortful,
+  disorienting, or collaborative depending on system dynamics.
+- **Instability:** co-fronting states are often less stable than single-fronting.
+  More susceptible to full switches. The simulation would need to reflect that
+  increased volatility.
+
+Co-fronting connects directly to the antipsychotic question — one of the things
+suppressed is exactly this capacity. The medication making the system "quieter"
+means this blended, negotiated state becomes less available. Alters that were
+co-fronting to cooperate lose that channel. Whether that reads as calm or as
+loss depends entirely on the system.
+
 **Antipsychotics and inter-alter communication**
 
 This is contested and requires careful handling. Some people with DID report that
