@@ -17,11 +17,25 @@ and the framing is investigation/RPG rather than survival/mundane life. The inne
 voice system — multiple competing psychological voices surfacing as intrusive text —
 is the strongest prior art for NT-shaded prose.
 
+*Gap:* Stats are visible — the skill panel breaks the fiction, enables optimization.
+Harry is fixed and authored; zero emergence. The mundane ordinary day doesn't exist
+in it — everything is heightened, baroque, significant. No ongoing simulation: the
+game doesn't model Harry's neurochemistry drifting across days, only authored scenes
+gated on skill values. The combination of authored-quality prose *with* procedural
+simulation underneath is unclaimed. So is the ordinary Wednesday.
+
 **Fallen London** (Failbetter Games, 2009–present)
 Quality-based narrative: stats are called "qualities" and prose changes based on
 their values. High prose quality, hidden consequence chains, skinner box underneath.
 The "StoryNexus" engine they built from it is the closest existing tool to a
 quality-gated prose system, though stats remain visible to the player.
+
+*Gap:* Stats visible even when called "qualities" — player optimizes because numbers
+are present. Explicitly gamified (grinds, card draws, retention loops) — the opposite
+of existence's design values. No simulation underneath: qualities are directly tracked
+numbers, not emergent from a running model. All content authored. Existence's specific
+contribution to what Fallen London started: qualities that emerge from a simulation
+rather than being directly tracked and exposed.
 
 **Depression Quest** (Zoe Quinn, 2013)
 Options visibly crossed out by depression severity. Gestures at the same design
@@ -29,10 +43,21 @@ space — mental state gates what's available — with very thin tooling and aut
 (not simulated) state. The crossing-out mechanic is explicit where existence keeps
 it opaque; the effect is different.
 
+*Gap:* The visible crossing-out is a statement: *look at what this takes from you*.
+Existence makes the removal invisible — the option just isn't there, no explanation.
+Very different emotional register: DQ describes deprivation from outside; existence
+attempts to make you live it from inside without knowing what you've lost. No
+simulation, no emergence, very short authored arc.
+
 **A Dark Room** (Michael Townsend / Amir Rajan, 2012)
 Minimal UI, hidden mechanics, prose as primary readout. No simulation underneath
 but shares the instinct that chrome gets in the way. The slow reveal of what the
 game actually is has no equivalent here, but the austerity does.
+
+*Gap:* The hidden mechanics are genre mechanics (resource management, base building),
+not psychology. No character, no interiority — the game is about a colony, not a
+self. Has an arc, a revelation, an end. The austerity instinct is right; what's
+underneath it is wrong for existence's purposes.
 
 **Façade** (Michael Mateas & Andrew Stern, 2005)
 Drama management + real-time NLP + psychologically simulated characters. Academic
@@ -41,12 +66,23 @@ surface when) is a different solution to a related problem: how does a simulatio
 know what to show? Prior art for the idea that generative systems can produce
 emotionally coherent experiences.
 
+*Gap:* The player is external — visiting Trip and Grace, trying to affect their
+relationship. Observational/therapeutic positioning, not identification. You watch
+them fall apart; you don't live it from inside. Single scene, scripted states, no
+sustained world. The drama manager concept (what to surface when) remains the most
+relevant piece for existence's prose generation problem, even though everything
+else differs.
+
 ### Related by mechanics or tone
 
 **Galatea** (Emily Short, 2000)
 Parser IF, single character interaction, extraordinary depth of character simulation
 for its era. Emily Short's work generally is the craft reference for interactive
 narrative — her blog is more useful than most academic papers.
+
+*Gap:* External — you're talking to Galatea, not being her. Single conversation,
+no sustained daily life. Parser interface. The character depth is the lesson, not
+the form.
 
 **Howling Dogs** (Porpentine, 2012)
 Twine hypertext, fragmentary prose, dissociation as form. Formally very different
@@ -59,9 +95,18 @@ body as literal interface. More developed than Howling Dogs in terms of using
 prose texture to render psychological dissociation. The most formally interesting
 of her work for existence's purposes. Accompanied by a score by Brenda Neotenomie.
 
+*Gap (both):* Authored hypertext — the dissociation and psychological texture are
+achieved through writing, not through a running simulation. Compressed and intense
+rather than sustained. The instinct (psychological state rendered in prose texture,
+not UI) is exactly right; the mechanism is authorship rather than generation.
+
 **80 Days** (Inkle Studios, 2014)
 High prose quality in a branching narrative, consequences that accumulate. The
 writing is the benchmark for what good choice-based prose sounds like at scale.
+
+*Gap:* Adventure framing with an external goal (circumnavigate the globe in 80
+days). Authored, no psychological simulation. No mundane life — everything is
+spectacle and incident. The prose quality is the lesson.
 
 **Dwarf Fortress** (Bay 12 Games, 2006–present)
 The ur-example of hidden simulation producing emergent narrative. Neurochemistry
@@ -69,10 +114,54 @@ The ur-example of hidden simulation producing emergent narrative. Neurochemistry
 player ever seeing the numbers directly. The lesson: simulation depth generates
 story; the UI doesn't need to expose it.
 
+*Gap:* No prose. DF produces no readable output — the emergent narrative exists
+in the player's interpretation of simulation events, not in anything the game
+writes. External perspective: you manage a colony, you don't live as a dwarf.
+DF is the existence proof that deep simulation generates narrative. Existence is
+the attempt to close the gap — to have the simulation write the prose directly,
+not just produce events the player narrates to themselves.
+
 **Caves of Qud** (Freehold Games, 2015–present)
 Deep simulation, procedurally generated history and character backstory. The
 character history system (which generates a meaningful past that affects starting
 stats) is prior art for the backstory approach in existence.
+
+*Gap:* Roguelike — combat, death, procedural dungeon, visible stats to optimize.
+The backstory generates flavor and narrative color; in existence it generates
+emotional parameters (neurochemistry targets, inertia, sentiment baselines). The
+past produces feeling, not just lore.
+
+### The unclaimed territory
+
+Taking these games together, existence sits at the intersection of things none
+of them do:
+
+**Hidden simulation producing readable prose directly.** Dwarf Fortress has
+simulation without prose. Disco Elysium has prose without simulation. Everyone
+else has authorship. Existence attempts to close the gap: the simulation writes
+the prose, not just produces events for the player to narrate to themselves.
+
+**The mundane ordinary life as the subject.** None of these games take place
+in the ordinary weekday. Depression Quest comes closest but is a statement, not
+a world. Disco is baroque, 80 Days is spectacle, DF is catastrophe management.
+The domestic, the routine, the not-eventful — Tuesday — is unclaimed as subject
+matter for this kind of game.
+
+**A procedurally generated specific person.** Every game here either gives you
+a fixed authored character (Harry Du Bois, Trip and Grace) or a blank stat-sheet
+you optimize (Caves of Qud). Existence generates a specific person — backstory,
+personality, neurochemistry — and that specific person then lives their life.
+The past produces feeling, not just lore.
+
+**Invisible opacity.** Depression Quest shows you the crossed-out options. Disco
+Elysium shows you the skill panel. Existence gives you neither — the option simply
+isn't there, no explanation. You don't get a readout of what you've lost.
+
+**No arc, no goal, no win state.** This may be the most radical gap. Every one
+of these games has either an external goal pulling the experience forward (solve
+the murder, circumnavigate the globe) or an authored arc with an endpoint (the
+party in Façade, the reveal in A Dark Room). Depression Quest has an ending.
+Existence doesn't. It just continues — which is the point.
 
 ---
 
