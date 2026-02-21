@@ -189,6 +189,29 @@ A GTA RP server doesn't render the prose of 3am insomnia. These platforms are
 for socializing in a fictional skin, not for representing what it actually feels
 like to be inside a life.
 
+**Small web / indie web** (Neocities, tilde servers, webrings, personal sites)
+The contemporary revival of hand-crafted personal pages — shrines, digital
+gardens, link blogs, "about me" pages that accumulate slowly without audience
+pressure. The appetite being proven: there is demand for spaces that exist
+without a goal, without a funnel, without an arc. A Neocities site isn't trying
+to do anything. It just is there. That quality — continuous presence without
+purpose — is closer to existence's register than any game on this list.
+
+*Form:* Existence is itself a small web artifact. Plain HTML, no framework, no
+build step, a game you find through a link and play in a browser tab. No app
+store, no monetization, no retention loop. The form is the argument.
+
+*Character worlds:* A character in the 2020s might have or visit such a space —
+a shrine to something they love, a dead forum they still check, a Neocities site
+someone stopped updating in 2019. The texture of the small web (things that
+persist without maintenance, things that went quiet) is available as world detail.
+
+*Gap:* Small web is public-facing — a curated self, shown to someone. Existence
+is interior with no outside implied. The "no goal" quality maps; the presentation
+layer doesn't. Also: small web aesthetic is often nostalgic, warm, deliberately
+retro. Existence is contemporary and unglamorous. Take the continuous presence;
+don't take the warmth as default.
+
 ### The unclaimed territory
 
 Taking these games together, existence sits at the intersection of things none
