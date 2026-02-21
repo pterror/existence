@@ -716,3 +716,81 @@ The common thread: small, hard to locate, persistent, often requiring more effor
 - Adrenaline/NE high → acute pain suppressed (injury during high arousal noticed later)
 - Depression → pain perception heightened; the system more sensitive, less buffered
 - Adenosine high → dull aching quality to fatigue that borders on pain
+
+---
+
+## System inventory — what needs to be built
+
+Going through all the senses and asking what each sensation requires beyond the base fragment system produces a clean inventory. Most sensory facts need nothing special. A small set of recurring system types covers the rest.
+
+### The base system handles everything routine
+
+Fragment library + compositor + trigger conditions + NT weighting. Most ambient sensory facts, most state-triggered fragments, most location/time/transition-triggered content — all of this needs no special machinery beyond what the compositor already provides. Author the fragments, define the conditions, done.
+
+### System 1: Character sensory profile
+
+Constitutional conditions stored at chargen, consulted by the compositor when selecting and combining fragments. Almost every sense has at least one condition that requires this.
+
+Two modes:
+- **Suppression** — anosmia suppresses smell fragments entirely; deafness suppresses sound fragments; CIP suppresses pain fragments
+- **Replacement** — myopia doesn't just suppress distant-scene fragments, it replaces them with blur variants. Color blindness substitutes different color language. Low interoceptive awareness replaces clear hunger/thirst signals with absence or wrongness.
+
+Replacement means we need **fragment variants keyed to constitutional conditions** — not just flags that suppress, but alternative authored text that renders the world as this character actually experiences it.
+
+Conditions requiring this system: myopia, presbyopia, astigmatism, color blindness variants, visual snow, floaters, anosmia, ageusia, phantogeusia, tinnitus, deafness, low interoceptive awareness, CIP, hyperalgesia, dyspraxia, misophonia, BPPV, proprioceptive seeking, vestibular chronic dysfunction, Raynaud's, anhidrosis.
+
+### System 2: Tolerance / trained response variables
+
+Responses that change through play — learned, not constitutional:
+- **Spice tolerance** — scalar, increases with exposure, degrades with absence; affects which spice-tier fragments are available and how they read
+- **Vestibular tolerance** — scalar, affects how spinning/ride fragments read; varies by character background
+- **Acquired tastes** — plug into the existing sentiment system; taste sentiments that shift from aversive toward positive through repeated positive-context exposure
+
+Spice tolerance and vestibular tolerance are new scalar variables. Acquired tastes are sentiment system entries — same infrastructure, different targets.
+
+### System 3: Persistent body state variables
+
+Ongoing conditions with their own dynamics — not events, not NT systems, but continuous variables that drift and reshape capacity:
+- **Chronic pain level** — distinct from acute nociception; continuous, affects energy/capacity/mood; has its own fatigue effects; doesn't resolve between actions
+- **Vestibular disruption level** — after spinning, after alcohol, after a bad BPPV episode; decays over time back to baseline
+- **Tinnitus intensity** — character-variable baseline, modulated by ambient noise level; a constitutional baseline that the environment raises and lowers
+
+Same architecture as NT systems — continuous variables with drift toward targets. Different in that they're body-state rather than neurochemical.
+
+### System 4: Object state for consumables and body
+
+Simulated persistence applied to food and to the character's own body:
+- **Food freshness / degradation** — food has states (fresh, soggy, stale, slightly off, spoiled); affects taste fragments and whether eating is safe; food objects track their own state over time
+- **Foreign bodies in character** — a splinter, embedded plant fibers, an ingrown hair; temporary body state that produces ongoing nociceptive fragments until resolved by an interaction
+
+Food state is already needed for the food system broadly. Foreign bodies are a small new object-state concept: something embedded in the character's body that generates sensory fragments until removed.
+
+### System 5: Agency gradient machinery
+
+Already designed (see CLAUDE.md, docs/design/senses.md core principles), not yet built. Covers:
+- Contact with hot surfaces — reflex fires before player can act (zero agency, spinal arc)
+- Threat response to being followed — player choice unless trauma or NT state overrides
+- Aversive involuntary responses — nails on chalkboard, misophonia triggers
+- Trauma-triggered sensory responses — probability by PRNG, scales with trauma intensity
+
+### What existing systems just need fragments authored against them
+
+These systems already exist — sensory prose just needs fragments that reference them as trigger conditions and NT weights:
+- Hunger, nausea, adenosine, cortisol, NE, GABA, serotonin, dopamine
+- Health states (fever, acute illness)
+- Weather, location, time of day, season
+- Social state, guilt, sentiment levels
+
+### Summary
+
+| System | Status | Notes |
+|--------|--------|-------|
+| Fragment library + compositor | New | Core; everything depends on this |
+| Character sensory profile + variants | New | Chargen; constitutional conditions |
+| Tolerance variables (spice, vestibular) | New scalars | Spice degrades with absence |
+| Acquired taste sentiments | Existing (sentiment system) | New entries, same infrastructure |
+| Persistent body state (chronic pain, vestibular disruption, tinnitus) | New | NT-system architecture |
+| Object state: food freshness | Partially exists | Needs full state machine |
+| Object state: foreign bodies | New (small) | Temporary body state |
+| Agency gradient machinery | Designed, not built | Covers reflexes + trauma override |
+| Everything else | Existing systems | Just needs fragment authoring |
