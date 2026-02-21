@@ -23,6 +23,26 @@ Three-layer prose shading pattern established (see docs/design/overview.md "Pros
 - Shopping interactions (buy_groceries, buy_cheap_meal, browse_store) — no Timeline.pick sites
 - Utility interactions (shower, eat_food, drink_water, do_dishes) — no Timeline.pick sites
 
+### Prose compositor and sensory fragments system
+
+A system for combining authored prose fragments into natural sentences, and a library of sensory fragments covering all sensory channels. Two connected pieces:
+
+**1. Prose compositor** — combines typed, rhetorically-tagged fragments into grammatically coherent sentences. NT state selects the combination pattern (calm → subordination; anxious → short declaratives; dissociated → grammatical equality; overwhelmed → polysyndeton). Ordering follows attention order (involuntary body → deliberate visual → ambient). Sentence length is a pacing lever. See docs/research/prose-construction.md for the full design foundation.
+
+**2. Sensory fragment library** — authored fragments covering all sensory channels (smell, sound, sight, taste, touch, thermoception, proprioception, interoception, nociception, vestibular). Each fragment tagged with: grammatical type, rhetorical role, trigger conditions (state thresholds, location, time, transition, co-occurrence — see docs/design/triggers.md), NT conditions for availability and weighting. See docs/design/senses.md for what each channel produces.
+
+**Key design decisions already made:**
+- Noticeability not intensity — salience is relational between stimulus and character state
+- Triggers are just conditions — no fixed taxonomy (see docs/design/triggers.md)
+- Fragment authoring is the quality ceiling — the compositor only combines what's there
+- NT state → sentence structure (not just word choice) — same fragments, different joins
+
+**Not yet designed:**
+- Where sensory fragments live in the codebase (content.js alongside other prose, or own module)
+- Whether fragments encode their own conditions or compositor queries state independently
+- How compositor handles no available fragments (silent is fine; forced ill-fitting combination is not)
+- Integration with existing idle thoughts system — are sensory fragments a new category or an extension?
+
 ## Under Consideration
 
 Everything below is drawn from the gap between docs/design/overview.md and what's built. Not committed to — just visible.
