@@ -1,20 +1,6 @@
 // game.js — initialization, game loop, orchestration
 
 export function createGame(ctx) {
-  const State = ctx.state;
-  const Timeline = ctx.timeline;
-  const Character = ctx.character;
-  const World = ctx.world;
-  const Events = ctx.events;
-  const Content = ctx.content;
-  const Habits = ctx.habits;
-  const UI = ctx.ui;
-  const Runs = ctx.runs;
-  const Chargen = ctx.chargen;
-  const Dishes = ctx.dishes;
-  const Linens = ctx.linens;
-  const Clothing = ctx.clothing;
-  const Senses = ctx.senses;
 
   let isReplaying = false;
 
@@ -45,17 +31,17 @@ export function createGame(ctx) {
    */
   function tryAutoAdvance(prediction, interactions, connections) {
     if (!prediction || prediction.tier !== 'auto') return;
-    if (State.get('viewing_phone')) return;
+    if (ctx.state.get('viewing_phone')) return;
 
     const actionId = prediction.actionId;
 
     // Look up approaching prose
-    const proseFn = Content.approachingProse[actionId];
+    const proseFn = ctx.content.approachingProse[actionId];
     if (!proseFn) return;
 
     const prose = proseFn();
     if (prose) {
-      UI.appendEventText(prose);
+      ctx.ui.appendEventText(prose);
     }
 
     if (actionId.startsWith('move:')) {
@@ -83,7 +69,7 @@ export function createGame(ctx) {
   /** @param {string[]} events @param {string[]} eventTexts */
   function generateEventTexts(events, eventTexts) {
     for (const eventId of events) {
-      const eventFn = /** @type {Record<string, (() => string) | undefined>} */ (Content.eventText)[eventId];
+      const eventFn = /** @type {Record<string, (() => string) | undefined>} */ (ctx.content.eventText)[eventId];
       if (eventFn) {
         const text = eventFn();
         if (text && text.trim()) eventTexts.push(text);
@@ -93,12 +79,12 @@ export function createGame(ctx) {
 
   async function init() {
     // Open IndexedDB
-    await Runs.open();
+    await ctx.runs.open();
 
-    const activeRunId = await Runs.getActiveRunId();
+    const activeRunId = await ctx.runs.getActiveRunId();
 
     if (activeRunId) {
-      const runData = await Runs.loadRun(activeRunId);
+      const runData = await ctx.runs.loadRun(activeRunId);
       if (runData) {
         await resumeRun(runData);
         return;
@@ -106,7 +92,7 @@ export function createGame(ctx) {
     }
 
     // No active run — check for past runs
-    const runs = await Runs.listRuns();
+    const runs = await ctx.runs.listRuns();
     if (runs.length > 0) {
       showThreshold(runs);
     } else {
@@ -116,34 +102,34 @@ export function createGame(ctx) {
 
   /** @param {RunRecord} runData */
   async function resumeRun(runData) {
-    const saved = Timeline.restoreFrom(runData);
-    Timeline.setActiveRunId(runData.id);
+    const saved = ctx.timeline.restoreFrom(runData);
+    ctx.timeline.setActiveRunId(runData.id);
 
     // Restore character from save
     if (saved.character) {
-      Character.set(saved.character);
+      ctx.character.set(saved.character);
     }
 
     // Replay all actions to reconstruct state
-    State.init();
-    Character.applyToState();
-    Events.init();
-    Habits.reset();
-    Dishes.reset();
-    Linens.reset();
-    Clothing.reset();
+    ctx.state.init();
+    ctx.character.applyToState();
+    ctx.events.init();
+    ctx.habits.reset();
+    ctx.dishes.reset();
+    ctx.linens.reset();
+    ctx.clothing.reset();
 
     // Consume same initial RNG as fresh start (opening events + messages)
-    const initEvents = World.checkEvents();
+    const initEvents = ctx.world.checkEvents();
     for (const eventId of initEvents) {
-      const eventFn = /** @type {Record<string, (() => string) | undefined>} */ (Content.eventText)[eventId];
+      const eventFn = /** @type {Record<string, (() => string) | undefined>} */ (ctx.content.eventText)[eventId];
       if (eventFn) eventFn();
     }
-    Content.generateIncomingMessages();
+    ctx.content.generateIncomingMessages();
     const { lastIdleThought, lastInnerVoice, lastInnerVoiceTier, lastSensoryText } = replayActions(saved.actions);
 
     // Initialize UI
-    UI.init({
+    ctx.ui.init({
       onAction: handleAction,
       onMove: handleMove,
       onIdle: handleIdle,
@@ -152,31 +138,31 @@ export function createGame(ctx) {
       onStepAway: handleStepAway,
     });
 
-    UI.render();
-    UI.showAwareness();
-    UI.updateAwareness();
+    ctx.ui.render();
+    ctx.ui.showAwareness();
+    ctx.ui.updateAwareness();
     showStepAway();
     showLookBack();
 
     // Restore last idle thought, inner voice, and sensory text so they don't vanish on refresh
     if (lastIdleThought && lastInnerVoiceTier !== 'tremor') {
-      setTimeout(() => UI.appendEventText(lastIdleThought), 500);
+      setTimeout(() => ctx.ui.appendEventText(lastIdleThought), 500);
     }
     if (lastSensoryText) {
-      setTimeout(() => UI.appendEventText(lastSensoryText), 800);
+      setTimeout(() => ctx.ui.appendEventText(lastSensoryText), 800);
     }
     if (lastInnerVoice && lastInnerVoiceTier) {
       const ivDelay = lastInnerVoiceTier === 'tremor' ? 500 : 1200;
-      setTimeout(() => UI.appendInnerVoice(lastInnerVoice, lastInnerVoiceTier), ivDelay);
+      setTimeout(() => ctx.ui.appendInnerVoice(lastInnerVoice, lastInnerVoiceTier), ivDelay);
     }
   }
 
   function startFresh() {
-    Timeline.init();
-    Habits.reset();
+    ctx.timeline.init();
+    ctx.habits.reset();
 
     // Initialize UI early (chargen uses the same DOM)
-    UI.init({
+    ctx.ui.init({
       onAction: handleAction,
       onMove: handleMove,
       onIdle: handleIdle,
@@ -186,37 +172,37 @@ export function createGame(ctx) {
     });
 
     // Pause idle timer during chargen, hide awareness
-    UI.stopIdleTimer();
-    UI.hideAwareness();
+    ctx.ui.stopIdleTimer();
+    ctx.ui.hideAwareness();
     hideStepAway();
     hideLookBack();
 
-    Chargen.startCreation().then(character => {
+    ctx.chargen.startCreation().then(character => {
       // Character is set and saved by chargen.
       // Now start the game.
-      State.init();
-      Character.applyToState();
-      Events.init();
-      Dishes.reset();
-      Linens.reset();
-    Clothing.reset();
+      ctx.state.init();
+      ctx.character.applyToState();
+      ctx.events.init();
+      ctx.dishes.reset();
+      ctx.linens.reset();
+    ctx.clothing.reset();
 
       // Opening — check for initial events (consumes RNG)
-      const events = World.checkEvents();
+      const events = ctx.world.checkEvents();
       /** @type {string[]} */
       const eventTexts = [];
       generateEventTexts(events, eventTexts);
-      Content.generateIncomingMessages();
+      ctx.content.generateIncomingMessages();
 
-      UI.render();
-      UI.showAwareness();
-      UI.updateAwareness();
+      ctx.ui.render();
+      ctx.ui.showAwareness();
+      ctx.ui.updateAwareness();
       showStepAway();
       showLookBack();
 
       if (eventTexts.length > 0) {
         const firstText = /** @type {string} */ (eventTexts[0]);
-        setTimeout(() => UI.showEventText(firstText), 1200);
+        setTimeout(() => ctx.ui.showEventText(firstText), 1200);
       }
     });
   }
@@ -226,7 +212,7 @@ export function createGame(ctx) {
   /** @param {RunSummary[]} runs */
   function showThreshold(runs) {
     // Initialize UI if not already done
-    UI.init({
+    ctx.ui.init({
       onAction: handleAction,
       onMove: handleMove,
       onIdle: handleIdle,
@@ -235,8 +221,8 @@ export function createGame(ctx) {
       onStepAway: handleStepAway,
     });
 
-    UI.stopIdleTimer();
-    UI.hideAwareness();
+    ctx.ui.stopIdleTimer();
+    ctx.ui.hideAwareness();
     hideStepAway();
     hideLookBack();
 
@@ -288,9 +274,9 @@ export function createGame(ctx) {
 
   /** @param {string} id */
   async function pickRun(id) {
-    const runData = await Runs.loadRun(id);
+    const runData = await ctx.runs.loadRun(id);
     if (!runData) return;
-    await Runs.setActiveRunId(id);
+    await ctx.runs.setActiveRunId(id);
     await resumeRun(runData);
   }
 
@@ -350,16 +336,16 @@ export function createGame(ctx) {
       if (sceneIdx < scenes.length && i === scenes[sceneIdx].startIndex) {
         snapshots.push({
           actionIndex: i,
-          rngState: Timeline.getRngState(),
-          state: structuredClone(State.getAll()),
-          eventLog: structuredClone(Events.all()),
+          rngState: ctx.timeline.getRngState(),
+          state: structuredClone(ctx.state.getAll()),
+          eventLog: structuredClone(ctx.events.all()),
         });
         sceneIdx++;
       }
 
       // Capture state before
-      const before = State.getAll();
-      const eventCountBefore = Events.all().length;
+      const before = ctx.state.getAll();
+      const eventCountBefore = ctx.events.all().length;
 
       // Execute action (same as existing replayActions logic)
       const action = actions[i].action;
@@ -372,14 +358,14 @@ export function createGame(ctx) {
       } else if (action.type === 'idle') {
         replayIdle();
       } else if (action.type === 'observe_time') {
-        State.observeTime();
+        ctx.state.observeTime();
       } else if (action.type === 'observe_money') {
-        State.observeMoney();
+        ctx.state.observeMoney();
       }
 
       // Capture state after and compute significance
-      const after = State.getAll();
-      const eventCountAfter = Events.all().length;
+      const after = ctx.state.getAll();
+      const eventCountAfter = ctx.events.all().length;
       let sig = 0;
       sig += Math.abs(after.energy - before.energy);
       sig += Math.abs(after.stress - before.stress);
@@ -417,35 +403,35 @@ export function createGame(ctx) {
       if (interaction) {
         responseText = /** @type {string} */ (interaction.execute());
       }
-      const events = World.checkEvents();
+      const events = ctx.world.checkEvents();
       generateEventTexts(events, eventTexts);
-      Content.generateIncomingMessages();
+      ctx.content.generateIncomingMessages();
     } else if (action.type === 'move') {
       if (action.destination) {
-        const fromId = World.getLocationId();
-        World.travelTo(action.destination);
-        responseText = Content.transitionText(fromId, action.destination);
-        const arrivalText = Senses.arrivalSense(); // match live RNG order
+        const fromId = ctx.world.getLocationId();
+        ctx.world.travelTo(action.destination);
+        responseText = ctx.content.transitionText(fromId, action.destination);
+        const arrivalText = ctx.senses.arrivalSense(); // match live RNG order
         if (arrivalText) eventTexts.push(arrivalText);
-        const events = World.checkEvents();
+        const events = ctx.world.checkEvents();
         generateEventTexts(events, eventTexts);
-        Content.generateIncomingMessages();
+        ctx.content.generateIncomingMessages();
       }
     } else if (action.type === 'idle') {
-      const thought = Content.idleThoughts();
+      const thought = ctx.content.idleThoughts();
       if (thought) responseText = thought;
-      const ivTier = State.innerVoiceTier();
-      if (ivTier) Content.innerVoiceThoughts(); // consume RNG to keep replay aligned
-      const sensory = Senses.sense(); // N×4 or 0 RNG — keeps replay aligned
+      const ivTier = ctx.state.innerVoiceTier();
+      if (ivTier) ctx.content.innerVoiceThoughts(); // consume RNG to keep replay aligned
+      const sensory = ctx.senses.sense(); // N×4 or 0 RNG — keeps replay aligned
       if (sensory) eventTexts.push(sensory);
-      State.advanceTime(Timeline.randomInt(2, 5));
+      ctx.state.advanceTime(ctx.timeline.randomInt(2, 5));
     } else if (action.type === 'observe_time') {
-      State.observeTime();
-      const source = Content.getTimeSource();
+      ctx.state.observeTime();
+      const source = ctx.content.getTimeSource();
       if (source) responseText = source;
     } else if (action.type === 'observe_money') {
-      State.observeMoney();
-      const source = Content.getMoneySource();
+      ctx.state.observeMoney();
+      const source = ctx.content.getMoneySource();
       if (source) responseText = source;
     }
 
@@ -475,10 +461,10 @@ export function createGame(ctx) {
     }
 
     // Restore snapshot state (location is part of state, so World reads it correctly)
-    State.restoreSnapshot(bestSnapshot.state);
-    Events.restoreLog(bestSnapshot.eventLog);
-    Timeline.setRngState(bestSnapshot.rngState);
-    Content.resetIdleTracking();
+    ctx.state.restoreSnapshot(bestSnapshot.state);
+    ctx.events.restoreLog(bestSnapshot.eventLog);
+    ctx.timeline.setRngState(bestSnapshot.rngState);
+    ctx.content.resetIdleTracking();
 
     // Replay from snapshot to target, collecting prose
     /** @type {string[]} */
@@ -504,8 +490,8 @@ export function createGame(ctx) {
       passageEl.innerHTML = proseBlocks.map(t => textToHTML(t)).join('');
     } else {
       // Show location description if no prose
-      const location = World.getLocationId();
-      const descFn = /** @type {Record<string, (() => string) | undefined>} */ (Content.locationDescriptions)[location];
+      const location = ctx.world.getLocationId();
+      const descFn = /** @type {Record<string, (() => string) | undefined>} */ (ctx.content.locationDescriptions)[location];
       passageEl.innerHTML = textToHTML(descFn ? descFn() : '');
     }
     passageEl.classList.add('visible');
@@ -556,7 +542,7 @@ export function createGame(ctx) {
       corner_store: 'corner store',
     };
     const locName = locationNames[scene.location] || scene.location;
-    const period = State.timePeriod().replace(/_/g, ' ');
+    const period = ctx.state.timePeriod().replace(/_/g, ' ');
     label.textContent = `${locName}, ${period}`;
   }
 
@@ -658,28 +644,28 @@ export function createGame(ctx) {
   /** @param {RunRecord} runData */
   function enterReplay(runData) {
     isReplaying = true;
-    UI.stopIdleTimer();
-    UI.hideAwareness();
+    ctx.ui.stopIdleTimer();
+    ctx.ui.hideAwareness();
     hideStepAway();
     hideLookBack();
 
     // Restore seed/character/PRNG
-    const saved = Timeline.restoreFrom(runData);
+    const saved = ctx.timeline.restoreFrom(runData);
     if (saved.character) {
-      Character.set(saved.character);
+      ctx.character.set(saved.character);
     }
 
-    State.init();
-    Character.applyToState();
-    Events.init();
+    ctx.state.init();
+    ctx.character.applyToState();
+    ctx.events.init();
 
     // Consume initial events + messages (same RNG as live start)
-    const initEvents = World.checkEvents();
+    const initEvents = ctx.world.checkEvents();
     for (const eventId of initEvents) {
-      const eventFn = /** @type {Record<string, (() => string) | undefined>} */ (Content.eventText)[eventId];
+      const eventFn = /** @type {Record<string, (() => string) | undefined>} */ (ctx.content.eventText)[eventId];
       if (eventFn) eventFn();
     }
-    Content.generateIncomingMessages();
+    ctx.content.generateIncomingMessages();
 
     // Segment scenes
     const scenes = segmentScenes(saved.actions);
@@ -770,16 +756,16 @@ export function createGame(ctx) {
       if (replayControls) replayControls.classList.add('hidden');
 
       // Restore live game by reloading the run from IDB and replaying
-      const activeId = Timeline.getActiveRunId();
+      const activeId = ctx.timeline.getActiveRunId();
       if (activeId) {
-        const freshRun = await Runs.loadRun(activeId);
+        const freshRun = await ctx.runs.loadRun(activeId);
         if (freshRun) {
           await resumeRun(freshRun);
           return;
         }
       }
       // Fallback: go to threshold
-      const runs = await Runs.listRuns();
+      const runs = await ctx.runs.listRuns();
       showThreshold(runs);
     };
 
@@ -888,10 +874,10 @@ export function createGame(ctx) {
 
   async function handleLookBack() {
     cancelAutoAdvance();
-    Runs.flush();
-    const activeId = Timeline.getActiveRunId();
+    ctx.runs.flush();
+    const activeId = ctx.timeline.getActiveRunId();
     if (!activeId) return;
-    const runData = await Runs.loadRun(activeId);
+    const runData = await ctx.runs.loadRun(activeId);
     if (!runData) return;
 
     hideLookBack();
@@ -901,8 +887,8 @@ export function createGame(ctx) {
   async function handleStepAway() {
     cancelAutoAdvance();
     // Flush any pending save
-    Runs.flush();
-    await Runs.setActiveRunId(null);
+    ctx.runs.flush();
+    await ctx.runs.setActiveRunId(null);
 
     // Fade out and show threshold
     const passageEl = /** @type {HTMLElement} */ (document.getElementById('passage'));
@@ -913,13 +899,13 @@ export function createGame(ctx) {
     actionsEl.classList.remove('visible');
     movementEl.classList.remove('visible');
 
-    UI.stopIdleTimer();
-    UI.hideAwareness();
+    ctx.ui.stopIdleTimer();
+    ctx.ui.hideAwareness();
     hideStepAway();
     hideLookBack();
 
     setTimeout(async () => {
-      const runs = await Runs.listRuns();
+      const runs = await ctx.runs.listRuns();
       showThreshold(runs);
     }, 500);
   }
@@ -936,19 +922,19 @@ export function createGame(ctx) {
       const action = entry.action;
 
       // Snapshot features before action for habit training
-      const habitFeatures = Habits.extractFeatures();
+      const habitFeatures = ctx.habits.extractFeatures();
 
       if (action.type === 'interact') {
         replayInteraction(action.id, action.data);
         consumeEvents();
-        Habits.addExample(habitFeatures, action.id);
+        ctx.habits.addExample(habitFeatures, action.id);
         lastIdleThought = undefined;
         lastInnerVoice = null;
         lastInnerVoiceTier = null;
       } else if (action.type === 'move') {
         replayMove(action.destination);
         consumeEvents();
-        Habits.addExample(habitFeatures, 'move:' + action.destination);
+        ctx.habits.addExample(habitFeatures, 'move:' + action.destination);
         lastIdleThought = undefined;
         lastInnerVoice = null;
         lastInnerVoiceTier = null;
@@ -959,25 +945,25 @@ export function createGame(ctx) {
         lastInnerVoiceTier = result.ivTier;
         lastSensoryText = result.sensory ?? null;
       } else if (action.type === 'observe_time') {
-        State.observeTime();
+        ctx.state.observeTime();
       } else if (action.type === 'observe_money') {
-        State.observeMoney();
+        ctx.state.observeMoney();
       }
     }
 
     // Train habit trees from replay data
-    Habits.train();
+    ctx.habits.train();
 
     return { lastIdleThought, lastInnerVoice, lastInnerVoiceTier, lastSensoryText };
   }
 
   function consumeEvents() {
-    const events = World.checkEvents();
+    const events = ctx.world.checkEvents();
     for (const eventId of events) {
-      const eventFn = /** @type {Record<string, (() => string) | undefined>} */ (Content.eventText)[eventId];
+      const eventFn = /** @type {Record<string, (() => string) | undefined>} */ (ctx.content.eventText)[eventId];
       if (eventFn) eventFn();
     }
-    Content.generateIncomingMessages();
+    ctx.content.generateIncomingMessages();
   }
 
   /** @param {string | undefined} id @param {Record<string, any>} [data] */
@@ -995,11 +981,11 @@ export function createGame(ctx) {
    */
   function replayIdle() {
     // RNG order must match handleIdle() exactly (see comment there for breakdown)
-    const thought = Content.idleThoughts();
-    const ivTier = State.innerVoiceTier();
-    const voice = ivTier ? Content.innerVoiceThoughts() : null;
-    const sensory = Senses.sense(); // same N×4 or 0 RNG as handleIdle
-    State.advanceTime(Timeline.randomInt(2, 5));
+    const thought = ctx.content.idleThoughts();
+    const ivTier = ctx.state.innerVoiceTier();
+    const voice = ivTier ? ctx.content.innerVoiceThoughts() : null;
+    const sensory = ctx.senses.sense(); // same N×4 or 0 RNG as handleIdle
+    ctx.state.advanceTime(ctx.timeline.randomInt(2, 5));
     return { thought, voice, ivTier, sensory };
   }
 
@@ -1007,20 +993,20 @@ export function createGame(ctx) {
   function replayMove(destId) {
     if (!destId) return;
     // During replay, always execute the move
-    const fromId = World.getLocationId();
-    World.travelTo(destId);
+    const fromId = ctx.world.getLocationId();
+    ctx.world.travelTo(destId);
     // Consume same RNG as live play — order must match handleMove exactly
-    Content.transitionText(fromId, destId);
-    Senses.arrivalSense(); // 4 RNG calls or 0, matching live play
+    ctx.content.transitionText(fromId, destId);
+    ctx.senses.arrivalSense(); // 4 RNG calls or 0, matching live play
   }
 
   /** @param {string} id */
   function findInteraction(id) {
-    for (const interaction of Object.values(Content.interactions)) {
+    for (const interaction of Object.values(ctx.content.interactions)) {
       if (interaction.id === id) return interaction;
     }
     // Check call in sick
-    const callIn = Content.getInteraction('call_in');
+    const callIn = ctx.content.getInteraction('call_in');
     if (callIn && callIn.id === id) return callIn;
     return null;
   }
@@ -1029,26 +1015,26 @@ export function createGame(ctx) {
 
   function handleFocusTime() {
     if (isReplaying) return;
-    UI.boostTimeFocus();
-    const source = Content.getTimeSource();
+    ctx.ui.boostTimeFocus();
+    const source = ctx.content.getTimeSource();
     if (source) {
-      Timeline.recordAction({ type: 'observe_time' });
-      State.observeTime();
-      UI.appendEventText(source);
+      ctx.timeline.recordAction({ type: 'observe_time' });
+      ctx.state.observeTime();
+      ctx.ui.appendEventText(source);
     }
-    UI.updateAwareness();
+    ctx.ui.updateAwareness();
   }
 
   function handleFocusMoney() {
     if (isReplaying) return;
-    UI.boostMoneyFocus();
-    const source = Content.getMoneySource();
+    ctx.ui.boostMoneyFocus();
+    const source = ctx.content.getMoneySource();
     if (source) {
-      Timeline.recordAction({ type: 'observe_money' });
-      State.observeMoney();
-      UI.appendEventText(source);
+      ctx.timeline.recordAction({ type: 'observe_money' });
+      ctx.state.observeMoney();
+      ctx.ui.appendEventText(source);
     }
-    UI.updateAwareness();
+    ctx.ui.updateAwareness();
   }
 
   // --- Focus triggers from events ---
@@ -1057,14 +1043,14 @@ export function createGame(ctx) {
   function applyFocusTriggers(events, interaction) {
     for (const eventId of events) {
       if (eventId === 'alarm' || eventId === 'late_anxiety') {
-        UI.boostTimeFocus();
+        ctx.ui.boostTimeFocus();
       }
     }
     // Purchase interactions boost money focus
     if (interaction) {
       const id = interaction.id;
       if (id === 'buy_groceries' || id === 'buy_cheap_meal') {
-        UI.boostMoneyFocus();
+        ctx.ui.boostMoneyFocus();
       }
     }
   }
@@ -1072,10 +1058,10 @@ export function createGame(ctx) {
   /** @param {string} destId */
   function applyMoveFocusTriggers(destId) {
     if (destId === 'corner_store') {
-      UI.boostMoneyFocus();
+      ctx.ui.boostMoneyFocus();
     }
     if (destId === 'apartment_kitchen') {
-      UI.boostTimeFocus();
+      ctx.ui.boostTimeFocus();
     }
   }
 
@@ -1087,26 +1073,26 @@ export function createGame(ctx) {
     cancelAutoAdvance();
 
     // Snapshot features before action for habit training
-    const habitFeatures = Habits.extractFeatures();
+    const habitFeatures = ctx.habits.extractFeatures();
 
     // Record the action (include data if present)
     const actionEntry = /** @type {{ type: string; id: string; data?: Record<string, any> }} */ ({ type: 'interact', id: interaction.id });
     if (Object.keys(data).length) actionEntry.data = data;
-    Timeline.recordAction(actionEntry);
+    ctx.timeline.recordAction(actionEntry);
 
     // Execute and get prose response
     const responseText = interaction.execute(data);
 
     // Record training example with source tag and retrain periodically
-    Habits.addExample(habitFeatures, interaction.id, nextActionSource || undefined);
+    ctx.habits.addExample(habitFeatures, interaction.id, nextActionSource || undefined);
     nextActionSource = null;
-    if (Habits.shouldRetrain()) Habits.train();
+    if (ctx.habits.shouldRetrain()) ctx.habits.train();
 
     // Check for events after action
-    const events = World.checkEvents();
+    const events = ctx.world.checkEvents();
 
     // Show the response
-    UI.showPassage(responseText);
+    ctx.ui.showPassage(responseText);
 
     // Generate event text now (consuming RNG synchronously), display later
     /** @type {string[]} */
@@ -1114,22 +1100,22 @@ export function createGame(ctx) {
     generateEventTexts(events, eventTexts);
 
     // Generate incoming phone messages (consumes RNG)
-    const msgArrived = Content.generateIncomingMessages();
+    const msgArrived = ctx.content.generateIncomingMessages();
 
     // Buzz notification if message arrived + not silent + not in phone mode
-    if (msgArrived && !State.get('phone_silent') && !State.get('viewing_phone')) {
+    if (msgArrived && !ctx.state.get('phone_silent') && !ctx.state.get('viewing_phone')) {
       eventTexts.push('Your phone buzzes.');
     }
 
     // Apply focus triggers
     applyFocusTriggers(events, interaction);
-    UI.updateAwareness();
+    ctx.ui.updateAwareness();
 
     if (eventTexts.length > 0) {
       let delay = 1500;
       for (const text of eventTexts) {
         const t = text;
-        setTimeout(() => UI.appendEventText(t), delay);
+        setTimeout(() => ctx.ui.appendEventText(t), delay);
         delay += 1200;
       }
     }
@@ -1137,19 +1123,19 @@ export function createGame(ctx) {
     // Re-render actions and movement after a beat, then check auto-advance
     setTimeout(() => {
       // Phone mode — re-render the phone overlay (shows sent msg, updated compose row, etc.)
-      if (State.get('viewing_phone')) {
-        UI.render();
+      if (ctx.state.get('viewing_phone')) {
+        ctx.ui.render();
         return;
       }
-      const interactions = Content.getAvailableInteractions();
-      const connections = World.getConnections();
+      const interactions = ctx.content.getAvailableInteractions();
+      const connections = ctx.world.getConnections();
       const allIds = [
         ...interactions.map(i => i.id),
         ...connections.map(c => 'move:' + c.id),
       ];
-      const prediction = Habits.predictHabit(allIds);
-      UI.showActions(interactions, prediction);
-      UI.showMovement(connections, prediction);
+      const prediction = ctx.habits.predictHabit(allIds);
+      ctx.ui.showActions(interactions, prediction);
+      ctx.ui.showMovement(connections, prediction);
 
       tryAutoAdvance(prediction, interactions, connections);
     }, 800);
@@ -1159,28 +1145,28 @@ export function createGame(ctx) {
   function handleMove(destId) {
     if (isReplaying) return;
     cancelAutoAdvance();
-    if (!World.canTravel(destId)) return;
+    if (!ctx.world.canTravel(destId)) return;
 
     // Snapshot features before move for habit training
-    const habitFeatures = Habits.extractFeatures();
+    const habitFeatures = ctx.habits.extractFeatures();
 
     // Record the action
-    Timeline.recordAction({ type: 'move', destination: destId });
+    ctx.timeline.recordAction({ type: 'move', destination: destId });
 
-    const fromId = World.getLocationId();
+    const fromId = ctx.world.getLocationId();
 
     // Execute travel
-    const travel = World.travelTo(destId);
+    const travel = ctx.world.travelTo(destId);
     if (!travel) return;
 
     // Transition text
-    const transText = Content.transitionText(travel.from, travel.to);
+    const transText = ctx.content.transitionText(travel.from, travel.to);
 
     // Arrival sense — first-impression observation of new location (RNG consumed synchronously)
-    const arrivalText = Senses.arrivalSense();
+    const arrivalText = ctx.senses.arrivalSense();
 
     // Check events at new location
-    const events = World.checkEvents();
+    const events = ctx.world.checkEvents();
 
     // Generate event text now (consuming RNG synchronously), display later.
     // Arrival observation goes first — it's the immediate sense of the new place.
@@ -1190,41 +1176,41 @@ export function createGame(ctx) {
     generateEventTexts(events, eventTexts);
 
     // Generate incoming phone messages (consumes RNG)
-    const msgArrived = Content.generateIncomingMessages();
-    if (msgArrived && !State.get('phone_silent') && !State.get('viewing_phone')) {
+    const msgArrived = ctx.content.generateIncomingMessages();
+    if (msgArrived && !ctx.state.get('phone_silent') && !ctx.state.get('viewing_phone')) {
       eventTexts.push('Your phone buzzes.');
     }
 
     // Record training example with source tag and retrain periodically
-    Habits.addExample(habitFeatures, 'move:' + destId, nextActionSource || undefined);
+    ctx.habits.addExample(habitFeatures, 'move:' + destId, nextActionSource || undefined);
     nextActionSource = null;
-    if (Habits.shouldRetrain()) Habits.train();
+    if (ctx.habits.shouldRetrain()) ctx.habits.train();
 
     // Apply focus triggers
     applyMoveFocusTriggers(travel.to);
     applyFocusTriggers(events, null);
-    UI.updateAwareness();
+    ctx.ui.updateAwareness();
 
     if (transText && transText.trim()) {
       // Show transition, then location + auto-advance check
-      UI.showPassage(transText);
+      ctx.ui.showPassage(transText);
 
       setTimeout(() => {
-        // Explicit render steps (not UI.render()) so we can check auto-advance
-        const location = World.getLocationId();
-        const descFn = /** @type {Record<string, (() => string) | undefined>} */ (Content.locationDescriptions)[location];
-        UI.showPassage(descFn ? descFn() : '');
+        // Explicit render steps (not ctx.ui.render()) so we can check auto-advance
+        const location = ctx.world.getLocationId();
+        const descFn = /** @type {Record<string, (() => string) | undefined>} */ (ctx.content.locationDescriptions)[location];
+        ctx.ui.showPassage(descFn ? descFn() : '');
 
-        const interactions = Content.getAvailableInteractions();
-        const connections = World.getConnections();
+        const interactions = ctx.content.getAvailableInteractions();
+        const connections = ctx.world.getConnections();
         const allIds = [
           ...interactions.map(i => i.id),
           ...connections.map(c => 'move:' + c.id),
         ];
-        const prediction = Habits.predictHabit(allIds);
-        UI.showActions(interactions, prediction);
-        UI.showMovement(connections, prediction);
-        UI.updateAwareness();
+        const prediction = ctx.habits.predictHabit(allIds);
+        ctx.ui.showActions(interactions, prediction);
+        ctx.ui.showMovement(connections, prediction);
+        ctx.ui.updateAwareness();
 
         tryAutoAdvance(prediction, interactions, connections);
 
@@ -1232,27 +1218,27 @@ export function createGame(ctx) {
           let delay = 1000;
           for (const text of eventTexts) {
             const t = text;
-            setTimeout(() => UI.appendEventText(t), delay);
+            setTimeout(() => ctx.ui.appendEventText(t), delay);
             delay += 1200;
           }
         }
       }, 1500);
     } else {
       // No transition text — render location + auto-advance check
-      const location = World.getLocationId();
-      const descFn = /** @type {Record<string, (() => string) | undefined>} */ (Content.locationDescriptions)[location];
-      UI.showPassage(descFn ? descFn() : '');
+      const location = ctx.world.getLocationId();
+      const descFn = /** @type {Record<string, (() => string) | undefined>} */ (ctx.content.locationDescriptions)[location];
+      ctx.ui.showPassage(descFn ? descFn() : '');
 
-      const interactions = Content.getAvailableInteractions();
-      const connections = World.getConnections();
+      const interactions = ctx.content.getAvailableInteractions();
+      const connections = ctx.world.getConnections();
       const allIds = [
         ...interactions.map(i => i.id),
         ...connections.map(c => 'move:' + c.id),
       ];
-      const prediction = Habits.predictHabit(allIds);
-      UI.showActions(interactions, prediction);
-      UI.showMovement(connections, prediction);
-      UI.updateAwareness();
+      const prediction = ctx.habits.predictHabit(allIds);
+      ctx.ui.showActions(interactions, prediction);
+      ctx.ui.showMovement(connections, prediction);
+      ctx.ui.updateAwareness();
 
       tryAutoAdvance(prediction, interactions, connections);
 
@@ -1260,7 +1246,7 @@ export function createGame(ctx) {
         let delay = 800;
         for (const text of eventTexts) {
           const t = text;
-          setTimeout(() => UI.appendEventText(t), delay);
+          setTimeout(() => ctx.ui.appendEventText(t), delay);
           delay += 1200;
         }
       }
@@ -1271,36 +1257,36 @@ export function createGame(ctx) {
     if (isReplaying) return;
 
     // Record idle as an action so RNG consumption is replayable
-    Timeline.recordAction({ type: 'idle' });
+    ctx.timeline.recordAction({ type: 'idle' });
 
     // RNG order must match replayIdle() exactly:
     // 1. idleThoughts() — always (1 RNG)
     // 2. innerVoiceThoughts() — only when ivTier !== null (1 RNG, conditional)
-    // 3. Senses.sense() — N×4 RNG if observations available (N=2 calm/flat/dissociated,
+    // 3. ctx.senses.sense() — N×4 RNG if observations available (N=2 calm/flat/dissociated,
     //                     N=3 anxious/overwhelmed); 0 if no sources surface
     // 4. advanceTime(randomInt(2,5)) — always (1 RNG)
-    const thought = Content.idleThoughts();
-    const ivTier = State.innerVoiceTier();
-    const voice = ivTier ? Content.innerVoiceThoughts() : null;
-    const sensory = Senses.sense(); // always call; RNG consumed only if pool > 1
+    const thought = ctx.content.idleThoughts();
+    const ivTier = ctx.state.innerVoiceTier();
+    const voice = ivTier ? ctx.content.innerVoiceThoughts() : null;
+    const sensory = ctx.senses.sense(); // always call; RNG consumed only if pool > 1
 
     // Tremor: inner voice drowns out the narration
     if (thought && ivTier !== 'tremor') {
-      UI.appendEventText(thought);
+      ctx.ui.appendEventText(thought);
     }
     if (voice && ivTier) {
       const delay = ivTier === 'tremor' ? 0 : 800;
-      setTimeout(() => UI.appendInnerVoice(voice, ivTier), delay);
+      setTimeout(() => ctx.ui.appendInnerVoice(voice, ivTier), delay);
     }
     // Display sensory text if cooldown allows
-    if (sensory && Senses.canDisplay()) {
-      setTimeout(() => UI.appendEventText(sensory), 1200);
-      Senses.markDisplayed();
+    if (sensory && ctx.senses.canDisplay()) {
+      setTimeout(() => ctx.ui.appendEventText(sensory), 1200);
+      ctx.senses.markDisplayed();
     }
 
-    State.advanceTime(Timeline.randomInt(2, 5));
+    ctx.state.advanceTime(ctx.timeline.randomInt(2, 5));
 
-    UI.updateAwareness();
+    ctx.ui.updateAwareness();
   }
 
   return { init };

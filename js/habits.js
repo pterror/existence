@@ -4,8 +4,6 @@
 // No RNG consumed — pure state reads + ML.
 
 export function createHabits(ctx) {
-  const State = ctx.state;
-  const World = ctx.world;
 
   // --- Feature schema ---
   // Declares whether each feature is continuous or categorical.
@@ -97,40 +95,40 @@ export function createHabits(ctx) {
   /** @returns {Record<string, number|string|boolean>} */
   function extractFeatures() {
     const features = {
-      energy: State.get('energy'),
-      stress: State.get('stress'),
-      hunger: State.get('hunger'),
-      social: State.get('social'),
-      social_energy: State.get('social_energy'),
-      serotonin: State.get('serotonin'),
-      dopamine: State.get('dopamine'),
-      norepinephrine: State.get('norepinephrine'),
-      gaba: State.get('gaba'),
-      adenosine: State.get('adenosine'),
-      cortisol: State.get('cortisol'),
-      energy_tier: State.energyTier(),
-      stress_tier: State.stressTier(),
-      mood_tone: State.moodTone(),
-      time_period: State.timePeriod(),
-      hour: State.getHour(),
-      location: World.getLocationId(),
-      dressed: State.get('dressed'),
-      showered: State.get('showered'),
-      ate_today: State.get('ate_today'),
-      at_work_today: State.get('at_work_today'),
-      called_in: State.get('called_in'),
-      weather: State.get('weather'),
-      fridge_food: State.get('fridge_food'),
-      phone_battery: State.get('phone_battery'),
-      viewing_phone: State.get('viewing_phone'),
-      work_dread: State.sentimentIntensity('work', 'dread'),
-      work_satisfaction: State.sentimentIntensity('work', 'satisfaction'),
-      routine_comfort: State.sentimentIntensity('routine', 'comfort'),
-      routine_irritation: State.sentimentIntensity('routine', 'irritation'),
-      money: State.get('money'),
-      money_tier: State.moneyTier(),
-      has_unread: State.hasUnreadMessages(),
-      time_since_wake: lastWakeTime > 0 ? (State.get('time') - lastWakeTime) : 99999,
+      energy: ctx.state.get('energy'),
+      stress: ctx.state.get('stress'),
+      hunger: ctx.state.get('hunger'),
+      social: ctx.state.get('social'),
+      social_energy: ctx.state.get('social_energy'),
+      serotonin: ctx.state.get('serotonin'),
+      dopamine: ctx.state.get('dopamine'),
+      norepinephrine: ctx.state.get('norepinephrine'),
+      gaba: ctx.state.get('gaba'),
+      adenosine: ctx.state.get('adenosine'),
+      cortisol: ctx.state.get('cortisol'),
+      energy_tier: ctx.state.energyTier(),
+      stress_tier: ctx.state.stressTier(),
+      mood_tone: ctx.state.moodTone(),
+      time_period: ctx.state.timePeriod(),
+      hour: ctx.state.getHour(),
+      location: ctx.world.getLocationId(),
+      dressed: ctx.state.get('dressed'),
+      showered: ctx.state.get('showered'),
+      ate_today: ctx.state.get('ate_today'),
+      at_work_today: ctx.state.get('at_work_today'),
+      called_in: ctx.state.get('called_in'),
+      weather: ctx.state.get('weather'),
+      fridge_food: ctx.state.get('fridge_food'),
+      phone_battery: ctx.state.get('phone_battery'),
+      viewing_phone: ctx.state.get('viewing_phone'),
+      work_dread: ctx.state.sentimentIntensity('work', 'dread'),
+      work_satisfaction: ctx.state.sentimentIntensity('work', 'satisfaction'),
+      routine_comfort: ctx.state.sentimentIntensity('routine', 'comfort'),
+      routine_irritation: ctx.state.sentimentIntensity('routine', 'irritation'),
+      money: ctx.state.get('money'),
+      money_tier: ctx.state.moneyTier(),
+      has_unread: ctx.state.hasUnreadMessages(),
+      time_since_wake: lastWakeTime > 0 ? (ctx.state.get('time') - lastWakeTime) : 99999,
       last_action: lastActionId || 'none',
     };
     return features;
@@ -149,7 +147,7 @@ export function createHabits(ctx) {
    * @param {string} [sourceOverride]
    */
   function addExample(features, actionId, sourceOverride) {
-    const time = State.get('time');
+    const time = ctx.state.get('time');
     const source = sourceOverride || ((lastPredictionId && actionId === lastPredictionId) ? 'suggested' : 'player');
     trainingData.push({ features, action: actionId, time, source });
     lastTimeFor[actionId] = time;
@@ -162,7 +160,7 @@ export function createHabits(ctx) {
    * Update wake time tracking. Called when wakeUp happens.
    */
   function noteWake() {
-    lastWakeTime = State.get('time');
+    lastWakeTime = ctx.state.get('time');
   }
 
   /** @returns {boolean} */
@@ -459,8 +457,8 @@ export function createHabits(ctx) {
     const features = extractFeatures();
 
     // Routine sentiment modulates thresholds
-    const routineComfort = State.sentimentIntensity('routine', 'comfort');
-    const routineIrritation = State.sentimentIntensity('routine', 'irritation');
+    const routineComfort = ctx.state.sentimentIntensity('routine', 'comfort');
+    const routineIrritation = ctx.state.sentimentIntensity('routine', 'irritation');
     // Comfort lowers threshold (habits form easier), irritation raises it
     const thresholdAdjust = -routineComfort * 0.1 + routineIrritation * 0.1;
     // Base 0.6 (not 0.5) — a weak habit shouldn't look like a habit.

@@ -2,15 +2,6 @@
 // A world, not a script. Text carries everything.
 
 export function createContent(ctx) {
-  const State = ctx.state;
-  const Timeline = ctx.timeline;
-  const Character = ctx.character;
-  const World = ctx.world;
-  const Events = ctx.events;
-  const Dishes = ctx.dishes;
-  const Linens = ctx.linens;
-  const Clothing = ctx.clothing;
-  const Mess = ctx.mess;
 
   // --- Relationship prose tables ---
   // Keyed on flavor archetype. Name is the only dynamic part.
@@ -18,47 +9,47 @@ export function createContent(ctx) {
   /** @type {Record<string, (name: string) => string | undefined>} */
   const friendMessages = {
     sends_things: (name) => {
-      const dopa = State.get('dopamine');
-      return Timeline.weightedPick([
+      const dopa = ctx.state.get('dopamine');
+      return ctx.timeline.weightedPick([
         { weight: 1, value: `${name} sent a picture of a cat sitting in a shopping bag. No caption. None needed.` },
         { weight: 1, value: `A message from ${name} — a screenshot of a tweet, no context. The kind of thing that means she was thinking of you.` },
         { weight: 1, value: `${name} sent a voice memo. Fifteen seconds of background noise and half a laugh. That's it.` },
         { weight: 1, value: `A link from ${name}. No message, just the link. You tap it, skim two sentences, close it.` },
         // Low dopamine — the gesture doesn't land
-        { weight: State.lerp01(dopa, 40, 15), value: `${name} sent something. A picture, a link — you see the notification. You don't open it. It sits there, proof that someone thought of you, and that proof does nothing.` },
+        { weight: ctx.state.lerp01(dopa, 40, 15), value: `${name} sent something. A picture, a link — you see the notification. You don't open it. It sits there, proof that someone thought of you, and that proof does nothing.` },
       ]);
     },
     checks_in: (name) => {
-      const ser = State.get('serotonin');
-      return Timeline.weightedPick([
+      const ser = ctx.state.get('serotonin');
+      return ctx.timeline.weightedPick([
         { weight: 1, value: `A message from ${name}. "Hey, you good?" You stare at it. You don't type anything back yet.` },
         { weight: 1, value: `${name} texted. "Haven't heard from you." Simple. Not pushy. That makes it harder to ignore.` },
         { weight: 1, value: `A text from ${name}: "Just checking in." Three words that sit there, waiting.` },
         { weight: 1, value: `${name} sent a thumbs up emoji, then "thinking of you." Nothing else. Nothing else needed.` },
         // Low serotonin — the check-in is a weight
-        { weight: State.lerp01(ser, 35, 15), value: `A message from ${name}. "Hey, you good?" The question lands like something you have to carry. You're not good. The lie you'd have to type is heavier than not answering.` },
+        { weight: ctx.state.lerp01(ser, 35, 15), value: `A message from ${name}. "Hey, you good?" The question lands like something you have to carry. You're not good. The lie you'd have to type is heavier than not answering.` },
       ]);
     },
     dry_humor: (name) => {
-      const dopa = State.get('dopamine');
-      return Timeline.weightedPick([
+      const dopa = ctx.state.get('dopamine');
+      return ctx.timeline.weightedPick([
         { weight: 1, value: `${name} linked a video with "lmao this is you." You don't watch it yet but you save it.` },
         { weight: 1, value: `${name} in the group chat, complaining about his landlord again. The usual.` },
         { weight: 1, value: `A text from ${name}: "life update: still alive." You almost smile.` },
         { weight: 1, value: `${name} sent a meme. It's not funny, but that's the joke. You get it.` },
         // Low dopamine — the humor slides off
-        { weight: State.lerp01(dopa, 40, 15), value: `${name} sent something meant to be funny. You read it. You understand that it's funny. The understanding and the feeling are in different rooms.` },
+        { weight: ctx.state.lerp01(dopa, 40, 15), value: `${name} sent something meant to be funny. You read it. You understand that it's funny. The understanding and the feeling are in different rooms.` },
       ]);
     },
     earnest: (name) => {
-      const ser = State.get('serotonin');
-      return Timeline.weightedPick([
+      const ser = ctx.state.get('serotonin');
+      return ctx.timeline.weightedPick([
         { weight: 1, value: `A message from ${name}. Something about a sunset. Genuine in a way you can't match right now.` },
         { weight: 1, value: `${name} texted a long paragraph about their week. You read it twice. You don't reply yet.` },
         { weight: 1, value: `A text from ${name}: "Saw something that reminded me of you today." It lands somewhere soft.` },
         { weight: 1, value: `${name} asks how you're really doing. The "really" is doing a lot of work in that sentence.` },
         // Low serotonin — sincerity is unbearable
-        { weight: State.lerp01(ser, 35, 15), value: `A long message from ${name}. Genuine. Open. The kind that would need you to be honest back, and that's the one thing you can't do right now. You read it and close the phone.` },
+        { weight: ctx.state.lerp01(ser, 35, 15), value: `A long message from ${name}. Genuine. Open. The kind that would need you to be honest back, and that's the one thing you can't do right now. You read it and close the phone.` },
       ]);
     },
   };
@@ -74,57 +65,57 @@ export function createContent(ctx) {
   /** @type {Record<string, (name: string) => string>} */
   const friendReplyProse = {
     sends_things: (name) => {
-      const dopa = State.get('dopamine');
-      return Timeline.weightedPick([
+      const dopa = ctx.state.get('dopamine');
+      return ctx.timeline.weightedPick([
         { weight: 1, value: `You tap back a reaction. Quick. ${name} will know you saw it.` },
         { weight: 1, value: `You send something small — two characters, an emoji. The effort is almost nothing, which is the only way it could have happened.` },
-        { weight: State.lerp01(dopa, 40, 15), value: `You send a single character back. The effort it takes is out of proportion to how small it is.` },
+        { weight: ctx.state.lerp01(dopa, 40, 15), value: `You send a single character back. The effort it takes is out of proportion to how small it is.` },
       ]);
     },
     checks_in: (name) => {
-      const ser = State.get('serotonin');
-      return Timeline.weightedPick([
+      const ser = ctx.state.get('serotonin');
+      return ctx.timeline.weightedPick([
         { weight: 1, value: `You type "yeah, I'm good." You're not sure if it's true. You hit send before you can second-guess it.` },
         { weight: 1, value: `"Been busy." Not a lie, exactly. You send it.` },
-        { weight: State.lerp01(ser, 35, 15), value: `You stare at the text field for a moment. "Sorry, been a lot going on." Vague enough to be true. You send it before you can revise it into nothing.` },
+        { weight: ctx.state.lerp01(ser, 35, 15), value: `You stare at the text field for a moment. "Sorry, been a lot going on." Vague enough to be true. You send it before you can revise it into nothing.` },
       ]);
     },
     dry_humor: (_name) => {
-      const dopa = State.get('dopamine');
-      return Timeline.weightedPick([
+      const dopa = ctx.state.get('dopamine');
+      return ctx.timeline.weightedPick([
         { weight: 1, value: `You type something brief. He'll understand what it means.` },
         { weight: 1, value: `You send a meme back, or one word, or not much. He doesn't need more than that.` },
-        { weight: State.lerp01(dopa, 40, 15), value: `You send something back. It comes out flat, but that's fine — he doesn't require anything more.` },
+        { weight: ctx.state.lerp01(dopa, 40, 15), value: `You send something back. It comes out flat, but that's fine — he doesn't require anything more.` },
       ]);
     },
     earnest: (name) => {
-      const ser = State.get('serotonin');
-      return Timeline.weightedPick([
+      const ser = ctx.state.get('serotonin');
+      return ctx.timeline.weightedPick([
         { weight: 1, value: `You write back. It takes a minute — ${name} put thought into hers, and you want to give it some.` },
         { weight: 1, value: `You compose a reply. Not long, but honest. You send it.` },
-        { weight: State.lerp01(ser, 35, 15), value: `You write something short. It doesn't feel like enough. You send it anyway.` },
+        { weight: ctx.state.lerp01(ser, 35, 15), value: `You write something short. It doesn't feel like enough. You send it anyway.` },
       ]);
     },
   };
 
   /** @type {Record<string, (name: string) => string>} */
   const friendReplyMessages = {
-    sends_things: (name) => Timeline.weightedPick([
+    sends_things: (name) => ctx.timeline.weightedPick([
       { weight: 1, value: `${name} responds immediately. A follow-up — she had it ready. The thread continues on its own terms.` },
       { weight: 1, value: `${name} sends a thumbs up, then a voice note. Three seconds. The sound of her laughing at something off-screen.` },
       { weight: 1, value: `Another thing from ${name}. She had this one saved. The conversation is alive again.` },
     ]),
-    checks_in: (name) => Timeline.weightedPick([
+    checks_in: (name) => ctx.timeline.weightedPick([
       { weight: 1, value: `${name}: "Good. Just wanted to make sure." Then, a beat later: "Let me know if you need anything."` },
       { weight: 1, value: `A response from ${name}. "Okay good. Miss you." Short. Means what it says.` },
       { weight: 1, value: `${name} replies quickly. "okay good :)" And then nothing, which is exactly right.` },
     ]),
-    dry_humor: (name) => Timeline.weightedPick([
+    dry_humor: (name) => ctx.timeline.weightedPick([
       { weight: 1, value: `${name} sends a meme back. Different one. No explanation needed.` },
       { weight: 1, value: `His response: two words. The whole exchange is complete.` },
       { weight: 1, value: `"lmao" from ${name}. That's it. Conversation finished.` },
     ]),
-    earnest: (name) => Timeline.weightedPick([
+    earnest: (name) => ctx.timeline.weightedPick([
       { weight: 1, value: `A longer reply from ${name}. She's glad you reached out. She asks a follow-up question — gentle, not pushy. You could answer it or leave it there.` },
       { weight: 1, value: `${name} responds warmly. The kind of message that doesn't ask for anything. You feel slightly less alone.` },
       { weight: 1, value: `${name}: "I've been thinking about you." Two more sentences. Genuine. No pressure in it.` },
@@ -134,65 +125,65 @@ export function createContent(ctx) {
   /** @type {Record<string, (name: string) => string>} */
   const friendInitiateProse = {
     sends_things: (name) => {
-      const dopa = State.get('dopamine');
-      return Timeline.weightedPick([
+      const dopa = ctx.state.get('dopamine');
+      return ctx.timeline.weightedPick([
         { weight: 1, value: `You scroll until something stands out. You forward it without a caption. ${name} will know what it means.` },
         { weight: 1, value: `You find a thing — something she'd like, probably — and send it before you think about it too hard.` },
         { weight: 1, value: `You share something. A picture, a link. The sending takes a second. Small, but it goes out.` },
         // Low dopamine — the gesture feels hollow
-        { weight: State.lerp01(dopa, 40, 15), value: `You find a thing and forward it. The act is flatter than you want it to be, but it goes out.` },
+        { weight: ctx.state.lerp01(dopa, 40, 15), value: `You find a thing and forward it. The act is flatter than you want it to be, but it goes out.` },
       ]);
     },
     checks_in: (_name) => {
-      const ser = State.get('serotonin');
-      return Timeline.weightedPick([
+      const ser = ctx.state.get('serotonin');
+      return ctx.timeline.weightedPick([
         { weight: 1, value: `You type "hey." You delete the rest. The "hey" is enough.` },
         { weight: 1, value: `You open the thread. Two words. Something small. You send it.` },
         { weight: 1, value: `You check in. Brief. Just enough to say you're still here.` },
         // Low serotonin — even small words are hard
-        { weight: State.lerp01(ser, 35, 15), value: `You open the thread. The cursor blinks. You draft three things and delete them. What you finally send is the smallest version of what you meant. You hit send before you can take it back.` },
+        { weight: ctx.state.lerp01(ser, 35, 15), value: `You open the thread. The cursor blinks. You draft three things and delete them. What you finally send is the smallest version of what you meant. You hit send before you can take it back.` },
       ]);
     },
     dry_humor: (name) => {
-      const dopa = State.get('dopamine');
-      return Timeline.weightedPick([
+      const dopa = ctx.state.get('dopamine');
+      return ctx.timeline.weightedPick([
         { weight: 1, value: `You send the thing you've had sitting in another tab for two days. ${name} will get it.` },
         { weight: 1, value: `You type something stupid and send it before you can second-guess yourself.` },
         { weight: 1, value: `A meme, or a link, or just a line. Something dumb and specific enough to count. Sent.` },
         // Low dopamine — sending without feeling
-        { weight: State.lerp01(dopa, 40, 15), value: `You send something. It goes out. You watch the delivered receipt appear and feel nothing particular about it. But it's sent.` },
+        { weight: ctx.state.lerp01(dopa, 40, 15), value: `You send something. It goes out. You watch the delivered receipt appear and feel nothing particular about it. But it's sent.` },
       ]);
     },
     earnest: (name) => {
-      const ser = State.get('serotonin');
-      return Timeline.weightedPick([
+      const ser = ctx.state.get('serotonin');
+      return ctx.timeline.weightedPick([
         { weight: 1, value: `You open ${name}'s thread. You write something — not everything, just enough. You send it.` },
         { weight: 1, value: `You type. Delete half of it. What you send is shorter but truer for it.` },
         { weight: 1, value: `You start writing and don't stop until it's done. You read it once and send it before you revise it into nothing.` },
         // Low serotonin — the words don't want to come
-        { weight: State.lerp01(ser, 35, 15), value: `You open the thread and stare at it for a while. The things you want to say are too big. You write something small and true and send it before you change your mind.` },
+        { weight: ctx.state.lerp01(ser, 35, 15), value: `You open the thread and stare at it for a while. The things you want to say are too big. You write something small and true and send it before you change your mind.` },
       ]);
     },
   };
 
   /** @type {Record<string, (name: string) => string>} */
   const friendInitiateMessages = {
-    sends_things: (name) => Timeline.weightedPick([
+    sends_things: (name) => ctx.timeline.weightedPick([
       { weight: 1, value: `${name} responds immediately. She had something saved, ready. The thread is alive now.` },
       { weight: 1, value: `A reaction from ${name}, then a follow-up. She's been keeping things to send you.` },
       { weight: 1, value: `${name} sends something back — a picture, a voice note. The exchange has started.` },
     ]),
-    checks_in: (name) => Timeline.weightedPick([
+    checks_in: (name) => ctx.timeline.weightedPick([
       { weight: 1, value: `${name}: "Hey! So good to hear from you." You can feel the genuineness of it.` },
       { weight: 1, value: `A quick reply from ${name}. "I was just thinking about you." Probably true.` },
       { weight: 1, value: `${name} responds fast. "Hi! How are you?" Like she'd been waiting for an opening.` },
     ]),
-    dry_humor: (name) => Timeline.weightedPick([
+    dry_humor: (name) => ctx.timeline.weightedPick([
       { weight: 1, value: `${name} sends something back immediately. Two words. The whole exchange is symmetrical.` },
       { weight: 1, value: `He responds. Something brief and dry. He understood.` },
       { weight: 1, value: `"lmao" from ${name}, and then something else. He was waiting for you to say something first.` },
     ]),
-    earnest: (name) => Timeline.weightedPick([
+    earnest: (name) => ctx.timeline.weightedPick([
       { weight: 1, value: `A longer reply from ${name}. She's glad you reached out — she says so plainly, which is her way.` },
       { weight: 1, value: `${name} responds warmly. She asks a follow-up question. Gentle, not demanding.` },
       { weight: 1, value: `${name}: "I've been thinking about you." And then more. She had things to say.` },
@@ -263,39 +254,39 @@ export function createContent(ctx) {
   // tables are keyed by flavor and only receive name. So we read both slots and
   // match by name — imperfect but correct since names are unique per character.
   function coworkerSlotByName(name) {
-    const c1 = Character.get('coworker1');
+    const c1 = ctx.character.get('coworker1');
     if (c1 && c1.name === name) return 'coworker1';
     return 'coworker2';
   }
 
   const coworkerChatter = {
     warm_quiet: (name) => {
-      const ser = State.get('serotonin');
+      const ser = ctx.state.get('serotonin');
       const slot = coworkerSlotByName(name);
-      const irr = State.sentimentIntensity(slot, 'irritation');
-      return Timeline.weightedPick([
+      const irr = ctx.state.sentimentIntensity(slot, 'irritation');
+      return ctx.timeline.weightedPick([
         { weight: 1, value: `"Long day, huh?" ${name}, not really expecting an answer. Never does.` },
         { weight: 1, value: `"You want coffee?" ${name}, already walking to the machine, asking over a shoulder.` },
         { weight: 1, value: `${name} glances over and half-smiles. Doesn't say anything. Doesn't need to.` },
         { weight: 1, value: `${name} sets a cup of water near you without a word. Small.` },
         // Higher serotonin — the small gesture lands
-        { weight: State.lerp01(ser, 45, 65), value: `${name} looks over. Half-smile. Something about it — the lack of expectation, the ease — actually reaches you. A small warm thing that doesn't ask anything back.` },
+        { weight: ctx.state.lerp01(ser, 45, 65), value: `${name} looks over. Half-smile. Something about it — the lack of expectation, the ease — actually reaches you. A small warm thing that doesn't ask anything back.` },
         // Accumulated irritation — even quiet warmth grates
         { weight: irr * 1.5, value: `${name} glances over. The half-smile. The quiet gesture. It shouldn't bother you — it's kind, you know it's kind — but something about the ease of it lands wrong today.` },
       ]);
     },
     mundane_talker: (name) => {
-      const ne = State.get('norepinephrine');
+      const ne = ctx.state.get('norepinephrine');
       const slot = coworkerSlotByName(name);
-      const irr = State.sentimentIntensity(slot, 'irritation');
-      const wrm = State.sentimentIntensity(slot, 'warmth');
-      return Timeline.weightedPick([
+      const irr = ctx.state.sentimentIntensity(slot, 'irritation');
+      const wrm = ctx.state.sentimentIntensity(slot, 'warmth');
+      return ctx.timeline.weightedPick([
         { weight: 1, value: `${name} mentions something about the weather. You say something back. The ritual of it.` },
         { weight: 1, value: `${name} is talking about a show from last night. You nod in the right places.` },
         { weight: 1, value: `${name} sighs loudly at the screen. Does this about once an hour.` },
         { weight: 1, value: `${name} says something about traffic this morning. You make a sound of agreement.` },
         // High NE — the chatter grates
-        { weight: State.lerp01(ne, 55, 75), value: `${name} is talking. About what, you've lost track — the words arrive one at a time, each one landing on the last nerve you have. You nod. You can't stop nodding.` },
+        { weight: ctx.state.lerp01(ne, 55, 75), value: `${name} is talking. About what, you've lost track — the words arrive one at a time, each one landing on the last nerve you have. You nod. You can't stop nodding.` },
         // Accumulated irritation — the voice itself is the problem
         { weight: irr * 1.5, value: `${name} starts talking and you feel your jaw tighten before the first sentence lands. The voice. The cadence. You've heard it so many times that the sound itself carries weight.` },
         // Accumulated warmth — the ritual has ease
@@ -303,16 +294,16 @@ export function createContent(ctx) {
       ]);
     },
     stressed_out: (name) => {
-      const gaba = State.get('gaba');
+      const gaba = ctx.state.get('gaba');
       const slot = coworkerSlotByName(name);
-      const irr = State.sentimentIntensity(slot, 'irritation');
-      return Timeline.weightedPick([
+      const irr = ctx.state.sentimentIntensity(slot, 'irritation');
+      return ctx.timeline.weightedPick([
         { weight: 1, value: `${name} mutters something under their breath. Screen-related, probably.` },
         { weight: 1, value: `${name} is on the phone again, voice tighter than it needs to be.` },
         { weight: 1, value: `"Can you believe this?" ${name}, to no one in particular. The screen is the problem today.` },
         { weight: 1, value: `${name} exhales through teeth. Something happened. Something always happens.` },
         // Low GABA — their stress is contagious
-        { weight: State.lerp01(gaba, 40, 20), value: `${name} is tense — you can feel it from here. The tight voice, the sharp movements. Your own shoulders climb in response. Other people's stress is a frequency and you're tuned to it.` },
+        { weight: ctx.state.lerp01(gaba, 40, 20), value: `${name} is tense — you can feel it from here. The tight voice, the sharp movements. Your own shoulders climb in response. Other people's stress is a frequency and you're tuned to it.` },
         // Accumulated irritation — their stress is a personal offense now
         { weight: irr * 1.5, value: `${name} is stressed again. Of course ${name} is stressed. ${name} is always stressed, and somehow it always becomes your problem — the sighing, the muttering, the tight little sounds that land in your space like they own it.` },
       ]);
@@ -322,30 +313,30 @@ export function createContent(ctx) {
   /** @type {Record<string, (name: string) => string | undefined>} */
   const coworkerInteraction = {
     warm_quiet: (name) => {
-      const ser = State.get('serotonin');
+      const ser = ctx.state.get('serotonin');
       const slot = coworkerSlotByName(name);
-      const wrm = State.sentimentIntensity(slot, 'warmth');
-      return Timeline.weightedPick([
+      const wrm = ctx.state.sentimentIntensity(slot, 'warmth');
+      return ctx.timeline.weightedPick([
         { weight: 1, value: `"Hey." ${name} looks up. "Hey." That's it. That's the whole exchange. But it happened.` },
         { weight: 1, value: `${name}'s talking about a restaurant from the weekend. You ask which one. An almost-smile while describing it.` },
         { weight: 1, value: `You say something to ${name}. Something small. The response is warm and brief. Enough.` },
         // Higher serotonin — the exchange has warmth
-        { weight: State.lerp01(ser, 45, 65), value: `You and ${name} exchange a few words. Nothing important. But the rhythm of it — the easy back and forth, the pauses that aren't awkward — is like a small door opening.` },
+        { weight: ctx.state.lerp01(ser, 45, 65), value: `You and ${name} exchange a few words. Nothing important. But the rhythm of it — the easy back and forth, the pauses that aren't awkward — is like a small door opening.` },
         // Accumulated warmth — there's history in the ease
         { weight: wrm * 1.5, value: `You and ${name} talk for a minute. The ease of it — knowing what they'll say, knowing they won't ask too much — has the texture of something built from a lot of small moments. Recognition, not performance.` },
       ]);
     },
     mundane_talker: (name) => {
-      const aden = State.get('adenosine');
+      const aden = ctx.state.get('adenosine');
       const slot = coworkerSlotByName(name);
-      const wrm = State.sentimentIntensity(slot, 'warmth');
-      const irr = State.sentimentIntensity(slot, 'irritation');
-      return Timeline.weightedPick([
+      const wrm = ctx.state.sentimentIntensity(slot, 'warmth');
+      const irr = ctx.state.sentimentIntensity(slot, 'irritation');
+      return ctx.timeline.weightedPick([
         { weight: 1, value: `You ask ${name} about the coffee. Same as yesterday. You nod. It's small. It's something.` },
         { weight: 1, value: `${name} tells you about a sale somewhere. You listen. It's easier than not listening.` },
         { weight: 1, value: `You mention the weather to ${name}. The conversation goes exactly where you'd expect. It's fine.` },
         // High adenosine (unblocked by caffeine) — you drift through the interaction
-        { weight: State.lerp01(aden, 50, 70) * State.adenosineBlock(), value: `${name} is saying something. You catch every third word — enough to nod, enough to make the right face. The rest dissolves. You're here but the fog is doing most of the work.` },
+        { weight: ctx.state.lerp01(aden, 50, 70) * ctx.state.adenosineBlock(), value: `${name} is saying something. You catch every third word — enough to nod, enough to make the right face. The rest dissolves. You're here but the fog is doing most of the work.` },
         // Accumulated irritation — everything they say costs you
         { weight: irr * 1.5, value: `You say something to ${name}. They respond at length. You knew they would. You always know they will. Every word takes something from you that you can't name.` },
         // Accumulated warmth — the mundane has become familiar
@@ -353,15 +344,15 @@ export function createContent(ctx) {
       ]);
     },
     stressed_out: (name) => {
-      const ne = State.get('norepinephrine');
+      const ne = ctx.state.get('norepinephrine');
       const slot = coworkerSlotByName(name);
-      const irr = State.sentimentIntensity(slot, 'irritation');
-      return Timeline.weightedPick([
+      const irr = ctx.state.sentimentIntensity(slot, 'irritation');
+      return ctx.timeline.weightedPick([
         { weight: 1, value: `You ask ${name} how it's going. The answer involves a deadline. It always involves a deadline.` },
         { weight: 1, value: `${name} vents for thirty seconds about something that happened. You listen. That's what's needed.` },
         { weight: 1, value: `"Don't even ask," ${name} says, before you ask. So you don't.` },
         // High NE — the tension is catching
-        { weight: State.lerp01(ne, 50, 70), value: `${name} starts talking and the tension in their voice does something to yours. By the time they finish, your jaw has been clenched the whole time. Their stress is a frequency and you're receiving it.` },
+        { weight: ctx.state.lerp01(ne, 50, 70), value: `${name} starts talking and the tension in their voice does something to yours. By the time they finish, your jaw has been clenched the whole time. Their stress is a frequency and you're receiving it.` },
         // Accumulated irritation — you brace before they even speak
         { weight: irr * 1.5, value: `You approach ${name} and feel yourself brace. The venting will come — it always comes — and you'll absorb it because that's what you do. What you've always done. You're tired of doing it.` },
       ]);
@@ -373,13 +364,13 @@ export function createContent(ctx) {
   /** @type {Record<string, () => string>} */
   const workplaceDescriptions = {
     office: () => {
-      const mood = State.moodTone();
-      const job = State.jobTier();
-      const energy = State.energyTier();
-      const stress = State.stressTier();
-      const tasksDone = State.get('work_tasks_done');
-      const tasksExpected = State.get('work_tasks_expected');
-      const time = State.timePeriod();
+      const mood = ctx.state.moodTone();
+      const job = ctx.state.jobTier();
+      const energy = ctx.state.energyTier();
+      const stress = ctx.state.stressTier();
+      const tasksDone = ctx.state.get('work_tasks_done');
+      const tasksExpected = ctx.state.get('work_tasks_expected');
+      const time = ctx.state.timePeriod();
 
       let desc = '';
 
@@ -414,9 +405,9 @@ export function createContent(ctx) {
       }
 
       // NT deterministic modifiers
-      const ne = State.get('norepinephrine');
-      const aden = State.get('adenosine');
-      const gaba = State.get('gaba');
+      const ne = ctx.state.get('norepinephrine');
+      const aden = ctx.state.get('adenosine');
+      const gaba = ctx.state.get('gaba');
       if (ne > 65) {
         desc += ' Everything in here has an edge today. Keyboard clicks, AC hum, the chair.';
       } else if (aden > 65) {
@@ -429,13 +420,13 @@ export function createContent(ctx) {
     },
 
     retail: () => {
-      const mood = State.moodTone();
-      const job = State.jobTier();
-      const energy = State.energyTier();
-      const stress = State.stressTier();
-      const tasksDone = State.get('work_tasks_done');
-      const tasksExpected = State.get('work_tasks_expected');
-      const time = State.timePeriod();
+      const mood = ctx.state.moodTone();
+      const job = ctx.state.jobTier();
+      const energy = ctx.state.energyTier();
+      const stress = ctx.state.stressTier();
+      const tasksDone = ctx.state.get('work_tasks_done');
+      const tasksExpected = ctx.state.get('work_tasks_expected');
+      const time = ctx.state.timePeriod();
 
       let desc = '';
 
@@ -470,9 +461,9 @@ export function createContent(ctx) {
       }
 
       // NT deterministic modifiers
-      const ne = State.get('norepinephrine');
-      const aden = State.get('adenosine');
-      const gaba = State.get('gaba');
+      const ne = ctx.state.get('norepinephrine');
+      const aden = ctx.state.get('adenosine');
+      const gaba = ctx.state.get('gaba');
       if (ne > 65) {
         desc += ' Every loudspeaker announcement, every overhead ding, every aisle transaction. You can\'t filter any of it.';
       } else if (aden > 65) {
@@ -485,13 +476,13 @@ export function createContent(ctx) {
     },
 
     food_service: () => {
-      const mood = State.moodTone();
-      const job = State.jobTier();
-      const energy = State.energyTier();
-      const stress = State.stressTier();
-      const tasksDone = State.get('work_tasks_done');
-      const tasksExpected = State.get('work_tasks_expected');
-      const time = State.timePeriod();
+      const mood = ctx.state.moodTone();
+      const job = ctx.state.jobTier();
+      const energy = ctx.state.energyTier();
+      const stress = ctx.state.stressTier();
+      const tasksDone = ctx.state.get('work_tasks_done');
+      const tasksExpected = ctx.state.get('work_tasks_expected');
+      const time = ctx.state.timePeriod();
 
       let desc = '';
 
@@ -526,9 +517,9 @@ export function createContent(ctx) {
       }
 
       // NT deterministic modifiers
-      const ne = State.get('norepinephrine');
-      const aden = State.get('adenosine');
-      const gaba = State.get('gaba');
+      const ne = ctx.state.get('norepinephrine');
+      const aden = ctx.state.get('adenosine');
+      const gaba = ctx.state.get('gaba');
       if (ne > 65) {
         desc += ' The kitchen sounds are already too much — oil snap, timer beep, metal on metal.';
       } else if (aden > 65) {
@@ -546,16 +537,16 @@ export function createContent(ctx) {
   /** @type {Record<string, (canFocus: boolean, energy: string, stress: string) => string>} */
   const doWorkProse = {
     office: (canFocus, energy, stress) => {
-      const dread = State.sentimentIntensity('work', 'dread');
-      const sat = State.sentimentIntensity('work', 'satisfaction');
+      const dread = ctx.state.sentimentIntensity('work', 'dread');
+      const sat = ctx.state.sentimentIntensity('work', 'satisfaction');
       if (!canFocus && energy === 'depleted') {
-        return Timeline.weightedPick([
+        return ctx.timeline.weightedPick([
           { weight: 1, value: 'You stare at the screen. Words move but they don\'t mean anything. Time passes anyway. You\'re not sure what you accomplished.' },
           { weight: dread * 2, value: 'The task list. The same task list. You open it like opening a wound. The screen swims. Nothing sticks. Nothing has stuck for a while.' },
         ]);
       }
       if (!canFocus) {
-        return Timeline.weightedPick([
+        return ctx.timeline.weightedPick([
           { weight: 1, value: 'You try to focus. It\'s like pushing through water. Things get done, maybe, but you couldn\'t say what exactly.' },
           { weight: dread * 2, value: 'You try. The screen is right there. The work is right there. But there\'s something between you and it now — a heaviness that wasn\'t always this heavy.' },
         ]);
@@ -566,23 +557,23 @@ export function createContent(ctx) {
       if (energy === 'tired') {
         return 'You work. Slowly, but it happens. One thing, then the next. The clock moves.';
       }
-      return Timeline.weightedPick([
+      return ctx.timeline.weightedPick([
         { weight: 1, value: 'You settle into it. The work is the work — it\'s not interesting, but your hands know what to do. Something gets finished.' },
         { weight: sat * 2, value: 'You settle into it and the work cooperates. There\'s a rhythm here — not exciting, but competent. Something gets done, and you know it got done right.' },
       ]);
     },
 
     retail: (canFocus, energy, stress) => {
-      const dread = State.sentimentIntensity('work', 'dread');
-      const sat = State.sentimentIntensity('work', 'satisfaction');
+      const dread = ctx.state.sentimentIntensity('work', 'dread');
+      const sat = ctx.state.sentimentIntensity('work', 'satisfaction');
       if (!canFocus && energy === 'depleted') {
-        return Timeline.weightedPick([
+        return ctx.timeline.weightedPick([
           { weight: 1, value: 'You stand at the register. Scan, bag, repeat. Your body does it. Your mind is somewhere behind glass.' },
           { weight: dread * 2, value: 'Scan. Bag. The beep of the register is a sound you hear in your sleep now. Your body does the job. The rest of you left a while ago.' },
         ]);
       }
       if (!canFocus) {
-        return Timeline.weightedPick([
+        return ctx.timeline.weightedPick([
           { weight: 1, value: 'Restock, face the shelves, help someone find something. The motions happen. Whether you\'re in them is another question.' },
           { weight: dread * 2, value: 'Shelves need facing. Customers need helping. You do it because the alternative is standing still, and standing still here is worse.' },
         ]);
@@ -593,23 +584,23 @@ export function createContent(ctx) {
       if (energy === 'tired') {
         return 'Shelves. Register. Customer. Shelves again. Your feet have their own opinion about all of this.';
       }
-      return Timeline.weightedPick([
+      return ctx.timeline.weightedPick([
         { weight: 1, value: 'You work the floor. Straighten things, ring people up, answer the same three questions. It fills the time.' },
         { weight: sat * 2, value: 'You work the floor. Someone can\'t find what they need and you know exactly where it is. Small competence. It\'s something.' },
       ]);
     },
 
     food_service: (canFocus, energy, stress) => {
-      const dread = State.sentimentIntensity('work', 'dread');
-      const sat = State.sentimentIntensity('work', 'satisfaction');
+      const dread = ctx.state.sentimentIntensity('work', 'dread');
+      const sat = ctx.state.sentimentIntensity('work', 'satisfaction');
       if (!canFocus && energy === 'depleted') {
-        return Timeline.weightedPick([
+        return ctx.timeline.weightedPick([
           { weight: 1, value: 'The ticket says what to do. Your hands do it. There\'s a gap between you and the work that\'s getting wider.' },
           { weight: dread * 2, value: 'Ticket after ticket. The kitchen is too hot and too loud and the gap between you and the work is a chasm now. Your hands keep going. They don\'t need you for this.' },
         ]);
       }
       if (!canFocus) {
-        return Timeline.weightedPick([
+        return ctx.timeline.weightedPick([
           { weight: 1, value: 'Orders come in. You make them. The fryer beeps and you pull the basket. It\'s not focus, it\'s muscle memory.' },
           { weight: dread * 2, value: 'More orders. The fryer beeps. You pull the basket. Every shift is the same shift and your body knows it before you walk in the door.' },
         ]);
@@ -620,7 +611,7 @@ export function createContent(ctx) {
       if (energy === 'tired') {
         return 'You work the line. Plate, garnish, slide. Your back has a suggestion about when to stop. You ignore it.';
       }
-      return Timeline.weightedPick([
+      return ctx.timeline.weightedPick([
         { weight: 1, value: 'The rhythm of it. Ticket comes, you make it, it goes out. When it\'s flowing like this, the time actually moves.' },
         { weight: sat * 2, value: 'The rhythm catches and holds. Ticket, prep, plate — your hands know the sequence and the sequence knows your hands. When it flows like this, you almost don\'t mind being here.' },
       ]);
@@ -667,29 +658,29 @@ export function createContent(ctx) {
   /** @type {Record<string, () => string | undefined>} */
   const workTaskEvent = {
     office: () => {
-      State.adjustStress(3);
+      ctx.state.adjustStress(3);
       return 'An email. Another thing that needs doing. It goes on the list, which is the same as all the other lists.';
     },
     retail: () => {
-      State.adjustStress(3);
-      const ne = State.get('norepinephrine');
-      return Timeline.weightedPick([
+      ctx.state.adjustStress(3);
+      const ne = ctx.state.get('norepinephrine');
+      return ctx.timeline.weightedPick([
         { weight: 1, value: 'The walkie crackles. Someone needs help in aisle six.' },
         { weight: 1, value: 'A customer is waiting at the counter. Has been for a while, apparently.' },
         { weight: 1, value: 'A delivery showed up. Boxes in the back that need to be somewhere else.' },
         // High NE — the demand cuts sharper
-        { weight: State.lerp01(ne, 55, 75), value: 'The walkie crackles and the sound goes through you. Another voice, another task, another thing that needs you now. Your jaw tightens before you can stop it.' },
+        { weight: ctx.state.lerp01(ne, 55, 75), value: 'The walkie crackles and the sound goes through you. Another voice, another task, another thing that needs you now. Your jaw tightens before you can stop it.' },
       ]);
     },
     food_service: () => {
-      State.adjustStress(3);
-      const ne = State.get('norepinephrine');
-      return Timeline.weightedPick([
+      ctx.state.adjustStress(3);
+      const ne = ctx.state.get('norepinephrine');
+      return ctx.timeline.weightedPick([
         { weight: 1, value: 'The ticket printer rattles. Another order. The paper curls off the end.' },
         { weight: 1, value: 'Someone calls out an order correction. You adjust. Again.' },
         { weight: 1, value: 'The timer beeps. Something needs to come out of the fryer now.' },
         // High NE — sounds compound
-        { weight: State.lerp01(ne, 55, 75), value: 'The ticket printer, the timer, someone shouting behind you — all at once, all urgent, all aimed at you. The kitchen is a machine and you\'re a part that\'s running hot.' },
+        { weight: ctx.state.lerp01(ne, 55, 75), value: 'The ticket printer, the timer, someone shouting behind you — all at once, all urgent, all aimed at you. The kitchen is a machine and you\'re a part that\'s running hot.' },
       ]);
     },
   };
@@ -702,23 +693,23 @@ export function createContent(ctx) {
       return 'Laughter from the break room. You\'re not sure about what. It drifts and fades.';
     },
     retail: () => {
-      const aden = State.get('adenosine');
-      return Timeline.weightedPick([
+      const aden = ctx.state.get('adenosine');
+      return ctx.timeline.weightedPick([
         { weight: 1, value: 'The overhead music changes to a song you know. You wish it hadn\'t.' },
         { weight: 1, value: 'The automatic doors open and close. Open and close.' },
         { weight: 1, value: 'A child is crying somewhere in the store. The sound carries.' },
         // High adenosine (unblocked) — everything blurs together
-        { weight: State.lerp01(aden, 50, 70) * State.adenosineBlock(), value: 'The store sounds blur into a single hum — registers, music, voices, the hiss of the HVAC. You\'re standing in it. It\'s hard to pick anything apart.' },
+        { weight: ctx.state.lerp01(aden, 50, 70) * ctx.state.adenosineBlock(), value: 'The store sounds blur into a single hum — registers, music, voices, the hiss of the HVAC. You\'re standing in it. It\'s hard to pick anything apart.' },
       ]);
     },
     food_service: () => {
-      const aden = State.get('adenosine');
-      return Timeline.weightedPick([
+      const aden = ctx.state.get('adenosine');
+      return ctx.timeline.weightedPick([
         { weight: 1, value: 'The exhaust fan changes pitch for a second, then settles.' },
         { weight: 1, value: 'Someone drops a pan in the back. The clatter hangs in the air.' },
         { weight: 1, value: 'The drive-through speaker crackles with a voice you can\'t quite make out.' },
         // High adenosine (unblocked) — the kitchen noise is a wall
-        { weight: State.lerp01(aden, 50, 70) * State.adenosineBlock(), value: 'The kitchen noise is a wall of sound and you\'re behind it. Hood fans, fryer, someone talking — it\'s all one texture. You move through it without separating the parts.' },
+        { weight: ctx.state.lerp01(aden, 50, 70) * ctx.state.adenosineBlock(), value: 'The kitchen noise is a wall of sound and you\'re behind it. Hood fans, fryer, someone talking — it\'s all one texture. You move through it without separating the parts.' },
       ]);
     },
   };
@@ -728,16 +719,16 @@ export function createContent(ctx) {
 
   const locationDescriptions = {
     apartment_bedroom: () => {
-      const energy = State.energyTier();
-      const time = State.timePeriod();
-      const mess = Mess.tier();
-      const mood = State.moodTone();
+      const energy = ctx.state.energyTier();
+      const time = ctx.state.timePeriod();
+      const mess = ctx.mess.tier();
+      const mood = ctx.state.moodTone();
 
       // NT values for continuous shading (no RNG consumed)
-      const ser = State.get('serotonin');
-      const ne = State.get('norepinephrine');
-      const gaba = State.get('gaba');
-      const aden = State.get('adenosine');
+      const ser = ctx.state.get('serotonin');
+      const ne = ctx.state.get('norepinephrine');
+      const gaba = ctx.state.get('gaba');
+      const aden = ctx.state.get('adenosine');
 
       let desc = '';
 
@@ -804,7 +795,7 @@ export function createContent(ctx) {
       }
 
       // Migraine — overrides mood tone with physical reality (deterministic, no RNG)
-      const migraineTier = State.migraineTier();
+      const migraineTier = ctx.state.migraineTier();
       if (migraineTier === 'severe') {
         desc = 'The room is too bright. Everything is. Light from the window is a problem. Sound from outside is a problem. The headache has its own gravity.';
       } else if (migraineTier === 'active') {
@@ -814,7 +805,7 @@ export function createContent(ctx) {
       }
 
       // Illness — physical reality layered over mood (deterministic, no RNG)
-      const illTier = State.illnessTier();
+      const illTier = ctx.state.illnessTier();
       if (illTier === 'very_sick') {
         desc = 'The bed is the whole world right now. Moving anywhere feels like a decision that requires more from you than you have.';
       } else if (illTier === 'sick') {
@@ -824,7 +815,7 @@ export function createContent(ctx) {
       }
 
       // Dental — background ache present on wake or when flaring (deterministic, no RNG)
-      const dentalT = State.dentalTier();
+      const dentalT = ctx.state.dentalTier();
       if (dentalT === 'flare') {
         desc += ' The tooth is going. It does this sometimes — starts up and just keeps going.';
       } else if (dentalT === 'ache') {
@@ -832,7 +823,7 @@ export function createContent(ctx) {
       }
 
       // Floor clothes — from Clothing module
-      const floorClothes = Clothing.floorDescription('bedroom');
+      const floorClothes = ctx.clothing.floorDescription('bedroom');
       if (floorClothes) {
         desc += ' ' + floorClothes;
       }
@@ -845,7 +836,7 @@ export function createContent(ctx) {
       }
 
       // Bed state — from Linens
-      const bed = Linens.bedState();
+      const bed = ctx.linens.bedState();
       if (bed === 'messy') {
         desc += ' The bed is a wreck — sheets pulled loose, pillow somewhere it shouldn\'t be.';
       } else if (bed === 'made') {
@@ -854,23 +845,23 @@ export function createContent(ctx) {
       // 'unmade' is the default, already implied — no additional sentence
 
       // Alarm detail — perceived, not exact (location description, not a direct check)
-      if (State.get('alarm_set') && !State.get('alarm_went_off')
+      if (ctx.state.get('alarm_set') && !ctx.state.get('alarm_went_off')
           && (time === 'early_morning' || time === 'deep_night' || time === 'morning')) {
-        const tf = State.timeFidelity();
+        const tf = ctx.state.timeFidelity();
         if (tf === 'exact' || tf === 'rounded') {
-          desc += ' The alarm clock on the nightstand shows ' + State.perceivedTimeString() + '.';
+          desc += ' The alarm clock on the nightstand shows ' + ctx.state.perceivedTimeString() + '.';
         } else if (tf === 'vague') {
           desc += ' The alarm clock is set. The number on it hasn\'t registered yet.';
         }
         // sensory: the character isn't reading details — omit
       }
 
-      if (!State.get('dressed') && time !== 'deep_night' && time !== 'night') {
-        desc += ' You\'re still in ' + Character.get('sleepwear') + '.';
+      if (!ctx.state.get('dressed') && time !== 'deep_night' && time !== 'night') {
+        desc += ' You\'re still in ' + ctx.character.get('sleepwear') + '.';
       }
 
       // Deterministic NT modifiers — no RNG consumed, appended as undertones
-      if (aden > 65 && State.adenosineBlock() > 0.4) {
+      if (aden > 65 && ctx.state.adenosineBlock() > 0.4) {
         desc += ' The edges of things are soft. Not blurry — just not quite sharp.';
       }
       if (ne > 60 && gaba < 35) {
@@ -881,11 +872,11 @@ export function createContent(ctx) {
     },
 
     apartment_kitchen: () => {
-      const hunger = State.hungerTier();
-      const fridge = State.fridgeTier();
-      const mess = Mess.tier();
-      const mood = State.moodTone();
-      const time = State.timePeriod();
+      const hunger = ctx.state.hungerTier();
+      const fridge = ctx.state.fridgeTier();
+      const mess = ctx.mess.tier();
+      const mood = ctx.state.moodTone();
+      const time = ctx.state.timePeriod();
 
       let desc = '';
 
@@ -898,7 +889,7 @@ export function createContent(ctx) {
       }
 
       // Fridge + pantry
-      const pantry = State.pantryTier();
+      const pantry = ctx.state.pantryTier();
       if (fridge === 'empty') {
         if (hunger === 'starving' || hunger === 'very_hungry') {
           desc += pantry !== 'empty'
@@ -925,7 +916,7 @@ export function createContent(ctx) {
       }
 
       // Dishes — sink state from object system
-      desc += ' ' + Dishes.sinkDescription();
+      desc += ' ' + ctx.dishes.sinkDescription();
 
       // Counter clutter — mess tier from object systems (general disorder beyond dishes)
       if (mess === 'chaotic' || mess === 'messy') {
@@ -934,11 +925,11 @@ export function createContent(ctx) {
 
       // Microwave clock — perceived, not exact (location description, not a direct check)
       {
-        const tf = State.timeFidelity();
+        const tf = ctx.state.timeFidelity();
         if (tf === 'exact' || tf === 'rounded') {
-          desc += ' The microwave clock reads ' + State.perceivedTimeString() + '.';
+          desc += ' The microwave clock reads ' + ctx.state.perceivedTimeString() + '.';
         } else if (tf === 'vague') {
-          const v = State.vagueTimeString();
+          const v = ctx.state.vagueTimeString();
           desc += ' The microwave clock. ' + v.charAt(0).toUpperCase() + v.slice(1) + '.';
         } else {
           // sensory — character is barely registering the clock face
@@ -947,16 +938,16 @@ export function createContent(ctx) {
       }
 
       // NT deterministic modifiers (no RNG — location descriptions called from UI.render)
-      const aden = State.get('adenosine');
-      const ne = State.get('norepinephrine');
-      if (aden > 65 && State.adenosineBlock() > 0.4) {
+      const aden = ctx.state.get('adenosine');
+      const ne = ctx.state.get('norepinephrine');
+      if (aden > 65 && ctx.state.adenosineBlock() > 0.4) {
         desc += ' The light in here is doing more than its share.';
       } else if (ne > 65 && (time === 'morning' || time === 'early_morning')) {
         desc += ' Everything in here feels very present this early.';
       }
 
       // Illness modifier (deterministic, no RNG)
-      const illTierK = State.illnessTier();
+      const illTierK = ctx.state.illnessTier();
       if (illTierK === 'very_sick') {
         desc += ' Getting here took something out of you.';
       } else if (illTierK === 'sick') {
@@ -977,10 +968,10 @@ export function createContent(ctx) {
     },
 
     apartment_bathroom: () => {
-      const energy = State.energyTier();
-      const mood = State.moodTone();
-      const showered = State.get('showered');
-      const mess = Mess.tier();
+      const energy = ctx.state.energyTier();
+      const mood = ctx.state.moodTone();
+      const showered = ctx.state.get('showered');
+      const mess = ctx.mess.tier();
 
       let desc = 'The bathroom. Mirror, sink, shower.';
 
@@ -1001,7 +992,7 @@ export function createContent(ctx) {
       }
 
       // Towel — from Linens
-      const towel = Linens.towelState();
+      const towel = ctx.linens.towelState();
       if (towel === 'on_floor') {
         desc += ' The towel\'s on the floor. Been there a while.';
       } else if (towel === 'damp_hanging') {
@@ -1009,15 +1000,15 @@ export function createContent(ctx) {
       }
 
       // Clothes on bathroom floor — from Clothing
-      const bathClothes = Clothing.floorDescription('bathroom');
+      const bathClothes = ctx.clothing.floorDescription('bathroom');
       if (bathClothes) {
         desc += ' ' + bathClothes;
       }
 
       // NT deterministic modifiers
-      const aden = State.get('adenosine');
-      const ne = State.get('norepinephrine');
-      if (aden > 70 && State.adenosineBlock() > 0.4) {
+      const aden = ctx.state.get('adenosine');
+      const ne = ctx.state.get('norepinephrine');
+      if (aden > 70 && ctx.state.adenosineBlock() > 0.4) {
         desc += ' The light in here is harsh.';
       } else if (ne > 65) {
         desc += ' The faucet drip sounds too loud.';
@@ -1027,11 +1018,11 @@ export function createContent(ctx) {
     },
 
     street: () => {
-      const weather = State.get('weather');
-      const time = State.timePeriod();
-      const energy = State.energyTier();
-      const mood = State.moodTone();
-      const temp = State.temperatureTier();
+      const weather = ctx.state.get('weather');
+      const time = ctx.state.timePeriod();
+      const energy = ctx.state.energyTier();
+      const mood = ctx.state.moodTone();
+      const temp = ctx.state.temperatureTier();
 
       let desc = '';
 
@@ -1083,12 +1074,12 @@ export function createContent(ctx) {
       desc += ' Your apartment building is behind you. The bus stop is down the block. There\'s a corner store across the way.';
 
       // NT deterministic modifiers
-      const ne = State.get('norepinephrine');
-      const aden = State.get('adenosine');
-      const gaba = State.get('gaba');
+      const ne = ctx.state.get('norepinephrine');
+      const aden = ctx.state.get('adenosine');
+      const gaba = ctx.state.get('gaba');
       if (ne > 70) {
         desc += ' Every car, every voice arrives separately. Too much input for a street.';
-      } else if (aden > 65 && State.adenosineBlock() > 0.4) {
+      } else if (aden > 65 && ctx.state.adenosineBlock() > 0.4) {
         desc += ' The street softens at the edges. You\'re moving through it but not quite in it.';
       } else if (gaba < 35) {
         desc += ' The openness doesn\'t help as much as it should.';
@@ -1098,10 +1089,10 @@ export function createContent(ctx) {
     },
 
     bus_stop: () => {
-      const time = State.timePeriod();
-      const weather = State.get('weather');
-      const energy = State.energyTier();
-      const mood = State.moodTone();
+      const time = ctx.state.timePeriod();
+      const weather = ctx.state.get('weather');
+      const energy = ctx.state.energyTier();
+      const mood = ctx.state.moodTone();
 
       let desc = 'The bus stop. A bench, a sign, a schedule nobody trusts.';
 
@@ -1119,7 +1110,7 @@ export function createContent(ctx) {
         desc += ' Snow on the bench. You brush a corner clear.';
       }
 
-      const temp = State.temperatureTier();
+      const temp = ctx.state.temperatureTier();
       if (temp === 'bitter')   desc += ' Your feet are already numb.';
       else if (temp === 'freezing') desc += ' The cold makes standing here miserable.';
       else if (temp === 'cold')     desc += ' Cold. You pull your jacket tighter.';
@@ -1134,12 +1125,12 @@ export function createContent(ctx) {
       }
 
       // NT deterministic modifiers
-      const ne = State.get('norepinephrine');
-      const aden = State.get('adenosine');
-      const gaba = State.get('gaba');
+      const ne = ctx.state.get('norepinephrine');
+      const aden = ctx.state.get('adenosine');
+      const gaba = ctx.state.get('gaba');
       if (ne > 65) {
         desc += ' The other people waiting register louder than they should.';
-      } else if (aden > 65 && State.adenosineBlock() > 0.4) {
+      } else if (aden > 65 && ctx.state.adenosineBlock() > 0.4) {
         desc += ' The wait stretches in that thick, slow way. Time doing what it does when you\'re tired.';
       } else if (gaba < 35) {
         desc += ' Standing still is hard.';
@@ -1149,15 +1140,15 @@ export function createContent(ctx) {
     },
 
     workplace: () => {
-      const jobType = Character.get('job_type');
+      const jobType = ctx.character.get('job_type');
       const descFn = /** @type {() => string} */ (workplaceDescriptions[jobType] || workplaceDescriptions.office);
       return descFn();
     },
 
     corner_store: () => {
-      const money = State.moneyTier();
-      const hunger = State.hungerTier();
-      const mood = State.moodTone();
+      const money = ctx.state.moneyTier();
+      const hunger = ctx.state.hungerTier();
+      const mood = ctx.state.moodTone();
 
       let desc = 'The corner store. Bright inside, that chemical-clean smell.';
 
@@ -1180,11 +1171,11 @@ export function createContent(ctx) {
       }
 
       // NT deterministic modifiers
-      const ne = State.get('norepinephrine');
-      const aden = State.get('adenosine');
+      const ne = ctx.state.get('norepinephrine');
+      const aden = ctx.state.get('adenosine');
       if (ne > 65) {
         desc += ' The fluorescent hum, the fridge doors rattling — too much input for a corner store.';
-      } else if (aden > 65 && State.adenosineBlock() > 0.4) {
+      } else if (aden > 65 && ctx.state.adenosineBlock() > 0.4) {
         desc += ' The aisles smear a little. You know what you need.';
       }
 
@@ -1192,10 +1183,10 @@ export function createContent(ctx) {
     },
 
     soup_kitchen: () => {
-      const mood = State.moodTone();
-      const hunger = State.hungerTier();
-      const visits = State.get('soup_kitchen_visits');
-      const hour = State.getHour();
+      const mood = ctx.state.moodTone();
+      const hunger = ctx.state.hungerTier();
+      const visits = ctx.state.get('soup_kitchen_visits');
+      const hour = ctx.state.getHour();
 
       let desc;
       if (visits === 0) {
@@ -1223,8 +1214,8 @@ export function createContent(ctx) {
       }
 
       // NT modifiers
-      const ne = State.get('norepinephrine');
-      const gaba = State.get('gaba');
+      const ne = ctx.state.get('norepinephrine');
+      const gaba = ctx.state.get('gaba');
       if (ne > 65) {
         desc += ' The noise of the room — chairs, voices, trays — comes in sharp.';
       } else if (gaba < 40) {
@@ -1235,8 +1226,8 @@ export function createContent(ctx) {
     },
 
     food_bank: () => {
-      const mood = State.moodTone();
-      const visits = State.get('food_bank_visits');
+      const mood = ctx.state.moodTone();
+      const visits = ctx.state.get('food_bank_visits');
 
       let desc;
       if (visits === 0) {
@@ -1254,8 +1245,8 @@ export function createContent(ctx) {
       }
 
       // NT modifiers
-      const gaba = State.get('gaba');
-      const ne = State.get('norepinephrine');
+      const gaba = ctx.state.get('gaba');
+      const ne = ctx.state.get('norepinephrine');
       if (gaba < 40) {
         desc += ' Something about waiting rooms.';
       } else if (ne > 65) {
@@ -1272,14 +1263,14 @@ export function createContent(ctx) {
    *  When phone_thread_contact is set (live play with thread open), uses that slot.
    *  Falls back to guilt-based selection for replay compat when thread contact isn't set. */
   function getReplyTarget() {
-    const inbox = State.get('phone_inbox');
-    const pending = State.get('pending_replies') || [];
-    const threadContact = State.get('phone_thread_contact');
+    const inbox = ctx.state.get('phone_inbox');
+    const pending = ctx.state.get('pending_replies') || [];
+    const threadContact = ctx.state.get('phone_thread_contact');
 
     // Live play — use the active thread
     if (threadContact && ['friend1', 'friend2'].includes(threadContact)) {
       if (pending.some(r => r.slot === threadContact)) return null;
-      return { slot: threadContact, friend: Character.get(threadContact) };
+      return { slot: threadContact, friend: ctx.character.get(threadContact) };
     }
 
     // Fallback — old guilt-based logic for replay compat
@@ -1287,9 +1278,9 @@ export function createContent(ctx) {
       slot => inbox.some(m => m.source === slot) && !pending.some(r => r.slot === slot)
     );
     if (candidates.length === 0) return null;
-    if (candidates.length === 1) return { slot: candidates[0], friend: Character.get(candidates[0]) };
-    const g0 = State.sentimentIntensity(candidates[0], 'guilt');
-    const g1 = State.sentimentIntensity(candidates[1], 'guilt');
+    if (candidates.length === 1) return { slot: candidates[0], friend: ctx.character.get(candidates[0]) };
+    const g0 = ctx.state.sentimentIntensity(candidates[0], 'guilt');
+    const g1 = ctx.state.sentimentIntensity(candidates[1], 'guilt');
     let slot;
     if (g0 > g1 + 0.05) slot = candidates[0];
     else if (g1 > g0 + 0.05) slot = candidates[1];
@@ -1299,22 +1290,22 @@ export function createContent(ctx) {
         if (m.source && candidates.includes(m.source)) slot = m.source;
       }
     }
-    return { slot, friend: Character.get(slot) };
+    return { slot, friend: ctx.character.get(slot) };
   }
 
   /** Returns the friend slot + character to initiate contact with, or null if no valid target.
    *  When phone_thread_contact is set (live play with thread open), uses that slot.
    *  Falls back to guilt-based selection for replay compat when thread contact isn't set. */
   function getInitiateTarget() {
-    const pending = State.get('pending_replies') || [];
-    const inbox = State.get('phone_inbox');
-    const threadContact = State.get('phone_thread_contact');
+    const pending = ctx.state.get('pending_replies') || [];
+    const inbox = ctx.state.get('phone_inbox');
+    const threadContact = ctx.state.get('phone_thread_contact');
 
     // Live play — use the active thread
     if (threadContact && ['friend1', 'friend2'].includes(threadContact)) {
       if (pending.some(r => r.slot === threadContact)) return null;
       if (inbox.some(m => m.source === threadContact && !m.read)) return null; // has unread → use reply
-      return { slot: threadContact, friend: Character.get(threadContact) };
+      return { slot: threadContact, friend: ctx.character.get(threadContact) };
     }
 
     // Fallback — old logic for replay compat
@@ -1324,16 +1315,16 @@ export function createContent(ctx) {
       return true;
     });
     if (candidates.length === 0) return null;
-    if (candidates.length === 1) return { slot: candidates[0], friend: Character.get(candidates[0]) };
-    const g0 = State.sentimentIntensity(candidates[0], 'guilt');
-    const g1 = State.sentimentIntensity(candidates[1], 'guilt');
-    if (g0 > g1 + 0.05) return { slot: candidates[0], friend: Character.get(candidates[0]) };
-    if (g1 > g0 + 0.05) return { slot: candidates[1], friend: Character.get(candidates[1]) };
-    const fc = State.get('friend_contact');
+    if (candidates.length === 1) return { slot: candidates[0], friend: ctx.character.get(candidates[0]) };
+    const g0 = ctx.state.sentimentIntensity(candidates[0], 'guilt');
+    const g1 = ctx.state.sentimentIntensity(candidates[1], 'guilt');
+    if (g0 > g1 + 0.05) return { slot: candidates[0], friend: ctx.character.get(candidates[0]) };
+    if (g1 > g0 + 0.05) return { slot: candidates[1], friend: ctx.character.get(candidates[1]) };
+    const fc = ctx.state.get('friend_contact');
     const t0 = fc[candidates[0]] || 0;
     const t1 = fc[candidates[1]] || 0;
     const slot = t0 <= t1 ? candidates[0] : candidates[1];
-    return { slot, friend: Character.get(slot) };
+    return { slot, friend: ctx.character.get(slot) };
   }
 
   // --- Interaction price constants ---
@@ -1351,36 +1342,36 @@ export function createContent(ctx) {
       label: 'Lie down',
       location: 'apartment_bedroom',
       available: () => {
-        const energy = State.energyTier();
-        const time = State.timePeriod();
+        const energy = ctx.state.energyTier();
+        const time = ctx.state.timePeriod();
         return energy === 'depleted' || energy === 'exhausted' || energy === 'tired'
           || time === 'night' || time === 'deep_night' || time === 'evening';
       },
       execute: () => {
-        const energy = State.energyTier();
-        const stress = State.stressTier();
-        const hunger = State.hungerTier();
+        const energy = ctx.state.energyTier();
+        const stress = ctx.state.stressTier();
+        const hunger = ctx.state.hungerTier();
 
         // Pre-sleep NT values for falling-asleep prose shading
-        const preSleepAden = State.get('adenosine');
-        const preSleepGaba = State.get('gaba');
-        const preSleepNE = State.get('norepinephrine');
-        const preSleepSer = State.get('serotonin');
+        const preSleepAden = ctx.state.get('adenosine');
+        const preSleepGaba = ctx.state.get('gaba');
+        const preSleepNE = ctx.state.get('norepinephrine');
+        const preSleepSer = ctx.state.get('serotonin');
 
         // Falling-asleep delay — stress and racing thoughts keep you up
         let fallAsleepDelay;
         if (energy === 'depleted') {
-          fallAsleepDelay = Timeline.randomInt(2, 8);
+          fallAsleepDelay = ctx.timeline.randomInt(2, 8);
         } else if (stress === 'overwhelmed' || stress === 'strained') {
-          fallAsleepDelay = Timeline.randomInt(15, 45);
+          fallAsleepDelay = ctx.timeline.randomInt(15, 45);
         } else if (stress === 'tense') {
-          fallAsleepDelay = Timeline.randomInt(8, 25);
+          fallAsleepDelay = ctx.timeline.randomInt(8, 25);
         } else {
-          fallAsleepDelay = Timeline.randomInt(3, 15);
+          fallAsleepDelay = ctx.timeline.randomInt(3, 15);
         }
 
         // Melatonin modifier — high melatonin eases onset, low delays it
-        const melatoninAtOnset = State.get('melatonin');
+        const melatoninAtOnset = ctx.state.get('melatonin');
         if (melatoninAtOnset > 60) {
           fallAsleepDelay = Math.max(1, Math.round(fallAsleepDelay * 0.7));
         } else if (melatoninAtOnset < 20) {
@@ -1390,31 +1381,31 @@ export function createContent(ctx) {
         // Natural sleep duration
         let sleepMinutes;
         if (energy === 'depleted') {
-          sleepMinutes = Timeline.randomInt(300, 540);
+          sleepMinutes = ctx.timeline.randomInt(300, 540);
         } else if (energy === 'exhausted') {
-          sleepMinutes = Timeline.randomInt(240, 480);
+          sleepMinutes = ctx.timeline.randomInt(240, 480);
         } else {
-          sleepMinutes = Timeline.randomInt(120, 360);
+          sleepMinutes = ctx.timeline.randomInt(120, 360);
         }
 
         // Alarm interruption — check if alarm fires during sleep
         let wokeByAlarm = false;
-        if (State.get('alarm_set') && !State.get('alarm_went_off')) {
-          const alarmTime = State.get('alarm_time');
-          const tod = State.timeOfDay();
+        if (ctx.state.get('alarm_set') && !ctx.state.get('alarm_went_off')) {
+          const alarmTime = ctx.state.get('alarm_time');
+          const tod = ctx.state.timeOfDay();
           // Time from now until alarm (wrapping across midnight)
           const minutesToAlarm = ((alarmTime - tod) % 1440 + 1440) % 1440;
           if (minutesToAlarm > 0 && minutesToAlarm < fallAsleepDelay + sleepMinutes) {
             // Alarm fires during sleep — chance to sleep through if depleted
             // Approximation debt: 0.3 probability of sleeping through alarm at depleted energy chosen
-            if (energy === 'depleted' && Timeline.chance(0.3)) {
+            if (energy === 'depleted' && ctx.timeline.chance(0.3)) {
               // Sleep through the alarm
-              State.set('alarm_went_off', true);
+              ctx.state.set('alarm_went_off', true);
             } else {
               // Alarm truncates sleep
               sleepMinutes = Math.max(30, minutesToAlarm - fallAsleepDelay);
               wokeByAlarm = true;
-              State.set('alarm_went_off', true);
+              ctx.state.set('alarm_went_off', true);
             }
           }
         }
@@ -1442,8 +1433,8 @@ export function createContent(ctx) {
         // largest in noisy environments; absent/negative in already-quiet settings.
         // Previous +0.10 inflated a latency benefit into a quality multiplier.
         // Approximation debt: should condition on environmental noise tier when that exists.
-        const rainComfort = State.sentimentIntensity('rain_sound', 'comfort');
-        if (State.get('weather') === 'drizzle' && rainComfort > 0) {
+        const rainComfort = ctx.state.sentimentIntensity('rain_sound', 'comfort');
+        if (ctx.state.get('weather') === 'drizzle' && rainComfort > 0) {
           qualityMult += rainComfort * 0.04; // Messineo 2017: ~2-4pp efficiency; PMC5742584
         }
 
@@ -1456,7 +1447,7 @@ export function createContent(ctx) {
         // Circadian alignment — sleeping at the wrong time degrades quality.
         // Dijk & Czeisler 1999 forced desynchrony PSG (PMC2269279): efficiency 92.6% at optimal
         // vs 73.0% at worst phase → ratio 0.785. Daytime 10-16h is the absolute worst phase.
-        const sleepHour = Math.floor(State.timeOfDay() / 60);
+        const sleepHour = Math.floor(ctx.state.timeOfDay() / 60);
         if (sleepHour >= 10 && sleepHour <= 16) {
           qualityMult *= 0.75;  // Dijk & Czeisler 1999: worst-phase ratio ≈ 0.785; within range
         } else if (sleepHour >= 6 && sleepHour < 10) {
@@ -1471,11 +1462,11 @@ export function createContent(ctx) {
         // PMC9541543; Porkka-Heiskanen et al. 2000, PMID: see calibration doc).
 
         // Caffeine interference — caffeine at bedtime degrades sleep architecture
-        qualityMult *= State.caffeineSleepInterference();
+        qualityMult *= ctx.state.caffeineSleepInterference();
 
         // Illness — fever and immune activation degrade sleep architecture
-        if (State.get('illness_severity') > 0) {
-          const sev = State.get('illness_severity');
+        if (ctx.state.get('illness_severity') > 0) {
+          const sev = ctx.state.get('illness_severity');
           qualityMult *= Math.max(0.5, 1 - sev * 0.35); // Approximation debt: illness quality penalty coefficient 0.35 chosen
         }
 
@@ -1483,210 +1474,210 @@ export function createContent(ctx) {
         const ideal = 480;
         const deficit = ideal - sleepMinutes;
         const debtChange = deficit > 0 ? deficit : deficit * 0.33;
-        const oldDebt = State.get('sleep_debt');
-        State.set('sleep_debt', Math.max(0, Math.min(4800, oldDebt + debtChange)));
+        const oldDebt = ctx.state.get('sleep_debt');
+        ctx.state.set('sleep_debt', Math.max(0, Math.min(4800, oldDebt + debtChange)));
 
         // Debt penalty on energy recovery: chronic deficit impairs restoration
-        const currentDebt = State.get('sleep_debt');
+        const currentDebt = ctx.state.get('sleep_debt');
         const debtPenalty = 1 / (1 + currentDebt / 1200);
         // Approximation debt: divisor 5 (= 0.2 energy per minute of sleep) is chosen.
         // No derivation for the mapping between sleep duration and energy restoration.
         const energyGain = (sleepMinutes / 5) * qualityMult * debtPenalty;
 
         // Sleep cycle breakdown — determines deep sleep / REM architecture
-        const cycles = State.sleepCycleBreakdown(sleepMinutes);
+        const cycles = ctx.state.sleepCycleBreakdown(sleepMinutes);
 
         // Neurochemistry: sleep effects
         // Store sleep quality for serotonin/NE target functions
-        State.set('last_sleep_quality', qualityMult);
+        ctx.state.set('last_sleep_quality', qualityMult);
         // Adenosine: cleared by deep sleep (the clearing mechanism)
         // Approximation debt: max clearance fraction (0.9), baseline fraction (0.4), deep-sleep
         // contribution weight (0.6) all chosen. Real adenosine clearance kinetics involve the
         // glymphatic system and are not simple fractions of current level.
         // Calibration: Xie et al. 2013 (Science) on glymphatic clearance during sleep.
-        const adenosineClear = -(sleepMinutes / 480) * State.get('adenosine') * 0.9 * (0.4 + 0.6 * cycles.deepSleepFrac);
-        State.adjustNT('adenosine', adenosineClear);
+        const adenosineClear = -(sleepMinutes / 480) * ctx.state.get('adenosine') * 0.9 * (0.4 + 0.6 * cycles.deepSleepFrac);
+        ctx.state.adjustNT('adenosine', adenosineClear);
         // Serotonin: good sleep promotes synthesis, poor sleep impairs
         // Approximation debt: serotonin sleep adjustments (+3 good sleep / -2 poor sleep) and
         // thresholds (0.9 / 0.6) chosen. NE clearing coefficient -4 and remFrac threshold 0.15
         // are chosen. These are direct NT kicks outside the drift system.
-        State.adjustNT('serotonin', qualityMult >= 0.9 ? 3 : qualityMult < 0.6 ? -2 : 0);
+        ctx.state.adjustNT('serotonin', qualityMult >= 0.9 ? 3 : qualityMult < 0.6 ? -2 : 0);
         // Norepinephrine: REM sleep is the NE-free environment — more REM = better NE clearing
         const neClear = cycles.remFrac * qualityMult;
-        State.adjustNT('norepinephrine', neClear > 0.15 ? -4 * neClear : qualityMult < 0.6 ? 3 : 0);
+        ctx.state.adjustNT('norepinephrine', neClear > 0.15 ? -4 * neClear : qualityMult < 0.6 ? 3 : 0);
 
-        State.advanceTime(fallAsleepDelay + sleepMinutes);
+        ctx.state.advanceTime(fallAsleepDelay + sleepMinutes);
 
         // Phone charges overnight if sleeping at home
-        if (State.get('location') === 'apartment_bedroom') {
+        if (ctx.state.get('location') === 'apartment_bedroom') {
           const chargeHours = (fallAsleepDelay + sleepMinutes) / 60;
-          State.adjustBattery(chargeHours * 30);
+          ctx.state.adjustBattery(chargeHours * 30);
         }
 
-        State.adjustEnergy(energyGain);
+        ctx.state.adjustEnergy(energyGain);
         // Approximation debt: divisor 20 (= 0.05 stress reduction per minute of sleep) chosen.
-        State.adjustStress(-sleepMinutes / 20);
-        State.set('actions_since_rest', 0);
+        ctx.state.adjustStress(-sleepMinutes / 20);
+        ctx.state.set('actions_since_rest', 0);
 
         // Sleep emotional processing — REM quality determines processing effectiveness
         const emotionalQuality = qualityMult * (0.4 + 0.6 * cycles.remFrac);
-        State.processSleepEmotions(Character.get().sentiments, emotionalQuality, sleepMinutes);
+        ctx.state.processSleepEmotions(ctx.character.get().sentiments, emotionalQuality, sleepMinutes);
 
         // Friend absence — guilt accumulates per night of silence
-        State.processAbsenceEffects();
+        ctx.state.processAbsenceEffects();
 
         // Fridge food slowly goes bad overnight
         // Approximation debt: 15%/sleep spoilage rate chosen; real rate depends on food type, temperature, storage
-        if (State.fridgeTier() !== 'empty' && Timeline.chance(0.15)) {
-          State.set('fridge_food', Math.max(0, State.get('fridge_food') - 1));
+        if (ctx.state.fridgeTier() !== 'empty' && ctx.timeline.chance(0.15)) {
+          ctx.state.set('fridge_food', Math.max(0, ctx.state.get('fridge_food') - 1));
         }
 
         // Illness onset / progression — always 2 balanced RNG calls per sleep
-        const illnessRoll1 = Timeline.random();
-        const illnessRoll2 = Timeline.randomInt(0, 3);
-        if (State.illnessTier() === 'healthy') {
+        const illnessRoll1 = ctx.timeline.random();
+        const illnessRoll2 = ctx.timeline.randomInt(0, 3);
+        if (ctx.state.illnessTier() === 'healthy') {
           // Approximation debt: all magnitudes need calibration against real incidence data.
           // No seasonal variation, no recent-illness immunity, no job-type exposure rates.
           // Should eventually derive from: immune function state, job type (food service
           // vs remote), season/climate, recent illness history.
-          const stressRisk  = State.get('stress') > 60      ? 0.005 : 0;
-          const debtRisk    = State.get('sleep_debt') > 480 ? 0.005 : 0;
-          const workedRisk  = State.get('at_work_today')    ? 0.003 : 0;
+          const stressRisk  = ctx.state.get('stress') > 60      ? 0.005 : 0;
+          const debtRisk    = ctx.state.get('sleep_debt') > 480 ? 0.005 : 0;
+          const workedRisk  = ctx.state.get('at_work_today')    ? 0.003 : 0;
           const baseChance  = 0.007 + stressRisk + debtRisk + workedRisk;
           if (illnessRoll1 < baseChance) {
             const types = ['flu', 'cold', 'cold', 'gi']; // cold more common
-            State.set('illness_severity', 0.2);
-            State.set('illness_type', types[illnessRoll2]);
-            State.set('illness_day', 0);
+            ctx.state.set('illness_severity', 0.2);
+            ctx.state.set('illness_type', types[illnessRoll2]);
+            ctx.state.set('illness_day', 0);
           }
         } else {
           // Deterministic progression — RNG already consumed above
           // Approximation debt: illness progression rates (0.18/night unmedicated, 0.07 medicated),
           // base recovery (0.12 + quality×0.10), work recovery penalty (40%), medicine bonus (0.05)
           // all chosen. Real illness arc depends heavily on pathogen, immune status, treatment type.
-          const illDay    = State.get('illness_day');
-          const sev       = State.get('illness_severity');
-          const medicated = State.get('illness_medicated');
-          State.set('illness_day', illDay + 1);
+          const illDay    = ctx.state.get('illness_day');
+          const sev       = ctx.state.get('illness_severity');
+          const medicated = ctx.state.get('illness_medicated');
+          ctx.state.set('illness_day', illDay + 1);
           if (illDay < 2) {
             // Peak phase — severity builds, medicine slows it
             const increase = medicated ? 0.07 : 0.18;
-            State.set('illness_severity', Math.min(1.0, sev + increase));
+            ctx.state.set('illness_severity', Math.min(1.0, sev + increase));
           } else {
             // Recovery — rest helps, working delays it, medicine speeds it
             const baseRecovery  = 0.12 + qualityMult * 0.1;
-            const recoveryRate  = State.get('at_work_today') ? baseRecovery * 0.4 : baseRecovery;
+            const recoveryRate  = ctx.state.get('at_work_today') ? baseRecovery * 0.4 : baseRecovery;
             const medBonus      = medicated ? 0.05 : 0;
             const newSev        = Math.max(0, sev - recoveryRate - medBonus);
-            State.set('illness_severity', newSev);
+            ctx.state.set('illness_severity', newSev);
             if (newSev < 0.05) {
-              State.set('illness_type', null);
-              State.set('illness_day', 0);
+              ctx.state.set('illness_type', null);
+              ctx.state.set('illness_day', 0);
             }
           }
         }
 
         // Undress — destination depends on energy + mood
-        Clothing.undress(State.energyTier(), State.moodTone(), State.get('location'));
+        ctx.clothing.undress(ctx.state.energyTier(), ctx.state.moodTone(), ctx.state.get('location'));
 
         // Reset wake-period flags
-        State.wakeUp();
-        Linens.noteSlept();
+        ctx.state.wakeUp();
+        ctx.linens.noteSlept();
         // Set just_woke_alarm AFTER wakeUp() clears it — enables snooze/dismiss
         if (wokeByAlarm) {
-          State.set('just_woke_alarm', true);
+          ctx.state.set('just_woke_alarm', true);
         }
-        Habits.noteWake();
+        ctx.habits.noteWake();
 
         // Record events
         const quality = qualityMult >= 0.9 ? 'good' : qualityMult >= 0.6 ? 'restless' : 'poor';
-        Events.record('slept', { duration: sleepMinutes, wokeByAlarm, quality });
-        Events.record('woke_up', {});
+        ctx.events.record('slept', { duration: sleepMinutes, wokeByAlarm, quality });
+        ctx.events.record('woke_up', {});
 
         // Post-sleep state — how you actually are on waking
-        const postEnergy = State.energyTier();
-        const postMood = State.moodTone();
-        const wakeTime = State.timePeriod();
+        const postEnergy = ctx.state.energyTier();
+        const postMood = ctx.state.moodTone();
+        const wakeTime = ctx.state.timePeriod();
 
         // Post-sleep NT values for waking prose shading
-        const postSer = State.get('serotonin');
-        const postNE = State.get('norepinephrine');
-        const postGaba = State.get('gaba');
-        const postAden = State.get('adenosine');
+        const postSer = ctx.state.get('serotonin');
+        const postNE = ctx.state.get('norepinephrine');
+        const postGaba = ctx.state.get('gaba');
+        const postAden = ctx.state.get('adenosine');
         const sleepInertia = cycles.sleepInertia;
 
         // --- Falling asleep ---
         let asleep;
         if (wokeByAlarm) {
           if (energy === 'depleted') {
-            asleep = Timeline.weightedPick([
+            asleep = ctx.timeline.weightedPick([
               { weight: 1, value: 'You\'re gone before your head settles. The kind of sleep that takes you — no transition, no drift, just off.' },
               { weight: 1, value: 'Your body gives out. Not falling asleep so much as shutting down. One breath you\'re lying there, the next you\'re nowhere.' },
               // High adenosine — consciousness collapses
-              { weight: State.lerp01(preSleepAden, 60, 90), value: 'You don\'t fall asleep. You drop. Like someone pulled a plug — one moment the ceiling, the next nothing, not even the nothing.' },
+              { weight: ctx.state.lerp01(preSleepAden, 60, 90), value: 'You don\'t fall asleep. You drop. Like someone pulled a plug — one moment the ceiling, the next nothing, not even the nothing.' },
             ]);
           } else if (stress === 'overwhelmed' || stress === 'strained') {
-            asleep = Timeline.weightedPick([
+            asleep = ctx.timeline.weightedPick([
               { weight: 1, value: 'Sleep comes late. You lie there turning the same thoughts over, the same knots, until exhaustion wins. It\'s not rest. It\'s surrender.' },
               { weight: 1, value: 'You stare at the dark for a long time. The thoughts don\'t stop — they just blur, eventually, into something close enough to unconsciousness.' },
               { weight: 1, value: 'It takes a while. You lie still and your head won\'t stop. Eventually the gap between thoughts gets wide enough and you slip through.' },
               // Low GABA — the mind won't release
-              { weight: State.lerp01(preSleepGaba, 40, 15), value: 'Your body is exhausted but your head won\'t let go. Every time you get close to the edge, something yanks you back — a thought, a fear, your own pulse. Sleep has to fight for it.' },
+              { weight: ctx.state.lerp01(preSleepGaba, 40, 15), value: 'Your body is exhausted but your head won\'t let go. Every time you get close to the edge, something yanks you back — a thought, a fear, your own pulse. Sleep has to fight for it.' },
               // High NE — hyper-alert in the dark
-              { weight: State.lerp01(preSleepNE, 55, 80), value: 'Every sound is too loud. The building settling, the fridge, your own breathing. You lie rigid in the dark, listening to everything, and the listening is what keeps you awake.' },
+              { weight: ctx.state.lerp01(preSleepNE, 55, 80), value: 'Every sound is too loud. The building settling, the fridge, your own breathing. You lie rigid in the dark, listening to everything, and the listening is what keeps you awake.' },
             ]);
           } else {
-            asleep = Timeline.weightedPick([
+            asleep = ctx.timeline.weightedPick([
               { weight: 1, value: 'You close your eyes and the day lets go of you. Sleep comes — not instantly, but without a fight.' },
               { weight: 1, value: 'The pillow, the dark, the quiet. You drift. Somewhere between one thought and the next you stop being awake.' },
               { weight: 1, value: 'You settle in. A few minutes of the ceiling, then nothing. Actual sleep.' },
               // Higher serotonin — settling in feels warm
-              { weight: State.lerp01(preSleepSer, 50, 70), value: 'Your eyes close and there\'s a warmth to it — the sheets, the dark, your body letting go without being asked. You\'re asleep before you notice.' },
+              { weight: ctx.state.lerp01(preSleepSer, 50, 70), value: 'Your eyes close and there\'s a warmth to it — the sheets, the dark, your body letting go without being asked. You\'re asleep before you notice.' },
               // Rain lover during drizzle — the sound helps
-              { weight: State.get('weather') === 'drizzle' && rainComfort > 0 ? rainComfort * 0.8 : 0, value: 'The rain taps the window and your eyes close. The sound fills the dark — steady, patient, asking nothing. Sleep comes with the rain.' },
+              { weight: ctx.state.get('weather') === 'drizzle' && rainComfort > 0 ? rainComfort * 0.8 : 0, value: 'The rain taps the window and your eyes close. The sound fills the dark — steady, patient, asking nothing. Sleep comes with the rain.' },
             ]);
           }
         } else {
           if (energy === 'depleted' && quality === 'poor') {
-            asleep = Timeline.weightedPick([
+            asleep = ctx.timeline.weightedPick([
               { weight: 1, value: 'You lie down and something gives way. Not quite sleep. More like your body collecting a debt it\'s owed.' },
               { weight: 1, value: 'Your body folds into the mattress. Sleep takes you, but roughly — dragging you under before you\'re ready.' },
               // High NE — body won't unclench even in exhaustion
-              { weight: State.lerp01(preSleepNE, 50, 75), value: 'You collapse more than lie down. Sleep takes you but your jaw stays clenched, your shoulders stay locked. Even unconscious, something in you is bracing.' },
+              { weight: ctx.state.lerp01(preSleepNE, 50, 75), value: 'You collapse more than lie down. Sleep takes you but your jaw stays clenched, your shoulders stay locked. Even unconscious, something in you is bracing.' },
             ]);
           } else if (energy === 'depleted') {
-            asleep = Timeline.weightedPick([
+            asleep = ctx.timeline.weightedPick([
               { weight: 1, value: 'You\'re asleep before you finish lying down. Gone. The kind of unconsciousness that doesn\'t feel like rest because you weren\'t awake enough to notice the transition.' },
               { weight: 1, value: 'Your body doesn\'t ask. It takes. You\'re horizontal and then you\'re nowhere, instantly, like a switch thrown.' },
               // Very high adenosine — past crash, into oblivion
-              { weight: State.lerp01(preSleepAden, 70, 95), value: 'You don\'t remember lying down. Between standing and unconscious there was nothing — no transition, no last thought, just the world switching off.' },
+              { weight: ctx.state.lerp01(preSleepAden, 70, 95), value: 'You don\'t remember lying down. Between standing and unconscious there was nothing — no transition, no last thought, just the world switching off.' },
             ]);
           } else if (quality === 'poor') {
-            asleep = Timeline.weightedPick([
+            asleep = ctx.timeline.weightedPick([
               { weight: 1, value: 'Sleep comes in pieces. You\'re awake, then you\'re not, then you are again and the ceiling is the same.' },
               { weight: 1, value: 'You drift, surface, drift again. Every time you almost get there, something pulls you back — a thought, a sound, your own body shifting.' },
               { weight: 1, value: 'Not really sleeping. More like visiting unconsciousness in short trips and coming back each time with less to show for it.' },
               // Low GABA — anxiety keeps breaking through
-              { weight: State.lerp01(preSleepGaba, 40, 15), value: 'You sink, then your chest tightens and you\'re back. Sink again. Tighten. Back. Your body wants sleep but something underneath keeps tripping the wire.' },
+              { weight: ctx.state.lerp01(preSleepGaba, 40, 15), value: 'You sink, then your chest tightens and you\'re back. Sink again. Tighten. Back. Your body wants sleep but something underneath keeps tripping the wire.' },
               // High NE — startling awake
-              { weight: State.lerp01(preSleepNE, 50, 75), value: 'You jolt awake. You were asleep — you think — but now you\'re staring at the ceiling with your heart going. Nothing happened. You lie there until it slows, then try again.' },
+              { weight: ctx.state.lerp01(preSleepNE, 50, 75), value: 'You jolt awake. You were asleep — you think — but now you\'re staring at the ceiling with your heart going. Nothing happened. You lie there until it slows, then try again.' },
             ]);
           } else if (sleepMinutes >= 240) {
-            asleep = Timeline.weightedPick([
+            asleep = ctx.timeline.weightedPick([
               { weight: 1, value: 'You sleep. Actually sleep. The kind that takes you somewhere and brings you back changed.' },
               { weight: 1, value: 'You close your eyes and the world does the decent thing and goes away for a while.' },
               { weight: 1, value: 'Sleep comes, and it\'s the real kind. Deep, blank, generous.' },
               // Higher serotonin — sleep with warmth
-              { weight: State.lerp01(preSleepSer, 50, 70), value: 'Sleep gathers you up. No resistance, no negotiation — just warmth and dark and the easy surrender of a body that\'s been allowed to rest.' },
+              { weight: ctx.state.lerp01(preSleepSer, 50, 70), value: 'Sleep gathers you up. No resistance, no negotiation — just warmth and dark and the easy surrender of a body that\'s been allowed to rest.' },
               // Rain lover during drizzle — rain carries you under
-              { weight: State.get('weather') === 'drizzle' && rainComfort > 0 ? rainComfort : 0, value: 'Rain on the window. The sound of it — steady, close, the whole room softened. Your eyes close and the rain is the last thing you hear, tapping its patient rhythm on the glass. Sleep takes you gently.' },
+              { weight: ctx.state.get('weather') === 'drizzle' && rainComfort > 0 ? rainComfort : 0, value: 'Rain on the window. The sound of it — steady, close, the whole room softened. Your eyes close and the rain is the last thing you hear, tapping its patient rhythm on the glass. Sleep takes you gently.' },
             ]);
           } else {
-            asleep = Timeline.weightedPick([
+            asleep = ctx.timeline.weightedPick([
               { weight: 1, value: 'You close your eyes. Something between sleep and not — the body resting even if the mind doesn\'t fully let go.' },
               { weight: 1, value: 'You drift. Not deep, not long, but your body takes what it can get.' },
               // High adenosine — drift is heavier than expected
-              { weight: State.lerp01(preSleepAden, 55, 75), value: 'You meant to just close your eyes. The tiredness was deeper than you realized — you\'re under before you can reconsider.' },
+              { weight: ctx.state.lerp01(preSleepAden, 55, 75), value: 'You meant to just close your eyes. The tiredness was deeper than you realized — you\'re under before you can reconsider.' },
             ]);
           }
         }
@@ -1696,148 +1687,148 @@ export function createContent(ctx) {
         if (wokeByAlarm) {
           // Alarm waking — the specific fog of being pulled out
           if (postEnergy === 'depleted' || postEnergy === 'exhausted') {
-            waking = Timeline.weightedPick([
+            waking = ctx.timeline.weightedPick([
               { weight: 1, value: 'The alarm. It comes from far away and then it\'s right there, inside your skull. Your hand finds it somehow. The silence after is worse — now you have to be a person. Your body says no. Every part of you says no.' },
               { weight: 1, value: 'Sound. Your arm moves before you\'re awake. The alarm stops. You lie in the sudden quiet and your eyelids weigh more than anything has ever weighed. Not enough. It wasn\'t enough.' },
               { weight: 1, value: 'The alarm drags you up from somewhere deep. You kill it and lie there in the aftermath, not yet a person, not yet anything. The room is dark, or bright, or something. You can\'t make it matter yet.' },
               // High adenosine — can barely surface
-              { weight: State.lerp01(postAden, 30, 55), value: 'The alarm is somewhere. Far away and getting closer, or maybe it was always close and you\'re the one who was far. Your hand moves through something thick. Finds the phone. Silence. Your eyes won\'t open. They genuinely won\'t open.' },
+              { weight: ctx.state.lerp01(postAden, 30, 55), value: 'The alarm is somewhere. Far away and getting closer, or maybe it was always close and you\'re the one who was far. Your hand moves through something thick. Finds the phone. Silence. Your eyes won\'t open. They genuinely won\'t open.' },
               // Low serotonin — waking into dread
-              { weight: State.lerp01(postSer, 35, 15), value: 'The alarm, and before you\'re even awake, the feeling is already there — not a thought, not yet, just weight. The day waiting on the other side of your eyelids, and you already know what it\'s going to be.' },
+              { weight: ctx.state.lerp01(postSer, 35, 15), value: 'The alarm, and before you\'re even awake, the feeling is already there — not a thought, not yet, just weight. The day waiting on the other side of your eyelids, and you already know what it\'s going to be.' },
             ]);
           } else if (quality === 'poor') {
-            waking = Timeline.weightedPick([
+            waking = ctx.timeline.weightedPick([
               { weight: 1, value: 'The alarm. You were already half-awake anyway, floating in that grey zone between sleep and not. The sound just makes it official. Your eyes feel like they\'ve been open for days.' },
               { weight: 1, value: 'Sound cuts through the thin sleep you had. You turn it off. The room comes back — same room, same light, same you. Except grittier, like something\'s been rubbed raw.' },
               // High NE — edges too sharp
-              { weight: State.lerp01(postNE, 50, 70), value: 'The alarm is an assault. Not loud — it\'s always this loud — but every frequency is a needle. You slap it quiet and the silence rings. Your skin feels too thin for the morning.' },
+              { weight: ctx.state.lerp01(postNE, 50, 70), value: 'The alarm is an assault. Not loud — it\'s always this loud — but every frequency is a needle. You slap it quiet and the silence rings. Your skin feels too thin for the morning.' },
             ]);
           } else if (postEnergy === 'tired' || postEnergy === 'okay') {
-            waking = Timeline.weightedPick([
+            waking = ctx.timeline.weightedPick([
               { weight: 1, value: 'The alarm. You were actually sleeping — deeply enough that the sound takes a second to become a sound and not just part of whatever you were dreaming. You reach for the phone. The room assembles itself around you: walls, ceiling, the light saying morning.' },
               { weight: 1, value: 'The alarm goes off and you\'re not yet a person. A hand hits the phone. Silence. You lie there while the fog lifts in layers — first you know where you are, then when, then why it matters. A minute passes before any of it feels real.' },
               { weight: 1, value: 'Noise. Then not noise. Then the slow work of becoming someone who is awake. The pillow is warm. The air is not. You\'re somewhere between the two.' },
               // High adenosine residual — thicker fog
-              { weight: State.lerp01(postAden, 25, 45), value: 'The alarm. You hear it for a long time before it becomes an alarm — just sound, formless, part of something you were already in. Your hand knows what to do before you do. The silence after is cotton. You float in it, not yet here.' },
+              { weight: ctx.state.lerp01(postAden, 25, 45), value: 'The alarm. You hear it for a long time before it becomes an alarm — just sound, formless, part of something you were already in. Your hand knows what to do before you do. The silence after is cotton. You float in it, not yet here.' },
               // Sleep inertia — pulled out of deep sleep
               { weight: sleepInertia, value: 'The alarm rips you out of something. Deep, whatever it was — the sound is wrong, the room is wrong, everything is a foreign country for a few bad seconds. Your hand kills the noise and you lie there while the world slowly becomes a place you recognize.' },
             ]);
           } else {
             // rested/alert alarm wake
-            waking = Timeline.weightedPick([
+            waking = ctx.timeline.weightedPick([
               { weight: 1, value: 'The alarm and you\'re awake — actually awake, not the usual drag. Your eyes open and the room is just a room. Morning. Your body cooperates for once.' },
               { weight: 1, value: 'The alarm. But you were already surfacing, already close to the edge of waking. The sound just tips you over. You open your eyes and the day is right there, ready. So are you, more or less.' },
               // Higher serotonin — morning feels possible
-              { weight: State.lerp01(postSer, 55, 75), value: 'The alarm, and you\'re already there. Eyes open, body present, the room making sense on the first try. Something in you cooperated overnight. The morning is just morning.' },
+              { weight: ctx.state.lerp01(postSer, 55, 75), value: 'The alarm, and you\'re already there. Eyes open, body present, the room making sense on the first try. Something in you cooperated overnight. The morning is just morning.' },
             ]);
           }
         } else if (wakeTime === 'deep_night' || wakeTime === 'night') {
           // Waking in the dark — the wrong kind of awake
           if (postEnergy === 'depleted' || postEnergy === 'exhausted') {
-            waking = Timeline.weightedPick([
+            waking = ctx.timeline.weightedPick([
               { weight: 1, value: 'You surface in the dark. Not morning — not close. The room is black and quiet and your body is a thing that is awake when it shouldn\'t be. Nowhere to go with it. Nothing to do with it.' },
               { weight: 1, value: 'Dark. You\'re awake. That\'s wrong — it should be later, should be light. But here you are, eyes open in a room that gives you nothing to look at. Too tired to get up. Too awake to go back.' },
               // Low GABA — night anxiety, the 3am dread
-              { weight: State.lerp01(postGaba, 40, 15), value: 'You\'re awake and it\'s dark and the first thing that arrives is the dread. Not of anything specific — just the particular terror of being conscious at the wrong hour with a body too tired to do anything about it.' },
+              { weight: ctx.state.lerp01(postGaba, 40, 15), value: 'You\'re awake and it\'s dark and the first thing that arrives is the dread. Not of anything specific — just the particular terror of being conscious at the wrong hour with a body too tired to do anything about it.' },
             ]);
           } else {
-            waking = Timeline.weightedPick([
+            waking = ctx.timeline.weightedPick([
               { weight: 1, value: 'You come back to yourself in the dark. The room is silent except for the building being a building — pipes, settling, the hum you only notice at night. It\'s the wrong time to be awake. You know this the way you know your own name.' },
               { weight: 1, value: 'Dark. Still. You\'re awake and the world isn\'t. The silence has that particular quality — the one that means everyone else is asleep and you\'re on the wrong side of it.' },
               { weight: 1, value: 'Your eyes open to nothing. Dark room, dark window. The kind of awake that comes without a reason, just you suddenly here in the middle of the night with no idea what to do about it.' },
               // High NE — hyper-aware in the dark
-              { weight: State.lerp01(postNE, 45, 70), value: 'You\'re awake, and every sound is a fact. The pipes. A car outside. Someone\'s footsteps above you, or below. The dark is full of information you didn\'t ask for, and you can\'t stop receiving it.' },
+              { weight: ctx.state.lerp01(postNE, 45, 70), value: 'You\'re awake, and every sound is a fact. The pipes. A car outside. Someone\'s footsteps above you, or below. The dark is full of information you didn\'t ask for, and you can\'t stop receiving it.' },
             ]);
           }
         } else if (wakeTime === 'afternoon' || wakeTime === 'evening') {
           // Late waking — the disorientation of lost time
           if (postMood === 'numb' || postMood === 'heavy') {
-            waking = Timeline.weightedPick([
+            waking = ctx.timeline.weightedPick([
               { weight: 1, value: 'You open your eyes and the light is wrong. Afternoon light — low, coming in at an angle that means the day happened without you. You lie there with that. The weight of it.' },
               { weight: 1, value: 'The room is bright in the wrong way. You slept through the morning, through whatever the morning was going to be. The day is mostly over. You\'re mostly not surprised.' },
               // Low serotonin — the lost time has gravity
-              { weight: State.lerp01(postSer, 35, 15), value: 'Afternoon. The day already gone. Some part of you chose this, the long sleep, the missed hours. It doesn\'t feel like a choice. It feels like the only thing that was going to happen.' },
+              { weight: ctx.state.lerp01(postSer, 35, 15), value: 'Afternoon. The day already gone. Some part of you chose this, the long sleep, the missed hours. It doesn\'t feel like a choice. It feels like the only thing that was going to happen.' },
             ]);
           } else {
-            waking = Timeline.weightedPick([
+            waking = ctx.timeline.weightedPick([
               { weight: 1, value: 'You surface and the light says afternoon. The day is already half-gone, already somewhere you\'ll never catch. The room has that overslept feeling — stale air, warm sheets, time you didn\'t spend.' },
               { weight: 1, value: 'You come back. The light through the window is angled low and golden, which means it\'s later than it should be. Much later. The morning happened without you. It\'s gone.' },
               { weight: 1, value: 'Your eyes open and the sun is wrong — past the middle of the sky, past the part of the day when waking up feels like waking up. This feels like something else. Surfacing.' },
               // High adenosine residual — sluggish re-entry
-              { weight: State.lerp01(postAden, 25, 45), value: 'The light is wrong and so is your head. Thick, slow, like waking up underwater. Afternoon. The day has been happening without you, and getting back to it feels like swimming through something.' },
+              { weight: ctx.state.lerp01(postAden, 25, 45), value: 'The light is wrong and so is your head. Thick, slow, like waking up underwater. Afternoon. The day has been happening without you, and getting back to it feels like swimming through something.' },
             ]);
           }
         } else if (postEnergy === 'depleted' || postEnergy === 'exhausted') {
           // Still exhausted despite sleeping — not enough
-          waking = Timeline.weightedPick([
+          waking = ctx.timeline.weightedPick([
             { weight: 1, value: 'You surface. That\'s the only word for it — coming up from somewhere that wasn\'t deep enough, breaking the surface and finding the air no different. Your body is heavy. Your eyes are heavy. Everything is heavy and the room is asking you to be a person in it.' },
             { weight: 1, value: 'You wake up, and the first thing you know is that it wasn\'t enough. The sleep, the hours, whatever your body did in the dark — not enough. You\'re here, eyes open, and the distance between this and rested is a distance you can feel.' },
             { weight: 1, value: 'Morning, probably. You\'re awake, technically. Your body is a sandbag version of itself — present but dense, uncooperative. The ceiling is up there. You\'re down here. The gap between is everything.' },
             // Low serotonin — the not-enough has a color
-            { weight: State.lerp01(postSer, 35, 15), value: 'You surface and the first thing waiting is the knowledge that this is it. This is all the rest you\'re getting. Your body is heavy. Your thoughts are heavy. The room is the same room, and you\'re worse for having opened your eyes.' },
+            { weight: ctx.state.lerp01(postSer, 35, 15), value: 'You surface and the first thing waiting is the knowledge that this is it. This is all the rest you\'re getting. Your body is heavy. Your thoughts are heavy. The room is the same room, and you\'re worse for having opened your eyes.' },
             // Moderate+ sleep debt — not just last night, it's cumulative
-            { weight: State.lerp01(currentDebt, 300, 720), value: 'You wake up and it\'s not just last night. It\'s the night before, and the one before that. The tiredness has layers — each one a sleep that wasn\'t enough, stacked up, compounding. One good night won\'t fix this. You can feel that in your bones.' },
+            { weight: ctx.state.lerp01(currentDebt, 300, 720), value: 'You wake up and it\'s not just last night. It\'s the night before, and the one before that. The tiredness has layers — each one a sleep that wasn\'t enough, stacked up, compounding. One good night won\'t fix this. You can feel that in your bones.' },
             // Severe sleep debt — the body running on empty
-            { weight: State.lerp01(currentDebt, 720, 2400), value: 'You\'re awake. You think. The line between sleeping and not has worn so thin you can\'t always tell which side you\'re on. Your body has been running a tab it can\'t pay, and this morning it\'s not even pretending to try. Everything is far away.' },
+            { weight: ctx.state.lerp01(currentDebt, 720, 2400), value: 'You\'re awake. You think. The line between sleeping and not has worn so thin you can\'t always tell which side you\'re on. Your body has been running a tab it can\'t pay, and this morning it\'s not even pretending to try. Everything is far away.' },
           ]);
         } else if (quality === 'poor') {
           // Slept but poorly — the gritty surface feeling
-          waking = Timeline.weightedPick([
+          waking = ctx.timeline.weightedPick([
             { weight: 1, value: 'You wake up feeling like you didn\'t sleep. You did — you must have, because time passed — but your body didn\'t get the memo. Your eyes are gritty, your neck is wrong, everything is slightly off in a way you can\'t fix by stretching.' },
             { weight: 1, value: 'You come back. The room. The light. You. Something\'s wrong, or not wrong exactly — just not right. Sleep happened but it didn\'t take. You feel like a rough draft of a person.' },
             { weight: 1, value: 'Awake. Or some version of it. Your body did the hours but skipped the rest — you can feel it in your eyes, your joints, the dull headache that isn\'t quite a headache. The room is the same room. You\'re a worse version of who lay down in it.' },
             // High NE — sleep didn't clear the charge
-            { weight: State.lerp01(postNE, 50, 70), value: 'You wake up tight. Your jaw, your shoulders, your hands — clenched around something that wasn\'t there when you went to sleep, or was and didn\'t leave. The sleep didn\'t clear it. You can feel the charge in your teeth.' },
+            { weight: ctx.state.lerp01(postNE, 50, 70), value: 'You wake up tight. Your jaw, your shoulders, your hands — clenched around something that wasn\'t there when you went to sleep, or was and didn\'t leave. The sleep didn\'t clear it. You can feel the charge in your teeth.' },
             // Moderate sleep debt — the poor quality is catching up
-            { weight: State.lerp01(currentDebt, 300, 720), value: 'You slept, but your body isn\'t buying it. This isn\'t one bad night — it\'s a string of them, the deficit compounding, each morning a little worse than the last. The ceiling looks the same but you\'re seeing it from deeper down.' },
+            { weight: ctx.state.lerp01(currentDebt, 300, 720), value: 'You slept, but your body isn\'t buying it. This isn\'t one bad night — it\'s a string of them, the deficit compounding, each morning a little worse than the last. The ceiling looks the same but you\'re seeing it from deeper down.' },
           ]);
         } else if (postEnergy === 'rested' || postEnergy === 'alert') {
           // Actually rested — rare clarity
           if (postMood === 'clear' || postMood === 'present') {
-            waking = Timeline.weightedPick([
+            waking = ctx.timeline.weightedPick([
               { weight: 1, value: 'You open your eyes and the room is just a room. Not a problem, not a weight — just walls and light and air. Your body is yours. It works. The morning is outside the window doing morning things, and you\'re in here, and that\'s fine. Actually fine.' },
               { weight: 1, value: 'You wake up and something is different. It takes a second to place it — the absence of dread. The room is light, the bed is warm, your body cooperated. You\'re just awake. Just here. It feels rare because it is.' },
               { weight: 1, value: 'Light through the curtain. Your eyes open and your body doesn\'t argue. No fog, no weight, no negotiation with your own limbs. The room, the morning, you — all present, all accounted for. This is what it\'s supposed to feel like.' },
               // High serotonin — actually warm
-              { weight: State.lerp01(postSer, 60, 80), value: 'You wake up and the world is gentle. That\'s the word — gentle. The light, the air, the fact of being alive in a bed. Your body is easy in itself. You lie there for a moment just because you can, and the moment is good.' },
+              { weight: ctx.state.lerp01(postSer, 60, 80), value: 'You wake up and the world is gentle. That\'s the word — gentle. The light, the air, the fact of being alive in a bed. Your body is easy in itself. You lie there for a moment just because you can, and the moment is good.' },
             ]);
           } else {
-            waking = Timeline.weightedPick([
+            waking = ctx.timeline.weightedPick([
               { weight: 1, value: 'You wake up and your body is there — present, functional, not fighting you. The room comes into focus: the light, the shapes, the ordinary evidence of morning. You don\'t feel good, exactly. But you feel like yourself.' },
               { weight: 1, value: 'Your eyes open. The ceiling, the light, the quiet. Your body did the thing it was supposed to do for once — slept, recovered, came back to you more or less intact. The day is out there. You can probably meet it.' },
               // Low GABA despite rest — body rested but mind already running
-              { weight: State.lerp01(postGaba, 45, 25), value: 'Your body is rested — you can feel that, the energy is there. But your mind is already going, already making lists, already three steps into a day that hasn\'t started. You\'re functional. Just not calm.' },
+              { weight: ctx.state.lerp01(postGaba, 45, 25), value: 'Your body is rested — you can feel that, the energy is there. But your mind is already going, already making lists, already three steps into a day that hasn\'t started. You\'re functional. Just not calm.' },
             ]);
           }
         } else {
           // Tired but functional — the middle ground
           if (postMood === 'heavy' || postMood === 'numb') {
-            waking = Timeline.weightedPick([
+            waking = ctx.timeline.weightedPick([
               { weight: 1, value: 'You\'re awake. The room, the light. Your body moves when you tell it to, just slowly, just with the particular reluctance of something that would rather not. The day is there, outside the window. It doesn\'t care if you\'re ready.' },
               { weight: 1, value: 'You surface slowly. The fog doesn\'t lift so much as thin — you can see through it, but it\'s still there, clinging. The room is a room again. Your body is a body again. Neither feels like a gift.' },
               // Low serotonin — the heaviness has weight
-              { weight: State.lerp01(postSer, 35, 15), value: 'You\'re awake, and the first thing you feel is the cost of it. Being conscious takes something from you, some toll paid at the door. The room is there. The day is there. That\'s already too much.' },
+              { weight: ctx.state.lerp01(postSer, 35, 15), value: 'You\'re awake, and the first thing you feel is the cost of it. Being conscious takes something from you, some toll paid at the door. The room is there. The day is there. That\'s already too much.' },
             ]);
           } else if (wakeTime === 'early_morning' || wakeTime === 'morning') {
-            waking = Timeline.weightedPick([
+            waking = ctx.timeline.weightedPick([
               { weight: 1, value: 'You wake up. Not sharply, not gently — just the slow fade from not-here to here. The room materializes: the light through the curtain, the shapes of things, the particular silence of early morning. You\'re somewhere between fog and awake. The body moves, but it takes a minute.' },
               { weight: 1, value: 'Morning. You know this before you open your eyes — the light, the feel of it. Your body is still negotiating the transition from asleep to not. The room is there when you\'re ready for it. You\'re almost ready for it.' },
               { weight: 1, value: 'You surface into morning. The light is thin and pale — early, or early enough. Your body does an inventory without your permission: stiff, slow, but functional. The day hasn\'t started demanding things yet. Give it a minute.' },
               // High NE — sharper morning than expected
-              { weight: State.lerp01(postNE, 45, 65), value: 'You wake up and the room is immediately all there — every edge, every sound, the light too precise for how early it is. Your body is already cataloguing: the temperature, the stiffness in your back, the air. Too awake for how tired you are.' },
+              { weight: ctx.state.lerp01(postNE, 45, 65), value: 'You wake up and the room is immediately all there — every edge, every sound, the light too precise for how early it is. Your body is already cataloguing: the temperature, the stiffness in your back, the air. Too awake for how tired you are.' },
             ]);
           } else {
-            waking = Timeline.weightedPick([
+            waking = ctx.timeline.weightedPick([
               { weight: 1, value: 'You wake up. The room, the light, the fact of being conscious again. Your body comes back to you in pieces — hands first, then weight, then the specific feeling of a head that was recently asleep. You\'re here.' },
               { weight: 1, value: 'Eyes open. The room. You. The slow assembly of a person from the raw material of someone who was just unconscious. It takes a minute. Things come back — where you are, what day it is, what you\'re supposed to be doing. You\'re not sure about the last one.' },
               // High adenosine residual — foggy edges
-              { weight: State.lerp01(postAden, 25, 40), value: 'You come back slowly. The room is there but soft, like looking through gauze. Your thoughts are shapes, not words yet. It takes a while for the edges to sharpen — for the room to become a room and not just light and surfaces.' },
+              { weight: ctx.state.lerp01(postAden, 25, 40), value: 'You come back slowly. The room is there but soft, like looking through gauze. Your thoughts are shapes, not words yet. It takes a while for the edges to sharpen — for the room to become a room and not just light and surfaces.' },
             ]);
           }
         }
 
         // Slept-through-alarm awareness — alarm fired but didn't wake you
-        if (State.get('alarm_went_off') && !wokeByAlarm) {
+        if (ctx.state.get('alarm_went_off') && !wokeByAlarm) {
           waking += ' Your phone is quiet. The alarm went off, earlier. You think.';
         }
 
@@ -1849,24 +1840,24 @@ export function createContent(ctx) {
       id: 'get_dressed',
       label: 'Get dressed',
       location: 'apartment_bedroom',
-      available: () => !State.get('dressed'),
+      available: () => !ctx.state.get('dressed'),
       execute: () => {
         // Check before wear() — no wearable items means grabbing from the floor
-        const grabbingFromFloor = Clothing.wearableItems().length === 0;
-        State.set('dressed', true);
-        Clothing.wear();
-        State.advanceTime(5);
-        Events.record('got_dressed');
+        const grabbingFromFloor = ctx.clothing.wearableItems().length === 0;
+        ctx.state.set('dressed', true);
+        ctx.clothing.wear();
+        ctx.state.advanceTime(5);
+        ctx.events.record('got_dressed');
 
-        const mood = State.moodTone();
+        const mood = ctx.state.moodTone();
 
         if (mood === 'numb' || mood === 'heavy') {
-          return Character.get('outfit_low_mood');
+          return ctx.character.get('outfit_low_mood');
         }
         if (grabbingFromFloor) {
-          return Character.get('outfit_messy');
+          return ctx.character.get('outfit_messy');
         }
-        return Character.get('outfit_default');
+        return ctx.character.get('outfit_default');
       },
     },
 
@@ -1875,18 +1866,18 @@ export function createContent(ctx) {
       label: 'Set your alarm',
       location: 'apartment_bedroom',
       available: () => {
-        const time = State.timePeriod();
+        const time = ctx.state.timePeriod();
         return (time === 'evening' || time === 'night' || time === 'deep_night')
-          && State.get('has_phone') && State.get('phone_battery') > 0;
+          && ctx.state.get('has_phone') && ctx.state.get('phone_battery') > 0;
       },
       execute: () => {
         // Set alarm relative to work shift — enough time to get ready and commute
-        const shiftStart = State.get('work_shift_start');
+        const shiftStart = ctx.state.get('work_shift_start');
         const alarmTime = shiftStart - 90; // 90 min before shift
-        State.set('alarm_time', alarmTime);
-        State.set('alarm_set', true);
-        State.set('alarm_went_off', false);
-        State.advanceTime(1);
+        ctx.state.set('alarm_time', alarmTime);
+        ctx.state.set('alarm_set', true);
+        ctx.state.set('alarm_went_off', false);
+        ctx.state.advanceTime(1);
 
         const h = Math.floor(alarmTime / 60);
         const m = alarmTime % 60;
@@ -1903,13 +1894,13 @@ export function createContent(ctx) {
       label: 'Turn off your alarm',
       location: 'apartment_bedroom',
       available: () => {
-        const time = State.timePeriod();
-        return State.get('alarm_set') && !State.get('alarm_went_off')
+        const time = ctx.state.timePeriod();
+        return ctx.state.get('alarm_set') && !ctx.state.get('alarm_went_off')
           && (time === 'evening' || time === 'night' || time === 'deep_night');
       },
       execute: () => {
-        State.set('alarm_set', false);
-        State.advanceTime(1);
+        ctx.state.set('alarm_set', false);
+        ctx.state.advanceTime(1);
         return 'You turn off the alarm. Tomorrow is tomorrow\'s problem.';
       },
     },
@@ -1918,51 +1909,51 @@ export function createContent(ctx) {
       id: 'snooze_alarm',
       label: 'Snooze',
       location: 'apartment_bedroom',
-      available: () => State.get('just_woke_alarm'),
+      available: () => ctx.state.get('just_woke_alarm'),
       execute: () => {
-        const count = State.get('snooze_count');
-        State.set('snooze_count', count + 1);
-        State.advanceTime(9);
-        const energyGain = Timeline.randomInt(1, 3);
-        State.adjustEnergy(energyGain);
-        State.adjustNT('adenosine', -1);
+        const count = ctx.state.get('snooze_count');
+        ctx.state.set('snooze_count', count + 1);
+        ctx.state.advanceTime(9);
+        const energyGain = ctx.timeline.randomInt(1, 3);
+        ctx.state.adjustEnergy(energyGain);
+        ctx.state.adjustNT('adenosine', -1);
         // Phone charges a tiny bit during snooze
-        if (State.get('location') === 'apartment_bedroom') {
-          State.adjustBattery(4);
+        if (ctx.state.get('location') === 'apartment_bedroom') {
+          ctx.state.adjustBattery(4);
         }
 
-        Events.record('snoozed', { count: count + 1 });
+        ctx.events.record('snoozed', { count: count + 1 });
 
-        const mood = State.moodTone();
-        const aden = State.get('adenosine');
-        const ser = State.get('serotonin');
+        const mood = ctx.state.moodTone();
+        const aden = ctx.state.get('adenosine');
+        const ser = ctx.state.get('serotonin');
 
         if (count === 0) {
           // First snooze — pure fog
-          return Timeline.weightedPick([
+          return ctx.timeline.weightedPick([
             { weight: 1, value: 'Your hand finds the button before the rest of you wakes up. Nine minutes. The pillow takes you back. The room dissolves.' },
             { weight: 1, value: 'Snooze. The sound stops. The silence rushes in and you sink back into it, the warm dark, the not-yet. Nine minutes of borrowed time.' },
             { weight: 1, value: 'You hit snooze the way you breathe — without deciding. The alarm goes quiet. The mattress has you. Nine more minutes of not being a person.' },
             // High adenosine — barely surfaced
-            { weight: State.lerp01(aden, 40, 70), value: 'The sound. Your hand. Silence. You were never really awake — just close enough to the surface for your arm to know what to do. You\'re already gone again.' },
+            { weight: ctx.state.lerp01(aden, 40, 70), value: 'The sound. Your hand. Silence. You were never really awake — just close enough to the surface for your arm to know what to do. You\'re already gone again.' },
           ]);
         } else if (count === 1) {
           // Second snooze — negotiation
-          return Timeline.weightedPick([
+          return ctx.timeline.weightedPick([
             { weight: 1, value: 'Again. The alarm, the hand, the silence. You know you should get up. You know exactly what you should do. Nine minutes. Just nine more.' },
             { weight: 1, value: 'The alarm comes back and part of you expected it, and part of you is furious. You hit snooze. Your body makes a convincing argument for staying. You listen to it.' },
             // Low serotonin — the negotiation has weight
-            { weight: State.lerp01(ser, 40, 20), value: 'Again. And this time there\'s something behind it — not just tired, but the specific reluctance of knowing what\'s on the other side of getting up. The alarm goes quiet. You stay.' },
+            { weight: ctx.state.lerp01(ser, 40, 20), value: 'Again. And this time there\'s something behind it — not just tired, but the specific reluctance of knowing what\'s on the other side of getting up. The alarm goes quiet. You stay.' },
           ]);
         } else {
           // Third+ snooze — guilt building
-          return Timeline.weightedPick([
+          return ctx.timeline.weightedPick([
             { weight: 1, value: 'You hit snooze again and the guilt is there now, thin but present, accumulating with each press. You know. You know. Nine minutes won\'t fix anything. You press it anyway.' },
             { weight: 1, value: 'Snooze. Again. The ritual of it — sound, hand, silence, sinking. You\'re losing time you\'ll pay for later. You can feel that and you do it anyway because the alternative is now and now is too much.' },
             // High adenosine — guilt can't compete with the fog
-            { weight: State.lerp01(aden, 40, 65), value: 'You should feel bad about this. You will, later. Right now the fog is thicker than the guilt and nine minutes is nine minutes is nine minutes.' },
+            { weight: ctx.state.lerp01(aden, 40, 65), value: 'You should feel bad about this. You will, later. Right now the fog is thicker than the guilt and nine minutes is nine minutes is nine minutes.' },
             // Low serotonin — each snooze is a small defeat
-            { weight: State.lerp01(ser, 40, 20), value: 'Again. And each time it\'s less about being tired and more about the thing you can\'t name — the weight of it, the knowing that getting up means starting and starting is the part you can\'t do. Nine more minutes of not starting.' },
+            { weight: ctx.state.lerp01(ser, 40, 20), value: 'Again. And each time it\'s less about being tired and more about the thing you can\'t name — the weight of it, the knowing that getting up means starting and starting is the part you can\'t do. Nine more minutes of not starting.' },
           ]);
         }
       },
@@ -1972,20 +1963,20 @@ export function createContent(ctx) {
       id: 'dismiss_alarm',
       label: 'Get up',
       location: 'apartment_bedroom',
-      available: () => State.get('just_woke_alarm'),
+      available: () => ctx.state.get('just_woke_alarm'),
       execute: () => {
-        State.set('just_woke_alarm', false);
-        State.advanceTime(1);
+        ctx.state.set('just_woke_alarm', false);
+        ctx.state.advanceTime(1);
 
-        Events.record('dismissed_alarm', { snoozeCount: State.get('snooze_count') });
+        ctx.events.record('dismissed_alarm', { snoozeCount: ctx.state.get('snooze_count') });
 
-        const count = State.get('snooze_count');
-        const mood = State.moodTone();
-        const energy = State.energyTier();
+        const count = ctx.state.get('snooze_count');
+        const mood = ctx.state.moodTone();
+        const energy = ctx.state.energyTier();
 
         if (count === 0) {
           // Dismissed immediately — no snoozes
-          return Timeline.weightedPick([
+          return ctx.timeline.weightedPick([
             { weight: 1, value: 'You turn off the alarm and sit up. Just like that. Some mornings you can do it. This is one of them.' },
             { weight: 1, value: 'Alarm off. Feet on the floor. The air is cold and the bed is warm and you leave it anyway, the way you leave a conversation — just turning away before you can change your mind.' },
             // Good energy — body cooperates
@@ -1995,7 +1986,7 @@ export function createContent(ctx) {
           ]);
         } else if (count <= 2) {
           // A few snoozes — the typical morning
-          return Timeline.weightedPick([
+          return ctx.timeline.weightedPick([
             { weight: 1, value: 'You turn off the alarm this time. Actually turn it off. Your body protests — loudly, in the language of heavy limbs and warm sheets — but you\'re up. You\'re up.' },
             { weight: 1, value: 'Enough. You sit up before you can hit snooze again. The room tilts slightly, then settles. The morning is waiting. It\'s been waiting.' },
             // Heavy mood — getting up is the hard part
@@ -2003,7 +1994,7 @@ export function createContent(ctx) {
           ]);
         } else {
           // Many snoozes — running late, aware of it
-          return Timeline.weightedPick([
+          return ctx.timeline.weightedPick([
             { weight: 1, value: 'You finally get up and the clock tells you what you already know — you\'re late, or close to it, and every snoozed minute is a minute you don\'t have. The day started without you.' },
             { weight: 1, value: 'Up. Finally. Your body moves like it\'s doing you a personal favor. The time — you don\'t want to look at the time, but you do, and it\'s exactly as bad as you thought.' },
           ]);
@@ -2015,15 +2006,15 @@ export function createContent(ctx) {
       id: 'charge_phone',
       label: 'Plug your phone in',
       location: 'apartment_bedroom',
-      available: () => State.get('has_phone') && State.get('phone_battery') < 80 && !State.get('viewing_phone'),
+      available: () => ctx.state.get('has_phone') && ctx.state.get('phone_battery') < 80 && !ctx.state.get('viewing_phone'),
       execute: () => {
-        const minutes = Timeline.randomInt(15, 30);
+        const minutes = ctx.timeline.randomInt(15, 30);
         const chargeGain = (minutes / 60) * 30;
-        State.advanceTime(minutes);
-        State.adjustBattery(chargeGain);
+        ctx.state.advanceTime(minutes);
+        ctx.state.adjustBattery(chargeGain);
 
-        const mood = State.moodTone();
-        const battery = State.batteryTier();
+        const mood = ctx.state.moodTone();
+        const battery = ctx.state.batteryTier();
 
         if (battery === 'dead' || battery === 'critical') {
           if (mood === 'numb' || mood === 'heavy') {
@@ -2045,11 +2036,11 @@ export function createContent(ctx) {
       id: 'check_phone_bedroom',
       label: 'Check your phone',
       location: 'apartment_bedroom',
-      available: () => State.get('has_phone') && State.get('phone_battery') > 0 && !State.get('viewing_phone'),
+      available: () => ctx.state.get('has_phone') && ctx.state.get('phone_battery') > 0 && !ctx.state.get('viewing_phone'),
       execute: () => {
-        State.set('viewing_phone', true);
-        State.advanceTime(1);
-        Events.record('checked_phone');
+        ctx.state.set('viewing_phone', true);
+        ctx.state.advanceTime(1);
+        ctx.events.record('checked_phone');
         return phoneScreenDescription();
       },
     },
@@ -2060,89 +2051,89 @@ export function createContent(ctx) {
       location: 'apartment_bedroom',
       available: () => true,
       execute: () => {
-        const mood = State.moodTone();
-        const minutes = Timeline.randomInt(10, 20);
-        State.advanceTime(minutes);
+        const mood = ctx.state.moodTone();
+        const minutes = ctx.timeline.randomInt(10, 20);
+        ctx.state.advanceTime(minutes);
 
         // NT values for continuous prose and mechanical shading
-        const ser = State.get('serotonin');
-        const ne = State.get('norepinephrine');
-        const gaba = State.get('gaba');
-        const aden = State.get('adenosine');
+        const ser = ctx.state.get('serotonin');
+        const ne = ctx.state.get('norepinephrine');
+        const gaba = ctx.state.get('gaba');
+        const aden = ctx.state.get('adenosine');
 
         let text;
 
         if (mood === 'fraying') {
-          State.adjustStress(2);
-          text = Timeline.weightedPick([
+          ctx.state.adjustStress(2);
+          text = ctx.timeline.weightedPick([
             { weight: 1, value: 'You lie there. The thoughts don\'t stop. They circle — the same three things, faster, tighter. You\'re not resting. You\'re trapped horizontally.' },
             { weight: 1, value: 'The ceiling. Your jaw is clenched. You notice it, unclench, and it\'s back thirty seconds later. The bed isn\'t helping.' },
             { weight: 1, value: 'You stay in bed. The quiet makes it worse — nothing to drown out what\'s in your head. Your body is still but nothing else is.' },
             // High NE — sensory overload even horizontal
-            { weight: State.lerp01(ne, 60, 85), value: 'You lie down but the sheets are wrong. The texture. The temperature. Your skin is reading everything at twice the volume.' },
+            { weight: ctx.state.lerp01(ne, 60, 85), value: 'You lie down but the sheets are wrong. The texture. The temperature. Your skin is reading everything at twice the volume.' },
             // Low GABA — no way to settle
-            { weight: State.lerp01(gaba, 35, 15), value: 'The bed should help. Lying down should help. Nothing is helping. Your body is still but everything underneath is running.' },
+            { weight: ctx.state.lerp01(gaba, 35, 15), value: 'The bed should help. Lying down should help. Nothing is helping. Your body is still but everything underneath is running.' },
           ]);
         } else if (mood === 'numb') {
-          text = Timeline.weightedPick([
+          text = ctx.timeline.weightedPick([
             { weight: 1, value: 'You lie there. Time passes. You know this because the light changes slightly. That\'s the only evidence.' },
             { weight: 1, value: 'The bed. The ceiling. The space between them, with you in it. Nothing moves. Nothing needs to.' },
             { weight: 1, value: 'You stay. It\'s not rest and it\'s not not-rest. It\'s just the absence of getting up.' },
             // Very low serotonin — numb is deep
-            { weight: State.lerp01(ser, 30, 10), value: 'You lie there. You could be anyone. You could be no one. It wouldn\'t change what the ceiling looks like.' },
+            { weight: ctx.state.lerp01(ser, 30, 10), value: 'You lie there. You could be anyone. You could be no one. It wouldn\'t change what the ceiling looks like.' },
           ]);
         } else if (mood === 'heavy') {
           // Mechanical shading: low GABA means anxiety under the heaviness — no relief from lying down
           if (gaba < 35) {
             // Heavy + anxious: bed doesn't help, stress stays
-            State.adjustStress(0);
+            ctx.state.adjustStress(0);
           } else {
-            State.adjustStress(-1);
+            ctx.state.adjustStress(-1);
           }
-          text = Timeline.weightedPick([
+          text = ctx.timeline.weightedPick([
             { weight: 1, value: 'You stay in bed. The pressure to be somewhere, do something — it\'s still there, but quieter when you\'re lying down. Barely.' },
             { weight: 1, value: 'The pillow is warm from your head. You turn it over. The cool side. Small.' },
             { weight: 1, value: 'You don\'t get up. Nobody is asking you to. That helps, a little, in a way that also doesn\'t help.' },
             // Low serotonin — heavy and sinking
-            { weight: State.lerp01(ser, 35, 15), value: 'You lie there. The mattress takes your shape and you let it. Getting back out of this shape seems like a problem for someone else.' },
+            { weight: ctx.state.lerp01(ser, 35, 15), value: 'You lie there. The mattress takes your shape and you let it. Getting back out of this shape seems like a problem for someone else.' },
             // Low GABA — heavy but can't rest
-            { weight: State.lerp01(gaba, 40, 20), value: 'You stay in bed. It doesn\'t help. There\'s a hum underneath the heaviness, a vibration that won\'t let the weight settle into rest.' },
+            { weight: ctx.state.lerp01(gaba, 40, 20), value: 'You stay in bed. It doesn\'t help. There\'s a hum underneath the heaviness, a vibration that won\'t let the weight settle into rest.' },
           ]);
         } else if (mood === 'hollow' || mood === 'quiet') {
-          State.adjustStress(-1);
-          text = Timeline.weightedPick([
+          ctx.state.adjustStress(-1);
+          text = ctx.timeline.weightedPick([
             { weight: 1, value: 'You lie there. The room is quiet. You\'re quiet. The two of you have an understanding.' },
             { weight: 1, value: 'Just being. The bed, the air, the sound of nothing in particular. It\'s not peace. But it\'s not war.' },
             { weight: 1, value: 'You stay. The quiet settles. Not comfortable exactly — but not uncomfortable either. Just still.' },
             // Higher serotonin — quiet tips toward gentle
-            { weight: State.lerp01(ser, 45, 65), value: 'You lie there. The quiet isn\'t asking anything. Neither are you. Something about that is almost okay.' },
+            { weight: ctx.state.lerp01(ser, 45, 65), value: 'You lie there. The quiet isn\'t asking anything. Neither are you. Something about that is almost okay.' },
             // High NE — quiet but wired
-            { weight: State.lerp01(ne, 45, 70), value: 'You stay still. The quiet should be restful but you\'re listening for something. You don\'t know what. The listening doesn\'t stop.' },
+            { weight: ctx.state.lerp01(ne, 45, 70), value: 'You stay still. The quiet should be restful but you\'re listening for something. You don\'t know what. The listening doesn\'t stop.' },
           ]);
         } else if (mood === 'clear' || mood === 'present') {
-          State.adjustStress(-2);
-          text = Timeline.weightedPick([
+          ctx.state.adjustStress(-2);
+          text = ctx.timeline.weightedPick([
             { weight: 1, value: 'You lie still. Actually still — not the holding-still of trying to sleep, just the stillness of not needing to move. Your breath slows. Something loosens.' },
             { weight: 1, value: 'The sheets, the light, the quiet. You\'re lying here because you can. That\'s the whole reason. It\'s enough.' },
             { weight: 1, value: 'You stay in bed. Not sleeping, not trying to. Just being horizontal in a room that asks nothing of you. Something settles.' },
             // High serotonin — genuinely warm
-            { weight: State.lerp01(ser, 60, 80), value: 'You lie there and your body is quiet. Not tired-quiet. Just — at ease. The kind of still that\'s chosen, not collapsed into.' },
+            { weight: ctx.state.lerp01(ser, 60, 80), value: 'You lie there and your body is quiet. Not tired-quiet. Just — at ease. The kind of still that\'s chosen, not collapsed into.' },
           ]);
         } else {
           // flat
-          text = Timeline.weightedPick([
+          text = ctx.timeline.weightedPick([
             { weight: 1, value: 'You lie there for a while. The ceiling doesn\'t change. Neither do you. Eventually you shift, but that\'s about it.' },
             { weight: 1, value: 'Time passes. You\'re in bed. These are the facts. Nothing else happens.' },
             { weight: 1, value: 'You stay. Not resting, not thinking, not anything in particular. Just lying there because you\'re already lying there.' },
             // Low serotonin — flat has an undertow
-            { weight: State.lerp01(ser, 42, 25), value: 'You lie there. It should be nothing. It is nothing. But the nothing has a color to it and the color isn\'t good.' },
+            { weight: ctx.state.lerp01(ser, 42, 25), value: 'You lie there. It should be nothing. It is nothing. But the nothing has a color to it and the color isn\'t good.' },
             // High NE — flat but restless
-            { weight: State.lerp01(ne, 45, 65), value: 'You lie there. Your foot moves. Your hand adjusts the sheet. Small things that aren\'t rest and aren\'t decisions. Just the body fidgeting with itself.' },
+            { weight: ctx.state.lerp01(ne, 45, 65), value: 'You lie there. Your foot moves. Your hand adjusts the sheet. Small things that aren\'t rest and aren\'t decisions. Just the body fidgeting with itself.' },
           ]);
         }
 
         // Deterministic modifiers — no RNG consumed
-        if (aden > 70 && State.adenosineBlock() > 0.4) {
+        if (aden > 70 && ctx.state.adenosineBlock() > 0.4) {
           text += ' Everything is soft at the edges. The kind of tired that blurs.';
         }
 
@@ -2156,67 +2147,67 @@ export function createContent(ctx) {
       location: 'apartment_bedroom',
       available: () => true,
       execute: () => {
-        const mood = State.moodTone();
-        const weather = State.get('weather');
-        const minutes = Timeline.randomInt(5, 10);
-        State.advanceTime(minutes);
+        const mood = ctx.state.moodTone();
+        const weather = ctx.state.get('weather');
+        const minutes = ctx.timeline.randomInt(5, 10);
+        ctx.state.advanceTime(minutes);
 
         // Rain sound sentiment — serotonin nudge during drizzle + habituation
-        const rc = State.sentimentIntensity('rain_sound', 'comfort');
+        const rc = ctx.state.sentimentIntensity('rain_sound', 'comfort');
         if (weather === 'drizzle' && rc > 0) {
-          State.adjustNT('serotonin', rc * 2);
-          State.adjustSentiment('rain_sound', 'comfort', -0.002);
+          ctx.state.adjustNT('serotonin', rc * 2);
+          ctx.state.adjustSentiment('rain_sound', 'comfort', -0.002);
         }
 
         // NT values for continuous prose shading
-        const ser = State.get('serotonin');
-        const ne = State.get('norepinephrine');
-        const dopa = State.get('dopamine');
-        const gaba = State.get('gaba');
-        const aden = State.get('adenosine');
+        const ser = ctx.state.get('serotonin');
+        const ne = ctx.state.get('norepinephrine');
+        const dopa = ctx.state.get('dopamine');
+        const gaba = ctx.state.get('gaba');
+        const aden = ctx.state.get('adenosine');
 
         // Weather sentiment
-        const weatherComfort = State.sentimentIntensity('weather_' + weather, 'comfort');
+        const weatherComfort = ctx.state.sentimentIntensity('weather_' + weather, 'comfort');
 
         if (mood === 'numb') {
-          return Timeline.weightedPick([
+          return ctx.timeline.weightedPick([
             { weight: 1, value: 'You look out the window. The street is there. People, cars, the sky. You see all of it. None of it registers.' },
             { weight: 1, value: 'The window. The world on the other side of the glass. You watch it like it\'s on a screen — present, visible, not quite real.' },
             { weight: 1, value: 'Outside exists. You can see it. Knowing that doesn\'t do anything, but you look anyway.' },
             // Low dopamine — nothing catches
-            { weight: State.lerp01(dopa, 40, 15), value: 'You look out. Things move — a person, a car, a bird. Your eyes follow without your permission. None of it reaches the part of you that would care.' },
+            { weight: ctx.state.lerp01(dopa, 40, 15), value: 'You look out. Things move — a person, a car, a bird. Your eyes follow without your permission. None of it reaches the part of you that would care.' },
             // Snow — white and still out there
             { weight: weather === 'snow' ? 1.5 : 0, value: 'Snow on the street, on the rooftops. White and quiet out there. You see all of it. None of it reaches you.' },
           ]);
         }
         if (mood === 'heavy') {
-          return Timeline.weightedPick([
+          return ctx.timeline.weightedPick([
             { weight: 1, value: 'The world outside. People going places. You\'re in here. The glass between you and that is thin but it might as well be a wall.' },
             { weight: 1, value: 'You look out. Trees, if there are trees. Sky. The distance between you and all of it feels wider than the window.' },
             { weight: 1, value: 'Outside is happening. You watch it from the bed. The effort of being out there — even thinking about it is a lot.' },
             // Low serotonin — the distance is heavier
-            { weight: State.lerp01(ser, 35, 15), value: 'You look out and the world is right there, close enough to touch if you opened the window. You won\'t. The distance isn\'t the glass. It\'s everything between you and being a person who goes outside.' },
+            { weight: ctx.state.lerp01(ser, 35, 15), value: 'You look out and the world is right there, close enough to touch if you opened the window. You won\'t. The distance isn\'t the glass. It\'s everything between you and being a person who goes outside.' },
             // Snow — the white world feels like more pressure
             { weight: weather === 'snow' ? 1.5 : 0, value: 'Snow outside. The world white and quiet. The stillness of it doesn\'t help — it just makes the inside feel louder.' },
           ]);
         }
         if (mood === 'fraying') {
           if (weather === 'clear') {
-            State.adjustStress(-2);
-            return Timeline.weightedPick([
+            ctx.state.adjustStress(-2);
+            return ctx.timeline.weightedPick([
               { weight: 1, value: 'You look out. Clear sky. The light is doing something good today — something open. Your shoulders drop half an inch. It helps.' },
               { weight: 1, value: 'The window. Blue out there, or close to it. Your eyes rest on the sky because it\'s the only thing not asking anything of you.' },
               { weight: 1, value: 'Clear outside. The light comes in and touches the floor. You stand in it for a minute. Something loosens, slightly.' },
               // Higher serotonin — the light actually reaches you
-              { weight: State.lerp01(ser, 40, 60), value: 'The sky is clear and the light comes in and for a second it\'s just light — not an accusation, not a reminder. Just warmth on your face. Your shoulders come down. Your breath comes easier.' },
+              { weight: ctx.state.lerp01(ser, 40, 60), value: 'The sky is clear and the light comes in and for a second it\'s just light — not an accusation, not a reminder. Just warmth on your face. Your shoulders come down. Your breath comes easier.' },
             ]);
           }
-          return Timeline.weightedPick([
+          return ctx.timeline.weightedPick([
             { weight: 1, value: 'You look out the window. Grey. The same grey as the inside of your head. It doesn\'t help.' },
             { weight: 1, value: 'Outside is flat and overcast. You were hoping for something — you\'re not sure what. This isn\'t it.' },
             { weight: 1, value: 'The window. Rain, or the threat of it. The world out there looks exactly like you feel.' },
             // Low GABA — the grey presses in
-            { weight: State.lerp01(gaba, 40, 20), value: 'You look out and the grey is everywhere — the sky, the buildings, the flat light on the street. It presses against the glass. You step back without deciding to.' },
+            { weight: ctx.state.lerp01(gaba, 40, 20), value: 'You look out and the grey is everywhere — the sky, the buildings, the flat light on the street. It presses against the glass. You step back without deciding to.' },
             // Rain lover during drizzle — the sound helps even when fraying
             { weight: weather === 'drizzle' && rc > 0 ? rc * 0.6 : 0, value: 'You look out. Grey, drizzle, the streaked glass. But the sound of the rain — that steady tapping — is doing something. Somewhere beneath the noise in your head, the rain is a rhythm you can hold onto.' },
             // Snow — the quiet doesn't match what's inside
@@ -2224,24 +2215,24 @@ export function createContent(ctx) {
           ]);
         }
         if (mood === 'hollow') {
-          return Timeline.weightedPick([
+          return ctx.timeline.weightedPick([
             { weight: 1, value: 'You look out. Someone\'s walking a dog. Someone else is carrying groceries. People with destinations. You watch.' },
             { weight: 1, value: 'The window shows the usual. The street, the building opposite. A life-sized diorama of people going somewhere.' },
             { weight: 1, value: 'Outside. People. Movement. The glass keeps the sound out. You watch like it\'s an aquarium.' },
             // Low dopamine — watching without any pull to join
-            { weight: State.lerp01(dopa, 40, 20), value: 'Someone crosses the street. Someone else waits at the corner. You watch them the way you\'d watch a screensaver — movement without meaning, pattern without pull.' },
+            { weight: ctx.state.lerp01(dopa, 40, 20), value: 'Someone crosses the street. Someone else waits at the corner. You watch them the way you\'d watch a screensaver — movement without meaning, pattern without pull.' },
             // Snow — the muted street fits
             { weight: weather === 'snow' ? 1.5 : 0, value: 'Snow out there. The street is slower, the usual movement muted under white. You watch from the glass. The stillness suits you, or you suit it. Hard to say.' },
           ]);
         }
         if (mood === 'clear' || mood === 'present') {
-          State.adjustStress(-3);
-          return Timeline.weightedPick([
+          ctx.state.adjustStress(-3);
+          return ctx.timeline.weightedPick([
             { weight: 1, value: 'You look out the window. The light, the sky, the ordinary scene below — it\'s actually nice. The kind of nice you can feel today.' },
             { weight: 1, value: 'The view. Nothing special — rooftops, sky, a tree if you lean. But you\'re seeing it. Actually seeing it. That\'s different.' },
             { weight: 1, value: 'You stand at the window. The world is out there, doing its thing. For a minute you\'re part of it, watching from the inside. Something close to peace.' },
             // High serotonin + NE — vivid and warm
-            { weight: State.lerp01(ser, 55, 75) * State.lerp01(ne, 40, 60), value: 'The light is good today. You notice the color of the sky, the way shadows fall on the building opposite, a bird sitting on a wire. Small things, all of them clear, all of them enough. You stay at the window longer than you meant to.' },
+            { weight: ctx.state.lerp01(ser, 55, 75) * ctx.state.lerp01(ne, 40, 60), value: 'The light is good today. You notice the color of the sky, the way shadows fall on the building opposite, a bird sitting on a wire. Small things, all of them clear, all of them enough. You stay at the window longer than you meant to.' },
             // Rain lover during drizzle — rain on glass
             { weight: weather === 'drizzle' && rc > 0 ? rc : 0, value: 'Rain on the glass. You stand at the window and watch it run in lines down the pane. The sound of it — steady, close, the whole world softened by water. Something in you settles. You stay.' },
             // Weather comfort — the weather itself lands
@@ -2251,13 +2242,13 @@ export function createContent(ctx) {
           ]);
         }
         // flat
-        State.adjustStress(-1);
-        return Timeline.weightedPick([
+        ctx.state.adjustStress(-1);
+        return ctx.timeline.weightedPick([
           { weight: 1, value: 'You look out. The usual view. It\'s something to look at that isn\'t the room.' },
           { weight: 1, value: 'The window. Outside. Not much happening, but you look for a while anyway.' },
           { weight: 1, value: 'You watch the street for a few minutes. Nothing in particular. It passes the time.' },
           // High adenosine — the view is soft
-          { weight: State.lerp01(aden, 50, 75) * State.adenosineBlock(), value: 'You look out. The view is there but soft — edges blurred, details optional. You watch without really watching. The tiredness makes it all a little far away.' },
+          { weight: ctx.state.lerp01(aden, 50, 75) * ctx.state.adenosineBlock(), value: 'You look out. The view is there but soft — edges blurred, details optional. You watch without really watching. The tiredness makes it all a little far away.' },
           // Rain lover during drizzle — rain on glass
           { weight: weather === 'drizzle' && rc > 0 ? rc * 0.7 : 0, value: 'You look out. The rain runs down the glass in slow lines. The sound of it is something you don\'t have a word for, just a feeling. You watch.' },
           // Snow — the view is the same but different
@@ -2270,51 +2261,51 @@ export function createContent(ctx) {
       id: 'make_bed',
       label: 'Make the bed',
       location: 'apartment_bedroom',
-      available: () => Linens.bedState() !== 'made' && State.energyTier() !== 'depleted',
+      available: () => ctx.linens.bedState() !== 'made' && ctx.state.energyTier() !== 'depleted',
       execute: () => {
-        Linens.makeBed();
-        State.set('last_surfaced_mess_tier', null);  // reset so next tier change is noticed
-        State.adjustEnergy(-3);
-        State.adjustStress(-2);
-        State.advanceTime(5);
+        ctx.linens.makeBed();
+        ctx.state.set('last_surfaced_mess_tier', null);  // reset so next tier change is noticed
+        ctx.state.adjustEnergy(-3);
+        ctx.state.adjustStress(-2);
+        ctx.state.advanceTime(5);
 
-        const mood = State.moodTone();
-        const ser = State.get('serotonin');
-        const dopa = State.get('dopamine');
+        const mood = ctx.state.moodTone();
+        const ser = ctx.state.get('serotonin');
+        const dopa = ctx.state.get('dopamine');
 
         if (mood === 'numb') {
-          return Timeline.weightedPick([
+          return ctx.timeline.weightedPick([
             { weight: 1, value: 'You pull the sheets straight. Tuck the corners. Smooth the surface. The bed is made. You don\'t feel any different.' },
             { weight: 1, value: 'The motions of making a bed. You do them. It\'s done.' },
-            { weight: State.lerp01(dopa, 40, 20), value: 'Sheets. Pillow. Done. You stand there looking at it. Nothing catches.' },
+            { weight: ctx.state.lerp01(dopa, 40, 20), value: 'Sheets. Pillow. Done. You stand there looking at it. Nothing catches.' },
           ]);
         }
         if (mood === 'heavy') {
-          return Timeline.weightedPick([
+          return ctx.timeline.weightedPick([
             { weight: 1, value: 'You straighten the sheets, tuck the pillow back where it belongs. The room looks a little more like someone lives here intentionally. You\'re not sure that\'s a comfort.' },
             { weight: 1, value: 'You make the bed. One thing done. One thing that will stay done until you sleep in it again.' },
-            { weight: State.lerp01(ser, 35, 20), value: 'You make the bed without knowing why. The bed doesn\'t care. The room doesn\'t look better, not really. But you made it.' },
+            { weight: ctx.state.lerp01(ser, 35, 20), value: 'You make the bed without knowing why. The bed doesn\'t care. The room doesn\'t look better, not really. But you made it.' },
           ]);
         }
         if (mood === 'fraying') {
-          return Timeline.weightedPick([
+          return ctx.timeline.weightedPick([
             { weight: 1, value: 'You make the bed. Smooth the cover, straighten the pillow. One small thing you can actually do. It helps, a little.' },
             { weight: 1, value: 'The bed. You pull it straight. One corner, then the next. The room looks slightly less like evidence. That\'s something.' },
-            { weight: State.lerp01(ser, 40, 55), value: 'You make the bed. It takes three minutes and when you\'re done the room feels fractionally more like a place you meant to be in.' },
+            { weight: ctx.state.lerp01(ser, 40, 55), value: 'You make the bed. It takes three minutes and when you\'re done the room feels fractionally more like a place you meant to be in.' },
           ]);
         }
         if (mood === 'clear' || mood === 'present') {
-          return Timeline.weightedPick([
+          return ctx.timeline.weightedPick([
             { weight: 1, value: 'You make the bed — sheets pulled taut, pillow back where it belongs. The room settles. Small but real.' },
             { weight: 1, value: 'Quick and deliberate. Sheets, blanket, pillow. The bed is made. Something in the day clicks slightly into place.' },
-            { weight: State.lerp01(ser, 55, 75), value: 'You make the bed without thinking too hard about it. When you\'re done the room looks right, the kind of right that carries.' },
+            { weight: ctx.state.lerp01(ser, 55, 75), value: 'You make the bed without thinking too hard about it. When you\'re done the room looks right, the kind of right that carries.' },
           ]);
         }
         // flat / hollow / quiet
-        return Timeline.weightedPick([
+        return ctx.timeline.weightedPick([
           { weight: 1, value: 'You make the bed. Straighten the sheets, fix the pillow. The room looks more like a room now.' },
           { weight: 1, value: 'Sheets pulled straight, cover smoothed. The bed\'s made. You move on.' },
-          { weight: State.lerp01(dopa, 50, 30), value: 'The bed. You straighten it. The kind of small thing that\'s easy to skip and easy to do and makes no large difference either way.' },
+          { weight: ctx.state.lerp01(dopa, 50, 30), value: 'The bed. You straighten it. The kind of small thing that\'s easy to skip and easy to do and makes no large difference either way.' },
         ]);
       },
     },
@@ -2323,20 +2314,20 @@ export function createContent(ctx) {
       id: 'start_laundry',
       label: 'Start a load of laundry',
       location: 'apartment_bedroom',
-      available: () => Clothing.dirtyCount() > 5
-        && State.get('laundry_phase') === 'none'
-        && State.energyTier() !== 'depleted',
+      available: () => ctx.clothing.dirtyCount() > 5
+        && ctx.state.get('laundry_phase') === 'none'
+        && ctx.state.energyTier() !== 'depleted',
       execute: () => {
-        State.set('laundry_phase', 'washing');
-        State.set('laundry_phase_started', State.get('time'));
-        State.adjustEnergy(-3);
-        State.advanceTime(5);
+        ctx.state.set('laundry_phase', 'washing');
+        ctx.state.set('laundry_phase_started', ctx.state.get('time'));
+        ctx.state.adjustEnergy(-3);
+        ctx.state.advanceTime(5);
 
-        const mood = State.moodTone();
+        const mood = ctx.state.moodTone();
         if (mood === 'numb' || mood === 'heavy') {
           return 'You gather the dirty clothes and load the washer. It starts up. You have about half an hour before you need to think about it again.';
         }
-        return Timeline.weightedPick([
+        return ctx.timeline.weightedPick([
           { weight: 1, value: 'You load the washer and start it. Thirty-five minutes and you\'ll need to move it to the dryer. Until then it\'s not your problem.' },
           { weight: 1, value: 'Laundry in, machine started. The pile is someone else\'s problem for the next half hour.' },
         ]);
@@ -2347,15 +2338,15 @@ export function createContent(ctx) {
       id: 'move_to_dryer',
       label: 'Move laundry to dryer',
       location: 'apartment_bedroom',
-      available: () => State.get('laundry_phase') === 'washing'
-        && (State.get('time') - State.get('laundry_phase_started')) >= 35,
+      available: () => ctx.state.get('laundry_phase') === 'washing'
+        && (ctx.state.get('time') - ctx.state.get('laundry_phase_started')) >= 35,
       execute: () => {
-        State.set('laundry_phase', 'drying');
-        State.set('laundry_phase_started', State.get('time'));
-        State.adjustEnergy(-2);
-        State.advanceTime(5);
+        ctx.state.set('laundry_phase', 'drying');
+        ctx.state.set('laundry_phase_started', ctx.state.get('time'));
+        ctx.state.adjustEnergy(-2);
+        ctx.state.advanceTime(5);
 
-        return Timeline.weightedPick([
+        return ctx.timeline.weightedPick([
           { weight: 1, value: 'You move the wet clothes to the dryer, start it. Forty-five minutes. Go.' },
           { weight: 1, value: 'Washer done, dryer started. Now you wait again.' },
           { weight: 1, value: 'Wet clothes into the dryer. It starts its tumble. Another forty-five minutes.' },
@@ -2367,29 +2358,29 @@ export function createContent(ctx) {
       id: 'fold_laundry',
       label: 'Fold and put away laundry',
       location: 'apartment_bedroom',
-      available: () => State.get('laundry_phase') === 'drying'
-        && (State.get('time') - State.get('laundry_phase_started')) >= 45,
+      available: () => ctx.state.get('laundry_phase') === 'drying'
+        && (ctx.state.get('time') - ctx.state.get('laundry_phase_started')) >= 45,
       execute: () => {
-        Clothing.wash();
-        State.set('laundry_phase', 'none');
-        State.adjustEnergy(-5);
-        State.adjustStress(-3);
-        State.advanceTime(10);
-        Events.record('did_laundry');
+        ctx.clothing.wash();
+        ctx.state.set('laundry_phase', 'none');
+        ctx.state.adjustEnergy(-5);
+        ctx.state.adjustStress(-3);
+        ctx.state.advanceTime(10);
+        ctx.events.record('did_laundry');
 
-        const mood = State.moodTone();
-        const ser = State.get('serotonin');
+        const mood = ctx.state.moodTone();
+        const ser = ctx.state.get('serotonin');
 
         if (mood === 'numb' || mood === 'heavy') {
-          return Timeline.weightedPick([
+          return ctx.timeline.weightedPick([
             { weight: 1, value: 'You fold everything and put it away. The drawer isn\'t empty anymore. That\'s something.' },
             { weight: 1, value: 'Folded, stacked, put away. The pile is gone. It\'ll be back. For now it\'s gone.' },
           ]);
         }
-        return Timeline.weightedPick([
+        return ctx.timeline.weightedPick([
           { weight: 1, value: 'You fold and put everything away. Clean clothes in the drawer, the pile gone. One less thing.' },
           { weight: 1, value: 'Laundry folded and away. The room looks intentional again. Small thing, but real.' },
-          { weight: State.lerp01(ser, 50, 70), value: 'You fold everything — actually fold it, put it away in the right places. The drawer is full again. Something in you settles when you close it.' },
+          { weight: ctx.state.lerp01(ser, 50, 70), value: 'You fold everything — actually fold it, put it away in the right places. The drawer is full again. Something in you settles when you close it.' },
         ]);
       },
     },
@@ -2398,40 +2389,40 @@ export function createContent(ctx) {
       id: 'tidy_clothes',
       label: 'Pick up the clothes',
       location: 'apartment_bedroom',
-      available: () => Clothing.itemsOnFloor('bedroom').length > 0 && State.energyTier() !== 'depleted',
+      available: () => ctx.clothing.itemsOnFloor('bedroom').length > 0 && ctx.state.energyTier() !== 'depleted',
       execute: () => {
-        Clothing.moveToBasket('bedroom');
-        State.set('last_surfaced_mess_tier', null);  // reset so next tier change is noticed
-        State.adjustEnergy(-4);
-        State.advanceTime(5);
+        ctx.clothing.moveToBasket('bedroom');
+        ctx.state.set('last_surfaced_mess_tier', null);  // reset so next tier change is noticed
+        ctx.state.adjustEnergy(-4);
+        ctx.state.advanceTime(5);
 
-        const mood = State.moodTone();
-        const ser = State.get('serotonin');
+        const mood = ctx.state.moodTone();
+        const ser = ctx.state.get('serotonin');
 
         if (mood === 'numb' || mood === 'heavy') {
-          return Timeline.weightedPick([
+          return ctx.timeline.weightedPick([
             { weight: 1, value: 'You pick the clothes up off the floor. Move them to the basket. The floor is a floor again. You don\'t feel anything about it.' },
             { weight: 1, value: 'The clothes from the floor into the basket. One task. Done.' },
-            { weight: State.lerp01(ser, 35, 20), value: 'You gather the clothes from the floor. It takes less time than you thought it would. The room looks different after. You\'re not sure what to do with that.' },
+            { weight: ctx.state.lerp01(ser, 35, 20), value: 'You gather the clothes from the floor. It takes less time than you thought it would. The room looks different after. You\'re not sure what to do with that.' },
           ]);
         }
         if (mood === 'fraying') {
-          return Timeline.weightedPick([
+          return ctx.timeline.weightedPick([
             { weight: 1, value: 'You gather the clothes from the floor. Something about the physical task steadies you — the motion of it, the before and after. One small thing actually done.' },
             { weight: 1, value: 'The floor clothes into the basket. The room looks less accidental. You needed something to be less accidental.' },
           ]);
         }
         if (mood === 'clear' || mood === 'present') {
-          return Timeline.weightedPick([
+          return ctx.timeline.weightedPick([
             { weight: 1, value: 'You scoop the clothes off the floor and drop them in the basket. Takes thirty seconds. The bedroom is a room you meant to live in again.' },
             { weight: 1, value: 'Floor to basket. The room is visibly better. Thirty seconds of actual improvement.' },
           ]);
         }
         // flat / hollow / quiet
-        return Timeline.weightedPick([
+        return ctx.timeline.weightedPick([
           { weight: 1, value: 'You pick the clothes up. Floor to basket. The room looks a little less like something gave up in here.' },
           { weight: 1, value: 'You deal with the clothes on the floor. It\'s a thing to do. Now it\'s done.' },
-          { weight: State.lerp01(ser, 40, 60), value: 'Clothes off the floor, into the basket. The room has its floor back. Small thing, but the small things count.' },
+          { weight: ctx.state.lerp01(ser, 40, 60), value: 'Clothes off the floor, into the basket. The room has its floor back. Small thing, but the small things count.' },
         ]);
       },
     },
@@ -2441,54 +2432,54 @@ export function createContent(ctx) {
       id: 'eat_food',
       label: 'Eat something',
       location: 'apartment_kitchen',
-      available: () => State.fridgeTier() !== 'empty',
+      available: () => ctx.state.fridgeTier() !== 'empty',
       execute: () => {
-        State.set('fridge_food', State.get('fridge_food') - 1);
-        Dishes.use();
-        State.adjustHunger(-35);
-        State.fillStomach(60, 'solid');
-        State.set('ate_today', true);
-        State.set('consecutive_meals_skipped', 0);
-        State.advanceTime(15);
-        Events.record('ate', { what: 'fridge_food' });
+        ctx.state.set('fridge_food', ctx.state.get('fridge_food') - 1);
+        ctx.dishes.use();
+        ctx.state.adjustHunger(-35);
+        ctx.state.fillStomach(60, 'solid');
+        ctx.state.set('ate_today', true);
+        ctx.state.set('consecutive_meals_skipped', 0);
+        ctx.state.advanceTime(15);
+        ctx.events.record('ate', { what: 'fridge_food' });
 
         // Dental — chewing spikes the ache
-        State.dentalSpike(15); // Approximation debt: 15pt chewing spike chosen
+        ctx.state.dentalSpike(15); // Approximation debt: 15pt chewing spike chosen
         // Food comfort sentiment — small serotonin nudge + habituation
-        const fc = State.sentimentIntensity('eating', 'comfort');
+        const fc = ctx.state.sentimentIntensity('eating', 'comfort');
         if (fc > 0) {
-          State.adjustNT('serotonin', fc * 3);
-          State.adjustSentiment('eating', 'comfort', -0.003);
+          ctx.state.adjustNT('serotonin', fc * 3);
+          ctx.state.adjustSentiment('eating', 'comfort', -0.003);
         }
 
-        const hunger = State.hungerTier();
-        const mood = State.moodTone();
-        const ser = State.get('serotonin');
-        const aden = State.get('adenosine');
-        const dopa = State.get('dopamine');
-        const fridgeNow = State.fridgeTier(); // checked AFTER decrement
-        const dentalAche = State.get('dental_ache');
-        const dentalW = State.lerp01(dentalAche, 20, 65); // 0 at dull, 1 at flare
+        const hunger = ctx.state.hungerTier();
+        const mood = ctx.state.moodTone();
+        const ser = ctx.state.get('serotonin');
+        const aden = ctx.state.get('adenosine');
+        const dopa = ctx.state.get('dopamine');
+        const fridgeNow = ctx.state.fridgeTier(); // checked AFTER decrement
+        const dentalAche = ctx.state.get('dental_ache');
+        const dentalW = ctx.state.lerp01(dentalAche, 20, 65); // 0 at dull, 1 at flare
 
         // Dental flare — the tooth competes with eating
         if (dentalAche >= 60) {
-          return Timeline.weightedPick([
+          return ctx.timeline.weightedPick([
             { weight: 1, value: 'You eat carefully, keeping to one side. It still hurts. The food is fine but the tooth has opinions about all of it.' },
             { weight: 1, value: 'You eat. Slowly, on one side, watching yourself. It helps a little. The tooth registers the effort regardless.' },
-            { weight: State.lerp01(ser, 50, 20), value: 'You eat carefully and the tooth makes its presence known anyway. At some point you\'re going to have to deal with it. You know that. You know that.' },
+            { weight: ctx.state.lerp01(ser, 50, 20), value: 'You eat carefully and the tooth makes its presence known anyway. At some point you\'re going to have to deal with it. You know that. You know that.' },
           ]);
         }
 
         if (mood === 'numb') {
-          return Timeline.weightedPick([
+          return ctx.timeline.weightedPick([
             { weight: 1, value: 'You eat. It goes in. You don\'t taste much of it, but your body takes it without complaint.' },
             { weight: 1, value: 'Food. You put it together, put it in. The motions of eating without the experience of it.' },
             // Low dopamine — eating is mechanical
-            { weight: State.lerp01(dopa, 40, 15), value: 'You eat because the body requires it. Fork to mouth, chew, swallow. The flavors are there, technically. They don\'t reach you.' },
+            { weight: ctx.state.lerp01(dopa, 40, 15), value: 'You eat because the body requires it. Fork to mouth, chew, swallow. The flavors are there, technically. They don\'t reach you.' },
           ]);
         }
         if (hunger === 'starving' || hunger === 'very_hungry') {
-          return Timeline.weightedPick([
+          return ctx.timeline.weightedPick([
             { weight: 1, value: 'You eat too fast. Standing at the counter, not even sitting down. It helps. It helps a lot, actually.' },
             { weight: 1, value: 'You eat standing up, barely tasting it. Your body was louder than you realized. The relief is immediate and physical.' },
             // High food comfort — the eating itself is a release
@@ -2499,27 +2490,27 @@ export function createContent(ctx) {
         }
         // Last item eaten — fridge is now empty
         if (fridgeNow === 'empty') {
-          const hasPantry = State.pantryTier() !== 'empty';
+          const hasPantry = ctx.state.pantryTier() !== 'empty';
           if (hasPantry) {
-            return Timeline.weightedPick([
+            return ctx.timeline.weightedPick([
               { weight: 1, value: 'You eat the last thing in the fridge. The fridge is empty now. There\'s still something in the cupboard.' },
-              { weight: State.lerp01(ser, 40, 20), value: 'You eat what was left. The fridge is empty now. At least there\'s still something in the cupboard.' },
+              { weight: ctx.state.lerp01(ser, 40, 20), value: 'You eat what was left. The fridge is empty now. At least there\'s still something in the cupboard.' },
             ]);
           }
-          return Timeline.weightedPick([
+          return ctx.timeline.weightedPick([
             { weight: 1, value: 'You eat the last thing in the fridge. Standing at the counter. The shelf is empty now. That\'s a thing you\'ll have to deal with.' },
             { weight: 1, value: 'The last of it. You eat quickly, not because you\'re hurrying but because now you\'re aware of it being the last. The fridge is empty after this.' },
             // Low serotonin — the empty fridge lands heavier
-            { weight: State.lerp01(ser, 40, 20), value: 'You eat what was left. It was the last of it. The fridge is empty now. One more thing added to the list of what needs doing, when you have the capacity to do it.' },
+            { weight: ctx.state.lerp01(ser, 40, 20), value: 'You eat what was left. It was the last of it. The fridge is empty now. One more thing added to the list of what needs doing, when you have the capacity to do it.' },
           ]);
         }
-        return Timeline.weightedPick([
+        return ctx.timeline.weightedPick([
           { weight: 1, value: 'You put something together from what\'s there and eat it. Nothing special. It\'s enough.' },
           { weight: 1, value: 'Something from the fridge. You eat it at the counter. It\'s food. It does the job.' },
           // High food comfort — eating is a small pleasure
           { weight: fc > 0 ? fc : 0, value: 'You make something simple from what\'s there and eat it slowly. The warmth of it, the familiar taste. A small comfort, but a real one.' },
           // High adenosine (unblocked) — eating through fog
-          { weight: State.lerp01(aden, 55, 75) * State.adenosineBlock(), value: 'You eat something. Standing at the counter, half-awake, chewing without really tasting. The food goes in. Your body processes it somewhere behind the fog.' },
+          { weight: ctx.state.lerp01(aden, 55, 75) * ctx.state.adenosineBlock(), value: 'You eat something. Standing at the counter, half-awake, chewing without really tasting. The food goes in. Your body processes it somewhere behind the fog.' },
           // Dental ache — eating carefully
           { weight: dentalW, value: 'You eat on one side, the way you\'ve been doing. The food is fine. The tooth is not fine. Those are separate problems.' },
         ]);
@@ -2530,48 +2521,48 @@ export function createContent(ctx) {
       id: 'eat_from_pantry',
       label: 'Find something in the cupboard',
       location: 'apartment_kitchen',
-      available: () => State.fridgeTier() === 'empty' && State.pantryTier() !== 'empty',
+      available: () => ctx.state.fridgeTier() === 'empty' && ctx.state.pantryTier() !== 'empty',
       execute: () => {
-        State.set('pantry_food', State.get('pantry_food') - 1);
-        Dishes.use();
-        State.adjustHunger(-20);
-        State.fillStomach(35, 'solid');
-        State.set('ate_today', true);
-        State.set('consecutive_meals_skipped', 0);
-        State.advanceTime(10);
-        Events.record('ate', { what: 'pantry_food' });
+        ctx.state.set('pantry_food', ctx.state.get('pantry_food') - 1);
+        ctx.dishes.use();
+        ctx.state.adjustHunger(-20);
+        ctx.state.fillStomach(35, 'solid');
+        ctx.state.set('ate_today', true);
+        ctx.state.set('consecutive_meals_skipped', 0);
+        ctx.state.advanceTime(10);
+        ctx.events.record('ate', { what: 'pantry_food' });
 
         // Dental — chewing spikes the ache
-        State.dentalSpike(15); // Approximation debt: 15pt chewing spike chosen
+        ctx.state.dentalSpike(15); // Approximation debt: 15pt chewing spike chosen
 
-        const mood = State.moodTone();
-        const hunger = State.hungerTier();
-        const pantryNow = State.pantryTier();
-        const ser = State.get('serotonin');
-        const aden = State.get('adenosine');
-        const dentalW = State.lerp01(State.get('dental_ache'), 20, 65);
+        const mood = ctx.state.moodTone();
+        const hunger = ctx.state.hungerTier();
+        const pantryNow = ctx.state.pantryTier();
+        const ser = ctx.state.get('serotonin');
+        const aden = ctx.state.get('adenosine');
+        const dentalW = ctx.state.lerp01(ctx.state.get('dental_ache'), 20, 65);
 
         const lastLine = pantryNow === 'empty'
           ? ' That\'s the last of it.'
           : '';
 
         if (hunger === 'starving' || hunger === 'very_hungry') {
-          return Timeline.weightedPick([
+          return ctx.timeline.weightedPick([
             { weight: 1, value: `You find something at the back of the cupboard and eat it fast. It's not much.${lastLine}` },
-            { weight: State.lerp01(ser, 50, 20), value: `Ramen, or crackers, or whatever was back there. You eat it standing up. Your body stops making its case, a little.${lastLine}` },
+            { weight: ctx.state.lerp01(ser, 50, 20), value: `Ramen, or crackers, or whatever was back there. You eat it standing up. Your body stops making its case, a little.${lastLine}` },
             { weight: dentalW, value: `You find something and eat it carefully. The tooth makes it harder. The hunger doesn't care.${lastLine}` },
           ]);
         }
         if (mood === 'numb' || mood === 'hollow') {
-          return Timeline.weightedPick([
+          return ctx.timeline.weightedPick([
             { weight: 1, value: `You find something in the cupboard. You eat it without much thought. It goes in.${lastLine}` },
-            { weight: State.lerp01(aden, 50, 75) * State.adenosineBlock(), value: `Something from the back of the cupboard. You make it and eat it and that's about all there is to say about it.${lastLine}` },
+            { weight: ctx.state.lerp01(aden, 50, 75) * ctx.state.adenosineBlock(), value: `Something from the back of the cupboard. You make it and eat it and that's about all there is to say about it.${lastLine}` },
           ]);
         }
-        return Timeline.weightedPick([
+        return ctx.timeline.weightedPick([
           { weight: 1, value: `You go through the cupboard and find something. Not exciting, but it's food.${lastLine}` },
           { weight: 1, value: `There's something at the back of the cupboard. Shelf-stable, sitting there for exactly this kind of day.${lastLine}` },
-          { weight: State.lerp01(ser, 60, 35), value: `You eat whatever was in the cupboard. It's the kind of meal you don't mention to anyone.${lastLine}` },
+          { weight: ctx.state.lerp01(ser, 60, 35), value: `You eat whatever was in the cupboard. It's the kind of meal you don't mention to anyone.${lastLine}` },
           // Dental — eating carefully from the cupboard
           { weight: dentalW * 0.8, value: `You find something soft enough in the cupboard. That's the criteria now. Soft enough.${lastLine}` },
         ]);
@@ -2584,17 +2575,17 @@ export function createContent(ctx) {
       location: 'apartment_kitchen',
       available: () => true,
       execute: () => {
-        State.adjustEnergy(2);
-        State.adjustHunger(-3);
-        State.fillStomach(8, 'liquid');
-        State.advanceTime(2);
+        ctx.state.adjustEnergy(2);
+        ctx.state.adjustHunger(-3);
+        ctx.state.fillStomach(8, 'liquid');
+        ctx.state.advanceTime(2);
 
         // NT deterministic variants (no RNG — replay-safe)
-        const energy = State.energyTier();
-        const aden = State.get('adenosine');
-        const mood = State.moodTone();
-        const hunger = State.hungerTier();
-        const fridge = State.fridgeTier();
+        const energy = ctx.state.energyTier();
+        const aden = ctx.state.get('adenosine');
+        const mood = ctx.state.moodTone();
+        const hunger = ctx.state.hungerTier();
+        const fridge = ctx.state.fridgeTier();
 
         // Drinking water because there's nothing to eat — specific texture
         if (fridge === 'empty' && (hunger === 'very_hungry' || hunger === 'starving')) {
@@ -2607,7 +2598,7 @@ export function createContent(ctx) {
         if (energy === 'depleted' || energy === 'exhausted') {
           return 'Water from the tap. You drink it standing at the sink. Your body wanted it more than you realized.';
         }
-        if (aden > 60 && State.adenosineBlock() > 0.4 && (mood === 'numb' || mood === 'heavy')) {
+        if (aden > 60 && ctx.state.adenosineBlock() > 0.4 && (mood === 'numb' || mood === 'heavy')) {
           return 'Water. Something your body can process without much thought from you.';
         }
         return 'You fill a glass and drink it. Tap water. It\'s fine.';
@@ -2618,41 +2609,41 @@ export function createContent(ctx) {
       id: 'make_coffee',
       label: 'Make coffee',
       location: 'apartment_kitchen',
-      available: () => State.caffeineTier() !== 'high',
+      available: () => ctx.state.caffeineTier() !== 'high',
       execute: () => {
-        State.consumeCaffeine(50);
-        State.advanceTime(Timeline.randomInt(5, 8));
+        ctx.state.consumeCaffeine(50);
+        ctx.state.advanceTime(ctx.timeline.randomInt(5, 8));
 
         // Dental — hot liquid is a significant trigger
-        State.dentalSpike(25); // Approximation debt: 25pt hot liquid spike chosen
+        ctx.state.dentalSpike(25); // Approximation debt: 25pt hot liquid spike chosen
 
-        const mood = State.moodTone();
-        const aden = State.get('adenosine');
-        const caffeine = State.caffeineTier();
-        const withdrawal = State.withdrawalTier();
-        const dentalAche = State.get('dental_ache');
-        const dentalW = State.lerp01(dentalAche, 25, 70);
+        const mood = ctx.state.moodTone();
+        const aden = ctx.state.get('adenosine');
+        const caffeine = ctx.state.caffeineTier();
+        const withdrawal = ctx.state.withdrawalTier();
+        const dentalAche = ctx.state.get('dental_ache');
+        const dentalW = ctx.state.lerp01(dentalAche, 25, 70);
 
         // Dental flare from hot coffee
         if (dentalAche >= 60) {
-          return Timeline.weightedPick([
+          return ctx.timeline.weightedPick([
             { weight: 1, value: 'The coffee is too hot for the tooth. You knew it would be. You hold it to the other side anyway. This is your life now.' },
             { weight: 1, value: 'First sip hits the tooth and the tooth objects loudly. You breathe through it. Drink on the left side. Or the right side. Whichever one isn\'t the problem.' },
-            { weight: State.lerp01(State.get('serotonin'), 50, 20), value: 'You make coffee and the coffee does what it always does to the tooth. You drink it anyway. It\'s not like there\'s a better option.' },
+            { weight: ctx.state.lerp01(ctx.state.get('serotonin'), 50, 20), value: 'You make coffee and the coffee does what it always does to the tooth. You drink it anyway. It\'s not like there\'s a better option.' },
           ]);
         }
 
         // Second cup — already caffeinated
         if (caffeine === 'active') {
-          return Timeline.weightedPick([
+          return ctx.timeline.weightedPick([
             { weight: 1, value: 'The second one. The first one wore off faster than it should have.' },
-            { weight: State.lerp01(aden, 40, 80), value: 'You weren\'t done needing it yet. The second cup goes down the same way as the first.' },
+            { weight: ctx.state.lerp01(aden, 40, 80), value: 'You weren\'t done needing it yet. The second cup goes down the same way as the first.' },
           ]);
         }
 
         // Withdrawal relief — the headache was building
         if (withdrawal === 'moderate' || withdrawal === 'severe') {
-          return Timeline.weightedPick([
+          return ctx.timeline.weightedPick([
             { weight: 1, value: 'You make coffee. The headache has been sitting behind your eyes all morning. You wait for it to start clearing. It takes a few minutes. Then it does.' },
             { weight: 1, value: 'The coffee is ready. You drink it standing at the counter. The pressure behind your eyes starts to ease — you hadn\'t realized how much it was there until it wasn\'t.' },
             { weight: withdrawal === 'severe' ? 2 : 1, value: 'You needed this an hour ago. The headache has been building since you woke up — not loud enough to stop you, just loud enough to make everything harder. First sip. Second. Something shifts.' },
@@ -2661,23 +2652,23 @@ export function createContent(ctx) {
 
         // First cup of the day
         if (mood === 'numb' || mood === 'hollow') {
-          return Timeline.weightedPick([
+          return ctx.timeline.weightedPick([
             { weight: 1, value: 'You make coffee. Something to do with your hands. The smell is better than it usually is.' },
-            { weight: State.lerp01(aden, 40, 80), value: 'Coffee. Your brain needs something to hold onto. The warmth helps, a little.' },
+            { weight: ctx.state.lerp01(aden, 40, 80), value: 'Coffee. Your brain needs something to hold onto. The warmth helps, a little.' },
           ]);
         }
         if (mood === 'heavy' || mood === 'fraying') {
-          return Timeline.weightedPick([
+          return ctx.timeline.weightedPick([
             { weight: 1, value: 'Coffee. You need the ritual as much as the caffeine. The kettle, the wait, the first sip.' },
-            { weight: State.lerp01(aden, 50, 85) * State.adenosineBlock(), value: 'You\'re dragging. The coffee is supposed to help with that.' },
+            { weight: ctx.state.lerp01(aden, 50, 85) * ctx.state.adenosineBlock(), value: 'You\'re dragging. The coffee is supposed to help with that.' },
             // Dental ache from hot coffee
             { weight: dentalW, value: 'You make coffee and drink it carefully on one side. The tooth is already watching. The caffeine is worth the negotiation.' },
           ]);
         }
-        return Timeline.weightedPick([
+        return ctx.timeline.weightedPick([
           { weight: 1, value: 'You make coffee. The machine goes through its routine. You go through yours.' },
-          { weight: State.lerp01(aden, 30, 70) * State.adenosineBlock(), value: 'You make coffee. It\'s early enough that it feels necessary.' },
-          { weight: State.lerp01(State.get('serotonin'), 50, 80), value: 'Coffee. The smell fills the kitchen before it\'s even done.' },
+          { weight: ctx.state.lerp01(aden, 30, 70) * ctx.state.adenosineBlock(), value: 'You make coffee. It\'s early enough that it feels necessary.' },
+          { weight: ctx.state.lerp01(ctx.state.get('serotonin'), 50, 80), value: 'Coffee. The smell fills the kitchen before it\'s even done.' },
           // Dental — hot coffee wakes the tooth up
           { weight: dentalW * 0.8, value: 'You make coffee. The first sip touches the tooth. You wait a moment, then continue. It\'s just a thing that happens now.' },
         ]);
@@ -2688,17 +2679,17 @@ export function createContent(ctx) {
       id: 'do_dishes',
       label: 'Deal with the dishes',
       location: 'apartment_kitchen',
-      available: () => Dishes.dirtyCount() > 0 && State.energyTier() !== 'depleted',
+      available: () => ctx.dishes.dirtyCount() > 0 && ctx.state.energyTier() !== 'depleted',
       execute: () => {
-        Dishes.wash();
-        State.set('last_surfaced_mess_tier', null);  // reset so next tier change is noticed
-        State.adjustEnergy(-8);
-        State.adjustStress(-5);
-        State.advanceTime(15);
+        ctx.dishes.wash();
+        ctx.state.set('last_surfaced_mess_tier', null);  // reset so next tier change is noticed
+        ctx.state.adjustEnergy(-8);
+        ctx.state.adjustStress(-5);
+        ctx.state.advanceTime(15);
 
-        const mood = State.moodTone();
-        const sinkClear = Dishes.dirtyCount() === 0;
-        const aden = State.get('adenosine');
+        const mood = ctx.state.moodTone();
+        const sinkClear = ctx.dishes.dirtyCount() === 0;
+        const aden = ctx.state.get('adenosine');
 
         if (sinkClear) {
           // Sink is now empty
@@ -2710,7 +2701,7 @@ export function createContent(ctx) {
         if (mood === 'heavy' || mood === 'numb') {
           return 'You wash dishes. The warm water is the closest thing to comfort available right now. One thing, at least, is done.';
         }
-        if (aden > 65 && State.adenosineBlock() > 0.4) {
+        if (aden > 65 && ctx.state.adenosineBlock() > 0.4) {
           return 'Your hands know what to do without you deciding anything. Hot water, soap, the stack going down. When it\'s over you\'re not sure how long it took.';
         }
         return 'You wash the dishes. Warm water, soap, the repetition of it. The kitchen looks a little more like someone lives here on purpose.';
@@ -2721,11 +2712,11 @@ export function createContent(ctx) {
       id: 'check_phone_kitchen',
       label: 'Check your phone',
       location: 'apartment_kitchen',
-      available: () => State.get('has_phone') && State.get('phone_battery') > 0 && !State.get('viewing_phone'),
+      available: () => ctx.state.get('has_phone') && ctx.state.get('phone_battery') > 0 && !ctx.state.get('viewing_phone'),
       execute: () => {
-        State.set('viewing_phone', true);
-        State.advanceTime(1);
-        Events.record('checked_phone');
+        ctx.state.set('viewing_phone', true);
+        ctx.state.advanceTime(1);
+        ctx.events.record('checked_phone');
         return phoneScreenDescription();
       },
     },
@@ -2736,89 +2727,89 @@ export function createContent(ctx) {
       location: 'apartment_kitchen',
       available: () => true,
       execute: () => {
-        const mood = State.moodTone();
-        const minutes = Timeline.randomInt(5, 15);
-        State.advanceTime(minutes);
+        const mood = ctx.state.moodTone();
+        const minutes = ctx.timeline.randomInt(5, 15);
+        ctx.state.advanceTime(minutes);
 
         // Quiet sentiment — the kitchen is a quiet space + habituation
-        const qc = State.sentimentIntensity('quiet', 'comfort');
-        const qi = State.sentimentIntensity('quiet', 'irritation');
+        const qc = ctx.state.sentimentIntensity('quiet', 'comfort');
+        const qi = ctx.state.sentimentIntensity('quiet', 'irritation');
         if (qc > 0) {
-          State.adjustNT('serotonin', qc * 2);
-          State.adjustSentiment('quiet', 'comfort', -0.002);
+          ctx.state.adjustNT('serotonin', qc * 2);
+          ctx.state.adjustSentiment('quiet', 'comfort', -0.002);
         }
         if (qi > 0) {
-          State.adjustNT('norepinephrine', qi * 2);
-          State.adjustSentiment('quiet', 'irritation', -0.001);
+          ctx.state.adjustNT('norepinephrine', qi * 2);
+          ctx.state.adjustSentiment('quiet', 'irritation', -0.001);
         }
 
         // NT values for continuous prose shading
-        const ser = State.get('serotonin');
-        const ne = State.get('norepinephrine');
-        const dopa = State.get('dopamine');
-        const gaba = State.get('gaba');
-        const aden = State.get('adenosine');
+        const ser = ctx.state.get('serotonin');
+        const ne = ctx.state.get('norepinephrine');
+        const dopa = ctx.state.get('dopamine');
+        const gaba = ctx.state.get('gaba');
+        const aden = ctx.state.get('adenosine');
 
         if (mood === 'numb') {
-          return Timeline.weightedPick([
+          return ctx.timeline.weightedPick([
             { weight: 1, value: 'You sit at the table. The surface is cool under your hands. You sit there. That\'s it.' },
             { weight: 1, value: 'The kitchen table. You\'re at it. The fridge hums. Minutes pass. You don\'t move.' },
             { weight: 1, value: 'Sitting. The table, the chair, the quiet kitchen. You\'re here. That\'s the whole event.' },
             // Low dopamine — nothing to reach for
-            { weight: State.lerp01(dopa, 40, 15), value: 'You sit at the table. Your hands are on the surface. You could get up. You could do something. The thought arrives and lies there, flat, like everything else.' },
+            { weight: ctx.state.lerp01(dopa, 40, 15), value: 'You sit at the table. Your hands are on the surface. You could get up. You could do something. The thought arrives and lies there, flat, like everything else.' },
           ]);
         }
         if (mood === 'heavy') {
-          State.adjustEnergy(1);
-          return Timeline.weightedPick([
+          ctx.state.adjustEnergy(1);
+          return ctx.timeline.weightedPick([
             { weight: 1, value: 'You sit. The chair takes your weight. Not standing is something. Not much, but something.' },
             { weight: 1, value: 'The kitchen table. You put your arms on it and lean forward. The not-standing helps. Your body is grateful for small mercies.' },
             { weight: 1, value: 'You sit down. The effort of being upright transfers to the chair. Your back says thank you in its own way.' },
             // Low serotonin — sitting doesn't ease the weight
-            { weight: State.lerp01(ser, 35, 15), value: 'You sit. The chair holds you. You put your head on the table and the cool surface is the only good thing. You stay like that for a while, folded over, not resting.' },
+            { weight: ctx.state.lerp01(ser, 35, 15), value: 'You sit. The chair holds you. You put your head on the table and the cool surface is the only good thing. You stay like that for a while, folded over, not resting.' },
           ]);
         }
         if (mood === 'fraying') {
-          State.adjustStress(-1);
-          return Timeline.weightedPick([
+          ctx.state.adjustStress(-1);
+          return ctx.timeline.weightedPick([
             { weight: 1, value: 'You sit at the table. The kitchen is quieter than the rest of your head. Barely, but it\'s something.' },
             { weight: 1, value: 'The table. Your hands on it. The solidity of a flat surface. The fridge hum. For a minute the noise inside dims, slightly.' },
             { weight: 1, value: 'You sit. The kitchen has a specific quiet — the fridge, the clock, the tap. It\'s not peaceful. But it\'s not loud.' },
             // Low GABA — can't settle even sitting
-            { weight: State.lerp01(gaba, 40, 20), value: 'You sit but your leg bounces. Your fingers drum the table. The kitchen is quiet and the quiet makes room for the thing that won\'t stop running in your chest.' },
+            { weight: ctx.state.lerp01(gaba, 40, 20), value: 'You sit but your leg bounces. Your fingers drum the table. The kitchen is quiet and the quiet makes room for the thing that won\'t stop running in your chest.' },
             // Quiet irritation — the silence is wrong
             { weight: qi > 0 ? qi * 0.8 : 0, value: 'You sit at the table and the quiet presses in. The fridge hum. The clock. The specific silence of a room with nobody in it. Your skin prickles. You need noise, or movement, or something.' },
           ]);
         }
         if (mood === 'hollow') {
-          return Timeline.weightedPick([
+          return ctx.timeline.weightedPick([
             { weight: 1, value: 'You sit at the kitchen table. The chair. The surface. The quiet. You\'re sitting because you walked in here and this is what\'s here.' },
             { weight: 1, value: 'The table. You sit at it. Not eating, not doing anything. Just occupying a chair in a room where chairs exist.' },
             { weight: 1, value: 'You sit. The kitchen is empty in the way it always is. You\'re in it. The clock ticks, or doesn\'t. Hard to tell.' },
             // High adenosine — the sitting is heavy
-            { weight: State.lerp01(aden, 50, 75) * State.adenosineBlock(), value: 'You sit down and your body thanks you by getting heavier. The table is a surface to put your arms on. Your eyelids are interested in closing. The kitchen hums around you, distant.' },
+            { weight: ctx.state.lerp01(aden, 50, 75) * ctx.state.adenosineBlock(), value: 'You sit down and your body thanks you by getting heavier. The table is a surface to put your arms on. Your eyelids are interested in closing. The kitchen hums around you, distant.' },
           ]);
         }
         if (mood === 'clear' || mood === 'present') {
-          State.adjustStress(-2);
-          return Timeline.weightedPick([
+          ctx.state.adjustStress(-2);
+          return ctx.timeline.weightedPick([
             { weight: 1, value: 'You sit at the table. The kitchen is quiet. Your hands are warm. Something close to comfort — the kind you don\'t notice until you\'re in it.' },
             { weight: 1, value: 'The kitchen table. The light from the window. You sit and it\'s fine — actually fine, not the word you say when nothing is. Just sitting, in a room, and it\'s okay.' },
             { weight: 1, value: 'You sit. The apartment is still. The fridge hums its one note. For a few minutes, that\'s all there is, and that\'s enough.' },
             // Higher serotonin — warmth settles in
-            { weight: State.lerp01(ser, 55, 75), value: 'You sit at the table and the kitchen holds you. The light, the quiet, the smell of the place you live. Your hands are warm. Your chest is easy. You stay because staying feels like the right thing.' },
+            { weight: ctx.state.lerp01(ser, 55, 75), value: 'You sit at the table and the kitchen holds you. The light, the quiet, the smell of the place you live. Your hands are warm. Your chest is easy. You stay because staying feels like the right thing.' },
             // Quiet comfort — the silence is the point
             { weight: qc > 0 ? qc : 0, value: 'You sit at the table and the quiet is perfect. Not empty — full of small things. The fridge, the light, the particular stillness of a room you\'re alone in. Something in you expands into the silence. You needed this.' },
           ]);
         }
         // flat / quiet
-        State.adjustStress(-1);
-        return Timeline.weightedPick([
+        ctx.state.adjustStress(-1);
+        return ctx.timeline.weightedPick([
           { weight: 1, value: 'You sit at the table for a while. Not doing anything. The kitchen is the kitchen. Time passes.' },
           { weight: 1, value: 'The table. You sit at it. The microwave clock changes. That\'s the most interesting thing that happens.' },
           { weight: 1, value: 'You sit. It\'s not productive, it\'s not restful, it\'s just sitting in a kitchen. Sometimes that\'s what there is.' },
           // High NE — aware of every small sound
-          { weight: State.lerp01(ne, 45, 65), value: 'You sit at the table. The fridge cycles on. A pipe ticks somewhere in the wall. Your body is still but your ears are busy — cataloguing the kitchen\'s small noises like they matter.' },
+          { weight: ctx.state.lerp01(ne, 45, 65), value: 'You sit at the table. The fridge cycles on. A pipe ticks somewhere in the wall. Your body is still but your ears are busy — cataloguing the kitchen\'s small noises like they matter.' },
           // Quiet irritation — the stillness is wrong
           { weight: qi > 0 ? qi * 0.5 : 0, value: 'You sit at the table. The quiet is too much. You tap your fingers, shift in the chair. The kitchen hums its one note and you wish it would hum a different one.' },
         ]);
@@ -2830,27 +2821,27 @@ export function createContent(ctx) {
       id: 'shower',
       label: 'Take a shower',
       location: 'apartment_bathroom',
-      available: () => !State.get('showered') && State.energyTier() !== 'depleted',
+      available: () => !ctx.state.get('showered') && ctx.state.energyTier() !== 'depleted',
       execute: () => {
-        State.set('showered', true);
-        Linens.useTowel();
-        State.adjustEnergy(-3);
-        State.adjustStress(-8);
-        State.advanceTime(15);
-        Events.record('showered');
+        ctx.state.set('showered', true);
+        ctx.linens.useTowel();
+        ctx.state.adjustEnergy(-3);
+        ctx.state.adjustStress(-8);
+        ctx.state.advanceTime(15);
+        ctx.events.record('showered');
 
         // Warmth comfort sentiment — extra stress relief + habituation
-        const wc = State.sentimentIntensity('warmth', 'comfort');
+        const wc = ctx.state.sentimentIntensity('warmth', 'comfort');
         if (wc > 0) {
-          State.adjustStress(-wc * 3);
-          State.adjustSentiment('warmth', 'comfort', -0.002);
+          ctx.state.adjustStress(-wc * 3);
+          ctx.state.adjustSentiment('warmth', 'comfort', -0.002);
         }
 
-        const mood = State.moodTone();
-        const energy = State.energyTier();
+        const mood = ctx.state.moodTone();
+        const energy = ctx.state.energyTier();
 
         if (mood === 'numb' || mood === 'heavy') {
-          return Timeline.weightedPick([
+          return ctx.timeline.weightedPick([
             { weight: 1, value: 'The water is warm. You stand in it longer than you need to. The world outside the shower curtain can wait.' },
             { weight: 1, value: 'Hot water. You stand under it. The steam fills the small room. For a few minutes, the world is just this.' },
             // High warmth comfort — the heat is an anchor
@@ -2858,14 +2849,14 @@ export function createContent(ctx) {
           ]);
         }
         if (energy === 'tired' || energy === 'exhausted') {
-          return Timeline.weightedPick([
+          return ctx.timeline.weightedPick([
             { weight: 1, value: 'Hot water. It doesn\'t fix anything but it makes the surface of things bearable. You get out when it starts going cold.' },
             { weight: 1, value: 'The shower runs hot and you lean into it. Your body is tired enough to just stand there and let the water do something.' },
             // High warmth comfort — the heat reaches the exhaustion
             { weight: wc > 0 ? wc : 0, value: 'The hot water hits your shoulders and something lets go. Not everything — but the layer closest to the surface. The warmth finds the tired places. You stay longer than you should.' },
           ]);
         }
-        return Timeline.weightedPick([
+        return ctx.timeline.weightedPick([
           { weight: 1, value: 'A shower. Hot water, steam, the sound of it. You feel more like a person when you step out.' },
           { weight: 1, value: 'You shower. The water is hot, the bathroom fills with steam. When you step out, you\'re clean. That\'s something.' },
           // High warmth comfort — the hot water is an old friend
@@ -2880,20 +2871,20 @@ export function createContent(ctx) {
       location: 'apartment_bathroom',
       available: () => true,
       execute: () => {
-        State.adjustEnergy(2);
-        State.adjustStress(-2);
-        State.advanceTime(3);
+        ctx.state.adjustEnergy(2);
+        ctx.state.adjustStress(-2);
+        ctx.state.advanceTime(3);
 
         // NT deterministic variants (no RNG — replay-safe)
-        const mood = State.moodTone();
-        const aden = State.get('adenosine');
-        const ne = State.get('norepinephrine');
-        const ser = State.get('serotonin');
+        const mood = ctx.state.moodTone();
+        const aden = ctx.state.get('adenosine');
+        const ne = ctx.state.get('norepinephrine');
+        const ser = ctx.state.get('serotonin');
 
         if (mood === 'numb' || mood === 'hollow') {
           return 'Cold water. You go through the motions. The face in the mirror is yours. You don\'t stay to look.';
         }
-        if (aden > 70 && State.adenosineBlock() > 0.4) {
+        if (aden > 70 && ctx.state.adenosineBlock() > 0.4) {
           return 'Cold water on your face. The shock of it is the point. You stand there dripping for a second, waiting to feel more awake.';
         }
         if (ne > 65) {
@@ -2910,16 +2901,16 @@ export function createContent(ctx) {
       id: 'rehang_towel',
       label: 'Pick up the towel',
       location: 'apartment_bathroom',
-      available: () => Linens.towelState() === 'on_floor',
+      available: () => ctx.linens.towelState() === 'on_floor',
       execute: () => {
-        Linens.rehangTowel();
-        State.advanceTime(1);
+        ctx.linens.rehangTowel();
+        ctx.state.advanceTime(1);
 
-        const mood = State.moodTone();
+        const mood = ctx.state.moodTone();
         if (mood === 'numb' || mood === 'heavy') {
           return 'You pick up the towel. Hang it back up. One thing off the floor.';
         }
-        return Timeline.weightedPick([
+        return ctx.timeline.weightedPick([
           { weight: 1, value: 'You pick up the towel and hang it back where it goes. The floor looks like a floor again.' },
           { weight: 1, value: 'The towel from the floor. You rehang it. Twenty seconds, done.' },
         ]);
@@ -2930,64 +2921,64 @@ export function createContent(ctx) {
       id: 'take_pain_reliever',
       label: 'Take something for the pain',
       location: 'apartment_bathroom',
-      available: () => (State.hasCondition('migraines') && State.migraineTier() !== 'none')
-                    || (State.hasCondition('dental_pain') && State.dentalTier() !== 'none'),
+      available: () => (ctx.state.hasCondition('migraines') && ctx.state.migraineTier() !== 'none')
+                    || (ctx.state.hasCondition('dental_pain') && ctx.state.dentalTier() !== 'none'),
       execute: () => {
-        const dentalTier = State.dentalTier();
-        const migraineTier = State.migraineTier();
+        const dentalTier = ctx.state.dentalTier();
+        const migraineTier = ctx.state.migraineTier();
 
         // Dental — ibuprofen cuts ache by ~35 points; doesn't fix the underlying tooth
         if (dentalTier !== 'none') {
-          State.dentalSpike(-35); // Approximation debt: -35pt relief chosen
+          ctx.state.dentalSpike(-35); // Approximation debt: -35pt relief chosen
         }
         // Migraine — pain reliever cuts intensity by ~35 points
         if (migraineTier !== 'none') {
-          State.set('migraine_intensity', Math.max(0, State.get('migraine_intensity') - 35));
+          ctx.state.set('migraine_intensity', Math.max(0, ctx.state.get('migraine_intensity') - 35));
         }
-        State.advanceTime(Timeline.randomInt(3, 6));
+        ctx.state.advanceTime(ctx.timeline.randomInt(3, 6));
 
-        const mood = State.moodTone();
+        const mood = ctx.state.moodTone();
 
         // Dental-primary prose (when tooth is worse than or instead of migraine)
-        if (dentalTier !== 'none' && (migraineTier === 'none' || State.get('dental_ache') > State.get('migraine_intensity'))) {
-          const acheNow = State.get('dental_ache');
+        if (dentalTier !== 'none' && (migraineTier === 'none' || ctx.state.get('dental_ache') > ctx.state.get('migraine_intensity'))) {
+          const acheNow = ctx.state.get('dental_ache');
           if (acheNow < 20) {
-            return Timeline.weightedPick([
+            return ctx.timeline.weightedPick([
               { weight: 1, value: 'You take ibuprofen and wait at the sink. The tooth quiets down — not gone, but livable. You know it\'ll be back.' },
               { weight: 1, value: 'The pill. You wash it down and run your tongue along the side of your mouth carefully. It\'ll help. For now.' },
             ]);
           }
           if (acheNow < 45) {
-            return Timeline.weightedPick([
+            return ctx.timeline.weightedPick([
               { weight: 1, value: 'You take something for it and stand there waiting for it to work. The tooth is still there, doing its thing. The medication will argue with it, eventually.' },
-              { weight: State.lerp01(mood === 'heavy' ? 80 : 40, 40, 20), value: 'Two pills and the tap. You probe the tooth with your tongue by instinct and immediately regret it. You wait for the ibuprofen to work.' },
+              { weight: ctx.state.lerp01(mood === 'heavy' ? 80 : 40, 40, 20), value: 'Two pills and the tap. You probe the tooth with your tongue by instinct and immediately regret it. You wait for the ibuprofen to work.' },
             ]);
           }
-          return Timeline.weightedPick([
+          return ctx.timeline.weightedPick([
             { weight: 1, value: 'You take ibuprofen with both hands on the sink and wait. The tooth is insistent. The pill will help. You just have to be still for a while.' },
             { weight: 1, value: 'Pills, water, the tile under your feet. The tooth is still going. It will keep going until the medication gets there. You wait.' },
-            { weight: State.lerp01(State.get('serotonin'), 40, 20), value: 'You take the medication and lean against the sink. The tooth doesn\'t know it\'s supposed to stop. You know from experience that it will. You\'re not sure when.' },
+            { weight: ctx.state.lerp01(ctx.state.get('serotonin'), 40, 20), value: 'You take the medication and lean against the sink. The tooth doesn\'t know it\'s supposed to stop. You know from experience that it will. You\'re not sure when.' },
           ]);
         }
 
         // Migraine-primary prose (original)
-        const migraineTierNow = State.migraineTier();
+        const migraineTierNow = ctx.state.migraineTier();
         if (migraineTierNow === 'none') {
-          return Timeline.weightedPick([
+          return ctx.timeline.weightedPick([
             { weight: 1, value: 'The pill. You wash it down and wait. By the time you leave the bathroom the worst of it is already lifting.' },
             { weight: 1, value: 'You take two. The headache recedes — not gone, but manageable. You can think again.' },
           ]);
         }
-        if (State.get('migraine_intensity') <= 20) {
-          return Timeline.weightedPick([
+        if (ctx.state.get('migraine_intensity') <= 20) {
+          return ctx.timeline.weightedPick([
             { weight: 1, value: 'The medication is doing something. The throb is still there but the edge has come off it. You can tolerate light now.' },
-            { weight: State.lerp01(State.get('migraine_intensity'), 20, 5), value: 'The headache is quieting. Not gone — never quite gone — but livable. You hold still for a minute, waiting to be sure.' },
+            { weight: ctx.state.lerp01(ctx.state.get('migraine_intensity'), 20, 5), value: 'The headache is quieting. Not gone — never quite gone — but livable. You hold still for a minute, waiting to be sure.' },
           ]);
         }
-        return Timeline.weightedPick([
+        return ctx.timeline.weightedPick([
           { weight: 1, value: 'You swallow it and stand at the sink. The headache doesn\'t respond immediately. It will. You\'ve done this before.' },
           { weight: 1, value: 'Two tablets and the tap. You lean against the sink and wait. The pill will work. You just have to be still for a while.' },
-          { weight: State.lerp01(State.get('serotonin'), 40, 20), value: 'You take the medication in the dark. Light makes it worse. You close your eyes and wait for the pills to do something. They usually do. Eventually.' },
+          { weight: ctx.state.lerp01(ctx.state.get('serotonin'), 40, 20), value: 'You take the medication in the dark. Light makes it worse. You close your eyes and wait for the pills to do something. They usually do. Eventually.' },
         ]);
       },
     },
@@ -2997,11 +2988,11 @@ export function createContent(ctx) {
       id: 'check_phone_street',
       label: 'Check your phone',
       location: 'street',
-      available: () => State.get('has_phone') && State.get('phone_battery') > 0 && !State.get('viewing_phone'),
+      available: () => ctx.state.get('has_phone') && ctx.state.get('phone_battery') > 0 && !ctx.state.get('viewing_phone'),
       execute: () => {
-        State.set('viewing_phone', true);
-        State.advanceTime(1);
-        Events.record('checked_phone');
+        ctx.state.set('viewing_phone', true);
+        ctx.state.advanceTime(1);
+        ctx.events.record('checked_phone');
         return phoneScreenDescription();
       },
     },
@@ -3010,13 +3001,13 @@ export function createContent(ctx) {
       id: 'sit_on_step',
       label: 'Sit on the step for a minute',
       location: 'street',
-      available: () => ['depleted', 'exhausted', 'tired'].includes(State.energyTier()),
+      available: () => ['depleted', 'exhausted', 'tired'].includes(ctx.state.energyTier()),
       execute: () => {
-        State.adjustEnergy(3);
-        State.advanceTime(Timeline.randomInt(5, 12));
+        ctx.state.adjustEnergy(3);
+        ctx.state.advanceTime(ctx.timeline.randomInt(5, 12));
 
-        const mood = State.moodTone();
-        const weather = State.get('weather');
+        const mood = ctx.state.moodTone();
+        const weather = ctx.state.get('weather');
 
         if (weather === 'snow') {
           return 'You sit on the step. Cold through your clothes immediately. The street is muffled, quieted. You stay a minute anyway.';
@@ -3029,9 +3020,9 @@ export function createContent(ctx) {
         }
 
         // NT deterministic shading (no RNG — replay-safe)
-        const aden = State.get('adenosine');
-        const ne = State.get('norepinephrine');
-        if (aden > 65 && State.adenosineBlock() > 0.4) {
+        const aden = ctx.state.get('adenosine');
+        const ne = ctx.state.get('norepinephrine');
+        if (aden > 65 && ctx.state.adenosineBlock() > 0.4) {
           return 'You sit down. Your body asked for this before the rest of you decided.';
         }
         if (ne > 65) {
@@ -3045,203 +3036,203 @@ export function createContent(ctx) {
       id: 'go_for_walk',
       label: 'Walk for a while',
       location: 'street',
-      available: () => State.energyTier() !== 'depleted' && State.migraineTier() !== 'severe',
+      available: () => ctx.state.energyTier() !== 'depleted' && ctx.state.migraineTier() !== 'severe',
       execute: () => {
-        const mood = State.moodTone();
-        const weather = State.get('weather');
-        const minutes = Timeline.randomInt(15, 30);
-        const energyCost = Timeline.randomInt(5, 8);
+        const mood = ctx.state.moodTone();
+        const weather = ctx.state.get('weather');
+        const minutes = ctx.timeline.randomInt(15, 30);
+        const energyCost = ctx.timeline.randomInt(5, 8);
 
-        State.advanceTime(minutes);
-        State.adjustEnergy(-energyCost);
+        ctx.state.advanceTime(minutes);
+        ctx.state.adjustEnergy(-energyCost);
 
         // Outside comfort sentiment — serotonin nudge + habituation
-        const oc = State.sentimentIntensity('outside', 'comfort');
+        const oc = ctx.state.sentimentIntensity('outside', 'comfort');
         if (oc > 0) {
-          State.adjustNT('serotonin', oc * 2);
-          State.adjustSentiment('outside', 'comfort', -0.002);
+          ctx.state.adjustNT('serotonin', oc * 2);
+          ctx.state.adjustSentiment('outside', 'comfort', -0.002);
         }
 
         // NT values for continuous prose shading
-        const ser = State.get('serotonin');
-        const ne = State.get('norepinephrine');
-        const dopa = State.get('dopamine');
-        const gaba = State.get('gaba');
-        const aden = State.get('adenosine');
+        const ser = ctx.state.get('serotonin');
+        const ne = ctx.state.get('norepinephrine');
+        const dopa = ctx.state.get('dopamine');
+        const gaba = ctx.state.get('gaba');
+        const aden = ctx.state.get('adenosine');
 
         // Rain sound sentiment (for drizzle prose)
-        const rc = State.sentimentIntensity('rain_sound', 'comfort');
+        const rc = ctx.state.sentimentIntensity('rain_sound', 'comfort');
         // Weather sentiment
-        const weatherComfort = State.sentimentIntensity('weather_' + weather, 'comfort');
+        const weatherComfort = ctx.state.sentimentIntensity('weather_' + weather, 'comfort');
 
         // Weather modifier — drizzle and snow add discomfort
         if (weather === 'drizzle') {
-          State.adjustStress(2);
+          ctx.state.adjustStress(2);
         } else if (weather === 'snow') {
-          State.adjustStress(3); // cold + wet + effort
+          ctx.state.adjustStress(3); // cold + wet + effort
         }
 
         // Stress effect depends on mood
         if (mood === 'clear' || mood === 'present') {
-          State.adjustStress(-8);
+          ctx.state.adjustStress(-8);
           if (weather === 'drizzle') {
-            return Timeline.weightedPick([
+            return ctx.timeline.weightedPick([
               { weight: 1, value: 'You walk. The drizzle is cold on your face but the air is good. Your legs find a rhythm. The wet doesn\'t ruin it — just changes the texture.' },
               { weight: 1, value: 'Rain on your jacket. Your shoes get damp. But the walking helps — the movement, the air, the world being bigger than a room. It\'s worth it.' },
               // High NE — the rain is vivid
-              { weight: State.lerp01(ne, 45, 65), value: 'The rain is on your face and you can feel every drop — distinct, cold, alive. Your feet on the wet pavement. The smell of it. The world in the rain is a specific, sharp thing, and you\'re in it.' },
+              { weight: ctx.state.lerp01(ne, 45, 65), value: 'The rain is on your face and you can feel every drop — distinct, cold, alive. Your feet on the wet pavement. The smell of it. The world in the rain is a specific, sharp thing, and you\'re in it.' },
               // Rain lover — the drizzle is welcome
               { weight: rc > 0 ? rc : 0, value: 'You walk in the rain and it\'s good. The sound of it on your jacket, the wet air, the way the street smells different. Something about rain has always been yours. You walk slower than you need to.' },
             ]);
           }
           if (weather === 'snow') {
-            return Timeline.weightedPick([
+            return ctx.timeline.weightedPick([
               { weight: 1, value: 'You walk in the snow. The street is quiet in a specific way. Your footprints behind you, new ones forming ahead. The cold is real but the air is clean and the world feels big and still.' },
               { weight: 1, value: 'Snow. Your feet find the cleared patches. The air has a bite to it but you\'re moving and the moving is good. The world under snow looks like a version of itself worth looking at.' },
               // High NE — the cold is vivid
-              { weight: State.lerp01(ne, 45, 65), value: 'The cold is on your face and your breath comes out white. The snow muffles everything. Your footsteps, your breathing, the sound of the world. You\'re walking in a particular kind of quiet.' },
+              { weight: ctx.state.lerp01(ne, 45, 65), value: 'The cold is on your face and your breath comes out white. The snow muffles everything. Your footsteps, your breathing, the sound of the world. You\'re walking in a particular kind of quiet.' },
             ]);
           }
-          return Timeline.weightedPick([
+          return ctx.timeline.weightedPick([
             { weight: 1, value: 'You walk. No destination, just movement. The air is different from inside — wider, cooler, real. Your thoughts spread out. Something loosens in your chest.' },
             { weight: 1, value: 'A walk. Around the block, then further because it feels good to keep going. Your legs know what to do. Your head quiets down. The world passes at a human speed.' },
             { weight: 1, value: 'You walk until the apartment feels far away. The sky, the street, the sound of your own footsteps. This is what outside is for.' },
             // High serotonin + dopamine — the walk is actually good
-            { weight: State.lerp01(ser, 55, 75) * State.lerp01(dopa, 50, 70), value: 'You walk, and the walking is good. Not because anything is happening — just the rhythm, the air, the way your body knows how to do this. The street unfolds. The sky is big. You feel like a person in the world, and it\'s enough.' },
+            { weight: ctx.state.lerp01(ser, 55, 75) * ctx.state.lerp01(dopa, 50, 70), value: 'You walk, and the walking is good. Not because anything is happening — just the rhythm, the air, the way your body knows how to do this. The street unfolds. The sky is big. You feel like a person in the world, and it\'s enough.' },
             // Outside lover — being out is the point
             { weight: oc > 0 ? oc : 0, value: 'You walk and the outside is enough. The air, the space, the sky that goes on without you. Your body knows this — the way it loosens, the way your breath comes easier. You needed out. This is out.' },
           ]);
         }
         if (mood === 'flat') {
-          State.adjustStress(-4);
+          ctx.state.adjustStress(-4);
           if (weather === 'drizzle') {
-            return Timeline.weightedPick([
+            return ctx.timeline.weightedPick([
               { weight: 1, value: 'You walk in the drizzle. Your jacket darkens at the shoulders. The movement helps some — not a lot, but some. You come back damp.' },
               { weight: 1, value: 'Rain. You walk through it because you\'re already out. It\'s not pleasant but the walking itself does something. Slightly.' },
               // High adenosine (unblocked) — the walk is a slog
-              { weight: State.lerp01(aden, 50, 70) * State.adenosineBlock(), value: 'You walk in the rain and your legs are heavy. The dampness seeps into your shoes. Each block takes more than the last. The air helps, barely. You come back tired and wet.' },
+              { weight: ctx.state.lerp01(aden, 50, 70) * ctx.state.adenosineBlock(), value: 'You walk in the rain and your legs are heavy. The dampness seeps into your shoes. Each block takes more than the last. The air helps, barely. You come back tired and wet.' },
               // Rain lover — the drizzle is okay
               { weight: rc > 0 ? rc * 0.7 : 0, value: 'You walk in the drizzle and it\'s fine, actually. The sound of rain on your hood. The wet streets. Not everyone likes this. You don\'t mind it.' },
             ]);
           }
           if (weather === 'snow') {
-            return Timeline.weightedPick([
+            return ctx.timeline.weightedPick([
               { weight: 1, value: 'You walk in the snow. It\'s an effort. Your shoes are damp by the third block. But the movement does something — something small — and the world under snow is at least a different version of itself.' },
               { weight: 1, value: 'Snow. You walk through it because walking is the thing you\'re doing. Each step leaves a mark. The cold is a fact you move through. You come back wetter than you went out.' },
               // High adenosine (unblocked) — the cold and the drag compound
-              { weight: State.lerp01(aden, 50, 70) * State.adenosineBlock(), value: 'You walk in the snow and your body is doing its best. Heavy legs, cold feet, the kind of tired that makes snow feel like sand. You do it anyway. That\'s the whole story.' },
+              { weight: ctx.state.lerp01(aden, 50, 70) * ctx.state.adenosineBlock(), value: 'You walk in the snow and your body is doing its best. Heavy legs, cold feet, the kind of tired that makes snow feel like sand. You do it anyway. That\'s the whole story.' },
             ]);
           }
-          return Timeline.weightedPick([
+          return ctx.timeline.weightedPick([
             { weight: 1, value: 'You walk. It\'s not transformative. But the air is different and your legs are moving and that\'s better than not.' },
             { weight: 1, value: 'A walk. The neighborhood. You\'ve seen it before. But moving through it is different from being inside looking at walls. It helps, some.' },
             { weight: 1, value: 'You walk for a while. It doesn\'t fix anything. But the blood moves and the air gets in and when you stop you feel slightly less like you were cemented to the floor.' },
             // Higher NE — details register more than usual
-            { weight: State.lerp01(ne, 40, 60), value: 'You walk. You notice things — the crack in the sidewalk, the color of someone\'s door, a sound from a window. Details that don\'t matter but your brain collects them anyway, like it needed something to do.' },
+            { weight: ctx.state.lerp01(ne, 40, 60), value: 'You walk. You notice things — the crack in the sidewalk, the color of someone\'s door, a sound from a window. Details that don\'t matter but your brain collects them anyway, like it needed something to do.' },
           ]);
         }
         if (mood === 'heavy') {
-          State.adjustStress(-2);
+          ctx.state.adjustStress(-2);
           if (weather === 'drizzle') {
-            return Timeline.weightedPick([
+            return ctx.timeline.weightedPick([
               { weight: 1, value: 'You walk in the rain. Every step costs something. The wet gets into your shoes. But the air — the air is different from inside. That\'s something.' },
               { weight: 1, value: 'Drizzle. You walk through it slowly. The world is grey and wet and you\'re in it. The effort is real. So is the fact that you went outside.' },
               // Low serotonin — the effort is almost too much
-              { weight: State.lerp01(ser, 35, 15), value: 'You walk in the rain and every step asks why. The wet, the cold, the weight of your own legs. You did this to yourself. You chose outside. It\'s unclear what it was supposed to fix.' },
+              { weight: ctx.state.lerp01(ser, 35, 15), value: 'You walk in the rain and every step asks why. The wet, the cold, the weight of your own legs. You did this to yourself. You chose outside. It\'s unclear what it was supposed to fix.' },
             ]);
           }
           if (weather === 'snow') {
-            return Timeline.weightedPick([
+            return ctx.timeline.weightedPick([
               { weight: 1, value: 'You walk in the snow. Everything is muffled — the world, the sounds, the sharp edges of things. Your footsteps are the loudest thing. You keep going because turning back is a different kind of effort.' },
               { weight: 1, value: 'Snow. You walk through it slowly. The cold cuts in. Each step is deliberate. You went outside. The snow makes that feel more true than usual.' },
               // Low serotonin + snow = weight of the world
-              { weight: State.lerp01(ser, 35, 15), value: 'You walk in the snow and the cold and the weight of it all compound. Your legs are doing the work while the rest of you follows. It doesn\'t help. But you\'re outside, which is different from not being outside.' },
+              { weight: ctx.state.lerp01(ser, 35, 15), value: 'You walk in the snow and the cold and the weight of it all compound. Your legs are doing the work while the rest of you follows. It doesn\'t help. But you\'re outside, which is different from not being outside.' },
             ]);
           }
-          return Timeline.weightedPick([
+          return ctx.timeline.weightedPick([
             { weight: 1, value: 'You walk. Slowly. The effort of being outside is real — the bodies, the noise, the fact of being vertical and moving. But the air changes things, slightly.' },
             { weight: 1, value: 'A walk. Your body does it reluctantly. The street, the sounds, the sky that\'s bigger than any ceiling. By the end something has shifted — not much, but it\'s there.' },
             { weight: 1, value: 'You make yourself walk. Each block is a small negotiation. But the air is different out here and by the time you turn back, something in your chest is a fraction looser.' },
             // High adenosine (unblocked) — the body drags
-            { weight: State.lerp01(aden, 50, 70) * State.adenosineBlock(), value: 'You walk. Your body is a heavy thing you\'re carrying through space. The legs work but they want you to know they\'re working. By the second block you\'re wondering if this was a mistake. By the third, you don\'t care. You just walk.' },
+            { weight: ctx.state.lerp01(aden, 50, 70) * ctx.state.adenosineBlock(), value: 'You walk. Your body is a heavy thing you\'re carrying through space. The legs work but they want you to know they\'re working. By the second block you\'re wondering if this was a mistake. By the third, you don\'t care. You just walk.' },
           ]);
         }
         if (mood === 'fraying') {
           // No stress relief — the thoughts follow you
           if (weather === 'drizzle') {
-            return Timeline.weightedPick([
+            return ctx.timeline.weightedPick([
               { weight: 1, value: 'You walk. The rain gets in your collar. Your thoughts are exactly as loud out here as they were inside, plus now you\'re wet.' },
               { weight: 1, value: 'Drizzle. You walk through it fast, shoulders hunched. The thoughts don\'t care about the scenery. They came with you. Now you\'re tired and damp.' },
               // High NE — every drop is an irritant
-              { weight: State.lerp01(ne, 55, 75), value: 'The rain is on your neck and you can feel every drop. Your jacket isn\'t enough. The cold, the wet, the sound of cars on wet road — every sensation is a needle. You walk faster. It doesn\'t help.' },
+              { weight: ctx.state.lerp01(ne, 55, 75), value: 'The rain is on your neck and you can feel every drop. Your jacket isn\'t enough. The cold, the wet, the sound of cars on wet road — every sensation is a needle. You walk faster. It doesn\'t help.' },
             ]);
           }
           if (weather === 'snow') {
-            return Timeline.weightedPick([
+            return ctx.timeline.weightedPick([
               { weight: 1, value: 'You walk in the snow. The cold sharpens every sensation — the thoughts, the ache in your hands, the sound of your own breathing. The world is quiet. You are not.' },
               { weight: 1, value: 'Snow. You walk through it. The thoughts came with you. The cold doesn\'t help and doesn\'t hurt, it just adds to the pile. You come back cold and no different.' },
               // High NE + cold — everything is too much
-              { weight: State.lerp01(ne, 55, 75), value: 'The cold is immediate — face, hands, ears. Each breath is a small shock. Your thoughts are already loud and the cold just adds a new register to the noise. You walk fast. You come back faster.' },
+              { weight: ctx.state.lerp01(ne, 55, 75), value: 'The cold is immediate — face, hands, ears. Each breath is a small shock. Your thoughts are already loud and the cold just adds a new register to the noise. You walk fast. You come back faster.' },
             ]);
           }
-          return Timeline.weightedPick([
+          return ctx.timeline.weightedPick([
             { weight: 1, value: 'You walk. Fast, tight, shoulders up. The thoughts come with you — they don\'t care about the change of scenery. You burn energy. That\'s what you accomplish.' },
             { weight: 1, value: 'A walk. You thought it would help. The air is fine. The sky is there. The thing in your chest is exactly the same, just outside now instead of inside.' },
             { weight: 1, value: 'You walk until your legs notice. The thoughts follow you the whole way — across the street, around the block, back again. Walking didn\'t help. But you walked.' },
             // Low GABA — the anxiety walks with you
-            { weight: State.lerp01(gaba, 40, 20), value: 'You walk fast. Too fast. Your breath is shallow and your hands are fists in your pockets. The movement should help. It doesn\'t. The thing inside you has legs too, and it keeps up easily.' },
+            { weight: ctx.state.lerp01(gaba, 40, 20), value: 'You walk fast. Too fast. Your breath is shallow and your hands are fists in your pockets. The movement should help. It doesn\'t. The thing inside you has legs too, and it keeps up easily.' },
           ]);
         }
         if (mood === 'numb') {
           // No stress relief — nothing registers
           if (weather === 'drizzle') {
-            return Timeline.weightedPick([
+            return ctx.timeline.weightedPick([
               { weight: 1, value: 'You walk in the rain. You get wet. You walk back. The rain happened to you. That\'s about all you can say about it.' },
               { weight: 1, value: 'Drizzle. You walk through it. Your body moves through space. You come back damp. Nothing changed except your socks.' },
               // Low serotonin — numb even to discomfort
-              { weight: State.lerp01(ser, 30, 10), value: 'You walk in the rain. It\'s cold. You know it\'s cold because your hands are wet, but the cold doesn\'t bother you the way it should. Nothing does. You walk until walking stops, then you turn around.' },
+              { weight: ctx.state.lerp01(ser, 30, 10), value: 'You walk in the rain. It\'s cold. You know it\'s cold because your hands are wet, but the cold doesn\'t bother you the way it should. Nothing does. You walk until walking stops, then you turn around.' },
             ]);
           }
           if (weather === 'snow') {
-            return Timeline.weightedPick([
+            return ctx.timeline.weightedPick([
               { weight: 1, value: 'You walk in the snow. The world is white and muffled. You move through it. Your feet get cold. You walk back. None of it reached you.' },
               { weight: 1, value: 'Snow. Your body walks through it. Your footprints are in the snow and that\'s the only evidence anything happened. You come back and you\'re cold. That\'s everything.' },
               // Low dopamine — snow's beauty is just information
-              { weight: State.lerp01(dopa, 40, 15), value: 'Snow on the street, on the parked cars, on the awnings. You know this is a particular kind of beautiful. You don\'t feel it. The information is there; the feeling isn\'t.' },
+              { weight: ctx.state.lerp01(dopa, 40, 15), value: 'Snow on the street, on the parked cars, on the awnings. You know this is a particular kind of beautiful. You don\'t feel it. The information is there; the feeling isn\'t.' },
             ]);
           }
-          return Timeline.weightedPick([
+          return ctx.timeline.weightedPick([
             { weight: 1, value: 'You walk. The street, the air, the people. You move through all of it like water through a pipe. You were out. Now you\'re back. That happened.' },
             { weight: 1, value: 'A walk. You went, you returned. The scenery was there. You were there. The two of you didn\'t really connect.' },
             { weight: 1, value: 'You walk. Your legs do it. The air touches your face. People pass. None of it reaches whatever part of you would need to be reached. You come back.' },
             // Low dopamine — no engagement with the world
-            { weight: State.lerp01(dopa, 40, 15), value: 'You walk. Trees, buildings, people — the world scrolls past like a feed you\'re not interested in. Your legs carry you through it. At no point do you feel like you\'re in it.' },
+            { weight: ctx.state.lerp01(dopa, 40, 15), value: 'You walk. Trees, buildings, people — the world scrolls past like a feed you\'re not interested in. Your legs carry you through it. At no point do you feel like you\'re in it.' },
           ]);
         }
         // hollow
-        State.adjustStress(-1);
+        ctx.state.adjustStress(-1);
         if (weather === 'drizzle') {
-          return Timeline.weightedPick([
+          return ctx.timeline.weightedPick([
             { weight: 1, value: 'You walk in the drizzle. The world exists. You were in it, briefly, getting rained on. It\'s something.' },
             { weight: 1, value: 'Rain on the street. You walk through it. Cars pass. People with umbrellas. You\'re out here. That\'s a fact about your life right now.' },
             // High NE — the rain is oddly present
-            { weight: State.lerp01(ne, 40, 60), value: 'You walk in the drizzle and the rain is on your face, each drop a small fact. Cars hiss past on wet road. Someone\'s umbrella is red. You notice things. You don\'t know what to do with any of them.' },
+            { weight: ctx.state.lerp01(ne, 40, 60), value: 'You walk in the drizzle and the rain is on your face, each drop a small fact. Cars hiss past on wet road. Someone\'s umbrella is red. You notice things. You don\'t know what to do with any of them.' },
           ]);
         }
         if (weather === 'snow') {
-          return Timeline.weightedPick([
+          return ctx.timeline.weightedPick([
             { weight: 1, value: 'You walk in the snow. The street is quiet. Your footprints in the white behind you. The world feels like it\'s holding still, which is something.' },
             { weight: 1, value: 'Snow on the street, on the cars, on you. You walk through it. The quiet of it is real. You were in the world for a little while. The world was muffled and still.' },
             // Higher NE — the muffled world notices you
-            { weight: State.lerp01(ne, 40, 60), value: 'You walk in the snow and the quiet is very present. Each footstep. Your breath white in the air. The world pulled back and left this version — white and specific and only slightly demanding.' },
+            { weight: ctx.state.lerp01(ne, 40, 60), value: 'You walk in the snow and the quiet is very present. Each footstep. Your breath white in the air. The world pulled back and left this version — white and specific and only slightly demanding.' },
           ]);
         }
-        return Timeline.weightedPick([
+        return ctx.timeline.weightedPick([
           { weight: 1, value: 'You walk. The world exists and you\'re in it, briefly. People going places. Cars. The sky. You were part of the scene for a few minutes. Then you came back.' },
           { weight: 1, value: 'A walk. The street, the air, the feeling of being a body among other bodies. It doesn\'t fill the hollow, but it proves the world is still out there.' },
           { weight: 1, value: 'You walk for a while. Past the store, past the bus stop, past people you\'ll never see again. The world is there. You were in it.' },
           // Higher serotonin — the hollow lets some light in
-          { weight: State.lerp01(ser, 40, 55), value: 'You walk. The hollow is still there, but the air moves through it. A tree. A stranger\'s dog. The light on the pavement. Small things that don\'t fix anything but prove the world is wider than the inside of your head.' },
+          { weight: ctx.state.lerp01(ser, 40, 55), value: 'You walk. The hollow is still there, but the air moves through it. A tree. A stranger\'s dog. The light on the pavement. Small things that don\'t fix anything but prove the world is wider than the inside of your head.' },
         ]);
       },
     },
@@ -3253,96 +3244,96 @@ export function createContent(ctx) {
       location: 'bus_stop',
       available: () => true,
       execute: () => {
-        const waitTime = Timeline.randomInt(3, 15);
-        State.advanceTime(waitTime);
+        const waitTime = ctx.timeline.randomInt(3, 15);
+        ctx.state.advanceTime(waitTime);
 
-        const mood = State.moodTone();
-        const weather = State.get('weather');
+        const mood = ctx.state.moodTone();
+        const weather = ctx.state.get('weather');
         const long = waitTime > 10;
-        const aden = State.get('adenosine');
-        const ne = State.get('norepinephrine');
-        const gaba = State.get('gaba');
-        const ser = State.get('serotonin');
-        const dopa = State.get('dopamine');
+        const aden = ctx.state.get('adenosine');
+        const ne = ctx.state.get('norepinephrine');
+        const gaba = ctx.state.get('gaba');
+        const ser = ctx.state.get('serotonin');
+        const dopa = ctx.state.get('dopamine');
 
         if (weather === 'snow') {
-          return Timeline.weightedPick([
+          return ctx.timeline.weightedPick([
             { weight: 1, value: long ? 'Snow on your shoulders. The bus takes a long time. There\'s nowhere warmer within reach.' : 'Snow while you wait. The bus comes.' },
             { weight: 1, value: 'The shelter doesn\'t help much with cold. You stand in it anyway. Snow on everything. The bus arrives eventually.' },
             // High adenosine (unblocked) — cold and tired compound
-            { weight: State.lerp01(aden, 50, 70) * State.adenosineBlock(), value: 'The cold gets into your feet first, then your hands. You shift your weight. Snow on your shoulders.' + (long ? ' The bus takes a long time.' : ' The bus comes.') },
+            { weight: ctx.state.lerp01(aden, 50, 70) * ctx.state.adenosineBlock(), value: 'The cold gets into your feet first, then your hands. You shift your weight. Snow on your shoulders.' + (long ? ' The bus takes a long time.' : ' The bus comes.') },
             // Low serotonin — the wait has more weight than it should
-            { weight: State.lerp01(ser, 40, 20), value: 'Snow, cold, waiting. ' + (long ? 'The bus doesn\'t come and doesn\'t come.' : 'The bus comes.') + ' You get on. That\'s all.' },
+            { weight: ctx.state.lerp01(ser, 40, 20), value: 'Snow, cold, waiting. ' + (long ? 'The bus doesn\'t come and doesn\'t come.' : 'The bus comes.') + ' You get on. That\'s all.' },
           ]);
         }
 
         if (weather === 'drizzle') {
-          return Timeline.weightedPick([
+          return ctx.timeline.weightedPick([
             { weight: 1, value: 'Rain collects on the shelter roof and drips from the edge in a line.' + (long ? ' The bus takes its time.' : '') },
             { weight: 1, value: 'The shelter covers most of it. You stand in the dry part and wait.' + (long ? ' A long wait.' : '') },
             // Low GABA — exposed even under cover
-            { weight: State.lerp01(gaba, 42, 22), value: 'The shelter helps with the rain. It doesn\'t help with the feeling of standing in the open.' + (long ? ' The bus is a long time.' : ' The bus comes.') },
+            { weight: ctx.state.lerp01(gaba, 42, 22), value: 'The shelter helps with the rain. It doesn\'t help with the feeling of standing in the open.' + (long ? ' The bus is a long time.' : ' The bus comes.') },
             // High NE — rain sounds are amplified
-            { weight: State.lerp01(ne, 55, 75), value: 'Rain on the shelter roof. Loud in a specific way. The wet street. Headlights. ' + (long ? 'You wait a long time in it.' : 'The bus comes before it gets worse.') },
+            { weight: ctx.state.lerp01(ne, 55, 75), value: 'Rain on the shelter roof. Loud in a specific way. The wet street. Headlights. ' + (long ? 'You wait a long time in it.' : 'The bus comes before it gets worse.') },
           ]);
         }
 
         // Clear / overcast / grey — mood is the texture
         if (mood === 'clear' || mood === 'present') {
-          return Timeline.weightedPick([
+          return ctx.timeline.weightedPick([
             { weight: 1, value: long ? 'The bus takes its time. You wait, and the waiting is just waiting — the street, the sounds, the air.' : 'A few minutes at the stop. The air is decent. The bus arrives.' },
             { weight: 1, value: 'You stand at the stop. A couple of people drift up. Someone checks their phone. The bus comes.' },
             // High NE — the stop is vivid
-            { weight: State.lerp01(ne, 45, 65), value: 'The stop is its own small world — the sounds, the movement. A car passes. A pigeon. Someone checks their watch. The bus comes when it comes.' },
+            { weight: ctx.state.lerp01(ne, 45, 65), value: 'The stop is its own small world — the sounds, the movement. A car passes. A pigeon. Someone checks their watch. The bus comes when it comes.' },
             // High dopamine — small interest in the scene
-            { weight: State.lerp01(dopa, 50, 70), value: 'You watch the intersection while you wait. Things happen there. The bus turns the corner. You board.' },
+            { weight: ctx.state.lerp01(dopa, 50, 70), value: 'You watch the intersection while you wait. Things happen there. The bus turns the corner. You board.' },
           ]);
         }
 
         if (mood === 'fraying') {
-          return Timeline.weightedPick([
+          return ctx.timeline.weightedPick([
             { weight: 1, value: 'You check the direction it comes from too many times. It comes when it comes.' },
             { weight: 1, value: 'The wait is hard. You can\'t stand still. The bus arrives before you\'ve decided what to do with yourself.' },
             // Low GABA — standing in the open is difficult
-            { weight: State.lerp01(gaba, 42, 22), value: 'You keep looking up the street. You can\'t stop yourself. The openness of the stop doesn\'t help — nowhere to put your back. The bus comes.' },
+            { weight: ctx.state.lerp01(gaba, 42, 22), value: 'You keep looking up the street. You can\'t stop yourself. The openness of the stop doesn\'t help — nowhere to put your back. The bus comes.' },
             // High NE — everything at the stop registers
-            { weight: State.lerp01(ne, 55, 75), value: 'Every car that rounds the corner gets your attention before you can stop it.' + (long ? ' The bus takes a long time. You are extremely ready to be on it.' : ' The bus comes and you move toward it before it stops.') },
+            { weight: ctx.state.lerp01(ne, 55, 75), value: 'Every car that rounds the corner gets your attention before you can stop it.' + (long ? ' The bus takes a long time. You are extremely ready to be on it.' : ' The bus comes and you move toward it before it stops.') },
           ]);
         }
 
         if (mood === 'heavy') {
-          return Timeline.weightedPick([
+          return ctx.timeline.weightedPick([
             { weight: 1, value: long ? 'The bus takes its time. You wait in the cold.' : 'You wait at the stop. The bus arrives.' },
             { weight: 1, value: 'Your bag. Your shoes. Your body wanting to lean on something.' + (long ? ' The bus is a long time coming.' : ' The bus comes.') },
             // High adenosine (unblocked) — legs want to sit
-            { weight: State.lerp01(aden, 45, 68) * State.adenosineBlock(), value: 'Your legs are tired and you\'ve only been standing for a few minutes.' + (long ? ' The bus takes forever.' : '') + ' You get on when it comes.' },
+            { weight: ctx.state.lerp01(aden, 45, 68) * ctx.state.adenosineBlock(), value: 'Your legs are tired and you\'ve only been standing for a few minutes.' + (long ? ' The bus takes forever.' : '') + ' You get on when it comes.' },
           ]);
         }
 
         if (mood === 'hollow') {
-          return Timeline.weightedPick([
+          return ctx.timeline.weightedPick([
             { weight: 1, value: 'You stand there. People come and go. The bus doesn\'t, and then it does.' },
             { weight: 1, value: 'The stop is exposed. You wait in it. Other people, their lives, the bus.' },
             // High adenosine (unblocked) — standing hollow and tired
-            { weight: State.lerp01(aden, 45, 65) * State.adenosineBlock(), value: 'Standing is its own kind of tired. You shift your weight from foot to foot. The bus eventually comes.' },
+            { weight: ctx.state.lerp01(aden, 45, 65) * ctx.state.adenosineBlock(), value: 'Standing is its own kind of tired. You shift your weight from foot to foot. The bus eventually comes.' },
           ]);
         }
 
         if (mood === 'numb') {
-          return Timeline.weightedPick([
+          return ctx.timeline.weightedPick([
             { weight: 1, value: 'You stand there. The bus will come. It does.' },
             { weight: 1, value: 'The stop. Other people waiting. The bus.' },
             // Low serotonin — time doesn't behave
-            { weight: State.lerp01(ser, 35, 15), value: 'You stand at the stop and time doesn\'t do what it\'s supposed to.' + (long ? ' The bus is a long time.' : ' The bus comes.') + ' You get on.' },
+            { weight: ctx.state.lerp01(ser, 35, 15), value: 'You stand at the stop and time doesn\'t do what it\'s supposed to.' + (long ? ' The bus is a long time.' : ' The bus comes.') + ' You get on.' },
           ]);
         }
 
         // flat / default
-        return Timeline.weightedPick([
+        return ctx.timeline.weightedPick([
           { weight: 1, value: long ? 'The bus takes its time. You wait.' : 'A few minutes. Buses arrive when they arrive.' },
           { weight: 1, value: 'You stand at the stop. Time passes at the speed it passes. The bus comes.' },
           // High adenosine (unblocked) — legs want to sit
-          { weight: State.lerp01(aden, 45, 65) * State.adenosineBlock(), value: 'Your legs want you to sit. The bench is full. You stand.' + (long ? ' The bus takes a while.' : ' The bus comes.') },
+          { weight: ctx.state.lerp01(aden, 45, 65) * ctx.state.adenosineBlock(), value: 'Your legs want you to sit. The bench is full. You stand.' + (long ? ' The bus takes a while.' : ' The bus comes.') },
         ]);
       },
     },
@@ -3352,44 +3343,44 @@ export function createContent(ctx) {
       id: 'do_work',
       label: 'Work on what\'s in front of you',
       location: 'workplace',
-      available: () => State.get('work_tasks_done') < State.get('work_tasks_expected'),
+      available: () => ctx.state.get('work_tasks_done') < ctx.state.get('work_tasks_expected'),
       execute: () => {
-        const canFocus = State.canFocus();
-        const energy = State.energyTier();
-        const stress = State.stressTier();
+        const canFocus = ctx.state.canFocus();
+        const energy = ctx.state.energyTier();
+        const stress = ctx.state.stressTier();
 
         let timeCost, energyCost, stressEffect;
 
         if (canFocus) {
-          timeCost = Timeline.randomInt(30, 60);
+          timeCost = ctx.timeline.randomInt(30, 60);
           energyCost = -10;
           stressEffect = -3;
-          State.set('work_tasks_done', State.get('work_tasks_done') + 1);
-          State.adjustJobStanding(1); // focused work builds standing — Approximation debt: +1 for focused work completion chosen
+          ctx.state.set('work_tasks_done', ctx.state.get('work_tasks_done') + 1);
+          ctx.state.adjustJobStanding(1); // focused work builds standing — Approximation debt: +1 for focused work completion chosen
         } else {
-          timeCost = Timeline.randomInt(45, 90);
+          timeCost = ctx.timeline.randomInt(45, 90);
           energyCost = -15;
           stressEffect = 5;
-          if (Timeline.chance(0.6)) {
-            State.set('work_tasks_done', State.get('work_tasks_done') + 1);
+          if (ctx.timeline.chance(0.6)) {
+            ctx.state.set('work_tasks_done', ctx.state.get('work_tasks_done') + 1);
           }
         }
 
-        State.adjustEnergy(energyCost);
-        State.adjustStress(stressEffect);
+        ctx.state.adjustEnergy(energyCost);
+        ctx.state.adjustStress(stressEffect);
 
         // Accumulating sentiments: work builds dread or satisfaction
         if (canFocus) {
-          State.adjustSentiment('work', 'satisfaction', 0.015);
-          State.adjustSentiment('work', 'dread', -0.01);
+          ctx.state.adjustSentiment('work', 'satisfaction', 0.015);
+          ctx.state.adjustSentiment('work', 'dread', -0.01);
         } else {
-          State.adjustSentiment('work', 'dread', 0.02);
-          State.adjustSentiment('work', 'satisfaction', -0.005);
+          ctx.state.adjustSentiment('work', 'dread', 0.02);
+          ctx.state.adjustSentiment('work', 'satisfaction', -0.005);
         }
 
-        State.advanceTime(timeCost);
+        ctx.state.advanceTime(timeCost);
 
-        const jobType = Character.get('job_type');
+        const jobType = ctx.character.get('job_type');
         const proseFn = /** @type {(canFocus: boolean, energy: string, stress: string) => string} */ (doWorkProse[jobType] || doWorkProse.office);
         return proseFn(canFocus, energy, stress);
       },
@@ -3399,23 +3390,23 @@ export function createContent(ctx) {
       id: 'work_break',
       label: 'Step away for a minute',
       location: 'workplace',
-      available: () => !['okay', 'rested', 'alert'].includes(State.energyTier()) || !['calm', 'baseline'].includes(State.stressTier()),
+      available: () => !['okay', 'rested', 'alert'].includes(ctx.state.energyTier()) || !['calm', 'baseline'].includes(ctx.state.stressTier()),
       execute: () => {
-        State.adjustEnergy(5);
-        State.adjustStress(-5);
+        ctx.state.adjustEnergy(5);
+        ctx.state.adjustStress(-5);
 
         // The need to escape is itself a signal
-        if (['tense', 'strained', 'overwhelmed'].includes(State.stressTier())) {
-          State.adjustSentiment('work', 'dread', 0.005);
-        } else if (State.sentimentIntensity('work', 'dread') > 0 && ['calm', 'baseline'].includes(State.stressTier())) {
+        if (['tense', 'strained', 'overwhelmed'].includes(ctx.state.stressTier())) {
+          ctx.state.adjustSentiment('work', 'dread', 0.005);
+        } else if (ctx.state.sentimentIntensity('work', 'dread') > 0 && ['calm', 'baseline'].includes(ctx.state.stressTier())) {
           // A relaxed break at work gently challenges dread
-          State.adjustSentiment('work', 'dread', -0.005);
+          ctx.state.adjustSentiment('work', 'dread', -0.005);
         }
 
-        State.advanceTime(10);
+        ctx.state.advanceTime(10);
 
-        const mood = State.moodTone();
-        const jobType = Character.get('job_type');
+        const mood = ctx.state.moodTone();
+        const jobType = ctx.character.get('job_type');
         const proseFn = /** @type {(mood: string) => string} */ (workBreakProse[jobType] || workBreakProse.office);
         return proseFn(mood);
       },
@@ -3425,40 +3416,40 @@ export function createContent(ctx) {
       id: 'talk_to_coworker',
       label: 'Say something to someone nearby',
       location: 'workplace',
-      available: () => State.socialTier() !== 'warm' && State.energyTier() !== 'depleted' && State.isWorkHours(),
+      available: () => ctx.state.socialTier() !== 'warm' && ctx.state.energyTier() !== 'depleted' && ctx.state.isWorkHours(),
       execute: () => {
-        const mood = State.moodTone();
+        const mood = ctx.state.moodTone();
 
         // Coworker sentiment affects mechanical outcomes
-        const isFirst = Timeline.chance(0.5);
+        const isFirst = ctx.timeline.chance(0.5);
         const slot = isFirst ? 'coworker1' : 'coworker2';
-        const coworker = Character.get(slot);
+        const coworker = ctx.character.get(slot);
 
-        const warmth = State.sentimentIntensity(slot, 'warmth');
-        const irritation = State.sentimentIntensity(slot, 'irritation');
+        const warmth = ctx.state.sentimentIntensity(slot, 'warmth');
+        const irritation = ctx.state.sentimentIntensity(slot, 'irritation');
 
         // Base social/stress effects, modified by accumulated sentiment
         // Approximation debt: base of 8 social (+ 2 for warmth) for talk_to_coworker chosen
         const socialBonus = 8 + (warmth > 0.3 ? 2 : 0);
         const stressEffect = irritation > 0.4 ? 2 : -3;
-        State.adjustSocial(socialBonus);
-        State.adjustStress(stressEffect);
+        ctx.state.adjustSocial(socialBonus);
+        ctx.state.adjustStress(stressEffect);
 
         // Accumulate coworker sentiments based on mood
         // Cross-reduction: good interactions gently challenge irritation, bad ones challenge warmth
-        if (mood === 'present' || mood === 'clear' || ['calm', 'baseline'].includes(State.stressTier())) {
-          State.adjustSentiment(slot, 'warmth', 0.02);
-          State.adjustSentiment(slot, 'irritation', -0.008);
-        } else if (mood === 'fraying' || mood === 'heavy' || mood === 'numb' || ['strained', 'overwhelmed'].includes(State.stressTier())) {
-          State.adjustSentiment(slot, 'irritation', 0.015);
-          State.adjustSentiment(slot, 'warmth', -0.005);
+        if (mood === 'present' || mood === 'clear' || ['calm', 'baseline'].includes(ctx.state.stressTier())) {
+          ctx.state.adjustSentiment(slot, 'warmth', 0.02);
+          ctx.state.adjustSentiment(slot, 'irritation', -0.008);
+        } else if (mood === 'fraying' || mood === 'heavy' || mood === 'numb' || ['strained', 'overwhelmed'].includes(ctx.state.stressTier())) {
+          ctx.state.adjustSentiment(slot, 'irritation', 0.015);
+          ctx.state.adjustSentiment(slot, 'warmth', -0.005);
         }
 
-        State.advanceTime(5);
+        ctx.state.advanceTime(5);
 
-        const social = State.socialTier();
+        const social = ctx.state.socialTier();
 
-        Events.record('talked_to_coworker', { name: coworker.name, flavor: coworker.flavor });
+        ctx.events.record('talked_to_coworker', { name: coworker.name, flavor: coworker.flavor });
 
         if (social === 'isolated' || social === 'withdrawn') {
           return /** @type {(name: string) => string | undefined} */ (coworkerInteraction[coworker.flavor])(coworker.name);
@@ -3474,11 +3465,11 @@ export function createContent(ctx) {
       id: 'check_phone_work',
       label: 'Check your phone',
       location: 'workplace',
-      available: () => State.get('has_phone') && State.get('phone_battery') > 0 && !State.get('viewing_phone'),
+      available: () => ctx.state.get('has_phone') && ctx.state.get('phone_battery') > 0 && !ctx.state.get('viewing_phone'),
       execute: () => {
-        State.set('viewing_phone', true);
-        State.advanceTime(1);
-        Events.record('checked_phone');
+        ctx.state.set('viewing_phone', true);
+        ctx.state.advanceTime(1);
+        ctx.events.record('checked_phone');
         return phoneScreenDescription();
       },
     },
@@ -3488,38 +3479,38 @@ export function createContent(ctx) {
       label: 'Grab something to eat',
       location: 'workplace',
       available: () => {
-        const job = Character.get('job');
+        const job = ctx.character.get('job');
         return job === 'food_service'
-          && !State.get('ate_at_work_today')
-          && ['hungry', 'very_hungry', 'starving'].includes(State.hungerTier());
+          && !ctx.state.get('ate_at_work_today')
+          && ['hungry', 'very_hungry', 'starving'].includes(ctx.state.hungerTier());
       },
       execute: () => {
-        State.adjustHunger(-40);
-        State.fillStomach(70, 'solid');
-        State.set('ate_at_work_today', true);
-        State.advanceTime(10);
+        ctx.state.adjustHunger(-40);
+        ctx.state.fillStomach(70, 'solid');
+        ctx.state.set('ate_at_work_today', true);
+        ctx.state.advanceTime(10);
 
         // Dental — eating spikes the ache
-        State.dentalSpike(15); // Approximation debt: 15pt chewing spike chosen
+        ctx.state.dentalSpike(15); // Approximation debt: 15pt chewing spike chosen
 
-        const mood = State.moodTone();
-        const hunger = State.hungerTier();
+        const mood = ctx.state.moodTone();
+        const hunger = ctx.state.hungerTier();
 
         if (mood === 'hollow' || mood === 'numb') {
-          return Timeline.weightedPick([
+          return ctx.timeline.weightedPick([
             { weight: 1, value: 'You eat standing up by the prep counter. Staff meal. You\'re allowed it. You barely taste it.' },
-            { weight: State.lerp01('serotonin', 0, 35), value: 'You eat because your body needs it, not because you wanted to. The food is fine. It doesn\'t matter.' },
+            { weight: ctx.state.lerp01('serotonin', 0, 35), value: 'You eat because your body needs it, not because you wanted to. The food is fine. It doesn\'t matter.' },
           ]);
         }
         if (hunger === 'starving' || hunger === 'very_hungry') {
-          return Timeline.weightedPick([
+          return ctx.timeline.weightedPick([
             { weight: 1, value: 'You take your break early and eat. Staff meal — you\'re entitled to it. You eat faster than you meant to.' },
-            { weight: State.lerp01('adenosine', 50, 80) * State.adenosineBlock(), value: 'You eat on your feet, between tasks, barely sitting. The food disappears. You feel more human than you have all shift.' },
+            { weight: ctx.state.lerp01('adenosine', 50, 80) * ctx.state.adenosineBlock(), value: 'You eat on your feet, between tasks, barely sitting. The food disappears. You feel more human than you have all shift.' },
           ]);
         }
-        return Timeline.weightedPick([
+        return ctx.timeline.weightedPick([
           { weight: 1, value: 'Staff meal. You eat in the back, standing at the counter. It\'s not a moment to savor but it\'s real food and you needed it.' },
-          { weight: State.lerp01('dopamine', 0, 40), value: 'You take your meal break. The kitchen smells like work but you eat it anyway. Something about eating what you made.' },
+          { weight: ctx.state.lerp01('dopamine', 0, 40), value: 'You take your meal break. The kitchen smells like work but you eat it anyway. Something about eating what you made.' },
         ]);
       },
     },
@@ -3529,56 +3520,56 @@ export function createContent(ctx) {
       label: 'See what\'s in the break room',
       location: 'workplace',
       available: () => {
-        const jobType = Character.get('job_type');
+        const jobType = ctx.character.get('job_type');
         return jobType === 'office'
-          && !State.get('grazed_break_room_today')
-          && State.isWorkHours();
+          && !ctx.state.get('grazed_break_room_today')
+          && ctx.state.isWorkHours();
       },
       execute: () => {
-        State.adjustHunger(-12);
-        State.fillStomach(20, 'solid');
-        State.set('grazed_break_room_today', true);
-        State.advanceTime(8);
+        ctx.state.adjustHunger(-12);
+        ctx.state.fillStomach(20, 'solid');
+        ctx.state.set('grazed_break_room_today', true);
+        ctx.state.advanceTime(8);
 
         // Dental — sugar/acidity from candy and cake.
         // Approximation debt: 10 pts chosen (less than full meals at 15) on the
         // reasoning that this is small amounts, less mastication. Uncalibrated.
-        State.dentalSpike(10);
+        ctx.state.dentalSpike(10);
 
-        const mood = State.moodTone();
-        const aden = State.get('adenosine');
-        const ne = State.get('norepinephrine');
-        const ser = State.get('serotonin');
-        const dopa = State.get('dopamine');
-        const hunger = State.hungerTier();
+        const mood = ctx.state.moodTone();
+        const aden = ctx.state.get('adenosine');
+        const ne = ctx.state.get('norepinephrine');
+        const ser = ctx.state.get('serotonin');
+        const dopa = ctx.state.get('dopamine');
+        const hunger = ctx.state.hungerTier();
 
         let prose;
 
         if (mood === 'hollow' || mood === 'numb') {
-          prose = Timeline.weightedPick([
+          prose = ctx.timeline.weightedPick([
             { weight: 1, value: 'You walk to the break room without deciding to. There\'s a quarter of a birthday cake on the counter, three days old, the frosting dried at the edges. You take a slice and eat it standing up. It doesn\'t taste like much. You go back.' },
-            { weight: State.lerp01(ser, 0, 35), value: 'The candy dish is on the counter. You take a few pieces and eat them on the walk back. You weren\'t hungry. You\'re not sure why you went.' },
-            { weight: State.lerp01(dopa, 0, 30), value: 'You get up and walk to the break room because sitting there wasn\'t working anymore. There\'s nothing appealing but you eat a piece of someone\'s leftover cake anyway. The gesture of eating something.' },
+            { weight: ctx.state.lerp01(ser, 0, 35), value: 'The candy dish is on the counter. You take a few pieces and eat them on the walk back. You weren\'t hungry. You\'re not sure why you went.' },
+            { weight: ctx.state.lerp01(dopa, 0, 30), value: 'You get up and walk to the break room because sitting there wasn\'t working anymore. There\'s nothing appealing but you eat a piece of someone\'s leftover cake anyway. The gesture of eating something.' },
           ]);
         } else if (mood === 'fraying' || mood === 'heavy') {
-          prose = Timeline.weightedPick([
+          prose = ctx.timeline.weightedPick([
             { weight: 1, value: 'Break room. The candy dish. You take a handful and stand there for a moment, which is the real reason you came — not the candy, just the standing somewhere else for a minute. Then you go back.' },
-            { weight: State.lerp01(aden, 50, 80) * State.adenosineBlock(), value: 'Mid-afternoon. You get up and walk to the break room on pure instinct. There\'s birthday cake — a few slices left from someone\'s thing yesterday. You eat a piece. It\'s very sweet. It helps a little.' },
-            { weight: State.lerp01(ser, 20, 55), value: 'The break room has that communal-space smell: old coffee, someone\'s lunch, the particular silence of a room nobody uses for long. You eat a few pieces of candy from the dish and don\'t run into anyone. That part is fine.' },
+            { weight: ctx.state.lerp01(aden, 50, 80) * ctx.state.adenosineBlock(), value: 'Mid-afternoon. You get up and walk to the break room on pure instinct. There\'s birthday cake — a few slices left from someone\'s thing yesterday. You eat a piece. It\'s very sweet. It helps a little.' },
+            { weight: ctx.state.lerp01(ser, 20, 55), value: 'The break room has that communal-space smell: old coffee, someone\'s lunch, the particular silence of a room nobody uses for long. You eat a few pieces of candy from the dish and don\'t run into anyone. That part is fine.' },
           ]);
         } else {
-          prose = Timeline.weightedPick([
+          prose = ctx.timeline.weightedPick([
             { weight: 1, value: 'You walk to the break room and find the candy dish, which is always there. You take a few pieces and eat them on the way back. This is the shape of the afternoon.' },
-            { weight: State.lerp01(dopa, 30, 65), value: 'There\'s birthday cake on the counter — leftover from yesterday, maybe the day before. You take the least-sad-looking slice. It\'s fine. Sweet, at least.' },
+            { weight: ctx.state.lerp01(dopa, 30, 65), value: 'There\'s birthday cake on the counter — leftover from yesterday, maybe the day before. You take the least-sad-looking slice. It\'s fine. Sweet, at least.' },
             { weight: hunger === 'hungry' ? 1 : 0, value: 'You\'re hungry enough that the candy dish is actually useful. You take a handful and eat them at your desk. Not a solution, but something.' },
-            { weight: State.lerp01(ser, 45, 75), value: 'Break room run. The coffee\'s been sitting for two hours and the cake is going dry at the corners but you take a slice anyway, mostly just to have a reason to stand up and walk somewhere.' },
+            { weight: ctx.state.lerp01(ser, 45, 75), value: 'Break room run. The coffee\'s been sitting for two hours and the cake is going dry at the corners but you take a slice anyway, mostly just to have a reason to stand up and walk somewhere.' },
           ]);
         }
 
         // Deterministic modifiers — no RNG
         if (ne > 65) {
           prose += ' Your shoulders haven\'t dropped the whole time.';
-        } else if (aden > 60 && State.adenosineBlock() > 0.3) {
+        } else if (aden > 60 && ctx.state.adenosineBlock() > 0.3) {
           prose += ' The walk helped more than the food.';
         }
 
@@ -3590,30 +3581,30 @@ export function createContent(ctx) {
       id: 'get_coffee_work',
       label: 'Get coffee',
       location: 'workplace',
-      available: () => State.caffeineTier() !== 'high' && State.isWorkHours(),
+      available: () => ctx.state.caffeineTier() !== 'high' && ctx.state.isWorkHours(),
       execute: () => {
-        State.consumeCaffeine(40);
-        State.advanceTime(Timeline.randomInt(4, 7));
+        ctx.state.consumeCaffeine(40);
+        ctx.state.advanceTime(ctx.timeline.randomInt(4, 7));
 
         // Dental — hot coffee is a significant trigger
-        State.dentalSpike(25); // Approximation debt: 25pt hot liquid spike chosen
+        ctx.state.dentalSpike(25); // Approximation debt: 25pt hot liquid spike chosen
 
-        const mood = State.moodTone();
-        const aden = State.get('adenosine');
-        const caffeine = State.caffeineTier();
-        const withdrawal = State.withdrawalTier();
-        const jobType = Character.get('job_type');
+        const mood = ctx.state.moodTone();
+        const aden = ctx.state.get('adenosine');
+        const caffeine = ctx.state.caffeineTier();
+        const withdrawal = ctx.state.withdrawalTier();
+        const jobType = ctx.character.get('job_type');
 
         if (caffeine === 'active') {
-          return Timeline.weightedPick([
+          return ctx.timeline.weightedPick([
             { weight: 1, value: 'You go back for another. The machine goes through its routine. You go through yours.' },
-            { weight: State.lerp01(aden, 40, 75) * State.adenosineBlock(), value: 'The second one. You weren\'t done needing it.' },
+            { weight: ctx.state.lerp01(aden, 40, 75) * ctx.state.adenosineBlock(), value: 'The second one. You weren\'t done needing it.' },
           ]);
         }
 
         // Withdrawal relief — made it to work with a headache
         if (withdrawal === 'moderate' || withdrawal === 'severe') {
-          return Timeline.weightedPick([
+          return ctx.timeline.weightedPick([
             { weight: 1, value: 'Break room. You pour coffee and drink it standing up. The headache starts to retreat. You give it a minute, then go back.' },
             { weight: 1, value: 'You\'ve had a headache since you got here. The coffee starts to address that. Not immediately — it takes a few minutes. But the pressure behind your eyes starts to ease and the shift gets a little more navigable.' },
           ]);
@@ -3621,35 +3612,35 @@ export function createContent(ctx) {
 
         if (jobType === 'office') {
           if (mood === 'numb' || mood === 'hollow') {
-            return Timeline.weightedPick([
+            return ctx.timeline.weightedPick([
               { weight: 1, value: 'You fill a mug in the break room. Something warm to hold. The smell is stale but present.' },
-              { weight: State.lerp01(aden, 40, 70) * State.adenosineBlock(), value: 'Break room. Coffee. Your brain needed something to hold onto.' },
+              { weight: ctx.state.lerp01(aden, 40, 70) * ctx.state.adenosineBlock(), value: 'Break room. Coffee. Your brain needed something to hold onto.' },
             ]);
           }
           if (mood === 'fraying' || mood === 'heavy') {
-            return Timeline.weightedPick([
+            return ctx.timeline.weightedPick([
               { weight: 1, value: 'Break room. Stale coffee but you pour it anyway. The walk over was the real thing.' },
-              { weight: State.lerp01(aden, 40, 70) * State.adenosineBlock(), value: 'You needed the break as much as the coffee. A minute away from your desk.' },
+              { weight: ctx.state.lerp01(aden, 40, 70) * ctx.state.adenosineBlock(), value: 'You needed the break as much as the coffee. A minute away from your desk.' },
             ]);
           }
-          return Timeline.weightedPick([
+          return ctx.timeline.weightedPick([
             { weight: 1, value: 'You grab coffee from the break room. The machine\'s been running all morning.' },
-            { weight: State.lerp01(aden, 30, 65) * State.adenosineBlock(), value: 'Coffee from the break room. You needed it more than you realized.' },
+            { weight: ctx.state.lerp01(aden, 30, 65) * ctx.state.adenosineBlock(), value: 'Coffee from the break room. You needed it more than you realized.' },
           ]);
         }
 
         if (jobType === 'retail') {
-          return Timeline.weightedPick([
+          return ctx.timeline.weightedPick([
             { weight: 1, value: 'The break room machine. You fill a cup and drink it in the thirty seconds you have.' },
             { weight: 1, value: 'Coffee from the back. Burnt, vending-machine quality. You drink it anyway.' },
-            { weight: State.lerp01(aden, 40, 70) * State.adenosineBlock(), value: 'You get coffee in the back. It\'s bad. Your body doesn\'t care.' },
+            { weight: ctx.state.lerp01(aden, 40, 70) * ctx.state.adenosineBlock(), value: 'You get coffee in the back. It\'s bad. Your body doesn\'t care.' },
           ]);
         }
 
         // food_service
-        return Timeline.weightedPick([
+        return ctx.timeline.weightedPick([
           { weight: 1, value: 'Staff coffee, poured fast, drunk faster. It tastes like the rest of the shift.' },
-          { weight: State.lerp01(aden, 40, 70) * State.adenosineBlock(), value: 'You pour coffee before the next rush. The mug is warm. That\'s enough.' },
+          { weight: ctx.state.lerp01(aden, 40, 70) * ctx.state.adenosineBlock(), value: 'You pour coffee before the next rush. The mug is warm. That\'s enough.' },
         ]);
       },
     },
@@ -3659,31 +3650,31 @@ export function createContent(ctx) {
       id: 'buy_groceries',
       label: 'Get a few things',
       location: 'corner_store',
-      available: () => State.canAfford(8) || State.get('ebt_balance') >= 8,
+      available: () => ctx.state.canAfford(8) || ctx.state.get('ebt_balance') >= 8,
       execute: () => {
-        const cost = Timeline.randomFloat(8, 14);
+        const cost = ctx.timeline.randomFloat(8, 14);
         const roundedCost = Math.round(cost * 100) / 100;
 
-        const usingEbt = !State.canAfford(roundedCost) && State.get('ebt_balance') >= roundedCost;
+        const usingEbt = !ctx.state.canAfford(roundedCost) && ctx.state.get('ebt_balance') >= roundedCost;
         if (usingEbt) {
-          State.spendEbt(roundedCost);
-        } else if (!State.spendMoney(roundedCost)) {
+          ctx.state.spendEbt(roundedCost);
+        } else if (!ctx.state.spendMoney(roundedCost)) {
           return 'You pick things up and put them back. The math doesn\'t work today.';
         }
 
-        State.set('fridge_food', Math.min(6, State.get('fridge_food') + 3));
-        State.set('pantry_food', Math.min(3, State.get('pantry_food') + 1));
-        State.advanceTime(10);
-        State.glanceMoney();
-        Events.record('bought_groceries', { cost: roundedCost });
+        ctx.state.set('fridge_food', Math.min(6, ctx.state.get('fridge_food') + 3));
+        ctx.state.set('pantry_food', Math.min(3, ctx.state.get('pantry_food') + 1));
+        ctx.state.advanceTime(10);
+        ctx.state.glanceMoney();
+        ctx.events.record('bought_groceries', { cost: roundedCost });
 
-        const money = State.moneyTier();
+        const money = ctx.state.moneyTier();
 
         if (usingEbt) {
-          return Timeline.weightedPick([
+          return ctx.timeline.weightedPick([
             { weight: 1, value: 'You swipe your EBT card. The machine beeps. You take your bags.' },
             { weight: 1, value: 'Bread. Rice. A can of beans. You pay with EBT. The cashier doesn\'t react.' },
-            { weight: State.lerp01('serotonin', 50, 25), value: 'You use your EBT. The transaction goes through. You carry the bags out without looking back.' },
+            { weight: ctx.state.lerp01('serotonin', 50, 25), value: 'You use your EBT. The transaction goes through. You carry the bags out without looking back.' },
           ]);
         }
         if (money === 'scraping' || money === 'tight') {
@@ -3700,45 +3691,45 @@ export function createContent(ctx) {
       id: 'buy_cheap_meal',
       label: 'Grab something to eat now',
       location: 'corner_store',
-      available: () => State.canAfford(3),
+      available: () => ctx.state.canAfford(3),
       execute: () => {
-        const cost = Timeline.randomFloat(3, 5.50);
+        const cost = ctx.timeline.randomFloat(3, 5.50);
         const roundedCost = Math.round(cost * 100) / 100;
 
-        if (!State.spendMoney(roundedCost)) {
+        if (!ctx.state.spendMoney(roundedCost)) {
           return 'Not enough. You put it back.';
         }
 
-        State.adjustHunger(-30);
-        State.fillStomach(50, 'solid');
-        State.set('ate_today', true);
-        State.set('consecutive_meals_skipped', 0);
-        State.advanceTime(5);
-        State.glanceMoney();
-        Events.record('ate', { what: 'cheap_meal' });
+        ctx.state.adjustHunger(-30);
+        ctx.state.fillStomach(50, 'solid');
+        ctx.state.set('ate_today', true);
+        ctx.state.set('consecutive_meals_skipped', 0);
+        ctx.state.advanceTime(5);
+        ctx.state.glanceMoney();
+        ctx.events.record('ate', { what: 'cheap_meal' });
 
         // Dental — eating anything spikes the ache
-        State.dentalSpike(15); // Approximation debt: 15pt chewing spike chosen
+        ctx.state.dentalSpike(15); // Approximation debt: 15pt chewing spike chosen
 
         // Food comfort sentiment — weaker than home food + habituation
-        const fc = State.sentimentIntensity('eating', 'comfort');
+        const fc = ctx.state.sentimentIntensity('eating', 'comfort');
         if (fc > 0) {
-          State.adjustNT('serotonin', fc * 2);
-          State.adjustSentiment('eating', 'comfort', -0.002);
+          ctx.state.adjustNT('serotonin', fc * 2);
+          ctx.state.adjustSentiment('eating', 'comfort', -0.002);
         }
 
-        const mood = State.moodTone();
-        const dentalW = State.lerp01(State.get('dental_ache'), 20, 65);
+        const mood = ctx.state.moodTone();
+        const dentalW = ctx.state.lerp01(ctx.state.get('dental_ache'), 20, 65);
 
         if (mood === 'numb' || mood === 'heavy') {
-          return Timeline.weightedPick([
+          return ctx.timeline.weightedPick([
             { weight: 1, value: 'You eat it on the way out. Something wrapped in plastic from a warmer. It\'s food. It does what food does.' },
             { weight: 1, value: 'You eat standing by the door. Cheap food in a plastic wrapper. Your body accepts it. That\'s about all.' },
             // High food comfort — even cheap food can be something
             { weight: fc > 0 ? fc * 0.7 : 0, value: 'You eat it on the way out. It\'s cheap and wrapped in plastic and warm, and the warmth is something. Not much. But something your body reaches for.' },
           ]);
         }
-        return Timeline.weightedPick([
+        return ctx.timeline.weightedPick([
           { weight: 1, value: 'A sandwich from the cooler. You eat it standing outside the store. It\'s fine. It\'s enough.' },
           { weight: 1, value: 'You grab something from the counter and eat it outside. Corner store food. It does the job.' },
           // High food comfort — small pleasure in cheap food
@@ -3755,10 +3746,10 @@ export function createContent(ctx) {
       location: 'corner_store',
       available: () => true,
       execute: () => {
-        State.advanceTime(5);
+        ctx.state.advanceTime(5);
 
-        const money = State.moneyTier();
-        const hunger = State.hungerTier();
+        const money = ctx.state.moneyTier();
+        const hunger = ctx.state.hungerTier();
 
         let text;
         if (money === 'broke') {
@@ -3772,11 +3763,11 @@ export function createContent(ctx) {
         }
 
         // NT deterministic modifiers (no RNG — replay-safe)
-        const dopa = State.get('dopamine');
-        const aden = State.get('adenosine');
+        const dopa = ctx.state.get('dopamine');
+        const aden = ctx.state.get('adenosine');
         if (money !== 'broke' && dopa < 35) {
           text += ' Nothing in here catches you. The things are just things.';
-        } else if (aden > 65 && State.adenosineBlock() > 0.4) {
+        } else if (aden > 65 && ctx.state.adenosineBlock() > 0.4) {
           text += ' You move through the aisles without fully seeing them.';
         }
 
@@ -3788,32 +3779,32 @@ export function createContent(ctx) {
       id: 'buy_medicine',
       label: 'Get something for it',
       location: 'corner_store',
-      available: () => State.illnessTier() !== 'healthy' && State.canAfford(9) && !State.get('illness_medicated'),
+      available: () => ctx.state.illnessTier() !== 'healthy' && ctx.state.canAfford(9) && !ctx.state.get('illness_medicated'),
       execute: () => {
-        const cost = Timeline.randomFloat(9, 13);
+        const cost = ctx.timeline.randomFloat(9, 13);
         const roundedCost = Math.round(cost * 100) / 100;
-        if (!State.spendMoney(roundedCost)) return 'Not enough. You put it back.';
-        State.set('illness_medicated', true);
-        State.advanceTime(Timeline.randomInt(5, 8));
-        State.glanceMoney();
+        if (!ctx.state.spendMoney(roundedCost)) return 'Not enough. You put it back.';
+        ctx.state.set('illness_medicated', true);
+        ctx.state.advanceTime(ctx.timeline.randomInt(5, 8));
+        ctx.state.glanceMoney();
 
-        const illTier = State.illnessTier();
-        const aden = State.get('adenosine');
+        const illTier = ctx.state.illnessTier();
+        const aden = ctx.state.get('adenosine');
         if (illTier === 'very_sick') {
-          return Timeline.weightedPick([
+          return ctx.timeline.weightedPick([
             { weight: 1, value: 'You find what you need and bring it to the register. The cashier doesn\'t comment. You get home and take it. It won\'t fix anything, but it will make it possible to exist in your body for a while.' },
             { weight: 1, value: 'Cold medicine. You take it in the store parking lot because you can\'t wait. The chemical taste is almost comforting — something doing something.' },
           ]);
         }
         if (illTier === 'sick') {
-          return Timeline.weightedPick([
+          return ctx.timeline.weightedPick([
             { weight: 1, value: 'DayQuil or NyQuil or whatever the generic version is. You take the recommended dose, which feels insufficient. You take it anyway.' },
             { weight: 1, value: 'You find the right aisle, pick something up, pay. You already feel slightly better just from the act of doing something about it.' },
             // High adenosine — the shopping itself was an effort
-            { weight: State.lerp01(aden, 50, 80) * State.adenosineBlock(), value: 'The walk here took most of what you had. You get the medicine, get out. That\'s enough for now.' },
+            { weight: ctx.state.lerp01(aden, 50, 80) * ctx.state.adenosineBlock(), value: 'The walk here took most of what you had. You get the medicine, get out. That\'s enough for now.' },
           ]);
         }
-        return Timeline.weightedPick([
+        return ctx.timeline.weightedPick([
           { weight: 1, value: 'Something to head it off before it gets worse. Or just help. Either way.' },
           { weight: 1, value: 'You grab cold medicine, the generic kind. Probably the same thing in the box. You pay and go.' },
         ]);
@@ -3824,60 +3815,60 @@ export function createContent(ctx) {
       id: 'buy_coffee_store',
       label: 'Get a coffee',
       location: 'corner_store',
-      available: () => State.canAfford(CORNER_STORE_COFFEE_PRICE) && State.caffeineTier() !== 'high',
+      available: () => ctx.state.canAfford(CORNER_STORE_COFFEE_PRICE) && ctx.state.caffeineTier() !== 'high',
       execute: () => {
         const cost = CORNER_STORE_COFFEE_PRICE;
 
-        if (!State.spendMoney(cost)) {
+        if (!ctx.state.spendMoney(cost)) {
           return 'Not enough. You put it back.';
         }
 
-        State.consumeCaffeine(50);
-        State.advanceTime(Timeline.randomInt(3, 5));
-        State.glanceMoney();
+        ctx.state.consumeCaffeine(50);
+        ctx.state.advanceTime(ctx.timeline.randomInt(3, 5));
+        ctx.state.glanceMoney();
 
         // Dental — hot coffee is a trigger
-        State.dentalSpike(25); // Approximation debt: 25pt hot liquid spike chosen
+        ctx.state.dentalSpike(25); // Approximation debt: 25pt hot liquid spike chosen
 
-        const mood = State.moodTone();
-        const aden = State.get('adenosine');
-        const caffeine = State.caffeineTier();
-        const withdrawal = State.withdrawalTier();
-        const money = State.moneyTier();
+        const mood = ctx.state.moodTone();
+        const aden = ctx.state.get('adenosine');
+        const caffeine = ctx.state.caffeineTier();
+        const withdrawal = ctx.state.withdrawalTier();
+        const money = ctx.state.moneyTier();
 
         if (caffeine === 'active') {
-          return Timeline.weightedPick([
+          return ctx.timeline.weightedPick([
             { weight: 1, value: 'The second one. You buy it because the first one didn\'t finish the job.' },
-            { weight: State.lerp01(aden, 40, 75) * State.adenosineBlock(), value: 'You\'re already on one. You buy another. Your body is making its case.' },
+            { weight: ctx.state.lerp01(aden, 40, 75) * ctx.state.adenosineBlock(), value: 'You\'re already on one. You buy another. Your body is making its case.' },
           ]);
         }
 
         // Withdrawal relief — the headache finally has an answer
         if (withdrawal === 'moderate' || withdrawal === 'severe') {
-          return Timeline.weightedPick([
+          return ctx.timeline.weightedPick([
             { weight: 1, value: 'The headache has been sitting behind your eyes. You buy the coffee, take it outside, drink it faster than you should. The pressure starts to ease. You stand there a moment letting that happen.' },
             { weight: withdrawal === 'severe' ? 2 : 1, value: 'Two dollars for the headache to stop. You\'ve been carrying it since you woke up. You pay and stand outside with the cup and wait. It takes a few minutes. Then: less.' },
           ]);
         }
 
         if (mood === 'numb' || mood === 'hollow') {
-          return Timeline.weightedPick([
+          return ctx.timeline.weightedPick([
             { weight: 1, value: 'Coffee from the register. You pay and carry it out. The cup is warm in your hand.' },
-            { weight: State.lerp01(aden, 40, 70) * State.adenosineBlock(), value: 'You buy coffee. Something your body wanted. The warmth of the cup is the best part.' },
+            { weight: ctx.state.lerp01(aden, 40, 70) * ctx.state.adenosineBlock(), value: 'You buy coffee. Something your body wanted. The warmth of the cup is the best part.' },
           ]);
         }
 
         if (money === 'broke' || money === 'scraping') {
-          return Timeline.weightedPick([
+          return ctx.timeline.weightedPick([
             { weight: 1, value: 'A small coffee. You pocket your change.' },
-            { weight: State.lerp01(aden, 30, 65) * State.adenosineBlock(), value: 'A coffee because you needed it more than the two dollars. The math feels simple right now.' },
+            { weight: ctx.state.lerp01(aden, 30, 65) * ctx.state.adenosineBlock(), value: 'A coffee because you needed it more than the two dollars. The math feels simple right now.' },
           ]);
         }
 
-        return Timeline.weightedPick([
+        return ctx.timeline.weightedPick([
           { weight: 1, value: 'Corner store coffee. It\'s not good but it\'s something. You drink it on the street.' },
           { weight: 1, value: 'Coffee from the register. The cup is warm. You take it outside.' },
-          { weight: State.lerp01(aden, 30, 60) * State.adenosineBlock(), value: 'You buy coffee. You needed it before you realized. The first sip confirms it.' },
+          { weight: ctx.state.lerp01(aden, 30, 60) * ctx.state.adenosineBlock(), value: 'You buy coffee. You needed it before you realized. The first sip confirms it.' },
         ]);
       },
     },
@@ -3888,51 +3879,51 @@ export function createContent(ctx) {
       label: 'Get a meal',
       location: 'soup_kitchen',
       available: () => {
-        if (State.get('ate_at_soup_kitchen_today')) return false;
-        const hour = State.getHour();
-        return hour >= 11 && hour < 14 && State.isWorkday();
+        if (ctx.state.get('ate_at_soup_kitchen_today')) return false;
+        const hour = ctx.state.getHour();
+        return hour >= 11 && hour < 14 && ctx.state.isWorkday();
       },
       execute: () => {
-        State.adjustHunger(-45);
-        State.fillStomach(80, 'mixed');
-        State.set('ate_today', true);
-        State.set('consecutive_meals_skipped', 0);
-        State.set('ate_at_soup_kitchen_today', true);
-        State.set('soup_kitchen_visits', State.get('soup_kitchen_visits') + 1);
-        State.advanceTime(25);
-        Events.record('ate', { what: 'soup_kitchen' });
+        ctx.state.adjustHunger(-45);
+        ctx.state.fillStomach(80, 'mixed');
+        ctx.state.set('ate_today', true);
+        ctx.state.set('consecutive_meals_skipped', 0);
+        ctx.state.set('ate_at_soup_kitchen_today', true);
+        ctx.state.set('soup_kitchen_visits', ctx.state.get('soup_kitchen_visits') + 1);
+        ctx.state.advanceTime(25);
+        ctx.events.record('ate', { what: 'soup_kitchen' });
 
-        const visits = State.get('soup_kitchen_visits'); // already incremented
-        const mood = State.moodTone();
-        const hunger = State.hungerTier();
-        const ser = State.get('serotonin');
+        const visits = ctx.state.get('soup_kitchen_visits'); // already incremented
+        const mood = ctx.state.moodTone();
+        const hunger = ctx.state.hungerTier();
+        const ser = ctx.state.get('serotonin');
 
         // First visit
         if (visits === 1) {
-          return Timeline.weightedPick([
+          return ctx.timeline.weightedPick([
             { weight: 1, value: 'You go through the line. Someone hands you a plate. You sit down and you eat. Nobody looks at you twice. The food is hot and there is enough of it.' },
             { weight: 1, value: 'A plate. A seat at a long table. The food is simple, institutional, warm. You eat all of it.' },
-            { weight: State.lerp01(ser, 50, 20), value: 'You take a tray and sit and eat. Around you people do the same. The food is fine. You don\'t have to think about anything except eating.' },
+            { weight: ctx.state.lerp01(ser, 50, 20), value: 'You take a tray and sit and eat. Around you people do the same. The food is fine. You don\'t have to think about anything except eating.' },
           ]);
         }
 
         // Subsequent visits
         if (mood === 'hollow' || mood === 'numb') {
-          return Timeline.weightedPick([
+          return ctx.timeline.weightedPick([
             { weight: 1, value: 'Through the line. A plate. You eat. Same as before.' },
-            { weight: State.lerp01(ser, 50, 25), value: 'You know the routine now. Tray, line, table. You eat without tasting much. Your body gets what it needed.' },
+            { weight: ctx.state.lerp01(ser, 50, 25), value: 'You know the routine now. Tray, line, table. You eat without tasting much. Your body gets what it needed.' },
           ]);
         }
         if (hunger === 'starving' || hunger === 'very_hungry') {
-          return Timeline.weightedPick([
+          return ctx.timeline.weightedPick([
             { weight: 1, value: 'You\'ve been here before. You go through the line, you sit, and you eat faster than you mean to. The food is hot. That\'s enough.' },
-            { weight: State.lerp01('adenosine', 50, 75) * State.adenosineBlock(), value: 'Through the line, a seat, and then you eat. Your hands settle once there\'s a plate in front of them.' },
+            { weight: ctx.state.lerp01('adenosine', 50, 75) * ctx.state.adenosineBlock(), value: 'Through the line, a seat, and then you eat. Your hands settle once there\'s a plate in front of them.' },
           ]);
         }
-        return Timeline.weightedPick([
+        return ctx.timeline.weightedPick([
           { weight: 1, value: 'The usual. A plate, a seat, a meal. You know the rhythm now. You eat and watch the room and then you leave.' },
           { weight: 1, value: 'You go through the line. Eat. The woman who ladles the soup nods at you — you\'ve been here enough that she recognizes you. You nod back.' },
-          { weight: State.lerp01(ser, 60, 35), value: 'A plate of food and a seat. You eat it. There\'s something almost comfortable about the routine of it now, if you don\'t examine it too closely.' },
+          { weight: ctx.state.lerp01(ser, 60, 35), value: 'A plate of food and a seat. You eat it. There\'s something almost comfortable about the routine of it now, if you don\'t examine it too closely.' },
         ]);
       },
     },
@@ -3943,43 +3934,43 @@ export function createContent(ctx) {
       label: 'Wait for a bag',
       location: 'food_bank',
       available: () => {
-        const hour = State.getHour();
-        const day = State.getDay();
-        const lastDay = State.get('last_food_bank_day');
+        const hour = ctx.state.getHour();
+        const day = ctx.state.getDay();
+        const lastDay = ctx.state.get('last_food_bank_day');
         return hour >= 9 && hour < 17
-          && State.isWorkday()
+          && ctx.state.isWorkday()
           && (lastDay === 0 || day - lastDay >= 7);
       },
       execute: () => {
-        State.set('fridge_food', Math.min(6, State.get('fridge_food') + 3));
-        State.set('pantry_food', Math.min(3, State.get('pantry_food') + 2));
-        State.set('last_food_bank_day', State.getDay());
-        State.set('food_bank_visits', State.get('food_bank_visits') + 1);
-        State.advanceTime(40);
-        Events.record('received_food_bank_bag');
+        ctx.state.set('fridge_food', Math.min(6, ctx.state.get('fridge_food') + 3));
+        ctx.state.set('pantry_food', Math.min(3, ctx.state.get('pantry_food') + 2));
+        ctx.state.set('last_food_bank_day', ctx.state.getDay());
+        ctx.state.set('food_bank_visits', ctx.state.get('food_bank_visits') + 1);
+        ctx.state.advanceTime(40);
+        ctx.events.record('received_food_bank_bag');
 
-        const visits = State.get('food_bank_visits');
-        const mood = State.moodTone();
-        const ser = State.get('serotonin');
+        const visits = ctx.state.get('food_bank_visits');
+        const mood = ctx.state.moodTone();
+        const ser = ctx.state.get('serotonin');
 
         if (visits === 1) {
-          return Timeline.weightedPick([
+          return ctx.timeline.weightedPick([
             { weight: 1, value: 'You wait. A volunteer calls your name, or a number, and hands you a bag. Canned goods, bread, whatever they have this week. You carry it home.' },
             { weight: 1, value: 'You sign in and you wait and eventually someone brings a bag out. It\'s heavier than you expected. You take it and go.' },
-            { weight: State.lerp01(ser, 50, 25), value: 'You wait in a plastic chair until they call you. A bag: bread, a few cans, some pasta. Enough. You walk out carrying it and you don\'t look at anyone.' },
+            { weight: ctx.state.lerp01(ser, 50, 25), value: 'You wait in a plastic chair until they call you. A bag: bread, a few cans, some pasta. Enough. You walk out carrying it and you don\'t look at anyone.' },
           ]);
         }
 
         if (mood === 'hollow' || mood === 'numb') {
-          return Timeline.weightedPick([
+          return ctx.timeline.weightedPick([
             { weight: 1, value: 'You wait, you get the bag, you leave. Same as before.' },
-            { weight: State.lerp01(ser, 50, 20), value: 'The wait. The bag. You carry it home. It has what it has.' },
+            { weight: ctx.state.lerp01(ser, 50, 20), value: 'The wait. The bag. You carry it home. It has what it has.' },
           ]);
         }
-        return Timeline.weightedPick([
+        return ctx.timeline.weightedPick([
           { weight: 1, value: 'You know the wait by now. When your name comes, you go up and take the bag. Bread, cans, whatever they had. You carry it home.' },
           { weight: 1, value: 'The usual wait, the usual bag. Heavier some weeks than others. This week it\'s decent.' },
-          { weight: State.lerp01(ser, 60, 35), value: 'You sit and wait and get the bag. There\'s a rhythm to it now — not comfortable exactly, but known. You carry it home.' },
+          { weight: ctx.state.lerp01(ser, 60, 35), value: 'You sit and wait and get the bag. There\'s a rhythm to it now — not comfortable exactly, but known. You carry it home.' },
         ]);
       },
     },
@@ -3989,45 +3980,45 @@ export function createContent(ctx) {
       id: 'read_messages',
       label: 'Messages',
       location: null,
-      available: () => State.get('viewing_phone') && State.hasUnreadMessages(),
+      available: () => ctx.state.get('viewing_phone') && ctx.state.hasUnreadMessages(),
       execute: () => {
         // Battery death check
-        if (State.get('phone_battery') <= 0) {
-          State.set('viewing_phone', false);
+        if (ctx.state.get('phone_battery') <= 0) {
+          ctx.state.set('viewing_phone', false);
           return 'The screen goes dark. Dead.';
         }
 
-        const unread = State.getUnreadMessages();
-        State.markMessagesRead();
-        State.advanceTime(2);
+        const unread = ctx.state.getUnreadMessages();
+        ctx.state.markMessagesRead();
+        ctx.state.advanceTime(2);
 
         const parts = [];
         for (const msg of unread) {
           parts.push(msg.text);
           // Apply per-type effects
           if (msg.type === 'friend') {
-            State.adjustSocial(3); // Approximation debt: +3 social chosen
+            ctx.state.adjustSocial(3); // Approximation debt: +3 social chosen
             // Reading a friend's message = contact. Reset timer, reduce guilt.
             if (msg.source) {
-              const fc = State.get('friend_contact');
-              fc[msg.source] = State.get('time');
-              State.adjustSentiment(msg.source, 'guilt', -0.02);
+              const fc = ctx.state.get('friend_contact');
+              fc[msg.source] = ctx.state.get('time');
+              ctx.state.adjustSentiment(msg.source, 'guilt', -0.02);
             }
           }
           else if (msg.type === 'paycheck') {
-            State.adjustStress(-3);
-            State.glanceMoney();
+            ctx.state.adjustStress(-3);
+            ctx.state.glanceMoney();
           }
           else if (msg.type === 'bill') {
             if (msg.paid === false) {
-              State.adjustStress(8);
+              ctx.state.adjustStress(8);
             } else {
-              State.adjustStress(3);
+              ctx.state.adjustStress(3);
             }
-            State.glanceMoney();
+            ctx.state.glanceMoney();
           }
-          else if (msg.type === 'bank') State.glanceMoney();
-          else if (msg.type === 'work') State.adjustStress(3);
+          else if (msg.type === 'bank') ctx.state.glanceMoney();
+          else if (msg.type === 'work') ctx.state.adjustStress(3);
         }
 
         return parts.join('\n\n');
@@ -4038,16 +4029,16 @@ export function createContent(ctx) {
       id: 'toggle_phone_silent',
       label: 'Silence it',
       location: null,
-      available: () => State.get('viewing_phone'),
+      available: () => ctx.state.get('viewing_phone'),
       execute: () => {
         // Battery death check
-        if (State.get('phone_battery') <= 0) {
-          State.set('viewing_phone', false);
+        if (ctx.state.get('phone_battery') <= 0) {
+          ctx.state.set('viewing_phone', false);
           return 'The screen goes dark. Dead.';
         }
 
-        const wasSilent = State.get('phone_silent');
-        State.set('phone_silent', !wasSilent);
+        const wasSilent = ctx.state.get('phone_silent');
+        ctx.state.set('phone_silent', !wasSilent);
         if (wasSilent) {
           return 'Sound on. You\'ll hear it now.';
         }
@@ -4059,13 +4050,13 @@ export function createContent(ctx) {
       id: 'put_phone_away',
       label: 'Put it away',
       location: null,
-      available: () => State.get('viewing_phone'),
+      available: () => ctx.state.get('viewing_phone'),
       execute: () => {
-        State.set('viewing_phone', false);
-        State.set('phone_screen', 'home');
-        State.set('phone_thread_contact', null);
-        const location = World.getLocationId();
-        const descFn = /** @type {Record<string, (() => string) | undefined>} */ (Content.locationDescriptions)[location];
+        ctx.state.set('viewing_phone', false);
+        ctx.state.set('phone_screen', 'home');
+        ctx.state.set('phone_thread_contact', null);
+        const location = ctx.world.getLocationId();
+        const descFn = /** @type {Record<string, (() => string) | undefined>} */ (locationDescriptions)[location];
         return descFn ? descFn() : '';
       },
     },
@@ -4075,18 +4066,18 @@ export function createContent(ctx) {
       label: 'Reply',
       location: null,
       available: () => {
-        if (!State.get('viewing_phone') || State.get('phone_battery') <= 0) return false;
-        const thread = State.get('phone_thread_contact');
+        if (!ctx.state.get('viewing_phone') || ctx.state.get('phone_battery') <= 0) return false;
+        const thread = ctx.state.get('phone_thread_contact');
         if (!thread || !['friend1', 'friend2'].includes(thread)) return false;
-        const inbox = State.get('phone_inbox');
+        const inbox = ctx.state.get('phone_inbox');
         if (!inbox.some(m => m.source === thread && !m.read)) return false;
-        const pending = State.get('pending_replies') || [];
+        const pending = ctx.state.get('pending_replies') || [];
         if (pending.some(r => r.slot === thread)) return false;
         return true;
       },
       execute: () => {
-        if (State.get('phone_battery') <= 0) {
-          State.set('viewing_phone', false);
+        if (ctx.state.get('phone_battery') <= 0) {
+          ctx.state.set('viewing_phone', false);
           return 'The screen goes dark. Dead.';
         }
         const target = getReplyTarget();
@@ -4098,20 +4089,20 @@ export function createContent(ctx) {
         // 1 RNG call: friend's response text (generated now, delivered later)
         const responseText = friendReplyMessages[friend.flavor](friend.name);
         // 1 RNG call: arrival delay
-        const delay = Timeline.randomInt(30, 90);
-        State.addPendingReply({ slot, arrivesAt: State.get('time') + delay, text: responseText });
+        const delay = ctx.timeline.randomInt(30, 90);
+        ctx.state.addPendingReply({ slot, arrivesAt: ctx.state.get('time') + delay, text: responseText });
 
         // Store sent message in inbox for thread view
-        State.addPhoneMessage({ type: 'sent', source: slot, text: replyText, read: true, direction: 'sent' });
+        ctx.state.addPhoneMessage({ type: 'sent', source: slot, text: replyText, read: true, direction: 'sent' });
 
         // Reset contact timer, reduce guilt more than just reading does
-        const fc = State.get('friend_contact');
-        fc[slot] = State.get('time');
-        State.adjustSentiment(slot, 'guilt', -0.06);
-        State.adjustSocial(3); // Approximation debt: +3 social chosen
+        const fc = ctx.state.get('friend_contact');
+        fc[slot] = ctx.state.get('time');
+        ctx.state.adjustSentiment(slot, 'guilt', -0.06);
+        ctx.state.adjustSocial(3); // Approximation debt: +3 social chosen
 
-        State.advanceTime(5);
-        State.adjustBattery(-1);
+        ctx.state.advanceTime(5);
+        ctx.state.adjustBattery(-1);
 
         return replyText;
       },
@@ -4122,18 +4113,18 @@ export function createContent(ctx) {
       label: 'Write',
       location: null,
       available: () => {
-        if (!State.get('viewing_phone') || State.get('phone_battery') <= 0) return false;
-        const thread = State.get('phone_thread_contact');
+        if (!ctx.state.get('viewing_phone') || ctx.state.get('phone_battery') <= 0) return false;
+        const thread = ctx.state.get('phone_thread_contact');
         if (!thread || !['friend1', 'friend2'].includes(thread)) return false;
-        const inbox = State.get('phone_inbox');
+        const inbox = ctx.state.get('phone_inbox');
         if (inbox.some(m => m.source === thread && !m.read)) return false; // has unread → use reply
-        const pending = State.get('pending_replies') || [];
+        const pending = ctx.state.get('pending_replies') || [];
         if (pending.some(r => r.slot === thread)) return false;
         return true;
       },
       execute: () => {
-        if (State.get('phone_battery') <= 0) {
-          State.set('viewing_phone', false);
+        if (ctx.state.get('phone_battery') <= 0) {
+          ctx.state.set('viewing_phone', false);
           return 'The screen goes dark. Dead.';
         }
         const target = getInitiateTarget();
@@ -4145,20 +4136,20 @@ export function createContent(ctx) {
         // 1 RNG call: friend's response (generated now, delivered later)
         const responseText = friendInitiateMessages[friend.flavor](friend.name);
         // 1 RNG call: arrival delay
-        const delay = Timeline.randomInt(30, 90);
-        State.addPendingReply({ slot, arrivesAt: State.get('time') + delay, text: responseText });
+        const delay = ctx.timeline.randomInt(30, 90);
+        ctx.state.addPendingReply({ slot, arrivesAt: ctx.state.get('time') + delay, text: responseText });
 
         // Store sent message in inbox for thread view
-        State.addPhoneMessage({ type: 'sent', source: slot, text: initiateText, read: true, direction: 'sent' });
+        ctx.state.addPhoneMessage({ type: 'sent', source: slot, text: initiateText, read: true, direction: 'sent' });
 
         // Reset contact timer, reduce guilt
-        const fc = State.get('friend_contact');
-        fc[slot] = State.get('time');
-        State.adjustSentiment(slot, 'guilt', -0.06);
-        State.adjustSocial(2); // Approximation debt: +2 social chosen
+        const fc = ctx.state.get('friend_contact');
+        fc[slot] = ctx.state.get('time');
+        ctx.state.adjustSentiment(slot, 'guilt', -0.06);
+        ctx.state.adjustSocial(2); // Approximation debt: +2 social chosen
 
-        State.advanceTime(5);
-        State.adjustBattery(-1);
+        ctx.state.advanceTime(5);
+        ctx.state.adjustBattery(-1);
 
         return initiateText;
       },
@@ -4169,31 +4160,31 @@ export function createContent(ctx) {
       label: 'Help',
       location: null,
       available: () => {
-        if (!State.get('viewing_phone') || State.get('phone_battery') <= 0) return false;
-        const thread = State.get('phone_thread_contact');
+        if (!ctx.state.get('viewing_phone') || ctx.state.get('phone_battery') <= 0) return false;
+        const thread = ctx.state.get('phone_thread_contact');
         if (!thread || !['friend1', 'friend2'].includes(thread)) return false;
-        const inbox = State.get('phone_inbox');
+        const inbox = ctx.state.get('phone_inbox');
         if (!inbox.some(m => m.source === thread && !m.read && m.subtype === 'in_need')) return false;
-        const pending = State.get('pending_replies') || [];
+        const pending = ctx.state.get('pending_replies') || [];
         if (pending.some(r => r.slot === thread)) return false;
-        if (!State.canAfford(1)) return false;
+        if (!ctx.state.canAfford(1)) return false;
         return true;
       },
       execute: (data = {}) => {
-        if (State.get('phone_battery') <= 0) {
-          State.set('viewing_phone', false);
+        if (ctx.state.get('phone_battery') <= 0) {
+          ctx.state.set('viewing_phone', false);
           return 'The screen goes dark. Dead.';
         }
-        const thread = State.get('phone_thread_contact');
+        const thread = ctx.state.get('phone_thread_contact');
         if (!thread) return '';
-        const friend = Character.get(thread);
+        const friend = ctx.character.get(thread);
         if (!friend) return '';
         const slot = thread;
-        const mood = State.moodTone();
+        const mood = ctx.state.moodTone();
         const flavor = friend.flavor || 'warm_quiet';
 
         // Amount is player-entered (live play via phone UI input) or recorded in action data (replay)
-        const amount = Math.min(Math.round(data.amount || 0), Math.floor(State.get('money')));
+        const amount = Math.min(Math.round(data.amount || 0), Math.floor(ctx.state.get('money')));
         if (amount <= 0) return '';
 
         // 1 RNG call: player's reply
@@ -4219,7 +4210,7 @@ export function createContent(ctx) {
             { weight: 1, value: 'yeah, sent! hope it helps.' },
           ],
         };
-        const playerText = Timeline.weightedPick(playerPools[mood] || playerPools.flat);
+        const playerText = ctx.timeline.weightedPick(playerPools[mood] || playerPools.flat);
 
         // 1 RNG call: friend's thanks (quick — they were waiting)
         const thanksPools = {
@@ -4240,24 +4231,24 @@ export function createContent(ctx) {
             { weight: 1, value: 'i really appreciate it. how are you holding up?' },
           ],
         };
-        const thanksText = Timeline.weightedPick(thanksPools[flavor] || thanksPools.warm_quiet);
+        const thanksText = ctx.timeline.weightedPick(thanksPools[flavor] || thanksPools.warm_quiet);
 
         // 1 RNG call: delay (short — they respond fast when they're the one waiting)
-        const delay = Timeline.randomInt(5, 20);
+        const delay = ctx.timeline.randomInt(5, 20);
 
-        State.adjustMoney(-amount);
-        State.addPendingReply({ slot, arrivesAt: State.get('time') + delay, text: thanksText });
-        State.addPhoneMessage({ type: 'sent', source: slot, text: playerText, read: true, direction: 'sent' });
-        State.markMessagesRead();
+        ctx.state.adjustMoney(-amount);
+        ctx.state.addPendingReply({ slot, arrivesAt: ctx.state.get('time') + delay, text: thanksText });
+        ctx.state.addPhoneMessage({ type: 'sent', source: slot, text: playerText, read: true, direction: 'sent' });
+        ctx.state.markMessagesRead();
 
         // Build warmth, reset contact timer, reduce guilt
-        State.adjustSentiment(slot, 'warmth', 0.05);
-        const fc = State.get('friend_contact');
-        fc[slot] = State.get('time');
-        State.adjustSentiment(slot, 'guilt', -0.04);
+        ctx.state.adjustSentiment(slot, 'warmth', 0.05);
+        const fc = ctx.state.get('friend_contact');
+        fc[slot] = ctx.state.get('time');
+        ctx.state.adjustSentiment(slot, 'guilt', -0.04);
 
-        State.advanceTime(3);
-        State.adjustBattery(-1);
+        ctx.state.advanceTime(3);
+        ctx.state.adjustBattery(-1);
 
         return playerText;
       },
@@ -4268,29 +4259,29 @@ export function createContent(ctx) {
       label: 'Ask for help',
       location: null,
       available: () => {
-        if (!State.get('viewing_phone') || State.get('phone_battery') <= 0) return false;
-        const thread = State.get('phone_thread_contact');
+        if (!ctx.state.get('viewing_phone') || ctx.state.get('phone_battery') <= 0) return false;
+        const thread = ctx.state.get('phone_thread_contact');
         if (!thread || !['friend1', 'friend2'].includes(thread)) return false;
-        const mt = State.moneyTier();
+        const mt = ctx.state.moneyTier();
         if (mt !== 'broke' && mt !== 'scraping') return false;
-        const pending = State.get('pending_replies') || [];
+        const pending = ctx.state.get('pending_replies') || [];
         if (pending.some(r => r.slot === thread)) return false;
         // 7-day cooldown — asking for money puts a real cost on the friendship
-        const lastAsked = State.get('last_asked_for_help_time');
-        if (lastAsked > 0 && State.get('time') - lastAsked < 7 * 24 * 60) return false;
+        const lastAsked = ctx.state.get('last_asked_for_help_time');
+        if (lastAsked > 0 && ctx.state.get('time') - lastAsked < 7 * 24 * 60) return false;
         return true;
       },
       execute: () => {
-        if (State.get('phone_battery') <= 0) {
-          State.set('viewing_phone', false);
+        if (ctx.state.get('phone_battery') <= 0) {
+          ctx.state.set('viewing_phone', false);
           return 'The screen goes dark. Dead.';
         }
-        const thread = State.get('phone_thread_contact');
+        const thread = ctx.state.get('phone_thread_contact');
         if (!thread) return '';
-        const friend = Character.get(thread);
+        const friend = ctx.character.get(thread);
         if (!friend) return '';
         const slot = thread;
-        const mood = State.moodTone();
+        const mood = ctx.state.moodTone();
 
         // 1 RNG call: player's sent message
         const sentPools = {
@@ -4315,15 +4306,15 @@ export function createContent(ctx) {
             { weight: 1, value: 'hey, not sure if you have it, but things are tight. could you help me out?' },
           ],
         };
-        const sentText = Timeline.weightedPick(sentPools[mood] || sentPools.flat);
+        const sentText = ctx.timeline.weightedPick(sentPools[mood] || sentPools.flat);
 
         // Help probability: flavor base + warmth bonus - repeat penalty + broke urgency
         const flavor = friend.flavor || 'warm_quiet';
         const flavorBase = { sends_things: 0.70, warm_quiet: 0.65, checking_in: 0.60, dry_humor: 0.55 };
-        const warmth = State.sentimentIntensity(slot, 'warmth');
-        const askCounts = State.get('asked_for_help_count');
+        const warmth = ctx.state.sentimentIntensity(slot, 'warmth');
+        const askCounts = ctx.state.get('asked_for_help_count');
         const askCount = (askCounts[slot] ?? 0);
-        const brokeBonus = State.moneyTier() === 'broke' ? 0.05 : 0;
+        const brokeBonus = ctx.state.moneyTier() === 'broke' ? 0.05 : 0;
         const helpProb = Math.max(0.10, Math.min(0.92,
           (flavorBase[flavor] ?? 0.60) + warmth * 0.25 - askCount * 0.10 + brokeBonus));
         const helpWeight = Math.max(1, Math.round(helpProb * 10));
@@ -4371,40 +4362,40 @@ export function createContent(ctx) {
           ...(helpResponses[flavor] || helpResponses.warm_quiet).map(text => ({ weight: helpWeight, value: { text, helps: true } })),
           ...(declineResponses[flavor] || declineResponses.warm_quiet).map(text => ({ weight: declineWeight, value: { text, helps: false } })),
         ];
-        const responseItem = Timeline.weightedPick(responsePool);
+        const responseItem = ctx.timeline.weightedPick(responsePool);
 
         // 1 RNG call: arrival delay
-        const delay = Timeline.randomInt(30, 90);
+        const delay = ctx.timeline.randomInt(30, 90);
 
         // 1 RNG call: variable amount if helping (flavor-based range), balance otherwise
         let amount = 0;
         if (responseItem.helps) {
           const flavorRange = { sends_things: [15, 40], warm_quiet: [15, 30], checking_in: [10, 25], dry_humor: [10, 20] };
           const [amtMin, amtMax] = flavorRange[flavor] ?? [10, 25];
-          amount = Timeline.randomInt(amtMin, amtMax);
+          amount = ctx.timeline.randomInt(amtMin, amtMax);
         } else {
-          Timeline.random(); // balance: always 4 RNG calls total
+          ctx.timeline.random(); // balance: always 4 RNG calls total
         }
 
         /** @type {{ slot: string, arrivesAt: number, text: string, effect?: { type: 'receiveMoney', amount: number } }} */
-        const pendingReply = { slot, arrivesAt: State.get('time') + delay, text: responseItem.text };
+        const pendingReply = { slot, arrivesAt: ctx.state.get('time') + delay, text: responseItem.text };
         if (responseItem.helps) {
           pendingReply.effect = { type: 'receiveMoney', amount };
         }
-        State.addPendingReply(pendingReply);
+        ctx.state.addPendingReply(pendingReply);
 
         // Store sent message in inbox
-        State.addPhoneMessage({ type: 'sent', source: slot, text: sentText, read: true, direction: 'sent' });
+        ctx.state.addPhoneMessage({ type: 'sent', source: slot, text: sentText, read: true, direction: 'sent' });
 
         // Reset contact timer, reduce guilt, track ask, set cooldown
-        const fc = State.get('friend_contact');
-        fc[slot] = State.get('time');
-        State.adjustSentiment(slot, 'guilt', -0.04);
+        const fc = ctx.state.get('friend_contact');
+        fc[slot] = ctx.state.get('time');
+        ctx.state.adjustSentiment(slot, 'guilt', -0.04);
         askCounts[slot] = askCount + 1;
-        State.set('last_asked_for_help_time', State.get('time'));
+        ctx.state.set('last_asked_for_help_time', ctx.state.get('time'));
 
-        State.advanceTime(5);
-        State.adjustBattery(-1);
+        ctx.state.advanceTime(5);
+        ctx.state.adjustBattery(-1);
 
         return sentText;
       },
@@ -4420,19 +4411,19 @@ export function createContent(ctx) {
    * @returns {boolean}
    */
   function generateIncomingMessages() {
-    const now = State.get('time');
-    const last = State.get('last_msg_gen_time');
+    const now = ctx.state.get('time');
+    const last = ctx.state.get('last_msg_gen_time');
     const elapsed = Math.max(0, now - last);
-    State.set('last_msg_gen_time', now);
+    ctx.state.set('last_msg_gen_time', now);
 
     if (elapsed <= 0) return false;
 
     let added = false;
 
     // --- Friend messages (RNG-consuming) ---
-    const friend1 = Character.get('friend1');
-    const friend2 = Character.get('friend2');
-    const socialT = State.socialTier();
+    const friend1 = ctx.character.get('friend1');
+    const friend2 = ctx.character.get('friend2');
+    const socialT = ctx.state.socialTier();
     const socialLow = socialT === 'withdrawn' || socialT === 'isolated';
 
     const friendSlots = [
@@ -4450,41 +4441,41 @@ export function createContent(ctx) {
       }
       const prob = elapsed * multiplier;
       // Two RNG calls per friend: chance + text pick
-      if (Timeline.chance(prob)) {
-        // friendMessages uses Timeline.pick internally (1 RNG call)
+      if (ctx.timeline.chance(prob)) {
+        // friendMessages uses ctx.timeline.pick internally (1 RNG call)
         // friendIsolatedMessages does not — consume RNG to stay consistent
         if (socialLow) {
-          Timeline.random(); // balance RNG consumption
+          ctx.timeline.random(); // balance RNG consumption
           const msgFn = friendIsolatedMessages[friend.flavor];
           const text = /** @type {(name: string) => string} */ (msgFn)(friend.name);
           if (text) {
-            State.addPhoneMessage({ type: 'friend', text, read: false, source: slot });
+            ctx.state.addPhoneMessage({ type: 'friend', text, read: false, source: slot });
             added = true;
           }
         } else {
           const msgFn = friendMessages[friend.flavor];
           const text = /** @type {(name: string) => string} */ (msgFn)(friend.name);
           if (text) {
-            State.addPhoneMessage({ type: 'friend', text, read: false, source: slot });
+            ctx.state.addPhoneMessage({ type: 'friend', text, read: false, source: slot });
             added = true;
           }
         }
       } else {
         // Consume matching RNG even on miss (text pick uses 1 call)
-        Timeline.random();
+        ctx.timeline.random();
       }
     }
 
     // --- Friend in-need messages (RNG-consuming, rare, 14-day minimum gap per friend) ---
     // A friend who needs help reaches out. Player can respond with help_friend.
     // Always 2 RNG calls per friend (chance + text or balance) regardless of outcome.
-    const inNeedLast = State.get('friend_in_need_last');
+    const inNeedLast = ctx.state.get('friend_in_need_last');
     for (const { friend: inNeedFriend, slot: inNeedSlot } of friendSlots) {
       const lastInNeed = inNeedLast[inNeedSlot] ?? 0;
       const eligible = (now - lastInNeed) >= 14 * 24 * 60;
-      if (Timeline.chance(eligible ? 0.003 : 0)) {
+      if (ctx.timeline.chance(eligible ? 0.003 : 0)) {
         // Only generate if no unread in-need message already exists from this friend
-        const inbox = State.get('phone_inbox');
+        const inbox = ctx.state.get('phone_inbox');
         const alreadyPending = inbox.some(m => m.source === inNeedSlot && !m.read && m.subtype === 'in_need');
         if (!alreadyPending) {
           const inNeedPools = {
@@ -4506,24 +4497,24 @@ export function createContent(ctx) {
             ],
           };
           const pool = inNeedPools[inNeedFriend.flavor] || inNeedPools.warm_quiet;
-          const text = Timeline.weightedPick(pool); // 2nd RNG call (fire path)
-          State.addPhoneMessage({ type: 'friend', source: inNeedSlot, text, read: false, subtype: 'in_need' });
+          const text = ctx.timeline.weightedPick(pool); // 2nd RNG call (fire path)
+          ctx.state.addPhoneMessage({ type: 'friend', source: inNeedSlot, text, read: false, subtype: 'in_need' });
           inNeedLast[inNeedSlot] = now;
           added = true;
         } else {
-          Timeline.random(); // balance: 2nd RNG call (fire path, already pending)
+          ctx.timeline.random(); // balance: 2nd RNG call (fire path, already pending)
         }
       } else {
-        Timeline.random(); // balance: 2nd RNG call (miss path)
+        ctx.timeline.random(); // balance: 2nd RNG call (miss path)
       }
     }
 
     // --- Work nag (deterministic trigger, no RNG) ---
-    const minutesLate = State.latenessMinutes();
-    if (minutesLate >= 30 && !State.get('at_work_today') && !State.get('called_in') && !State.get('work_nagged_today')) {
-      State.set('work_nagged_today', true);
-      const supervisor = Character.get('supervisor');
-      State.addPhoneMessage({
+    const minutesLate = ctx.state.latenessMinutes();
+    if (minutesLate >= 30 && !ctx.state.get('at_work_today') && !ctx.state.get('called_in') && !ctx.state.get('work_nagged_today')) {
+      ctx.state.set('work_nagged_today', true);
+      const supervisor = ctx.character.get('supervisor');
+      ctx.state.addPhoneMessage({
         type: 'work',
         source: 'supervisor',
         text: `A message from ${supervisor.name}. "Everything okay?" Which means: where are you.`,
@@ -4535,82 +4526,82 @@ export function createContent(ctx) {
     // --- Financial cycle triggers (deterministic, no RNG) ---
     // Paycheck, rent, utilities, phone bill — all on character-specific schedules.
     // Amounts and offsets derive from character backstory.
-    const day = State.getDay();
+    const day = ctx.state.getDay();
 
     // Paycheck — every 14 days, offset stored in state from character
-    const paycheckOffset = State.get('paycheck_day_offset');
-    if (day > 1 && day % 14 === paycheckOffset % 14 && State.get('last_paycheck_day') !== day) {
-      State.set('last_paycheck_day', day);
-      const payRate = State.get('pay_rate');
-      const daysWorked = State.get('days_worked_this_period');
+    const paycheckOffset = ctx.state.get('paycheck_day_offset');
+    if (day > 1 && day % 14 === paycheckOffset % 14 && ctx.state.get('last_paycheck_day') !== day) {
+      ctx.state.set('last_paycheck_day', day);
+      const payRate = ctx.state.get('pay_rate');
+      const daysWorked = ctx.state.get('days_worked_this_period');
       const pay = Math.round(payRate * Math.min(daysWorked, 10) / 10 * 100) / 100;
-      const wasBroke = State.moneyTier() === 'broke' || State.moneyTier() === 'scraping';
+      const wasBroke = ctx.state.moneyTier() === 'broke' || ctx.state.moneyTier() === 'scraping';
 
       if (pay > 0) {
         const shortPay = daysWorked < 10;
         const text = shortPay
           ? 'Direct deposit. Less than usual.'
           : 'Direct deposit.';
-        State.receiveMoney(pay, 'paycheck', text);
+        ctx.state.receiveMoney(pay, 'paycheck', text);
         added = true;
         // Paycheck when broke gives tiny anxiety relief
         if (wasBroke) {
-          State.adjustSentiment('money', 'anxiety', -0.01);
+          ctx.state.adjustSentiment('money', 'anxiety', -0.01);
         }
       }
-      State.set('days_worked_this_period', 0);
+      ctx.state.set('days_worked_this_period', 0);
     }
 
     // Rent — every 30 days, offset stored in state from character
-    const rentOffset = State.get('rent_day_offset');
-    if (day > 1 && day % 30 === rentOffset % 30 && State.get('last_rent_day') !== day) {
-      State.set('last_rent_day', day);
-      State.deductBill(State.get('rent_amount'), 'rent');
+    const rentOffset = ctx.state.get('rent_day_offset');
+    if (day > 1 && day % 30 === rentOffset % 30 && ctx.state.get('last_rent_day') !== day) {
+      ctx.state.set('last_rent_day', day);
+      ctx.state.deductBill(ctx.state.get('rent_amount'), 'rent');
       added = true;
     }
 
     // Utilities — every 30 days
-    const utilityOffset = State.get('utility_day_offset');
-    if (day > 1 && day % 30 === utilityOffset % 30 && State.get('last_utility_day') !== day) {
-      State.set('last_utility_day', day);
-      State.deductBill(65, 'utilities');
+    const utilityOffset = ctx.state.get('utility_day_offset');
+    if (day > 1 && day % 30 === utilityOffset % 30 && ctx.state.get('last_utility_day') !== day) {
+      ctx.state.set('last_utility_day', day);
+      ctx.state.deductBill(65, 'utilities');
       added = true;
     }
 
     // Phone bill — every 30 days
-    const phoneOffset = State.get('phone_bill_day_offset');
-    if (day > 1 && day % 30 === phoneOffset % 30 && State.get('last_phone_bill_day') !== day) {
-      State.set('last_phone_bill_day', day);
-      State.deductBill(45, 'phone');
+    const phoneOffset = ctx.state.get('phone_bill_day_offset');
+    if (day > 1 && day % 30 === phoneOffset % 30 && ctx.state.get('last_phone_bill_day') !== day) {
+      ctx.state.set('last_phone_bill_day', day);
+      ctx.state.deductBill(45, 'phone');
       added = true;
     }
 
     // EBT/SNAP — monthly benefit reload
-    const ebtMonthly = State.get('ebt_monthly_amount');
-    const ebtOffset = State.get('ebt_day_offset');
-    if (ebtMonthly > 0 && day > 1 && day % 30 === ebtOffset % 30 && State.get('last_ebt_day') !== day) {
-      State.set('last_ebt_day', day);
-      State.receiveEbt(ebtMonthly);
+    const ebtMonthly = ctx.state.get('ebt_monthly_amount');
+    const ebtOffset = ctx.state.get('ebt_day_offset');
+    if (ebtMonthly > 0 && day > 1 && day % 30 === ebtOffset % 30 && ctx.state.get('last_ebt_day') !== day) {
+      ctx.state.set('last_ebt_day', day);
+      ctx.state.receiveEbt(ebtMonthly);
       added = true;
     }
 
     // --- Pending friend replies (deterministic, no RNG) ---
-    const pendingReplies = State.get('pending_replies');
+    const pendingReplies = ctx.state.get('pending_replies');
     if (pendingReplies && pendingReplies.length > 0) {
       const remaining = [];
       for (const reply of pendingReplies) {
         if (reply.arrivesAt <= now) {
           // Apply any effects before delivering the message
           if (reply.effect?.type === 'receiveMoney') {
-            State.receiveMoney(reply.effect.amount);
+            ctx.state.receiveMoney(reply.effect.amount);
           }
-          State.addPhoneMessage({ type: 'friend', text: reply.text, read: false, source: reply.slot });
+          ctx.state.addPhoneMessage({ type: 'friend', text: reply.text, read: false, source: reply.slot });
           added = true;
         } else {
           remaining.push(reply);
         }
       }
-      State.set('pending_replies', remaining);
+      ctx.state.set('pending_replies', remaining);
     }
 
     return added;
@@ -4621,14 +4612,14 @@ export function createContent(ctx) {
    * @returns {string}
    */
   function phoneScreenDescription() {
-    const unread = State.getUnreadMessages();
-    const mood = State.moodTone();
+    const unread = ctx.state.getUnreadMessages();
+    const mood = ctx.state.moodTone();
 
     let desc = '';
 
     // Time — glance when looking at phone
-    State.glanceTime();
-    const timeStr = State.perceivedTimeString();
+    ctx.state.glanceTime();
+    const timeStr = ctx.state.perceivedTimeString();
     // Sensory tier returns full sentences (already punctuated); others are fragments
     desc += timeStr.endsWith('.') ? timeStr : timeStr + '.';
 
@@ -4644,9 +4635,9 @@ export function createContent(ctx) {
           if (msg.source) {
             if (!seenFriendSlots.has(msg.source)) {
               seenFriendSlots.add(msg.source);
-              const guilt = State.sentimentIntensity(msg.source, 'guilt');
+              const guilt = ctx.state.sentimentIntensity(msg.source, 'guilt');
               if (guilt > 0.03) {
-                State.adjustSentiment(msg.source, 'guilt', guilt * 0.02);
+                ctx.state.adjustSentiment(msg.source, 'guilt', guilt * 0.02);
               }
             }
           }
@@ -4678,7 +4669,7 @@ export function createContent(ctx) {
     }
 
     // Battery — you notice when it's low, not when it's fine
-    const bt = State.batteryTier();
+    const bt = ctx.state.batteryTier();
     if (bt === 'critical') {
       desc += ' Battery\'s red.';
     } else if (bt === 'low') {
@@ -4694,19 +4685,19 @@ export function createContent(ctx) {
     label: 'Call in to work',
     location: null,
     available: () => {
-      return State.get('has_phone') && State.get('phone_battery') > 5
-        && !State.get('at_work_today') && !State.get('called_in')
-        && State.isWorkHours() && State.getHour() < 12;
+      return ctx.state.get('has_phone') && ctx.state.get('phone_battery') > 5
+        && !ctx.state.get('at_work_today') && !ctx.state.get('called_in')
+        && ctx.state.isWorkHours() && ctx.state.getHour() < 12;
     },
     execute: () => {
-      State.set('called_in', true);
-      State.adjustJobStanding(-8); // Approximation debt: -8 for calling in chosen
-      State.adjustStress(-10);
-      State.advanceTime(5);
-      Events.record('called_in_sick');
+      ctx.state.set('called_in', true);
+      ctx.state.adjustJobStanding(-8); // Approximation debt: -8 for calling in chosen
+      ctx.state.adjustStress(-10);
+      ctx.state.advanceTime(5);
+      ctx.events.record('called_in_sick');
 
-      const job = State.jobTier();
-      const sick = State.illnessTier() !== 'healthy';
+      const job = ctx.state.jobTier();
+      const sick = ctx.state.illnessTier() !== 'healthy';
 
       if (job === 'at_risk' || job === 'shaky') {
         if (sick) {
@@ -4725,9 +4716,9 @@ export function createContent(ctx) {
 
   const eventText = {
     alarm: () => {
-      State.observeTime();  // The alarm clock IS the clock — this is a full observation
-      const timeStr = State.getTimeString();
-      const energy = State.energyTier();
+      ctx.state.observeTime();  // The alarm clock IS the clock — this is a full observation
+      const timeStr = ctx.state.getTimeString();
+      const energy = ctx.state.energyTier();
       if (energy === 'depleted' || energy === 'exhausted') {
         return 'The alarm. ' + timeStr + '. That sound. It exists only to tell you that lying here isn\'t an option. Except it is. The snooze button is right there.';
       }
@@ -4735,8 +4726,8 @@ export function createContent(ctx) {
     },
 
     late_anxiety: () => {
-      State.adjustStress(5);
-      const tier = State.get('last_surfaced_late_tier');
+      ctx.state.adjustStress(5);
+      const tier = ctx.state.get('last_surfaced_late_tier');
       if (tier === 'very_late') {
         return 'The time. It\'s still there, pressing against the inside of your ribs. You know. You already know.';
       }
@@ -4744,7 +4735,7 @@ export function createContent(ctx) {
     },
 
     hunger_pang: () => {
-      const tier = State.get('last_surfaced_hunger_tier');
+      const tier = ctx.state.get('last_surfaced_hunger_tier');
       if (tier === 'starving') {
         return 'Your hands feel slow. The thinking narrows. Just the one thing.';
       }
@@ -4752,7 +4743,7 @@ export function createContent(ctx) {
         return 'The hunger again. Sharper this time. Your body is done being polite about it.';
       }
       // hungry
-      const location = World.getLocationId();
+      const location = ctx.world.getLocationId();
       if (location === 'workplace') {
         return 'Your stomach makes a sound. You glance around to see if anyone heard.';
       }
@@ -4760,7 +4751,7 @@ export function createContent(ctx) {
     },
 
     exhaustion_wave: () => {
-      const tier = State.get('last_surfaced_energy_tier');
+      const tier = ctx.state.get('last_surfaced_energy_tier');
       if (tier === 'depleted') {
         return 'Your body is making its case. The argument is getting harder to ignore.';
       }
@@ -4769,9 +4760,9 @@ export function createContent(ctx) {
     },
 
     weather_shift: () => {
-      World.updateWeather();
-      const weather = State.get('weather');
-      if (World.isInside()) {
+      ctx.world.updateWeather();
+      const weather = ctx.state.get('weather');
+      if (ctx.world.isInside()) {
         if (weather === 'drizzle') {
           return 'Rain starts outside. You hear it on the window.';
         }
@@ -4793,204 +4784,204 @@ export function createContent(ctx) {
     },
 
     coworker_speaks: () => {
-      State.adjustSocial(3); // Approximation debt: +3 social chosen
-      const isFirst = Timeline.chance(0.5);
+      ctx.state.adjustSocial(3); // Approximation debt: +3 social chosen
+      const isFirst = ctx.timeline.chance(0.5);
       const slot = isFirst ? 'coworker1' : 'coworker2';
-      const coworker = Character.get(slot);
+      const coworker = ctx.character.get(slot);
 
       // Involuntary exposure builds smaller sentiment than chosen interaction
       // Cross-reduction: even involuntary good moments gently challenge irritation, and vice versa
-      const mood = State.moodTone();
+      const mood = ctx.state.moodTone();
       if (mood === 'fraying' || mood === 'numb' || mood === 'heavy') {
-        State.adjustSentiment(slot, 'irritation', 0.01);
-        State.adjustSentiment(slot, 'warmth', -0.003);
+        ctx.state.adjustSentiment(slot, 'irritation', 0.01);
+        ctx.state.adjustSentiment(slot, 'warmth', -0.003);
       } else {
-        State.adjustSentiment(slot, 'warmth', 0.008);
-        State.adjustSentiment(slot, 'irritation', -0.003);
+        ctx.state.adjustSentiment(slot, 'warmth', 0.008);
+        ctx.state.adjustSentiment(slot, 'irritation', -0.003);
       }
 
       return /** @type {(name: string) => string | undefined} */ (coworkerChatter[coworker.flavor])(coworker.name);
     },
 
     work_task_appears: () => {
-      const jobType = Character.get('job_type');
+      const jobType = ctx.character.get('job_type');
       const fn = /** @type {() => string | undefined} */ (workTaskEvent[jobType] || workTaskEvent.office);
       return fn();
     },
 
     break_room_noise: () => {
-      const jobType = Character.get('job_type');
+      const jobType = ctx.character.get('job_type');
       const fn = /** @type {() => string | undefined} */ (workAmbientEvent[jobType] || workAmbientEvent.office);
       return fn();
     },
 
     apartment_sound: () => {
-      const time = State.timePeriod();
-      const ne = State.get('norepinephrine');
+      const time = ctx.state.timePeriod();
+      const ne = ctx.state.get('norepinephrine');
       if (time === 'deep_night' || time === 'night') {
-        return Timeline.weightedPick([
+        return ctx.timeline.weightedPick([
           { weight: 1, value: 'A pipe knocks somewhere in the wall. The building talking to itself.' },
           { weight: 1, value: 'The fridge hums louder for a moment, then settles.' },
           { weight: 1, value: 'Footsteps above you. Someone else awake.' },
           // High NE at night — sounds are louder, more present
-          { weight: State.lerp01(ne, 45, 70), value: 'A sound. You freeze. The building settles — a creak, a tick, something in the walls. It\'s nothing. You know it\'s nothing. You\'re still listening.' },
+          { weight: ctx.state.lerp01(ne, 45, 70), value: 'A sound. You freeze. The building settles — a creak, a tick, something in the walls. It\'s nothing. You know it\'s nothing. You\'re still listening.' },
         ]);
       }
-      return Timeline.weightedPick([
+      return ctx.timeline.weightedPick([
         { weight: 1, value: 'A door shuts somewhere else in the building.' },
         { weight: 1, value: 'Muffled TV from next door. Voices that aren\'t talking to you.' },
         { weight: 1, value: 'The radiator clicks.' },
         // High NE during day — hyper-aware of building sounds
-        { weight: State.lerp01(ne, 50, 70), value: 'Water running through the pipes — upstairs, you think. You track the sound through the wall without meaning to. Your building full of people, all of them doing things.' },
+        { weight: ctx.state.lerp01(ne, 50, 70), value: 'Water running through the pipes — upstairs, you think. You track the sound through the wall without meaning to. Your building full of people, all of them doing things.' },
       ]);
     },
 
     apartment_notice: () => {
-      const mess = Mess.tier();
+      const mess = ctx.mess.tier();
       // Record the tier at which this surfaced — world.js won't fire again until it worsens.
-      State.set('last_surfaced_mess_tier', mess);
-      const ser = State.get('serotonin');
-      const aden = State.get('adenosine');
-      const dop = State.get('dopamine');
+      ctx.state.set('last_surfaced_mess_tier', mess);
+      const ser = ctx.state.get('serotonin');
+      const aden = ctx.state.get('adenosine');
+      const dop = ctx.state.get('dopamine');
       if (mess === 'chaotic' || mess === 'messy') {
-        return Timeline.weightedPick([
+        return ctx.timeline.weightedPick([
           { weight: 1, value: 'You notice how cluttered things have gotten. When did that happen.' },
           { weight: 1, value: 'The apartment. You see it for a second the way a visitor would. Then you stop seeing it that way.' },
           { weight: 1, value: 'Everything\'s been here long enough to stop being mess and start just being how it is.' },
           // Low serotonin — it reads as evidence
-          { weight: State.lerp01(ser, 40, 20), value: 'The apartment looks like what it is. A place someone\'s been barely keeping up with. You know because you\'re that person.' },
+          { weight: ctx.state.lerp01(ser, 40, 20), value: 'The apartment looks like what it is. A place someone\'s been barely keeping up with. You know because you\'re that person.' },
           // High adenosine (unblocked) — it blurs, then unregisters
-          { weight: State.lerp01(aden, 55, 75) * State.adenosineBlock(), value: 'You look at the state of things for a second. Then the moment passes and you\'ve stopped registering it.' },
+          { weight: ctx.state.lerp01(aden, 55, 75) * ctx.state.adenosineBlock(), value: 'You look at the state of things for a second. Then the moment passes and you\'ve stopped registering it.' },
           // Low dopamine — nothing moves toward fixing it
-          { weight: State.lerp01(dop, 40, 20), value: 'You know it needs dealing with. Knowing and doing are in different rooms right now.' },
+          { weight: ctx.state.lerp01(dop, 40, 20), value: 'You know it needs dealing with. Knowing and doing are in different rooms right now.' },
         ]);
       }
       if (mess === 'cluttered') {
-        return Timeline.weightedPick([
+        return ctx.timeline.weightedPick([
           { weight: 1, value: 'A few things out of place. The kind of mess that builds without you deciding to let it.' },
           { weight: 1, value: 'Things where they fell. Things moved somewhere temporary and then stayed.' },
           { weight: 1, value: 'The mess hasn\'t moved. You knew it wouldn\'t.' },
           // Low serotonin — minor disorder registers as more than it is
-          { weight: State.lerp01(ser, 40, 20), value: 'The small disorder of the place catches your eye. It shouldn\'t bother you this much.' },
+          { weight: ctx.state.lerp01(ser, 40, 20), value: 'The small disorder of the place catches your eye. It shouldn\'t bother you this much.' },
           // High adenosine (unblocked) — registers then blurs
-          { weight: State.lerp01(aden, 55, 75) * State.adenosineBlock(), value: 'The mess registers and then doesn\'t. You don\'t have the bandwidth to hold it.' },
+          { weight: ctx.state.lerp01(aden, 55, 75) * ctx.state.adenosineBlock(), value: 'The mess registers and then doesn\'t. You don\'t have the bandwidth to hold it.' },
         ]);
       }
       return '';
     },
 
     street_ambient: () => {
-      const time = State.timePeriod();
-      const weather = State.get('weather');
-      const ne = State.get('norepinephrine');
+      const time = ctx.state.timePeriod();
+      const weather = ctx.state.get('weather');
+      const ne = ctx.state.get('norepinephrine');
       if (weather === 'snow') {
-        return Timeline.weightedPick([
+        return ctx.timeline.weightedPick([
           { weight: 1, value: 'The snow takes the edge off everything. Muffled street, muffled city.' },
           { weight: 1, value: 'Footsteps in snow — someone else\'s, nearby, then gone.' },
           // High NE — the muffled world still registers
-          { weight: State.lerp01(ne, 45, 65), value: 'The snow quiets most things. Not everything. A car somewhere, a shovel on concrete, your own breath. Quieter, but still there.' },
+          { weight: ctx.state.lerp01(ne, 45, 65), value: 'The snow quiets most things. Not everything. A car somewhere, a shovel on concrete, your own breath. Quieter, but still there.' },
         ]);
       }
       if (weather === 'drizzle') {
         return 'Car tires on wet road. That specific hiss.';
       }
       if (time === 'morning') {
-        return Timeline.weightedPick([
+        return ctx.timeline.weightedPick([
           { weight: 1, value: 'A bus goes past, full of people who look like they\'re still waking up.' },
           { weight: 1, value: 'Someone walks a dog. The dog is more enthusiastic about it than they are.' },
           // High NE — the morning is sharp
-          { weight: State.lerp01(ne, 45, 65), value: 'The morning traffic is louder than it should be. Brakes, engines, a horn somewhere. Each sound is a separate thing hitting you.' },
+          { weight: ctx.state.lerp01(ne, 45, 65), value: 'The morning traffic is louder than it should be. Brakes, engines, a horn somewhere. Each sound is a separate thing hitting you.' },
         ]);
       }
-      return Timeline.weightedPick([
+      return ctx.timeline.weightedPick([
         { weight: 1, value: 'Traffic. The city sound that stops being a sound if you live here long enough.' },
         { weight: 1, value: 'A siren, far off. Moving away from you.' },
         // High NE — street sounds register individually
-        { weight: State.lerp01(ne, 45, 65), value: 'A car door. Footsteps. Someone\'s bass through a window. The street is a catalog of sounds and you\'re taking inventory whether you want to or not.' },
+        { weight: ctx.state.lerp01(ne, 45, 65), value: 'A car door. Footsteps. Someone\'s bass through a window. The street is a catalog of sounds and you\'re taking inventory whether you want to or not.' },
       ]);
     },
 
     someone_passes: () => {
-      const social = State.socialTier();
-      const weather = State.get('weather');
+      const social = ctx.state.socialTier();
+      const weather = ctx.state.get('weather');
       if (social === 'isolated') {
         return 'Someone walks past. They don\'t see you. You\'re part of the scenery.';
       }
-      const ser = State.get('serotonin');
-      return Timeline.weightedPick([
+      const ser = ctx.state.get('serotonin');
+      return ctx.timeline.weightedPick([
         { weight: 1, value: 'Someone passes, talking on their phone. Fragments of someone else\'s life.' },
         { weight: 1, value: 'A person walks by quickly, somewhere to be.' },
         { weight: 1, value: 'An older woman passes and nods. You nod back. That\'s enough.' },
         // Low serotonin — other people feel far away
-        { weight: State.lerp01(ser, 40, 20), value: 'Someone passes. You watch them go. They have a life — somewhere to be, someone to see. The distance between you and that is a thing you can feel.' },
+        { weight: ctx.state.lerp01(ser, 40, 20), value: 'Someone passes. You watch them go. They have a life — somewhere to be, someone to see. The distance between you and that is a thing you can feel.' },
         // Snow — people are bundled, moving differently
         { weight: weather === 'snow' ? 1.5 : 0, value: 'Someone goes past in a big coat, head down against the cold. Everyone out here looks like they\'re getting somewhere fast.' },
       ]);
     },
 
     vomit: () => {
-      const stomach = State.stomachTier();
-      const location = World.getLocationId();
+      const stomach = ctx.state.stomachTier();
+      const location = ctx.world.getLocationId();
       const inBathroom = location === 'apartment_bathroom';
-      const aden = State.get('adenosine');
-      const ne = State.get('norepinephrine');
-      const gaba = State.get('gaba');
+      const aden = ctx.state.get('adenosine');
+      const ne = ctx.state.get('norepinephrine');
+      const gaba = ctx.state.get('gaba');
 
       if (stomach === 'empty') {
         // Dry heave — nothing to bring up
-        State.adjustEnergy(-8);
-        State.adjustStress(6);
-        State.set('nausea', Math.max(0, State.get('nausea') - 8));
+        ctx.state.adjustEnergy(-8);
+        ctx.state.adjustStress(6);
+        ctx.state.set('nausea', Math.max(0, ctx.state.get('nausea') - 8));
 
         if (inBathroom) {
-          return Timeline.weightedPick([
+          return ctx.timeline.weightedPick([
             { weight: 1, value: 'Your body tries to expel something that isn\'t there. You\'re hunched over the toilet, hands braced on the seat, and nothing comes. The heaving is its own particular indignity — all the effort, none of the relief.' },
             { weight: 1, value: 'Dry heaves. Your stomach clenches hard on empty and your throat burns anyway. You wait for it to stop. Eventually it does.' },
             { weight: 1, value: 'You make it to the bathroom. You lean over the toilet and your body goes through the motions with nothing to show for it. The muscles ache after. The nausea doesn\'t really let up.' },
             // High NE — adrenaline sharpness, body crisis registering acutely
-            { weight: State.lerp01(ne, 50, 75), value: 'Everything is very immediate and sharp. Your knuckles are white on the rim of the toilet. Your body is doing something it needs to do and you are along for it, helpless, hyperaware of every muscle.' },
+            { weight: ctx.state.lerp01(ne, 50, 75), value: 'Everything is very immediate and sharp. Your knuckles are white on the rim of the toilet. Your body is doing something it needs to do and you are along for it, helpless, hyperaware of every muscle.' },
             // High adenosine — dissociation, foggy distance from the body
-            { weight: State.lerp01(aden, 55, 80) * State.adenosineBlock(), value: 'You\'re in the bathroom somehow. The heaving happens and there\'s a delay between the sensation and registering it — your body running ahead of you, your mind catching up.' },
+            { weight: ctx.state.lerp01(aden, 55, 80) * ctx.state.adenosineBlock(), value: 'You\'re in the bathroom somehow. The heaving happens and there\'s a delay between the sensation and registering it — your body running ahead of you, your mind catching up.' },
           ]);
         } else {
-          return Timeline.weightedPick([
+          return ctx.timeline.weightedPick([
             { weight: 1, value: 'The nausea crests and then your body decides — here, now, wherever you are. Dry heaves. Nothing comes up. Your eyes water. You wait until it\'s over.' },
             { weight: 1, value: 'There\'s no time to go anywhere. You bend forward and your stomach clenches on empty, twice, three times. The sounds you make are humiliating. Nothing comes.' },
             { weight: 1, value: 'It hits fast. You go still and breathe through it and your body heaves anyway, on its own timeline. Nothing comes up. The nausea barely shifts.' },
             // Low GABA — loss of control feeling, helplessness
-            { weight: State.lerp01(gaba, 45, 25), value: 'Your body stops being yours for a moment. You can\'t do anything but go with it — the heave, the nothing, the slow return. You had no control over that and it shows.' },
+            { weight: ctx.state.lerp01(gaba, 45, 25), value: 'Your body stops being yours for a moment. You can\'t do anything but go with it — the heave, the nothing, the slow return. You had no control over that and it shows.' },
             // High NE — the body crisis as sharp, sensory-acute experience
-            { weight: State.lerp01(ne, 50, 75), value: 'Sudden, total, and there\'s no part of you that isn\'t involved. Dry heaves — your whole body braces and produces nothing. It leaves you shaking.' },
+            { weight: ctx.state.lerp01(ne, 50, 75), value: 'Sudden, total, and there\'s no part of you that isn\'t involved. Dry heaves — your whole body braces and produces nothing. It leaves you shaking.' },
           ]);
         }
       } else {
         // Expulsion — stomach has contents
-        const newFullness = Math.max(0, State.get('stomach_fullness') - 75);
-        State.set('stomach_fullness', newFullness);
-        State.set('ate_today', false);  // food didn't stay down
-        State.set('nausea', Math.max(0, State.get('nausea') - 25));
-        State.adjustEnergy(-5);
-        State.adjustStress(4);
+        const newFullness = Math.max(0, ctx.state.get('stomach_fullness') - 75);
+        ctx.state.set('stomach_fullness', newFullness);
+        ctx.state.set('ate_today', false);  // food didn't stay down
+        ctx.state.set('nausea', Math.max(0, ctx.state.get('nausea') - 25));
+        ctx.state.adjustEnergy(-5);
+        ctx.state.adjustStress(4);
 
         if (inBathroom) {
-          return Timeline.weightedPick([
+          return ctx.timeline.weightedPick([
             { weight: 1, value: 'You make it to the bathroom in time. You lean over the toilet and your body takes care of the rest. Afterward you sit on the floor for a while with your back against the tub. The nausea has backed off a little. Not gone. Just less.' },
             { weight: 1, value: 'The nausea peaks and then everything comes up, fast and hard. When it\'s over you rinse your mouth at the sink and look at yourself in the mirror for a moment before you look away.' },
             { weight: 1, value: 'It happens quickly. There\'s almost nothing to decide — your body decides for you, and then it\'s over, and you\'re sitting on the bathroom floor, washed out, lighter in a bad way.' },
             // High NE — adrenaline, the body crisis as hyper-acute physical experience
-            { weight: State.lerp01(ne, 50, 75), value: 'Your hands are cold and you\'re sweating slightly and everything comes up at once. The bathroom tiles are very specific while you\'re down there. Afterward your body feels wrong in a new way, hollowed out.' },
+            { weight: ctx.state.lerp01(ne, 50, 75), value: 'Your hands are cold and you\'re sweating slightly and everything comes up at once. The bathroom tiles are very specific while you\'re down there. Afterward your body feels wrong in a new way, hollowed out.' },
             // High adenosine — fog-wrapped, processing delayed
-            { weight: State.lerp01(aden, 55, 80) * State.adenosineBlock(), value: 'The event happens — bathroom, toilet, the whole of it — and there\'s a layer of fog over it even as it\'s happening. You know what\'s going on. You just can\'t quite be present for it. Afterward you\'re empty and tired.' },
+            { weight: ctx.state.lerp01(aden, 55, 80) * ctx.state.adenosineBlock(), value: 'The event happens — bathroom, toilet, the whole of it — and there\'s a layer of fog over it even as it\'s happening. You know what\'s going on. You just can\'t quite be present for it. Afterward you\'re empty and tired.' },
           ]);
         } else {
-          return Timeline.weightedPick([
+          return ctx.timeline.weightedPick([
             { weight: 1, value: 'You don\'t make it anywhere. You bend forward and everything comes up right where you are. When it\'s done you stay still for a moment, hands on your knees, and then you deal with it.' },
             { weight: 1, value: 'There\'s no warning that isn\'t also already happening. It\'s fast and it\'s there and then it\'s over and you\'re standing in a mess of your own making, shaking slightly, stomach clenched around nothing.' },
             { weight: 1, value: 'The nausea spills over all at once. Not here, not like this — but here, like this. You clean up as best you can. You don\'t feel better. You feel emptied out.' },
             // Low GABA — the loss of control landing hard
-            { weight: State.lerp01(gaba, 45, 25), value: 'Your body does what it does and you have no say. Afterward — the shame of the mess, the fact of the location, the way you couldn\'t stop it — you file that away and clean up without thinking about it too hard.' },
+            { weight: ctx.state.lerp01(gaba, 45, 25), value: 'Your body does what it does and you have no say. Afterward — the shame of the mess, the fact of the location, the way you couldn\'t stop it — you file that away and clean up without thinking about it too hard.' },
             // High NE — the body crisis raw, un-muffled
-            { weight: State.lerp01(ne, 50, 75), value: 'Fast and total and you\'re not in the bathroom. It\'s just — out, all of it, and you\'re left shaking with the after-adrenaline of it, hyper-present in the worst way.' },
+            { weight: ctx.state.lerp01(ne, 50, 75), value: 'Fast and total and you\'re not in the bathroom. It\'s just — out, all of it, and you\'re left shaking with the after-adrenaline of it, hyper-present in the worst way.' },
           ]);
         }
       }
@@ -5003,18 +4994,18 @@ export function createContent(ctx) {
   const recentIdle = [];
 
   const idleThoughts = () => {
-    const mood = State.moodTone();
-    const hunger = State.hungerTier();
-    const energy = State.energyTier();
-    const social = State.socialTier();
-    const location = World.getLocationId();
+    const mood = ctx.state.moodTone();
+    const hunger = ctx.state.hungerTier();
+    const energy = ctx.state.energyTier();
+    const social = ctx.state.socialTier();
+    const location = ctx.world.getLocationId();
 
     // NT values for continuous prose shading
-    const ser = State.get('serotonin');
-    const dop = State.get('dopamine');
-    const ne = State.get('norepinephrine');
-    const gaba = State.get('gaba');
-    const aden = State.get('adenosine');
+    const ser = ctx.state.get('serotonin');
+    const dop = ctx.state.get('dopamine');
+    const ne = ctx.state.get('norepinephrine');
+    const gaba = ctx.state.get('gaba');
+    const aden = ctx.state.get('adenosine');
 
     // Helper: wrap a plain string as a weight-1 item
     const w1 = (/** @type {string} */ s) => ({ weight: 1, value: s });
@@ -5033,14 +5024,14 @@ export function createContent(ctx) {
         w1('Your eyes are open. That counts as being awake, technically.'),
         w1('You\'re aware of the room. The room is not aware of you. Fair enough.'),
         // Low serotonin deepens the numbness toward despair
-        { weight: State.lerp01(ser, 35, 15), value: 'There was a feeling here once. You can\'t remember what it was shaped like.' },
-        { weight: State.lerp01(ser, 35, 15), value: 'You try to care about something. Anything. The effort folds in on itself.' },
+        { weight: ctx.state.lerp01(ser, 35, 15), value: 'There was a feeling here once. You can\'t remember what it was shaped like.' },
+        { weight: ctx.state.lerp01(ser, 35, 15), value: 'You try to care about something. Anything. The effort folds in on itself.' },
         // High adenosine (unblocked) — the numbness is also fog
-        { weight: State.lerp01(aden, 50, 80) * State.adenosineBlock(), value: 'Your thoughts don\'t finish. They start and then they\'re somewhere else. Or nowhere.' },
-        { weight: State.lerp01(aden, 50, 80) * State.adenosineBlock(), value: 'The edges of the room are soft. Not comforting. Just indistinct.' },
+        { weight: ctx.state.lerp01(aden, 50, 80) * ctx.state.adenosineBlock(), value: 'Your thoughts don\'t finish. They start and then they\'re somewhere else. Or nowhere.' },
+        { weight: ctx.state.lerp01(aden, 50, 80) * ctx.state.adenosineBlock(), value: 'The edges of the room are soft. Not comforting. Just indistinct.' },
       );
     } else if (mood === 'hollow') {
-      const friend1 = Character.get('friend1');
+      const friend1 = ctx.character.get('friend1');
       thoughts.push(
         w1(`You think about calling ${friend1.name}. You don't pick up the phone.`),
         w1('What would you do if you could do anything. The question doesn\'t even finish forming.'),
@@ -5050,11 +5041,11 @@ export function createContent(ctx) {
         w1('You open your mouth to say something, then realize there\'s no one to say it to. And nothing to say.'),
         w1('A memory tries to surface. You let it sink back down.'),
         // Low serotonin — hollow tips toward hopeless
-        { weight: State.lerp01(ser, 40, 20), value: 'The distance between you and everyone else isn\'t measured in miles. It\'s measured in something you can\'t close.' },
+        { weight: ctx.state.lerp01(ser, 40, 20), value: 'The distance between you and everyone else isn\'t measured in miles. It\'s measured in something you can\'t close.' },
         // Low dopamine — can't even want connection
-        { weight: State.lerp01(dop, 40, 20), value: 'You could reach out. The thought is there. It doesn\'t connect to anything that would make your hand move.' },
+        { weight: ctx.state.lerp01(dop, 40, 20), value: 'You could reach out. The thought is there. It doesn\'t connect to anything that would make your hand move.' },
         // High NE — hollow but wired
-        { weight: State.lerp01(ne, 45, 70), value: 'The quiet isn\'t peaceful. There\'s something underneath it, humming. You can\'t name it but your body knows.' },
+        { weight: ctx.state.lerp01(ne, 45, 70), value: 'The quiet isn\'t peaceful. There\'s something underneath it, humming. You can\'t name it but your body knows.' },
       );
     } else if (mood === 'heavy') {
       thoughts.push(
@@ -5067,12 +5058,12 @@ export function createContent(ctx) {
         w1('You shift your weight from one foot to the other. That\'s the most you\'ve done in a while.'),
         w1('The thought of doing something and the doing of it — there\'s a gap there. It\'s wider than usual.'),
         // Low serotonin — heavy tilts darker
-        { weight: State.lerp01(ser, 40, 20), value: 'It\'s not that you can\'t. It\'s that the part of you that would want to is somewhere you can\'t reach.' },
-        { weight: State.lerp01(ser, 40, 20), value: 'Your hands are in your lap. They could do things. They don\'t feel like your hands.' },
+        { weight: ctx.state.lerp01(ser, 40, 20), value: 'It\'s not that you can\'t. It\'s that the part of you that would want to is somewhere you can\'t reach.' },
+        { weight: ctx.state.lerp01(ser, 40, 20), value: 'Your hands are in your lap. They could do things. They don\'t feel like your hands.' },
         // Low GABA — heavy with anxiety underneath
-        { weight: State.lerp01(gaba, 45, 25), value: 'The heaviness has a tremor in it. Not visible. Internal. The weight is there and something under it is vibrating.' },
+        { weight: ctx.state.lerp01(gaba, 45, 25), value: 'The heaviness has a tremor in it. Not visible. Internal. The weight is there and something under it is vibrating.' },
         // Low dopamine — can't start anything
-        { weight: State.lerp01(dop, 40, 20), value: 'You look at the room. There are things you could do. The list exists somewhere outside you, behind glass.' },
+        { weight: ctx.state.lerp01(dop, 40, 20), value: 'You look at the room. There are things you could do. The list exists somewhere outside you, behind glass.' },
       );
     } else if (mood === 'fraying') {
       thoughts.push(
@@ -5085,12 +5076,12 @@ export function createContent(ctx) {
         w1('A sound from somewhere. You flinch. It was nothing.'),
         w1('The inside of your skin feels too small for what\'s in there.'),
         // High NE — sensory overload
-        { weight: State.lerp01(ne, 55, 80), value: 'You can hear the light. The hum of whatever makes electricity work. It\'s in the walls and it won\'t stop.' },
-        { weight: State.lerp01(ne, 55, 80), value: 'The texture of your clothes. You can feel every fiber. When did fabric get this loud.' },
+        { weight: ctx.state.lerp01(ne, 55, 80), value: 'You can hear the light. The hum of whatever makes electricity work. It\'s in the walls and it won\'t stop.' },
+        { weight: ctx.state.lerp01(ne, 55, 80), value: 'The texture of your clothes. You can feel every fiber. When did fabric get this loud.' },
         // Low GABA — no brakes
-        { weight: State.lerp01(gaba, 40, 20), value: 'The thing about being wound this tight is there\'s nothing to wind down into. No floor. Just tighter.' },
+        { weight: ctx.state.lerp01(gaba, 40, 20), value: 'The thing about being wound this tight is there\'s nothing to wind down into. No floor. Just tighter.' },
         // High cortisol — body stress
-        { weight: State.lerp01(State.get('cortisol'), 60, 85), value: 'Your stomach is a fist. It\'s been a fist. You keep forgetting and then noticing again.' },
+        { weight: ctx.state.lerp01(ctx.state.get('cortisol'), 60, 85), value: 'Your stomach is a fist. It\'s been a fist. You keep forgetting and then noticing again.' },
       );
     } else if (mood === 'quiet') {
       thoughts.push(
@@ -5103,11 +5094,11 @@ export function createContent(ctx) {
         w1('You notice yourself noticing the quiet. That\'s a layer you didn\'t need.'),
         w1('The stillness has a weight to it. Not heavy. Just present.'),
         // Higher serotonin — quiet edges toward something almost peaceful
-        { weight: State.lerp01(ser, 45, 60), value: 'The quiet doesn\'t need filling. You notice that without reaching for a reason.' },
+        { weight: ctx.state.lerp01(ser, 45, 60), value: 'The quiet doesn\'t need filling. You notice that without reaching for a reason.' },
         // High NE — quiet but watchful
-        { weight: State.lerp01(ne, 45, 65), value: 'Quiet on the outside. Something scanning, underneath. Not anxious exactly. Just — listening for what isn\'t there.' },
+        { weight: ctx.state.lerp01(ne, 45, 65), value: 'Quiet on the outside. Something scanning, underneath. Not anxious exactly. Just — listening for what isn\'t there.' },
         // Low dopamine — quiet bleeds into apathy
-        { weight: State.lerp01(dop, 40, 20), value: 'The quiet is the loudest thing, and you don\'t mind, because minding takes something you don\'t have.' },
+        { weight: ctx.state.lerp01(dop, 40, 20), value: 'The quiet is the loudest thing, and you don\'t mind, because minding takes something you don\'t have.' },
       );
     } else if (mood === 'clear' || mood === 'present') {
       thoughts.push(
@@ -5119,11 +5110,11 @@ export function createContent(ctx) {
         w1('Something close to okay. You don\'t examine it too closely. Just let it be there.'),
         w1('The ordinary is ordinary. That\'s enough. That\'s more than enough.'),
         // High serotonin — present tips toward genuine warmth
-        { weight: State.lerp01(ser, 55, 75), value: 'For a second the room is just a room and you\'re just in it and that\'s fine. Actually fine.' },
+        { weight: ctx.state.lerp01(ser, 55, 75), value: 'For a second the room is just a room and you\'re just in it and that\'s fine. Actually fine.' },
         // Moderate NE — present and noticing
-        { weight: State.lerp01(ne, 35, 55), value: 'You notice the dust in the light. The way it moves. Slow, undirected. Like it has time.' },
+        { weight: ctx.state.lerp01(ne, 35, 55), value: 'You notice the dust in the light. The way it moves. Slow, undirected. Like it has time.' },
         // High dopamine — spark of engagement
-        { weight: State.lerp01(dop, 55, 75), value: 'Something in you wants to do something. Not urgent. Just — the idea of doing has a small pull to it.' },
+        { weight: ctx.state.lerp01(dop, 55, 75), value: 'Something in you wants to do something. Not urgent. Just — the idea of doing has a small pull to it.' },
       );
     } else {
       // flat
@@ -5136,14 +5127,14 @@ export function createContent(ctx) {
         w1('The light is different than it was a while ago. Things shift without you deciding.'),
         w1('You look around. Everything is where you left it.'),
         // Low serotonin — flat is darker than it looks
-        { weight: State.lerp01(ser, 45, 25), value: 'Nothing is wrong. You keep checking. Still nothing wrong. The checking is the closest thing to a feeling.' },
-        { weight: State.lerp01(ser, 45, 25), value: 'You\'re fine. That\'s what you\'d say if someone asked. Fine covers a lot of territory.' },
+        { weight: ctx.state.lerp01(ser, 45, 25), value: 'Nothing is wrong. You keep checking. Still nothing wrong. The checking is the closest thing to a feeling.' },
+        { weight: ctx.state.lerp01(ser, 45, 25), value: 'You\'re fine. That\'s what you\'d say if someone asked. Fine covers a lot of territory.' },
         // High NE — flat with restless edge
-        { weight: State.lerp01(ne, 45, 65), value: 'You\'re not doing anything but your foot is bouncing. When did it start. You stop it. It starts again.' },
+        { weight: ctx.state.lerp01(ne, 45, 65), value: 'You\'re not doing anything but your foot is bouncing. When did it start. You stop it. It starts again.' },
         // Low dopamine — flat and going through motions
-        { weight: State.lerp01(dop, 42, 25), value: 'The day is happening. You\'re technically in it. Participation is a strong word.' },
+        { weight: ctx.state.lerp01(dop, 42, 25), value: 'The day is happening. You\'re technically in it. Participation is a strong word.' },
         // High adenosine (unblocked) — flat is also foggy
-        { weight: State.lerp01(aden, 50, 75) * State.adenosineBlock(), value: 'Your thoughts keep softening at the edges. Not drifting. Dissolving. Like sugar in water.' },
+        { weight: ctx.state.lerp01(aden, 50, 75) * ctx.state.adenosineBlock(), value: 'Your thoughts keep softening at the edges. Not drifting. Dissolving. Like sugar in water.' },
       );
     }
 
@@ -5170,17 +5161,17 @@ export function createContent(ctx) {
     // fridge is empty, pantry is empty, and EBT balance is also depleted.
     // The compound state of having no available path to food right now.
     {
-      const nothingMoney = State.moneyTier();
-      const nothingFridge = State.fridgeTier();
-      const nothingPantry = State.pantryTier();
+      const nothingMoney = ctx.state.moneyTier();
+      const nothingFridge = ctx.state.fridgeTier();
+      const nothingPantry = ctx.state.pantryTier();
       if (
         (hunger === 'very_hungry' || hunger === 'starving') &&
         (nothingMoney === 'broke' || nothingMoney === 'scraping') &&
         nothingFridge === 'empty' &&
         nothingPantry === 'empty' &&
-        State.get('ebt_balance') < 5  // EBT must also be depleted — $5 minimum for buy_groceries
+        ctx.state.get('ebt_balance') < 5  // EBT must also be depleted — $5 minimum for buy_groceries
       ) {
-        const tp = State.timePeriod();
+        const tp = ctx.state.timePeriod();
         // Late = evening/night when food bank and most stores are closed.
         // Daytime = morning through afternoon when resources are still accessible.
         const isLate = tp === 'evening' || tp === 'night' || tp === 'deep_night';
@@ -5208,7 +5199,7 @@ export function createContent(ctx) {
             { weight: 8, value: 'The food bank opens at nine. That\'s — you do the math. That\'s a long time from now.' },
             { weight: 7, value: 'You could try to sleep through part of it. That\'s the plan. Sleep through some of it.' },
             // Low serotonin makes the late-night wait heavier
-            { weight: State.lerp01(ser, 40, 20) * 7, value: 'The night has a specific quality when you\'re hungry and there\'s nothing to do about it. You\'re in it.' },
+            { weight: ctx.state.lerp01(ser, 40, 20) * 7, value: 'The night has a specific quality when you\'re hungry and there\'s nothing to do about it. You\'re in it.' },
           );
         } else if (isDaytime) {
           thoughts.push(
@@ -5222,7 +5213,7 @@ export function createContent(ctx) {
           thoughts.push(
             { weight: 9, value: 'It\'s not dramatic. That\'s the thing. It\'s just — this is what today is.' },
             // Low dopamine — can't even generate the energy to feel bad about it
-            { weight: State.lerp01(dop, 40, 20) * 7, value: 'You don\'t have the bandwidth to feel bad about this right now. That\'s its own kind of mercy.' },
+            { weight: ctx.state.lerp01(dop, 40, 20) * 7, value: 'You don\'t have the bandwidth to feel bad about this right now. That\'s its own kind of mercy.' },
           );
         } else if (mood === 'fraying' || mood === 'flat') {
           thoughts.push(
@@ -5233,7 +5224,7 @@ export function createContent(ctx) {
 
         // Cortisol — body registering scarcity as emergency; mind has no action to give it
         thoughts.push(
-          { weight: State.lerp01(State.get('cortisol'), 55, 80) * 6, value: 'Your body is treating this like a problem that requires action. There is no action. The body doesn\'t adjust for that.' },
+          { weight: ctx.state.lerp01(ctx.state.get('cortisol'), 55, 80) * 6, value: 'Your body is treating this like a problem that requires action. There is no action. The body doesn\'t adjust for that.' },
         );
       }
     }
@@ -5251,8 +5242,8 @@ export function createContent(ctx) {
 
     // Social
     if (social === 'isolated') {
-      const friend1 = Character.get('friend1');
-      const friend2 = Character.get('friend2');
+      const friend1 = ctx.character.get('friend1');
+      const friend2 = ctx.character.get('friend2');
       const f1thoughts = /** @type {(name: string) => string[]} */ (friendIdleThoughts[friend1.flavor])(friend1.name);
       const f2thoughts = /** @type {(name: string) => string[]} */ (friendIdleThoughts[friend2.flavor])(friend2.name);
       thoughts.push(...f1thoughts.map(w1), ...f2thoughts.map(w1));
@@ -5260,10 +5251,10 @@ export function createContent(ctx) {
 
     // Friend guilt — fires regardless of social tier
     {
-      const f1 = Character.get('friend1');
-      const f2 = Character.get('friend2');
-      const g1 = State.sentimentIntensity('friend1', 'guilt');
-      const g2 = State.sentimentIntensity('friend2', 'guilt');
+      const f1 = ctx.character.get('friend1');
+      const f2 = ctx.character.get('friend2');
+      const g1 = ctx.state.sentimentIntensity('friend1', 'guilt');
+      const g2 = ctx.state.sentimentIntensity('friend2', 'guilt');
       if (g1 > 0.03) {
         const gThoughts = /** @type {(name: string) => string[]} */ (friendGuiltThoughts[f1.flavor])(f1.name);
         thoughts.push(...gThoughts.map(t => ({ weight: g1 * 8, value: t })));
@@ -5276,7 +5267,7 @@ export function createContent(ctx) {
 
     // Financial anxiety
     {
-      const moneyAnx = State.sentimentIntensity('money', 'anxiety');
+      const moneyAnx = ctx.state.sentimentIntensity('money', 'anxiety');
       if (moneyAnx > 0.05) {
         thoughts.push(
           { weight: moneyAnx * 6, value: 'The bills. You don\'t do the math. You already know the math.' },
@@ -5284,16 +5275,16 @@ export function createContent(ctx) {
           { weight: moneyAnx * 4, value: 'Rent is due. Or was due. Or will be. The due dates blur together after a while.' },
         );
         // Upcoming bill awareness
-        const bill = State.nextBillDue();
+        const bill = ctx.state.nextBillDue();
         if (bill && bill.daysUntil <= 3) {
           const timing = bill.daysUntil === 0 ? 'today' : bill.daysUntil === 1 ? 'tomorrow' : 'in a couple days';
           const label = bill.name === 'rent' ? 'Rent' : 'A bill';
           thoughts.push({ weight: moneyAnx * 8, value: `${label} is due ${timing}. You know the amount. You don\'t say it.` });
         }
         // Upcoming paycheck awareness when tight
-        const mt = State.moneyTier();
+        const mt = ctx.state.moneyTier();
         if (mt === 'broke' || mt === 'scraping' || mt === 'tight') {
-          const paycheckDays = State.nextPaycheckDays();
+          const paycheckDays = ctx.state.nextPaycheckDays();
           if (paycheckDays <= 4) {
             const timing = paycheckDays === 0 ? 'today' : paycheckDays === 1 ? 'tomorrow' : `in ${paycheckDays} days`;
             thoughts.push({ weight: moneyAnx * 7, value: `Paycheck ${timing}. The math between now and then is the only math that matters right now.` });
@@ -5308,7 +5299,7 @@ export function createContent(ctx) {
       }
       // Money fidelity — the experience of knowing-but-not-quite when finances are anxious
       if (moneyAnx > 0.1) {
-        const mf = State.moneyFidelity();
+        const mf = ctx.state.moneyFidelity();
         if (mf === 'rough' || mf === 'qualitative') {
           thoughts.push(
             { weight: moneyAnx * 5, value: 'You try to picture the account balance. You get a shape, not a number. Something in the vicinity of not enough.' },
@@ -5324,9 +5315,9 @@ export function createContent(ctx) {
 
     // Time fidelity — the experience of not quite knowing when it is
     {
-      const tf = State.timeFidelity();
-      const aden = State.get('adenosine');
-      const adWeight = State.lerp01(aden, 45, 70) * State.adenosineBlock();
+      const tf = ctx.state.timeFidelity();
+      const aden = ctx.state.get('adenosine');
+      const adWeight = ctx.state.lerp01(aden, 45, 70) * ctx.state.adenosineBlock();
       if (tf === 'sensory') {
         thoughts.push(
           { weight: 3 + adWeight * 4, value: 'You\'ve lost track of the time. Not dramatically. Just — lost it somewhere.' },
@@ -5342,7 +5333,7 @@ export function createContent(ctx) {
 
     // Illness — intrusive physical presence when sick
     {
-      const illTier = State.illnessTier();
+      const illTier = ctx.state.illnessTier();
       if (illTier === 'very_sick') {
         thoughts.push(
           { weight: 10, value: 'You feel bad in the specific, consuming way that makes everything else feel far away.' },
@@ -5370,7 +5361,7 @@ export function createContent(ctx) {
 
     // Dental pain — persistent background awareness
     {
-      const dentalT = State.dentalTier();
+      const dentalT = ctx.state.dentalTier();
       if (dentalT === 'flare') {
         thoughts.push(
           { weight: 8, value: 'The tooth. Still. Always.' },
@@ -5394,7 +5385,7 @@ export function createContent(ctx) {
 
     // Nausea — physical misery regardless of source
     {
-      const nTier = State.nauseaTier();
+      const nTier = ctx.state.nauseaTier();
       if (nTier === 'severe') {
         thoughts.push(
           { weight: 12, value: 'Your stomach is making its feelings known. Loud. Sustained. You stay very still.' },
@@ -5418,7 +5409,7 @@ export function createContent(ctx) {
 
     // Caffeine withdrawal — background headache pressing in
     {
-      const wdTier = State.withdrawalTier();
+      const wdTier = ctx.state.withdrawalTier();
       if (wdTier === 'severe') {
         thoughts.push(
           { weight: 10, value: 'The headache is a fact. It\'s been a fact since you woke up. It sits behind your eyes and does not move.' },
@@ -5441,7 +5432,7 @@ export function createContent(ctx) {
     // Filter out recently shown thoughts (compare .value)
     const fresh = thoughts.filter(t => !recentIdle.includes(t.value));
     const pool = fresh.length > 0 ? fresh : thoughts;
-    const picked = Timeline.weightedPick(pool);
+    const picked = ctx.timeline.weightedPick(pool);
 
     // Track recency — avoid repeats across consecutive idle periods
     if (picked) {
@@ -5460,15 +5451,15 @@ export function createContent(ctx) {
   /**
    * Returns a single inner voice string (the character's self-talk).
    * Called only when innerVoiceTier() !== null.
-   * Consumes 1 RNG call via Timeline.weightedPick().
+   * Consumes 1 RNG call via ctx.timeline.weightedPick().
    */
   const innerVoiceThoughts = () => {
-    const mood = State.moodTone();
+    const mood = ctx.state.moodTone();
 
-    const ser = State.get('serotonin');
-    const ne = State.get('norepinephrine');
-    const gaba = State.get('gaba');
-    const aden = State.get('adenosine');
+    const ser = ctx.state.get('serotonin');
+    const ne = ctx.state.get('norepinephrine');
+    const gaba = ctx.state.get('gaba');
+    const aden = ctx.state.get('adenosine');
 
     const w1 = (/** @type {string} */ s) => ({ weight: 1, value: s });
 
@@ -5482,11 +5473,11 @@ export function createContent(ctx) {
         w1('You had something to do. You can\'t remember what.'),
         w1('It doesn\'t matter. That\'s not comforting, it\'s just true.'),
         // Low serotonin deepens the silence
-        { weight: State.lerp01(ser, 35, 15), value: 'You keep waiting to feel something about this. Nothing shows up.' },
-        { weight: State.lerp01(ser, 35, 15), value: 'There\'s no version of this that helps.' },
+        { weight: ctx.state.lerp01(ser, 35, 15), value: 'You keep waiting to feel something about this. Nothing shows up.' },
+        { weight: ctx.state.lerp01(ser, 35, 15), value: 'There\'s no version of this that helps.' },
         // High adenosine (unblocked) — fog as static
-        { weight: State.lerp01(aden, 55, 80) * State.adenosineBlock(), value: 'The thought was right there.' },
-        { weight: State.lerp01(aden, 55, 80) * State.adenosineBlock(), value: 'What were you—' },
+        { weight: ctx.state.lerp01(aden, 55, 80) * ctx.state.adenosineBlock(), value: 'The thought was right there.' },
+        { weight: ctx.state.lerp01(aden, 55, 80) * ctx.state.adenosineBlock(), value: 'What were you—' },
       );
     } else if (mood === 'hollow') {
       thoughts.push(
@@ -5495,10 +5486,10 @@ export function createContent(ctx) {
         w1('You used to have more to say to yourself.'),
         w1('Quiet. It\'s been quiet a long time.'),
         // Low serotonin — hollow with weight
-        { weight: State.lerp01(ser, 40, 20), value: 'You don\'t know what you\'d say even if you tried.' },
-        { weight: State.lerp01(ser, 40, 20), value: 'They\'re fine without you. Everyone is fine.' },
+        { weight: ctx.state.lerp01(ser, 40, 20), value: 'You don\'t know what you\'d say even if you tried.' },
+        { weight: ctx.state.lerp01(ser, 40, 20), value: 'They\'re fine without you. Everyone is fine.' },
         // Low NE — hollow and flat
-        { weight: State.lerp01(ne, 45, 25), value: 'Nothing needs you right now. Nothing.' },
+        { weight: ctx.state.lerp01(ne, 45, 25), value: 'Nothing needs you right now. Nothing.' },
       );
     } else if (mood === 'heavy') {
       thoughts.push(
@@ -5507,13 +5498,13 @@ export function createContent(ctx) {
         w1('You could start small. You haven\'t.'),
         w1('Later. You\'ll deal with it later.'),
         // Low serotonin — heavy tips into defeat
-        { weight: State.lerp01(ser, 40, 20), value: 'You know what you should be doing.' },
-        { weight: State.lerp01(ser, 40, 20), value: 'You\'re not doing it.' },
+        { weight: ctx.state.lerp01(ser, 40, 20), value: 'You know what you should be doing.' },
+        { weight: ctx.state.lerp01(ser, 40, 20), value: 'You\'re not doing it.' },
         // Low NE — nothing reaching through
-        { weight: State.lerp01(ne, 45, 25), value: 'Nothing\'s reaching you right now.' },
-        { weight: State.lerp01(ne, 45, 25), value: 'You\'re in here somewhere.' },
+        { weight: ctx.state.lerp01(ne, 45, 25), value: 'Nothing\'s reaching you right now.' },
+        { weight: ctx.state.lerp01(ne, 45, 25), value: 'You\'re in here somewhere.' },
         // Low GABA — heavy with tremor underneath
-        { weight: State.lerp01(gaba, 40, 20), value: 'There\'s something under the tiredness. You don\'t look at it.' },
+        { weight: ctx.state.lerp01(gaba, 40, 20), value: 'There\'s something under the tiredness. You don\'t look at it.' },
       );
     } else if (mood === 'fraying') {
       thoughts.push(
@@ -5524,13 +5515,13 @@ export function createContent(ctx) {
         w1('You\'re doing it again.'),
         w1('Okay. Okay.'),
         // High NE — tight loop
-        { weight: State.lerp01(ne, 60, 80), value: 'Your heart is going too fast for what you\'re doing.' },
-        { weight: State.lerp01(ne, 60, 80), value: 'Every sound has a reason. You don\'t know the reason.' },
+        { weight: ctx.state.lerp01(ne, 60, 80), value: 'Your heart is going too fast for what you\'re doing.' },
+        { weight: ctx.state.lerp01(ne, 60, 80), value: 'Every sound has a reason. You don\'t know the reason.' },
         // Low GABA — no floor
-        { weight: State.lerp01(gaba, 40, 20), value: 'You try to calm down. You don\'t calm down.' },
-        { weight: State.lerp01(gaba, 40, 20), value: 'The thing about trying to relax is you can\'t make yourself relax.' },
+        { weight: ctx.state.lerp01(gaba, 40, 20), value: 'You try to calm down. You don\'t calm down.' },
+        { weight: ctx.state.lerp01(gaba, 40, 20), value: 'The thing about trying to relax is you can\'t make yourself relax.' },
         // Low serotonin — fraying with hopeless undertow
-        { weight: State.lerp01(ser, 40, 20), value: 'You can\'t keep doing this. You\'re doing it.' },
+        { weight: ctx.state.lerp01(ser, 40, 20), value: 'You can\'t keep doing this. You\'re doing it.' },
       );
     } else if (mood === 'quiet') {
       thoughts.push(
@@ -5538,10 +5529,10 @@ export function createContent(ctx) {
         w1('Nothing right now.'),
         w1('You\'re not going anywhere.'),
         // Lower serotonin — quiet with an edge
-        { weight: State.lerp01(ser, 45, 25), value: 'Something you were going to do. It can wait.' },
-        { weight: State.lerp01(ser, 45, 25), value: 'This is fine. This is exactly fine.' },
+        { weight: ctx.state.lerp01(ser, 45, 25), value: 'Something you were going to do. It can wait.' },
+        { weight: ctx.state.lerp01(ser, 45, 25), value: 'This is fine. This is exactly fine.' },
         // High NE — quiet but not still
-        { weight: State.lerp01(ne, 50, 70), value: 'Everything\'s fine. You know it\'s fine. Your body hasn\'t gotten the message.' },
+        { weight: ctx.state.lerp01(ne, 50, 70), value: 'Everything\'s fine. You know it\'s fine. Your body hasn\'t gotten the message.' },
       );
     } else if (mood === 'clear' || mood === 'present') {
       thoughts.push(
@@ -5550,7 +5541,7 @@ export function createContent(ctx) {
         { weight: 0.5, value: 'You\'re here.' },
         { weight: 0.4, value: 'Yeah.' },
         // Slight NE presence — noticing without worry
-        { weight: State.lerp01(ne, 35, 55) * 0.5, value: 'Something you noticed. Nothing to do with it.' },
+        { weight: ctx.state.lerp01(ne, 35, 55) * 0.5, value: 'Something you noticed. Nothing to do with it.' },
       );
     } else {
       // flat
@@ -5560,16 +5551,16 @@ export function createContent(ctx) {
         w1('You\'ve been here a while.'),
         w1('Still here.'),
         // Low serotonin — flat is darker
-        { weight: State.lerp01(ser, 45, 25), value: 'Fine. It\'s fine.' },
+        { weight: ctx.state.lerp01(ser, 45, 25), value: 'Fine. It\'s fine.' },
         // High adenosine (unblocked) — flat and foggy
-        { weight: State.lerp01(aden, 55, 75) * State.adenosineBlock(), value: 'Something. There was something.' },
-        { weight: State.lerp01(aden, 55, 75) * State.adenosineBlock(), value: 'Never mind.' },
+        { weight: ctx.state.lerp01(aden, 55, 75) * ctx.state.adenosineBlock(), value: 'Something. There was something.' },
+        { weight: ctx.state.lerp01(aden, 55, 75) * ctx.state.adenosineBlock(), value: 'Never mind.' },
       );
     }
 
     const fresh = thoughts.filter(t => !recentInnerVoice.includes(t.value));
     const pool = fresh.length > 0 ? fresh : thoughts;
-    const picked = Timeline.weightedPick(pool);
+    const picked = ctx.timeline.weightedPick(pool);
 
     if (picked) {
       recentInnerVoice.push(picked);
@@ -5583,35 +5574,35 @@ export function createContent(ctx) {
 
   /** @param {string} from @param {string} to */
   const transitionText = (from, to) => {
-    const mood = State.moodTone();
-    const energy = State.energyTier();
+    const mood = ctx.state.moodTone();
+    const energy = ctx.state.energyTier();
 
     // Kitchen has a visible clock — glance on arrival
     if (to === 'apartment_kitchen') {
-      State.glanceTime();
+      ctx.state.glanceTime();
     }
 
     // Within apartment
-    if (World.getLocation(from)?.area === 'apartment' && World.getLocation(to)?.area === 'apartment') {
+    if (ctx.world.getLocation(from)?.area === 'apartment' && ctx.world.getLocation(to)?.area === 'apartment') {
       return '';
     }
 
     // Leaving apartment
-    if (World.getLocation(from)?.area === 'apartment' && to === 'street') {
+    if (ctx.world.getLocation(from)?.area === 'apartment' && to === 'street') {
       if (energy === 'depleted' || energy === 'exhausted') {
         return 'Getting out the door takes more than it should. But you\'re out.';
       }
       if (mood === 'heavy') {
         return 'You lock the door. The hallway, the stairs, the outside. Each one a small decision you make by making it.';
       }
-      if (!State.get('dressed')) {
-        return 'You step outside in ' + Character.get('sleepwear') + '. The air reminds you immediately. You don\'t go back in.';
+      if (!ctx.state.get('dressed')) {
+        return 'You step outside in ' + ctx.character.get('sleepwear') + '. The air reminds you immediately. You don\'t go back in.';
       }
       return 'You lock up and head out.';
     }
 
     // Going home
-    if (from === 'street' && World.getLocation(to)?.area === 'apartment') {
+    if (from === 'street' && ctx.world.getLocation(to)?.area === 'apartment') {
       if (energy === 'depleted') {
         return 'The stairs up to your apartment are the last obstacle. You clear them.';
       }
@@ -5625,72 +5616,72 @@ export function createContent(ctx) {
 
     // Bus ride to work
     if (from === 'bus_stop' && to === 'workplace') {
-      const hour = State.getHour();
-      const aden = State.get('adenosine');
-      const ne = State.get('norepinephrine');
-      const gaba = State.get('gaba');
-      const ser = State.get('serotonin');
-      const weather = State.get('weather');
+      const hour = ctx.state.getHour();
+      const aden = ctx.state.get('adenosine');
+      const ne = ctx.state.get('norepinephrine');
+      const gaba = ctx.state.get('gaba');
+      const ser = ctx.state.get('serotonin');
+      const weather = ctx.state.get('weather');
       if (hour >= 7 && hour <= 9) {
         // Rush hour
         if (mood === 'numb' || mood === 'heavy' || mood === 'hollow') {
-          return Timeline.weightedPick([
+          return ctx.timeline.weightedPick([
             { weight: 1, value: 'The bus is full. Bodies pressed together going the same direction. You find a spot to stand and not be. Twenty minutes of that.' },
             { weight: 1, value: 'Standing room. You press in and find a hold bar. The bus moves. You move with it. Twenty minutes.' },
             // High adenosine (unblocked) — the bus sway is almost restful
-            { weight: State.lerp01(aden, 50, 70) * State.adenosineBlock(), value: 'The bus is packed and warm. You close your eyes for most of the ride. The sway. Twenty minutes you barely noticed.' },
+            { weight: ctx.state.lerp01(aden, 50, 70) * ctx.state.adenosineBlock(), value: 'The bus is packed and warm. You close your eyes for most of the ride. The sway. Twenty minutes you barely noticed.' },
             // Low serotonin — the press of bodies is nothing
-            { weight: State.lerp01(ser, 35, 18), value: 'The bus is full. You find a grip and hold it. Bodies around you, sounds, movement. None of it reaches you. Twenty minutes.' },
+            { weight: ctx.state.lerp01(ser, 35, 18), value: 'The bus is full. You find a grip and hold it. Bodies around you, sounds, movement. None of it reaches you. Twenty minutes.' },
           ]);
         }
-        return Timeline.weightedPick([
+        return ctx.timeline.weightedPick([
           { weight: 1, value: 'The morning bus. Standing room only. You wedge in and stare at the back of someone\'s jacket for twenty minutes.' },
           { weight: 1, value: 'The bus is packed. You find a hold bar, settle your weight, let it carry you.' },
           // High NE — the sounds of a packed bus are a lot
-          { weight: State.lerp01(ne, 50, 70), value: 'The morning bus. Brakes, announcements, someone\'s music leaking from headphones, the sound of the city outside. You hold on and get through the twenty minutes.' },
+          { weight: ctx.state.lerp01(ne, 50, 70), value: 'The morning bus. Brakes, announcements, someone\'s music leaking from headphones, the sound of the city outside. You hold on and get through the twenty minutes.' },
           // Low GABA — the press of bodies is hard
-          { weight: State.lerp01(gaba, 40, 22), value: 'The bus is packed and you find the least crowded spot and try not to think about it. Twenty minutes of other people\'s proximity.' },
+          { weight: ctx.state.lerp01(gaba, 40, 22), value: 'The bus is packed and you find the least crowded spot and try not to think about it. Twenty minutes of other people\'s proximity.' },
           // Weather — window texture
           { weight: weather === 'drizzle' || weather === 'snow' ? 0.8 : 0, value: 'The morning bus. Standing room. You watch the ' + (weather === 'snow' ? 'snow' : 'rain') + ' on the windows for twenty minutes. The city blurs past.' },
         ]);
       }
       // Off-peak
-      return Timeline.weightedPick([
+      return ctx.timeline.weightedPick([
         { weight: 1, value: 'The bus comes. It\'s quieter this time of day. You find a seat and watch the city slide past the window.' },
         { weight: 1, value: 'Off-peak. Seats to choose from. You sit and the route unfolds.' },
         // High adenosine (unblocked) — the seat and the motion
-        { weight: State.lerp01(aden, 50, 70) * State.adenosineBlock(), value: 'A seat to yourself. The city goes past the window. Your head finds the glass. Twenty minutes that feel almost like a pause.' },
+        { weight: ctx.state.lerp01(aden, 50, 70) * ctx.state.adenosineBlock(), value: 'A seat to yourself. The city goes past the window. Your head finds the glass. Twenty minutes that feel almost like a pause.' },
         // Low serotonin — the ride has weight
-        { weight: State.lerp01(ser, 40, 22), value: 'A seat. You take it. The route you know well enough to not watch. The bus carries you forward anyway.' },
+        { weight: ctx.state.lerp01(ser, 40, 22), value: 'A seat. You take it. The route you know well enough to not watch. The bus carries you forward anyway.' },
         // High NE — the quiet bus is still a lot
-        { weight: State.lerp01(ne, 50, 68), value: 'The bus is quiet. You notice the sounds of it anyway — the engine, the doors at each stop, someone shifting in their seat. The city slides past.' },
+        { weight: ctx.state.lerp01(ne, 50, 68), value: 'The bus is quiet. You notice the sounds of it anyway — the engine, the doors at each stop, someone shifting in their seat. The city slides past.' },
       ]);
     }
 
     // Bus ride from work
     if (from === 'workplace' && to === 'bus_stop') {
-      const aden = State.get('adenosine');
-      const ne = State.get('norepinephrine');
-      const ser = State.get('serotonin');
+      const aden = ctx.state.get('adenosine');
+      const ne = ctx.state.get('norepinephrine');
+      const ser = ctx.state.get('serotonin');
       if (energy === 'depleted' || energy === 'exhausted') {
-        return Timeline.weightedPick([
+        return ctx.timeline.weightedPick([
           { weight: 1, value: 'The bus ride back. You sit and close your eyes and exist in the motion of it.' },
           { weight: 1, value: 'A seat. You take it and don\'t move. The city in reverse outside the window. You\'re barely there.' },
           // High adenosine (unblocked) — the ride is surrender
-          { weight: State.lerp01(aden, 58, 78) * State.adenosineBlock(), value: 'The bus seat holds you. That\'s the job. You close your eyes and the motion of it is the only thing that\'s asking anything of you.' },
+          { weight: ctx.state.lerp01(aden, 58, 78) * ctx.state.adenosineBlock(), value: 'The bus seat holds you. That\'s the job. You close your eyes and the motion of it is the only thing that\'s asking anything of you.' },
           // Low serotonin — the day comes in pieces
-          { weight: State.lerp01(ser, 38, 18), value: 'You sit down hard. The day sits with you. Eyes closed, the bus brings you home through it.' },
+          { weight: ctx.state.lerp01(ser, 38, 18), value: 'You sit down hard. The day sits with you. Eyes closed, the bus brings you home through it.' },
         ]);
       }
-      return Timeline.weightedPick([
+      return ctx.timeline.weightedPick([
         { weight: 1, value: 'The ride back. The city in reverse. You\'re not thinking about work anymore, mostly.' },
         { weight: 1, value: 'The commute home. The same route, the other direction. People getting on, getting off. The city doing its thing.' },
         // Clear or present — the ride is decompression
         { weight: (mood === 'clear' || mood === 'present') ? 1.2 : 0, value: 'The ride back is its own kind of decompression. The city slides past. You sit with what the day was and let the bus carry you out of it.' },
         // High NE — noticing the route
-        { weight: State.lerp01(ne, 45, 65), value: 'The bus home. Stops, announcements, the sounds of the city through the windows. You watch. You\'re almost off the clock.' },
+        { weight: ctx.state.lerp01(ne, 45, 65), value: 'The bus home. Stops, announcements, the sounds of the city through the windows. You watch. You\'re almost off the clock.' },
         // Heavy or hollow — the ride doesn't erase it
-        { weight: (mood === 'heavy' || mood === 'hollow') ? State.lerp01(ser, 40, 20) : 0, value: 'The bus. The slow passage out of the part of the day that\'s done. You sit with it. It comes with you anyway.' },
+        { weight: (mood === 'heavy' || mood === 'hollow') ? ctx.state.lerp01(ser, 40, 20) : 0, value: 'The bus. The slow passage out of the part of the day that\'s done. You sit with it. It comes with you anyway.' },
       ]);
     }
 
@@ -5706,7 +5697,7 @@ export function createContent(ctx) {
 
     // To soup kitchen
     if (from === 'street' && to === 'soup_kitchen') {
-      const visits = State.get('soup_kitchen_visits');
+      const visits = ctx.state.get('soup_kitchen_visits');
       if (visits === 0) {
         if (mood === 'heavy' || mood === 'hollow') {
           return 'You find the place. Door, sign, the smell of food from inside.';
@@ -5723,7 +5714,7 @@ export function createContent(ctx) {
 
     // To food bank
     if (from === 'street' && to === 'food_bank') {
-      const visits = State.get('food_bank_visits');
+      const visits = ctx.state.get('food_bank_visits');
       if (visits === 0) {
         return 'You walk over. It takes longer than you thought. You find it.';
       }
@@ -5751,11 +5742,11 @@ export function createContent(ctx) {
     const available = [];
 
     // Phone mode — phone UI renders its own action buttons, #actions stays empty
-    if (State.get('viewing_phone')) {
+    if (ctx.state.get('viewing_phone')) {
       return available;
     }
 
-    const location = World.getLocationId();
+    const location = ctx.world.getLocationId();
 
     for (const interaction of Object.values(interactions)) {
       if (interaction.location === location && interaction.available()) {
@@ -5784,24 +5775,24 @@ export function createContent(ctx) {
 
   /** @type {Record<string, () => string>} */
   const timeSources = {
-    apartment_bedroom: () => 'The alarm clock on the nightstand. ' + State.getTimeString() + '.',
-    apartment_kitchen: () => 'The microwave clock. ' + State.getTimeString() + '.',
-    workplace: () => 'The clock on your screen. ' + State.getTimeString() + '.',
-    corner_store: () => 'The clock behind the register. ' + State.getTimeString() + '.',
+    apartment_bedroom: () => 'The alarm clock on the nightstand. ' + ctx.state.getTimeString() + '.',
+    apartment_kitchen: () => 'The microwave clock. ' + ctx.state.getTimeString() + '.',
+    workplace: () => 'The clock on your screen. ' + ctx.state.getTimeString() + '.',
+    corner_store: () => 'The clock behind the register. ' + ctx.state.getTimeString() + '.',
   };
 
   function getTimeSource() {
-    const loc = World.getLocationId();
+    const loc = ctx.world.getLocationId();
     const fn = timeSources[loc];
     if (fn) return fn();
-    if (State.get('has_phone') && State.get('phone_battery') > 0)
-      return 'You check your phone. ' + State.getTimeString() + '.';
+    if (ctx.state.get('has_phone') && ctx.state.get('phone_battery') > 0)
+      return 'You check your phone. ' + ctx.state.getTimeString() + '.';
     return null;
   }
 
   function getMoneySource() {
-    if (State.get('has_phone') && State.get('phone_battery') > 0)
-      return 'You open the banking app. $' + Math.round(State.get('money')) + '.';
+    if (ctx.state.get('has_phone') && ctx.state.get('phone_battery') > 0)
+      return 'You open the banking app. $' + Math.round(ctx.state.get('money')) + '.';
     return null;
   }
 
@@ -5822,8 +5813,8 @@ export function createContent(ctx) {
     // === BEDROOM ===
 
     sleep: () => {
-      const mood = State.moodTone();
-      const aden = State.get('adenosine');
+      const mood = ctx.state.moodTone();
+      const aden = ctx.state.get('adenosine');
       if (aden > 80) return 'Your body is already deciding.';
       if (mood === 'numb' || mood === 'heavy') return 'The bed. You\'re moving toward it before you\'ve thought about it.';
       if (mood === 'fraying') return 'You need to lie down. You need to stop.';
@@ -5831,14 +5822,14 @@ export function createContent(ctx) {
     },
 
     get_dressed: () => {
-      const mood = State.moodTone();
+      const mood = ctx.state.moodTone();
       if (mood === 'numb' || mood === 'heavy') return 'You\'re reaching for your clothes before you\'ve thought about it.';
       if (mood === 'fraying') return 'Your hands find your clothes.';
       return 'Clothes.';
     },
 
     set_alarm: () => {
-      const mood = State.moodTone();
+      const mood = ctx.state.moodTone();
       if (mood === 'heavy' || mood === 'numb') return 'The alarm. A number for tomorrow.';
       return 'Alarm.';
     },
@@ -5848,15 +5839,15 @@ export function createContent(ctx) {
     },
 
     snooze_alarm: () => {
-      const count = State.get('snooze_count');
-      const aden = State.get('adenosine');
+      const count = ctx.state.get('snooze_count');
+      const aden = ctx.state.get('adenosine');
       if (count > 1) return 'Again.';
       if (aden > 50) return 'Your hand is already moving.';
       return 'Snooze.';
     },
 
     dismiss_alarm: () => {
-      const count = State.get('snooze_count');
+      const count = ctx.state.get('snooze_count');
       if (count > 2) return 'Enough. Up.';
       return 'Up.';
     },
@@ -5866,16 +5857,16 @@ export function createContent(ctx) {
     },
 
     check_phone_bedroom: () => {
-      const mood = State.moodTone();
-      const cortisol = State.get('cortisol');
+      const mood = ctx.state.moodTone();
+      const cortisol = ctx.state.get('cortisol');
       if (cortisol > 60) return 'Your hand is already on your phone.';
       if (mood === 'numb') return 'Phone. Screen. Light in the dark.';
       return 'Your phone.';
     },
 
     lie_there: () => {
-      const mood = State.moodTone();
-      const aden = State.get('adenosine');
+      const mood = ctx.state.moodTone();
+      const aden = ctx.state.get('adenosine');
       if (aden > 60) return 'You\'re not getting up yet.';
       if (mood === 'heavy') return 'You stay. The ceiling stays.';
       if (mood === 'numb') return 'Nothing to get up for. Not yet.';
@@ -5883,13 +5874,13 @@ export function createContent(ctx) {
     },
 
     look_out_window: () => {
-      const mood = State.moodTone();
+      const mood = ctx.state.moodTone();
       if (mood === 'hollow') return 'The window. Something outside.';
       return 'The window.';
     },
 
     make_bed: () => {
-      const mood = State.moodTone();
+      const mood = ctx.state.moodTone();
       if (mood === 'numb' || mood === 'heavy') return 'The bed. You pull the sheets straight.';
       if (mood === 'fraying') return 'The bed. One small thing.';
       return 'Make the bed.';
@@ -5908,7 +5899,7 @@ export function createContent(ctx) {
     },
 
     tidy_clothes: () => {
-      const mood = State.moodTone();
+      const mood = ctx.state.moodTone();
       if (mood === 'fraying') return 'The clothes. Off the floor.';
       return 'The clothes on the floor.';
     },
@@ -5916,47 +5907,47 @@ export function createContent(ctx) {
     // === KITCHEN ===
 
     eat_food: () => {
-      const mood = State.moodTone();
-      if (['very_hungry', 'starving'].includes(State.hungerTier())) return 'You need to eat something.';
+      const mood = ctx.state.moodTone();
+      if (['very_hungry', 'starving'].includes(ctx.state.hungerTier())) return 'You need to eat something.';
       if (mood === 'numb') return 'You open the fridge. Standing there.';
       if (mood === 'heavy') return 'Something from the fridge. Whatever\'s there.';
       return 'Something from the fridge.';
     },
 
     eat_from_pantry: () => {
-      const hunger = State.hungerTier();
+      const hunger = ctx.state.hungerTier();
       if (hunger === 'starving' || hunger === 'very_hungry') return 'There\'s something in the cupboard.';
       return 'The cupboard.';
     },
 
     drink_water: () => {
-      const aden = State.get('adenosine');
+      const aden = ctx.state.get('adenosine');
       if (aden > 60) return 'Water. Your mouth is dry.';
       return 'Water.';
     },
 
     make_coffee: () => {
-      const aden = State.get('adenosine');
-      const caffeine = State.caffeineTier();
+      const aden = ctx.state.get('adenosine');
+      const caffeine = ctx.state.caffeineTier();
       if (caffeine === 'active') return 'The second cup.';
-      if (aden > 65 && State.adenosineBlock() > 0.5) return 'Coffee. You need it.';
+      if (aden > 65 && ctx.state.adenosineBlock() > 0.5) return 'Coffee. You need it.';
       return 'Coffee.';
     },
 
     do_dishes: () => {
-      const mood = State.moodTone();
+      const mood = ctx.state.moodTone();
       if (mood === 'heavy') return 'The dishes. They\'re still there.';
       return 'The dishes.';
     },
 
     check_phone_kitchen: () => {
-      const mood = State.moodTone();
+      const mood = ctx.state.moodTone();
       if (mood === 'fraying') return 'Your hand finds your phone again.';
       return 'Your phone.';
     },
 
     sit_at_table: () => {
-      const mood = State.moodTone();
+      const mood = ctx.state.moodTone();
       if (mood === 'numb' || mood === 'heavy') return 'The chair. You\'re sitting down before you meant to.';
       if (mood === 'fraying') return 'You sit. Your body made the decision.';
       return 'The table.';
@@ -5965,7 +5956,7 @@ export function createContent(ctx) {
     // === BATHROOM ===
 
     shower: () => {
-      const mood = State.moodTone();
+      const mood = ctx.state.moodTone();
       if (mood === 'numb') return 'The bathroom. Automatic.';
       if (mood === 'fraying') return 'Water. You need the water.';
       if (mood === 'heavy') return 'Shower. Going through the motions.';
@@ -5981,8 +5972,8 @@ export function createContent(ctx) {
     },
 
     take_pain_reliever: () => {
-      const migraineTier = State.migraineTier();
-      const dentalTier = State.dentalTier();
+      const migraineTier = ctx.state.migraineTier();
+      const dentalTier = ctx.state.dentalTier();
       if (migraineTier === 'severe') return 'The medication. You need it.';
       if (migraineTier === 'active') return 'Something for the headache.';
       if (dentalTier === 'flare') return 'Something for the tooth. Please.';
@@ -5997,14 +5988,14 @@ export function createContent(ctx) {
     },
 
     sit_on_step: () => {
-      const mood = State.moodTone();
+      const mood = ctx.state.moodTone();
       if (mood === 'heavy' || mood === 'numb') return 'You\'re stopping. Sitting.';
       return 'The step.';
     },
 
     go_for_walk: () => {
-      const mood = State.moodTone();
-      const ne = State.get('norepinephrine');
+      const mood = ctx.state.moodTone();
+      const ne = ctx.state.get('norepinephrine');
       if (ne > 60) return 'Moving. You need to be moving.';
       if (mood === 'heavy') return 'Walking. Not going anywhere, just walking.';
       return 'A walk.';
@@ -6013,7 +6004,7 @@ export function createContent(ctx) {
     // === BUS STOP ===
 
     wait_for_bus: () => {
-      const mood = State.moodTone();
+      const mood = ctx.state.moodTone();
       if (mood === 'numb') return 'You stand there. The bus will come.';
       return 'Waiting.';
     },
@@ -6021,23 +6012,23 @@ export function createContent(ctx) {
     // === WORKPLACE ===
 
     do_work: () => {
-      const mood = State.moodTone();
-      const dopa = State.get('dopamine');
+      const mood = ctx.state.moodTone();
+      const dopa = ctx.state.get('dopamine');
       if (dopa < 30) return 'The screen. The work. You\'re starting before you\'re ready.';
       if (mood === 'flat') return 'Work.';
       return 'Back to it.';
     },
 
     work_break: () => {
-      const mood = State.moodTone();
-      const cortisol = State.get('cortisol');
+      const mood = ctx.state.moodTone();
+      const cortisol = ctx.state.get('cortisol');
       if (cortisol > 55) return 'You need a minute. You\'re taking a minute.';
       if (mood === 'heavy') return 'A break. Whether it helps or not.';
       return 'A break.';
     },
 
     talk_to_coworker: () => {
-      const mood = State.moodTone();
+      const mood = ctx.state.moodTone();
       if (mood === 'hollow' || mood === 'numb') return 'Someone\'s there. You\'re turning toward them.';
       return 'A word with someone.';
     },
@@ -6047,45 +6038,45 @@ export function createContent(ctx) {
     },
 
     eat_at_work: () => {
-      const hunger = State.hungerTier();
+      const hunger = ctx.state.hungerTier();
       if (hunger === 'starving' || hunger === 'very_hungry') return 'You need to eat. The kitchen is right there.';
       return 'Staff meal.';
     },
 
     graze_break_room: () => {
-      const aden = State.get('adenosine');
-      const hunger = State.hungerTier();
+      const aden = ctx.state.get('adenosine');
+      const hunger = ctx.state.hungerTier();
       if (hunger === 'hungry' || hunger === 'very_hungry') return 'The break room. There might be something.';
-      if (aden > 60 && State.adenosineBlock() > 0.3) return 'Break room. You need to move.';
+      if (aden > 60 && ctx.state.adenosineBlock() > 0.3) return 'Break room. You need to move.';
       return 'See what\'s in the break room.';
     },
 
     get_coffee_work: () => {
-      const aden = State.get('adenosine');
-      const caffeine = State.caffeineTier();
+      const aden = ctx.state.get('adenosine');
+      const caffeine = ctx.state.caffeineTier();
       if (caffeine === 'active') return 'The second one.';
-      if (aden > 65 && State.adenosineBlock() > 0.4) return 'Coffee. You need it.';
+      if (aden > 65 && ctx.state.adenosineBlock() > 0.4) return 'Coffee. You need it.';
       return 'Coffee.';
     },
 
     // === CORNER STORE ===
 
     buy_groceries: () => {
-      const mood = State.moodTone();
+      const mood = ctx.state.moodTone();
       if (mood === 'heavy') return 'Groceries. Whatever\'s cheap.';
       return 'Groceries.';
     },
 
     buy_cheap_meal: () => {
-      if (['very_hungry', 'starving'].includes(State.hungerTier())) return 'Something quick. You\'re hungry.';
+      if (['very_hungry', 'starving'].includes(ctx.state.hungerTier())) return 'Something quick. You\'re hungry.';
       return 'Something to eat.';
     },
 
     buy_coffee_store: () => {
-      const aden = State.get('adenosine');
-      const caffeine = State.caffeineTier();
+      const aden = ctx.state.get('adenosine');
+      const caffeine = ctx.state.caffeineTier();
       if (caffeine === 'active') return 'The second one.';
-      if (aden > 65 && State.adenosineBlock() > 0.4) return 'Coffee. You want it.';
+      if (aden > 65 && ctx.state.adenosineBlock() > 0.4) return 'Coffee. You want it.';
       return 'Coffee.';
     },
 
@@ -6094,7 +6085,7 @@ export function createContent(ctx) {
     },
 
     buy_medicine: () => {
-      const illTier = State.illnessTier();
+      const illTier = ctx.state.illnessTier();
       if (illTier === 'very_sick') return 'Medicine. You need it.';
       return 'Something for it.';
     },
@@ -6102,13 +6093,13 @@ export function createContent(ctx) {
     // === PHONE MODE ===
 
     read_messages: () => {
-      const mood = State.moodTone();
+      const mood = ctx.state.moodTone();
       if (mood === 'hollow') return 'The messages. Someone wrote to you.';
       return 'Messages.';
     },
 
     toggle_phone_silent: () => {
-      return State.get('phone_silent') ? 'Sound on.' : 'Silent.';
+      return ctx.state.get('phone_silent') ? 'Sound on.' : 'Silent.';
     },
 
     put_phone_away: () => {
@@ -6116,28 +6107,28 @@ export function createContent(ctx) {
     },
 
     reply_to_friend: () => {
-      const mood = State.moodTone();
+      const mood = ctx.state.moodTone();
       if (mood === 'hollow' || mood === 'heavy') return 'Reply. Just a few words.';
       if (mood === 'fraying') return 'Send something back.';
       return 'Reply.';
     },
 
     message_friend: () => {
-      const mood = State.moodTone();
+      const mood = ctx.state.moodTone();
       if (mood === 'hollow' || mood === 'heavy') return 'Write. Just something.';
       if (mood === 'fraying') return 'Send something. Anything.';
       return 'Write.';
     },
 
     help_friend: () => {
-      const mood = State.moodTone();
+      const mood = ctx.state.moodTone();
       if (mood === 'hollow') return 'At least there\'s this.';
       if (mood === 'heavy') return 'You can do this for them.';
       return 'Helping.';
     },
 
     ask_for_help: () => {
-      const mood = State.moodTone();
+      const mood = ctx.state.moodTone();
       if (mood === 'hollow' || mood === 'heavy') return 'You\'re typing. You hate that you\'re doing this.';
       if (mood === 'fraying') return 'You\'re asking. You don\'t want to but you are.';
       return 'Asking.';
@@ -6146,7 +6137,7 @@ export function createContent(ctx) {
     // === ANYWHERE ===
 
     call_in: () => {
-      const mood = State.moodTone();
+      const mood = ctx.state.moodTone();
       if (mood === 'heavy' || mood === 'numb') return 'You\'re not going in. You\'re already not going in.';
       if (mood === 'fraying') return 'You can\'t do it today. You\'re reaching for the phone.';
       return 'Calling in.';
@@ -6155,7 +6146,7 @@ export function createContent(ctx) {
     // === MOVEMENT ===
 
     'move:apartment_kitchen': () => {
-      const mood = State.moodTone();
+      const mood = ctx.state.moodTone();
       if (mood === 'heavy') return 'Kitchen. The steps happen.';
       return 'Kitchen.';
     },
@@ -6165,17 +6156,17 @@ export function createContent(ctx) {
     },
 
     'move:apartment_bedroom': () => {
-      const mood = State.moodTone();
-      const aden = State.get('adenosine');
+      const mood = ctx.state.moodTone();
+      const aden = ctx.state.get('adenosine');
       if (aden > 60) return 'Back to the bedroom. Back to the bed.';
       if (mood === 'heavy') return 'The bedroom.';
       return 'Bedroom.';
     },
 
     'move:street': () => {
-      const mood = State.moodTone();
-      const temp = State.temperatureTier();
-      const weather = State.get('weather');
+      const mood = ctx.state.moodTone();
+      const temp = ctx.state.temperatureTier();
+      const weather = ctx.state.get('weather');
       const cold = temp === 'bitter' || temp === 'freezing';
       if (weather === 'snow') return mood === 'heavy' ? 'Out. Into the snow.' : 'Out. Snow.';
       if (mood === 'heavy') return cold ? 'Out. It\'s cold.' : 'Out. You\'re heading out.';
@@ -6185,35 +6176,35 @@ export function createContent(ctx) {
     },
 
     'move:bus_stop': () => {
-      const mood = State.moodTone();
+      const mood = ctx.state.moodTone();
       if (mood === 'numb' || mood === 'heavy') return 'The bus stop. Your feet know the way.';
       return 'Bus stop.';
     },
 
     'move:workplace': () => {
-      const mood = State.moodTone();
+      const mood = ctx.state.moodTone();
       if (mood === 'heavy') return 'Work. The bus, the building, the desk. All of it coming.';
       return 'Bus.';
     },
 
     'move:corner_store': () => {
-      const mood = State.moodTone();
+      const mood = ctx.state.moodTone();
       if (mood === 'heavy') return 'The store. Walking there.';
       return 'The store.';
     },
 
     'move:soup_kitchen': () => {
-      const hunger = State.hungerTier();
-      const visits = State.get('soup_kitchen_visits');
+      const hunger = ctx.state.hungerTier();
+      const visits = ctx.state.get('soup_kitchen_visits');
       if (hunger === 'starving') return 'The community meal. You know it\'s there.';
       if (visits === 0) return 'The community meal is open.';
       return 'The community meal.';
     },
 
     'move:food_bank': () => {
-      const visits = State.get('food_bank_visits');
-      const day = State.getDay();
-      const lastDay = State.get('last_food_bank_day');
+      const visits = ctx.state.get('food_bank_visits');
+      const day = ctx.state.getDay();
+      const lastDay = ctx.state.get('last_food_bank_day');
       const daysUntilNext = lastDay > 0 ? Math.max(0, 7 - (day - lastDay)) : 0;
       if (daysUntilNext > 0) return null; // shouldn't be reachable (gated by availability)
       if (visits === 0) return 'The food bank. It\'s open today.';
@@ -6225,7 +6216,7 @@ export function createContent(ctx) {
     },
 
     get_meal: () => {
-      const hunger = State.hungerTier();
+      const hunger = ctx.state.hungerTier();
       if (hunger === 'starving' || hunger === 'very_hungry') return 'Through the line.';
       return 'A plate.';
     },

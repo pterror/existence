@@ -1,11 +1,6 @@
 // ui.js — rendering, text display, interaction handling
 
 export function createUI(ctx) {
-  const State = ctx.state;
-  const Content = ctx.content;
-  const World = ctx.world;
-  const Habits = ctx.habits;
-  const Character = ctx.character;
   /** @type {HTMLElement} */ let passageEl;
   /** @type {HTMLElement} */ let eventTextEl;
   /** @type {HTMLElement} */ let actionsEl;
@@ -272,7 +267,7 @@ export function createUI(ctx) {
   // --- Idle behavior ---
 
   function scheduleNextIdle() {
-    if (State.get('viewing_phone')) return;
+    if (ctx.state.get('viewing_phone')) return;
     // Escalating delays: quick at first, then space out. Plateau at 20 min.
     const delays = [30000, 60000, 120000, 300000, 1200000];
     const delay = delays[Math.min(idleCount, delays.length - 1)];
@@ -311,7 +306,7 @@ export function createUI(ctx) {
   const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
   function phoneTimeStr() {
-    const cal = State.calendarDate();
+    const cal = ctx.state.calendarDate();
     const h = cal.hour;
     const m = cal.minute;
     const ampm = h >= 12 ? 'PM' : 'AM';
@@ -320,7 +315,7 @@ export function createUI(ctx) {
   }
 
   function phoneDateStr() {
-    const cal = State.calendarDate();
+    const cal = ctx.state.calendarDate();
     return WEEKDAY_NAMES[cal.weekday] + ', ' + MONTH_NAMES[cal.month] + '\u202f' + cal.day;
   }
 
@@ -333,10 +328,10 @@ export function createUI(ctx) {
   function contactDisplayName(slot) {
     if (slot === 'bank') return 'Bank';
     if (slot === 'supervisor') {
-      const sup = /** @type {{ name: string } | undefined} */ (Character && Character.get('supervisor'));
+      const sup = /** @type {{ name: string } | undefined} */ (Character && ctx.character.get('supervisor'));
       return sup ? sup.name : 'Work';
     }
-    const c = /** @type {{ name: string } | undefined} */ (Character && Character.get(slot));
+    const c = /** @type {{ name: string } | undefined} */ (Character && ctx.character.get(slot));
     return c ? c.name : slot;
   }
 
@@ -377,13 +372,13 @@ export function createUI(ctx) {
 
   function buildPhoneStatusBar(timeStr, batteryPct) {
     const batteryClass = batteryPct <= 15 ? ' phone-battery--low' : '';
-    const isSilent = State.get('phone_silent');
+    const isSilent = ctx.state.get('phone_silent');
     const silentDot = isSilent ? `<span class="phone-silent-dot" title="Silent"></span>` : '';
     return `<button class="phone-status-bar" data-phone-nav="notifications"><span class="phone-status-time">${timeStr}</span>${silentDot}<span class="phone-battery-pct${batteryClass}">${Math.round(batteryPct)}%</span></button>`;
   }
 
   function buildPhoneNotificationsScreen(timeStr, batteryPct) {
-    const isSilent = State.get('phone_silent');
+    const isSilent = ctx.state.get('phone_silent');
     const silentLabel = isSilent ? 'Sound on' : 'Silent';
     const silentState = isSilent ? 'on' : 'off';
     return `<div class="phone-notifications">`
@@ -443,10 +438,10 @@ export function createUI(ctx) {
     // Compose row — only for friend threads
     let compose = '';
     if (['friend1', 'friend2'].includes(slot)) {
-      const replyInter = Content.getInteraction('reply_to_friend');
-      const writeInter = Content.getInteraction('message_friend');
-      const helpFriendInter = Content.getInteraction('help_friend');
-      const askInter = Content.getInteraction('ask_for_help');
+      const replyInter = ctx.content.getInteraction('reply_to_friend');
+      const writeInter = ctx.content.getInteraction('message_friend');
+      const helpFriendInter = ctx.content.getInteraction('help_friend');
+      const askInter = ctx.content.getInteraction('ask_for_help');
       const canReply = replyInter && replyInter.available();
       const canWrite = writeInter && writeInter.available();
       const canHelpFriend = helpFriendInter && helpFriendInter.available();
@@ -474,16 +469,16 @@ export function createUI(ctx) {
     document.body.classList.add('phone-open');
 
     // Cracked screen — cosmetic overlay, set once from character property
-    if (Character.get('phone_cracked')) {
+    if (ctx.character.get('phone_cracked')) {
       phoneEl.classList.add('phone--cracked');
     } else {
       phoneEl.classList.remove('phone--cracked');
     }
 
-    const screen = State.get('phone_screen') || 'home';
-    const threadContact = State.get('phone_thread_contact');
-    const battery = State.get('phone_battery');
-    const inbox = State.get('phone_inbox') || [];
+    const screen = ctx.state.get('phone_screen') || 'home';
+    const threadContact = ctx.state.get('phone_thread_contact');
+    const battery = ctx.state.get('phone_battery');
+    const inbox = ctx.state.get('phone_inbox') || [];
     const timeStr = phoneTimeStr();
     const dateStr = phoneDateStr();
 
@@ -512,9 +507,9 @@ export function createUI(ctx) {
       const msgs = inbox.filter(m => m.source === threadContact && !m.read && m.direction !== 'sent');
       for (const msg of msgs) {
         msg.read = true;
-        const fc = State.get('friend_contact');
-        fc[threadContact] = State.get('time');
-        State.adjustSentiment(threadContact, 'guilt', -0.02);
+        const fc = ctx.state.get('friend_contact');
+        fc[threadContact] = ctx.state.get('time');
+        ctx.state.adjustSentiment(threadContact, 'guilt', -0.02);
       }
     } else if (screen === 'thread' && threadContact && (threadContact === 'supervisor' || threadContact === 'bank')) {
       const msgs = contactMessages(inbox, threadContact);
@@ -536,46 +531,46 @@ export function createUI(ctx) {
     if (nav) {
       e.stopPropagation();
       if (nav === 'notifications') {
-        State.set('phone_prev_screen', State.get('phone_screen') || 'home');
-        State.set('phone_screen', 'notifications');
+        ctx.state.set('phone_prev_screen', ctx.state.get('phone_screen') || 'home');
+        ctx.state.set('phone_screen', 'notifications');
       } else if (nav === 'back') {
-        const prev = State.get('phone_prev_screen') || 'home';
-        State.set('phone_screen', prev);
-        State.set('phone_prev_screen', null);
+        const prev = ctx.state.get('phone_prev_screen') || 'home';
+        ctx.state.set('phone_screen', prev);
+        ctx.state.set('phone_prev_screen', null);
       } else if (nav === 'home') {
-        State.set('phone_screen', 'home');
-        State.set('phone_thread_contact', null);
+        ctx.state.set('phone_screen', 'home');
+        ctx.state.set('phone_thread_contact', null);
       } else if (nav === 'messages') {
-        State.set('phone_screen', 'messages');
-        State.set('phone_thread_contact', null);
+        ctx.state.set('phone_screen', 'messages');
+        ctx.state.set('phone_thread_contact', null);
       } else if (nav === 'thread') {
         const contact = btn.getAttribute('data-contact');
-        State.set('phone_screen', 'thread');
-        State.set('phone_thread_contact', contact);
+        ctx.state.set('phone_screen', 'thread');
+        ctx.state.set('phone_thread_contact', contact);
       }
       renderPhone();
     } else if (action) {
       e.stopPropagation();
       if (action === 'put_phone_away') {
-        const inter = Content.getInteraction('put_phone_away');
+        const inter = ctx.content.getInteraction('put_phone_away');
         if (inter && onAction) onAction(/** @type {Interaction} */ (inter));
       } else if (action === 'reply_to_friend') {
-        const inter = Content.getInteraction('reply_to_friend');
+        const inter = ctx.content.getInteraction('reply_to_friend');
         if (inter && onAction) onAction(/** @type {Interaction} */ (inter));
       } else if (action === 'message_friend') {
-        const inter = Content.getInteraction('message_friend');
+        const inter = ctx.content.getInteraction('message_friend');
         if (inter && onAction) onAction(/** @type {Interaction} */ (inter));
       } else if (action === 'help_friend') {
         const amountInput = /** @type {HTMLInputElement | null} */ (document.getElementById('phone-help-amount'));
         const amount = amountInput ? parseFloat(amountInput.value) : 0;
         if (!amount || amount <= 0) return;
-        const inter = Content.getInteraction('help_friend');
+        const inter = ctx.content.getInteraction('help_friend');
         if (inter && onAction) onAction(/** @type {Interaction} */ (inter), { amount });
       } else if (action === 'ask_for_help') {
-        const inter = Content.getInteraction('ask_for_help');
+        const inter = ctx.content.getInteraction('ask_for_help');
         if (inter && onAction) onAction(/** @type {Interaction} */ (inter));
       } else if (action === 'toggle_phone_silent') {
-        const inter = Content.getInteraction('toggle_phone_silent');
+        const inter = ctx.content.getInteraction('toggle_phone_silent');
         if (inter && onAction) onAction(/** @type {Interaction} */ (inter));
       }
     }
@@ -590,7 +585,7 @@ export function createUI(ctx) {
   // --- Full render ---
 
   function render() {
-    if (State.get('viewing_phone')) {
+    if (ctx.state.get('viewing_phone')) {
       // Show phone overlay; clear main content areas
       showPassage('');
       showActions([]);
@@ -601,19 +596,19 @@ export function createUI(ctx) {
 
     hidePhone();
 
-    const location = World.getLocationId();
-    const descFn = /** @type {Record<string, (() => string) | undefined>} */ (Content.locationDescriptions)[location];
+    const location = ctx.world.getLocationId();
+    const descFn = /** @type {Record<string, (() => string) | undefined>} */ (ctx.content.locationDescriptions)[location];
     const description = descFn ? descFn() : '';
 
     showPassage(description);
 
-    const interactions = Content.getAvailableInteractions();
-    const connections = World.getConnections();
+    const interactions = ctx.content.getAvailableInteractions();
+    const connections = ctx.world.getConnections();
     const allIds = [
       ...interactions.map(i => i.id),
       ...connections.map(c => 'move:' + c.id),
     ];
-    const prediction = Habits.predictHabit(allIds);
+    const prediction = ctx.habits.predictHabit(allIds);
     showActions(interactions, prediction);
     showMovement(connections, prediction);
   }
@@ -626,8 +621,8 @@ export function createUI(ctx) {
     moneyFocus = Math.max(0.1, moneyFocus - 0.08);
 
     // Read perceived strings from state
-    awarenessTimeEl.textContent = State.perceivedTimeString();
-    awarenessMoneyEl.textContent = State.perceivedMoneyString();
+    awarenessTimeEl.textContent = ctx.state.perceivedTimeString();
+    awarenessMoneyEl.textContent = ctx.state.perceivedMoneyString();
 
     // Apply focus-driven opacity and color
     awarenessTimeEl.style.opacity = String(timeFocus);

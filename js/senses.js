@@ -225,9 +225,6 @@ function ensurePeriod(s) {
 // --- Factory ---
 
 export function createSenses(ctx) {
-  const State = ctx.state;
-  const Timeline = ctx.timeline;
-  const World = ctx.world;
 
   // Minimum game-minutes between sensory fragment displays.
   // RNG is always consumed regardless — this only gates UI output.
@@ -258,7 +255,7 @@ export function createSenses(ctx) {
       nt_weight: s => {
         const gaba = s.get('gaba');
         // More salient when GABA low (can't filter); baseline present otherwise
-        return gaba < 45 ? 1 + State.lerp01(gaba, 45, 20) * 2 : 0.6;
+        return gaba < 45 ? 1 + ctx.state.lerp01(gaba, 45, 20) * 2 : 0.6;
       },
     },
     {
@@ -297,7 +294,7 @@ export function createSenses(ctx) {
       nt_weight: s => {
         const ne = s.get('norepinephrine');
         // Intrudes when NE high (sounds harder to screen out)
-        return ne > 55 ? 0.5 + State.lerp01(ne, 55, 80) * 1.5 : 0.4;
+        return ne > 55 ? 0.5 + ctx.state.lerp01(ne, 55, 80) * 1.5 : 0.4;
       },
     },
 
@@ -428,7 +425,7 @@ export function createSenses(ctx) {
       channels: ['interoception'],
       attention_order: 'involuntary_body',
       trigger_conditions: s => s.get('adenosine') > 65,
-      nt_weight: s => 0.5 + State.lerp01(s.get('adenosine'), 65, 90) * 1.5,
+      nt_weight: s => 0.5 + ctx.state.lerp01(s.get('adenosine'), 65, 90) * 1.5,
     },
     {
       id: 'adenosine_pulling',
@@ -438,7 +435,7 @@ export function createSenses(ctx) {
       channels: ['interoception'],
       attention_order: 'involuntary_body',
       trigger_conditions: s => s.get('adenosine') > 75,
-      nt_weight: s => State.lerp01(s.get('adenosine'), 75, 95),
+      nt_weight: s => ctx.state.lerp01(s.get('adenosine'), 75, 95),
     },
 
     // === INTEROCEPTIVE: HUNGER ===
@@ -450,7 +447,7 @@ export function createSenses(ctx) {
       channels: ['interoception'],
       attention_order: 'involuntary_body',
       trigger_conditions: s => s.get('hunger') > 55,
-      nt_weight: s => State.lerp01(s.get('hunger'), 55, 85),
+      nt_weight: s => ctx.state.lerp01(s.get('hunger'), 55, 85),
     },
     {
       id: 'hunger_irritable',
@@ -460,7 +457,7 @@ export function createSenses(ctx) {
       channels: ['interoception'],
       attention_order: 'involuntary_body',
       trigger_conditions: s => s.get('hunger') > 65,
-      nt_weight: s => State.lerp01(s.get('hunger'), 65, 90) * 1.5,
+      nt_weight: s => ctx.state.lerp01(s.get('hunger'), 65, 90) * 1.5,
     },
 
     // === ANXIETY SIGNALS ===
@@ -472,7 +469,7 @@ export function createSenses(ctx) {
       channels: ['interoception'],
       attention_order: 'involuntary_body',
       trigger_conditions: s => s.get('gaba') < 38,
-      nt_weight: s => 0.5 + State.lerp01(s.get('gaba'), 38, 20) * 1.5,
+      nt_weight: s => 0.5 + ctx.state.lerp01(s.get('gaba'), 38, 20) * 1.5,
     },
     {
       id: 'ne_too_present',
@@ -482,7 +479,7 @@ export function createSenses(ctx) {
       channels: ['interoception'],
       attention_order: 'involuntary_body',
       trigger_conditions: s => s.get('norepinephrine') > 65,
-      nt_weight: s => State.lerp01(s.get('norepinephrine'), 65, 85),
+      nt_weight: s => ctx.state.lerp01(s.get('norepinephrine'), 65, 85),
     },
 
     // === PARTICIPIALS ===
@@ -517,7 +514,7 @@ export function createSenses(ctx) {
       channels: ['interoception'],
       attention_order: 'involuntary_body',
       trigger_conditions: s => s.get('adenosine') > 55,
-      nt_weight: s => 0.5 + State.lerp01(s.get('adenosine'), 55, 85) * 0.8,
+      nt_weight: s => 0.5 + ctx.state.lerp01(s.get('adenosine'), 55, 85) * 0.8,
     },
     {
       id: 'part_holding_still',
@@ -527,7 +524,7 @@ export function createSenses(ctx) {
       channels: ['interoception'],
       attention_order: 'involuntary_body',
       trigger_conditions: s => s.get('adenosine') > 70,
-      nt_weight: s => State.lerp01(s.get('adenosine'), 70, 92),
+      nt_weight: s => ctx.state.lerp01(s.get('adenosine'), 70, 92),
     },
 
     // === ADVERBIALS ===
@@ -581,7 +578,7 @@ export function createSenses(ctx) {
       channels: [],
       attention_order: 'ambient',
       trigger_conditions: s => s.get('adenosine') > 55,
-      nt_weight: s => State.lerp01(s.get('adenosine'), 55, 80),
+      nt_weight: s => ctx.state.lerp01(s.get('adenosine'), 55, 80),
     },
     {
       id: 'adv_nothing_wrong',
@@ -592,7 +589,7 @@ export function createSenses(ctx) {
       attention_order: 'ambient',
       // Triggers when anxious but not overwhelmed — the cognitive mismatch is the point
       trigger_conditions: s => s.get('gaba') < 45 && s.get('stress') < 55,
-      nt_weight: s => State.lerp01(s.get('gaba'), 45, 20),
+      nt_weight: s => ctx.state.lerp01(s.get('gaba'), 45, 20),
     },
     {
       id: 'adv_nothing_to_do',
@@ -626,13 +623,13 @@ export function createSenses(ctx) {
       salience: s => {
         const gaba = s.get('gaba');
         // More salient when GABA low (filtering degraded)
-        return gaba < 45 ? 0.35 + State.lerp01(gaba, 45, 20) * 0.5 : 0.15;
+        return gaba < 45 ? 0.35 + ctx.state.lerp01(gaba, 45, 20) * 0.5 : 0.15;
       },
       properties: {
         sound: {
           quality: () => 'hum',
           // Perceived louder when GABA low — same physical level, reduced filtering
-          perceived_intensity: s => State.lerp01(s.get('gaba'), 65, 20),
+          perceived_intensity: s => ctx.state.lerp01(s.get('gaba'), 65, 20),
         },
       },
     },
@@ -645,8 +642,8 @@ export function createSenses(ctx) {
         const gaba = s.get('gaba');
         const ne = s.get('norepinephrine');
         return Math.max(
-          gaba < 52 ? State.lerp01(gaba, 52, 25) * 0.4 : 0,
-          ne > 52 ? State.lerp01(ne, 52, 80) * 0.3 : 0,
+          gaba < 52 ? ctx.state.lerp01(gaba, 52, 25) * 0.4 : 0,
+          ne > 52 ? ctx.state.lerp01(ne, 52, 80) * 0.3 : 0,
         );
       },
       properties: {
@@ -665,8 +662,8 @@ export function createSenses(ctx) {
         const gaba = s.get('gaba');
         const ne = s.get('norepinephrine');
         return Math.max(
-          gaba < 42 ? State.lerp01(gaba, 42, 20) * 0.35 : 0,
-          ne > 58 ? State.lerp01(ne, 58, 85) * 0.3 : 0,
+          gaba < 42 ? ctx.state.lerp01(gaba, 42, 20) * 0.35 : 0,
+          ne > 58 ? ctx.state.lerp01(ne, 58, 85) * 0.3 : 0,
         );
       },
       properties: {
@@ -684,7 +681,7 @@ export function createSenses(ctx) {
       salience: s => {
         const ne = s.get('norepinephrine');
         // Low baseline; harder to screen out at high NE
-        return ne > 55 ? 0.2 + State.lerp01(ne, 55, 80) * 0.4 : 0.1;
+        return ne > 55 ? 0.2 + ctx.state.lerp01(ne, 55, 80) * 0.4 : 0.1;
       },
       properties: {
         sound: {
@@ -704,8 +701,8 @@ export function createSenses(ctx) {
       available: s => s.get('temperature') < 16 || s.get('temperature') > 26,
       salience: s => {
         const temp = s.get('temperature');
-        if (temp < 16) return State.lerp01(temp, 16, 5) * 0.7;
-        if (temp > 26) return State.lerp01(temp, 26, 35) * 0.5;
+        if (temp < 16) return ctx.state.lerp01(temp, 16, 5) * 0.7;
+        if (temp > 26) return ctx.state.lerp01(temp, 26, 35) * 0.5;
         return 0;
       },
       properties: {
@@ -723,7 +720,7 @@ export function createSenses(ctx) {
       id: 'fatigue',
       channels: ['interoception'],
       available: s => s.get('adenosine') > 55,
-      salience: s => State.lerp01(s.get('adenosine'), 55, 95) * 0.8,
+      salience: s => ctx.state.lerp01(s.get('adenosine'), 55, 95) * 0.8,
       properties: {
         interoception: {
           adenosine: s => s.get('adenosine'),
@@ -736,7 +733,7 @@ export function createSenses(ctx) {
       id: 'hunger_signal',
       channels: ['interoception'],
       available: s => s.get('hunger') > 45,
-      salience: s => State.lerp01(s.get('hunger'), 45, 90) * 0.7,
+      salience: s => ctx.state.lerp01(s.get('hunger'), 45, 90) * 0.7,
       properties: {
         interoception: {
           hollow:    s => s.get('hunger') > 75,
@@ -756,8 +753,8 @@ export function createSenses(ctx) {
         const gaba = s.get('gaba');
         const ne = s.get('norepinephrine');
         return Math.max(
-          gaba < 45 ? State.lerp01(gaba, 45, 20) * 0.6 : 0,
-          ne > 60 ? State.lerp01(ne, 60, 85) * 0.5 : 0,
+          gaba < 45 ? ctx.state.lerp01(gaba, 45, 20) * 0.6 : 0,
+          ne > 60 ? ctx.state.lerp01(ne, 60, 85) * 0.5 : 0,
         );
       },
       properties: {
@@ -776,7 +773,7 @@ export function createSenses(ctx) {
       available: () => true,
       salience: s => {
         const ne = s.get('norepinephrine');
-        return ne > 55 ? 0.3 + State.lerp01(ne, 55, 85) * 0.4 : 0.25;
+        return ne > 55 ? 0.3 + ctx.state.lerp01(ne, 55, 85) * 0.4 : 0.25;
       },
       properties: {
         sound: {
@@ -808,8 +805,8 @@ export function createSenses(ctx) {
       available: s => s.get('temperature') < 10 || s.get('temperature') > 28,
       salience: s => {
         const temp = s.get('temperature');
-        if (temp < 10) return 0.4 + State.lerp01(temp, 10, -5) * 0.5;
-        if (temp > 28) return 0.2 + State.lerp01(temp, 28, 40) * 0.4;
+        if (temp < 10) return 0.4 + ctx.state.lerp01(temp, 10, -5) * 0.5;
+        if (temp > 28) return 0.2 + ctx.state.lerp01(temp, 28, 40) * 0.4;
         return 0;
       },
       properties: {
@@ -830,7 +827,7 @@ export function createSenses(ctx) {
       available: s => s.get('temperature') < 8,
       salience: s => {
         const temp = s.get('temperature');
-        return temp < 8 ? 0.3 + State.lerp01(temp, 8, -5) * 0.5 : 0;
+        return temp < 8 ? 0.3 + ctx.state.lerp01(temp, 8, -5) * 0.5 : 0;
       },
       properties: {
         thermal: {
@@ -861,8 +858,8 @@ export function createSenses(ctx) {
       channels: ['sight'],
       available: () => true,
       salience: () => {
-        const h = State.getHour();
-        const rain = State.get('rain');
+        const h = ctx.state.getHour();
+        const rain = ctx.state.get('rain');
         // Most salient at transitions: dawn, evening dimming, and when still dark
         if (h >= 6 && h < 9)   return rain ? 0.5 : 0.45;  // morning grey or early light
         if (h >= 17 && h < 21) return 0.4;                 // evening darkening
@@ -871,11 +868,11 @@ export function createSenses(ctx) {
       },
       properties: {
         sight: {
-          dark:        () => { const h = State.getHour(); return h < 6 || h >= 22; },
-          grey:        () => { const h = State.getHour(); return State.get('rain') && h >= 6 && h < 22; },
-          early_light: () => { const h = State.getHour(); return !State.get('rain') && h >= 6 && h < 8; },
-          dimming:     () => { const h = State.getHour(); return !State.get('rain') && h >= 17 && h < 20; },
-          rain:        () => State.get('rain'),
+          dark:        () => { const h = ctx.state.getHour(); return h < 6 || h >= 22; },
+          grey:        () => { const h = ctx.state.getHour(); return ctx.state.get('rain') && h >= 6 && h < 22; },
+          early_light: () => { const h = ctx.state.getHour(); return !ctx.state.get('rain') && h >= 6 && h < 8; },
+          dimming:     () => { const h = ctx.state.getHour(); return !ctx.state.get('rain') && h >= 17 && h < 20; },
+          rain:        () => ctx.state.get('rain'),
         },
       },
     },
@@ -887,12 +884,12 @@ export function createSenses(ctx) {
       channels: ['sound'],
       available: () => true,
       salience: () => {
-        const ne = State.get('norepinephrine');
-        const gaba = State.get('gaba');
+        const ne = ctx.state.get('norepinephrine');
+        const gaba = ctx.state.get('gaba');
         // Tile acoustics are more noticeable when perceptual filtering is reduced
         return Math.max(
-          ne > 55 ? State.lerp01(ne, 55, 80) * 0.35 : 0.1,
-          gaba < 45 ? State.lerp01(gaba, 45, 25) * 0.3 : 0,
+          ne > 55 ? ctx.state.lerp01(ne, 55, 80) * 0.35 : 0.1,
+          gaba < 45 ? ctx.state.lerp01(gaba, 45, 25) * 0.3 : 0,
         );
       },
       properties: {
@@ -908,7 +905,7 @@ export function createSenses(ctx) {
       id: 'stress_signal',
       channels: ['interoception'],
       available: s => s.get('stress') > 50,
-      salience: s => State.lerp01(s.get('stress'), 50, 90) * 0.65,
+      salience: s => ctx.state.lerp01(s.get('stress'), 50, 90) * 0.65,
       properties: {
         interoception: {
           high: s => s.get('stress') > 65,
@@ -923,7 +920,7 @@ export function createSenses(ctx) {
       available: s => s.get('caffeine_level') > 30,
       salience: s => {
         const c = s.get('caffeine_level');
-        return c > 60 ? State.lerp01(c, 60, 100) * 0.55 : State.lerp01(c, 30, 60) * 0.2;
+        return c > 60 ? ctx.state.lerp01(c, 60, 100) * 0.55 : ctx.state.lerp01(c, 30, 60) * 0.2;
       },
       properties: {
         interoception: {
@@ -941,9 +938,9 @@ export function createSenses(ctx) {
       channels: ['sound'],
       available: () => true,
       salience: () => {
-        const gaba = State.get('gaba');
+        const gaba = ctx.state.get('gaba');
         // Normally screened out; breaks through when anxiety degrades filtering
-        return gaba < 45 ? 0.15 + State.lerp01(gaba, 45, 20) * 0.3 : 0.1;
+        return gaba < 45 ? 0.15 + ctx.state.lerp01(gaba, 45, 20) * 0.3 : 0.1;
       },
       properties: {
         sound: {
@@ -961,8 +958,8 @@ export function createSenses(ctx) {
         const gaba = s.get('gaba');
         const ne = s.get('norepinephrine');
         return Math.max(
-          gaba < 48 ? State.lerp01(gaba, 48, 22) * 0.4 : 0,
-          ne > 55 ? State.lerp01(ne, 55, 80) * 0.35 : 0,
+          gaba < 48 ? ctx.state.lerp01(gaba, 48, 22) * 0.4 : 0,
+          ne > 55 ? ctx.state.lerp01(ne, 55, 80) * 0.35 : 0,
         );
       },
       properties: {
@@ -983,12 +980,12 @@ export function createSenses(ctx) {
       channels: ['sound'],
       available: () => true,
       salience: () => {
-        const ne = State.get('norepinephrine');
-        const socialEnergy = State.get('social_energy');
+        const ne = ctx.state.get('norepinephrine');
+        const socialEnergy = ctx.state.get('social_energy');
         // High NE makes voices intrude; depleted social energy makes them harder to screen
         return Math.max(
-          ne > 58 ? State.lerp01(ne, 58, 85) * 0.45 : 0.15,
-          socialEnergy < 30 ? State.lerp01(socialEnergy, 30, 0) * 0.3 : 0,
+          ne > 58 ? ctx.state.lerp01(ne, 58, 85) * 0.45 : 0.15,
+          socialEnergy < 30 ? ctx.state.lerp01(socialEnergy, 30, 0) * 0.3 : 0,
         );
       },
       properties: {
@@ -1017,8 +1014,8 @@ export function createSenses(ctx) {
         const aden = s.get('adenosine');
         const daylight = s.get('daylight_exposure');
         // More present when closed in all day, or too tired to open a window
-        const tirednessBoost = aden > 55 ? State.lerp01(aden, 55, 85) * 0.15 : 0;
-        const indoorBoost    = daylight < 30 ? State.lerp01(daylight, 30, 0) * 0.12 : 0;
+        const tirednessBoost = aden > 55 ? ctx.state.lerp01(aden, 55, 85) * 0.15 : 0;
+        const indoorBoost    = daylight < 30 ? ctx.state.lerp01(daylight, 30, 0) * 0.12 : 0;
         return 0.10 + tirednessBoost + indoorBoost;
       },
       properties: {
@@ -1086,10 +1083,10 @@ export function createSenses(ctx) {
       channels: ['smell'],
       // Very cold air has a distinct quality — metallic, clean, almost nothing
       available: s => s.get('temperature') < 4,
-      salience: s => State.lerp01(s.get('temperature'), 4, -12) * 0.35,
+      salience: s => ctx.state.lerp01(s.get('temperature'), 4, -12) * 0.35,
       properties: {
         smell: {
-          intensity: s => State.lerp01(s.get('temperature'), 4, -12),
+          intensity: s => ctx.state.lerp01(s.get('temperature'), 4, -12),
           hedonics:  () => 0.55,  // neutral; clean rather than pleasant or unpleasant
           // Below −5°C the clean emptiness has a sharp edge
           sharp: s => s.get('temperature') < -5,
@@ -1174,8 +1171,8 @@ export function createSenses(ctx) {
    * @returns {ObservationSource[]}
    */
   function getAvailableSources() {
-    const locationId = World.getLocationId();
-    const location = World.getLocation(locationId);
+    const locationId = ctx.world.getLocationId();
+    const location = ctx.world.getLocation(locationId);
     const area = location ? location.area : null;
 
     return sources.filter(src => {
@@ -1253,7 +1250,7 @@ export function createSenses(ctx) {
    * @returns {number}
    */
   function habituationFactor() {
-    const minutesAtLocation = Math.max(0, State.get('time') - State.get('location_arrival_time'));
+    const minutesAtLocation = Math.max(0, ctx.state.get('time') - ctx.state.get('location_arrival_time'));
     return 0.4 + 0.6 * Math.exp(-minutesAtLocation / 40);
   }
 
@@ -1303,7 +1300,7 @@ export function createSenses(ctx) {
    * @returns {number}
    */
   function getChangeSalience(sourceId, properties) {
-    const now = State.get('time');
+    const now = ctx.state.get('time');
     const key = discreteKey(properties);
     const tracked = changeTracker.get(sourceId);
 
@@ -1326,11 +1323,11 @@ export function createSenses(ctx) {
   }
 
   function getStructureHint() {
-    const gaba = State.get('gaba');
-    const ne = State.get('norepinephrine');
-    const aden = State.get('adenosine');
-    const ser = State.get('serotonin');
-    const dopa = State.get('dopamine');
+    const gaba = ctx.state.get('gaba');
+    const ne = ctx.state.get('norepinephrine');
+    const aden = ctx.state.get('adenosine');
+    const ser = ctx.state.get('serotonin');
+    const dopa = ctx.state.get('dopamine');
 
     if (gaba < 30 && ne > 70) return 'overwhelmed';
     if (gaba < 40 || ne > 60) return 'anxious';
@@ -1344,8 +1341,8 @@ export function createSenses(ctx) {
 
   /** @returns {SensoryFragment[]} */
   function getTriggeredFragments() {
-    const locationId = World.getLocationId();
-    const location = World.getLocation(locationId);
+    const locationId = ctx.world.getLocationId();
+    const location = ctx.world.getLocation(locationId);
     const area = location ? location.area : null;
 
     return fragments.filter(f => {
@@ -1372,7 +1369,7 @@ export function createSenses(ctx) {
       weight: Math.max(0.01, f.nt_weight ? f.nt_weight(State) : 1),
       value: f,
     }));
-    const first = Timeline.weightedPick(weighted);
+    const first = ctx.timeline.weightedPick(weighted);
     if (budget <= 1) return [first];
 
     // Additional picks: deterministic (highest-weight from remainder, no more RNG)
@@ -1399,11 +1396,11 @@ export function createSenses(ctx) {
    */
   function getNtCtx() {
     return {
-      gaba:      State.get('gaba')           / 100,
-      ne:        State.get('norepinephrine') / 100,
-      aden:      State.get('adenosine')      / 100,
-      serotonin: State.get('serotonin')      / 100,
-      dopamine:  State.get('dopamine')       / 100,
+      gaba:      ctx.state.get('gaba')           / 100,
+      ne:        ctx.state.get('norepinephrine') / 100,
+      aden:      ctx.state.get('adenosine')      / 100,
+      serotonin: ctx.state.get('serotonin')      / 100,
+      dopamine:  ctx.state.get('dopamine')       / 100,
     };
   }
 
@@ -1419,7 +1416,7 @@ export function createSenses(ctx) {
     const threshold = getSalienceThreshold(hint);
     const observations = getObservations().filter(o => o.salience >= threshold);
     if (observations.length === 0) return null;
-    return realize(observations, hint, getNtCtx(), () => Timeline.random());
+    return realize(observations, hint, getNtCtx(), () => ctx.timeline.random());
   }
 
   /**
@@ -1436,7 +1433,7 @@ export function createSenses(ctx) {
     // which applies habituationFactor(), but timeDelta = 0 so factor = 1.0.
     const observations = getObservations().filter(o => o.salience >= threshold);
     if (observations.length === 0) return null;
-    return realize(observations, hint, getNtCtx(), () => Timeline.random());
+    return realize(observations, hint, getNtCtx(), () => ctx.timeline.random());
   }
 
   /**
@@ -1445,11 +1442,11 @@ export function createSenses(ctx) {
    * @returns {boolean}
    */
   function canDisplay() {
-    return State.get('time') - lastSensoryGameTime >= SENSE_COOLDOWN_MINUTES;
+    return ctx.state.get('time') - lastSensoryGameTime >= SENSE_COOLDOWN_MINUTES;
   }
 
   function markDisplayed() {
-    lastSensoryGameTime = State.get('time');
+    lastSensoryGameTime = ctx.state.get('time');
   }
 
   return {

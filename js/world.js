@@ -1,10 +1,6 @@
 // world.js — locations, movement, event triggers
 
 export function createWorld(ctx) {
-  const State = ctx.state;
-  const Timeline = ctx.timeline;
-  const Events = ctx.events;
-  const Mess = ctx.mess;
 
   const MESS_TIER_RANK = { tidy: 0, cluttered: 1, messy: 2, chaotic: 3 };
 
@@ -93,11 +89,11 @@ export function createWorld(ctx) {
   }
 
   function getCurrentLocation() {
-    return locations[State.get('location')];
+    return locations[ctx.state.get('location')];
   }
 
   function getLocationId() {
-    return State.get('location');
+    return ctx.state.get('location');
   }
 
   function getConnections() {
@@ -131,43 +127,43 @@ export function createWorld(ctx) {
     if (!loc || !loc.connections[destId]) return null;
 
     const travelTime = loc.connections[destId];
-    const prevLocation = State.get('location');
+    const prevLocation = ctx.state.get('location');
 
-    State.set('previous_location', prevLocation);
-    State.set('location', destId);
-    State.advanceTime(travelTime);
-    State.set('location_arrival_time', State.get('time')); // reset habituation for new location
+    ctx.state.set('previous_location', prevLocation);
+    ctx.state.set('location', destId);
+    ctx.state.advanceTime(travelTime);
+    ctx.state.set('location_arrival_time', ctx.state.get('time')); // reset habituation for new location
 
     // Travel costs energy — more if tired or hungry
     const energyCost = travelTime > 10 ? -5 : -1;
-    State.adjustEnergy(energyCost);
+    ctx.state.adjustEnergy(energyCost);
 
     // Bus ride is stressful when crowded (morning/evening)
     if ((prevLocation === 'bus_stop' || destId === 'bus_stop') && travelTime >= 20) {
-      const hour = State.getHour();
+      const hour = ctx.state.getHour();
       if ((hour >= 7 && hour <= 9) || (hour >= 16 && hour <= 18)) {
-        State.adjustStress(3);
+        ctx.state.adjustStress(3);
       }
     }
 
     // Arriving at work
     if (destId === 'workplace') {
-      if (!State.get('at_work_today')) {
-        State.set('at_work_today', true);
+      if (!ctx.state.get('at_work_today')) {
+        ctx.state.set('at_work_today', true);
         // Condition resolved — reset late tier tracking so it can fire again next day.
-        State.set('last_surfaced_late_tier', null);
+        ctx.state.set('last_surfaced_late_tier', null);
         // Track attendance for paycheck calculation
-        State.set('days_worked_this_period', State.get('days_worked_this_period') + 1);
-        const tod = State.timeOfDay();
-        if (tod > State.get('work_shift_start') + 15) {
-          State.set('times_late_this_week', State.get('times_late_this_week') + 1);
-          State.adjustJobStanding(-5);
-          Events.record('late_for_work', { minutesLate: Math.round(tod - State.get('work_shift_start')) });
+        ctx.state.set('days_worked_this_period', ctx.state.get('days_worked_this_period') + 1);
+        const tod = ctx.state.timeOfDay();
+        if (tod > ctx.state.get('work_shift_start') + 15) {
+          ctx.state.set('times_late_this_week', ctx.state.get('times_late_this_week') + 1);
+          ctx.state.adjustJobStanding(-5);
+          ctx.events.record('late_for_work', { minutesLate: Math.round(tod - ctx.state.get('work_shift_start')) });
         } else {
           // On time — demonstrates reliability
-          State.adjustJobStanding(2);
+          ctx.state.adjustJobStanding(2);
         }
-        Events.record('arrived_at_work', { late: tod > State.get('work_shift_start') + 15, minutesLate: Math.round(tod - State.get('work_shift_start')) });
+        ctx.events.record('arrived_at_work', { late: tod > ctx.state.get('work_shift_start') + 15, minutesLate: Math.round(tod - ctx.state.get('work_shift_start')) });
       }
     }
 
@@ -185,15 +181,15 @@ export function createWorld(ctx) {
   function checkEvents() {
     /** @type {(string | undefined)[]} */
     const events = [];
-    const tod = State.timeOfDay();
-    const hour = State.getHour();
-    const location = State.get('location');
+    const tod = ctx.state.timeOfDay();
+    const hour = ctx.state.getHour();
+    const location = ctx.state.get('location');
 
     // Alarm
-    const alarmTime = State.get('alarm_time');
-    if (State.get('alarm_set') && !State.get('alarm_went_off') && tod >= alarmTime && tod < alarmTime + 30) {
+    const alarmTime = ctx.state.get('alarm_time');
+    if (ctx.state.get('alarm_set') && !ctx.state.get('alarm_went_off') && tod >= alarmTime && tod < alarmTime + 30) {
       if (location === 'apartment_bedroom') {
-        State.set('alarm_went_off', true);
+        ctx.state.set('alarm_went_off', true);
         events.push('alarm');
       }
     }
@@ -202,71 +198,71 @@ export function createWorld(ctx) {
     // Deterministic: no RNG consumed. Resets each morning in wakeUp() and on work arrival.
     const LATE_TIER_RANK = { fine: 0, late: 1, very_late: 2 };
     if (hour < 12) {
-      const lTier = State.lateTier();
-      const lastLTier = State.get('last_surfaced_late_tier');
+      const lTier = ctx.state.lateTier();
+      const lastLTier = ctx.state.get('last_surfaced_late_tier');
       const currentLateRank = LATE_TIER_RANK[lTier] ?? 0;
       const lastLateRank = lastLTier !== null && lastLTier in LATE_TIER_RANK ? LATE_TIER_RANK[lastLTier] : -1;
       if (lTier !== 'fine' && currentLateRank > lastLateRank) {
-        State.set('last_surfaced_late_tier', lTier);
+        ctx.state.set('last_surfaced_late_tier', lTier);
         events.push('late_anxiety');
       }
     }
 
     // Hunger pang — fires once per tier crossing (hungry → very_hungry → starving).
     // Deterministic: no RNG consumed. Resets when eating.
-    const hTier = State.hungerTier();
-    const lastHTier = State.get('last_surfaced_hunger_tier');
+    const hTier = ctx.state.hungerTier();
+    const lastHTier = ctx.state.get('last_surfaced_hunger_tier');
     const hungerTierRank = { hungry: 0, very_hungry: 1, starving: 2 };
     if (hTier in hungerTierRank) {
       const current = hungerTierRank[hTier];
       const last = lastHTier !== null && lastHTier in hungerTierRank ? hungerTierRank[lastHTier] : -1;
       if (current > last) {
-        State.set('last_surfaced_hunger_tier', hTier);
+        ctx.state.set('last_surfaced_hunger_tier', hTier);
         events.push('hunger_pang');
       }
     }
 
     // Exhaustion wave — fires once per tier crossing (exhausted → depleted).
     // Deterministic: no RNG consumed. Resets when energy recovers.
-    const eTier = State.energyTier();
-    const lastETier = State.get('last_surfaced_energy_tier');
+    const eTier = ctx.state.energyTier();
+    const lastETier = ctx.state.get('last_surfaced_energy_tier');
     const energyTierRank = { exhausted: 0, depleted: 1 };
     if (eTier in energyTierRank) {
       const current = energyTierRank[eTier];
       const last = lastETier !== null && lastETier in energyTierRank ? energyTierRank[lastETier] : -1;
       if (current > last) {
-        State.set('last_surfaced_energy_tier', eTier);
+        ctx.state.set('last_surfaced_energy_tier', eTier);
         events.push('exhaustion_wave');
       }
     }
 
     // Weather change
-    if (Timeline.chance(0.03)) {
+    if (ctx.timeline.chance(0.03)) {
       events.push('weather_shift');
     }
 
     // Workplace events
     if (location === 'workplace') {
-      if (Timeline.chance(0.1)) {
-        events.push(Timeline.pick(['coworker_speaks', 'work_task_appears', 'break_room_noise']));
+      if (ctx.timeline.chance(0.1)) {
+        events.push(ctx.timeline.pick(['coworker_speaks', 'work_task_appears', 'break_room_noise']));
       }
     }
 
     // Apartment ambient
     if (locations[location]?.area === 'apartment') {
-      if (Timeline.chance(0.06)) {
+      if (ctx.timeline.chance(0.06)) {
         // Always push apartment_sound for the ambient chance roll.
         // apartment_notice fires separately — deterministically on tier worsening.
-        // Explicit balance call: preserves RNG consumption vs. the old Timeline.pick() that
+        // Explicit balance call: preserves RNG consumption vs. the old ctx.timeline.pick() that
         // chose between apartment_sound and apartment_notice on this path.
-        Timeline.random();
+        ctx.timeline.random();
         events.push('apartment_sound');
       }
       // apartment_notice fires when mess tier has worsened since last surfacing.
       // Deterministic: no RNG consumed. Resets when cleaning or on wake.
       // Ignore tidy — no notice warranted when things are tidy.
-      const currentMessTier = Mess.tier();
-      const lastSurfaced = State.get('last_surfaced_mess_tier');
+      const currentMessTier = ctx.mess.tier();
+      const lastSurfaced = ctx.state.get('last_surfaced_mess_tier');
       const currentRank = MESS_TIER_RANK[currentMessTier] ?? 0;
       const lastRank = lastSurfaced !== null ? (MESS_TIER_RANK[lastSurfaced] ?? 0) : -1;
       if (currentMessTier !== 'tidy' && currentRank > lastRank) {
@@ -276,15 +272,15 @@ export function createWorld(ctx) {
 
     // Street ambient
     if (location === 'street' || location === 'bus_stop') {
-      if (Timeline.chance(0.08)) {
-        events.push(Timeline.pick(['street_ambient', 'someone_passes']));
+      if (ctx.timeline.chance(0.08)) {
+        events.push(ctx.timeline.pick(['street_ambient', 'someone_passes']));
       }
     }
 
     // Vomiting — pending flag set in advanceTime() when nausea exceeds threshold.
     // Deterministic: no RNG consumed here. Fires and clears the flag.
-    if (State.get('pending_vomit')) {
-      State.set('pending_vomit', false);
+    if (ctx.state.get('pending_vomit')) {
+      ctx.state.set('pending_vomit', false);
       events.push('vomit');
     }
 
@@ -301,20 +297,20 @@ export function createWorld(ctx) {
       { weight: 1, value: 'drizzle' },
     ];
     // Snow: only in winter when cold enough
-    if (State.season() === 'winter' && State.seasonalTemperatureBaseline() <= 2) {
+    if (ctx.state.season() === 'winter' && ctx.state.seasonalTemperatureBaseline() <= 2) {
       weathers.push({ weight: 2, value: 'snow' });
     }
-    const newWeather = Timeline.weightedPick(weathers);
-    State.set('weather', newWeather);
-    State.set('rain', newWeather === 'drizzle');
+    const newWeather = ctx.timeline.weightedPick(weathers);
+    ctx.state.set('weather', newWeather);
+    ctx.state.set('rain', newWeather === 'drizzle');
     // Temperature: seasonal baseline + weather offset + diurnal variation
     // (advanceTime keeps this updated continuously; updateWeather recalculates on weather change)
-    const base = State.seasonalTemperatureBaseline();
+    const base = ctx.state.seasonalTemperatureBaseline();
     const weatherOffset = newWeather === 'drizzle' ? -3
       : newWeather === 'overcast' ? -1
       : newWeather === 'snow' ? -2
       : 0;
-    State.set('temperature', Math.round((base + weatherOffset + State.diurnalTemperatureOffset()) * 10) / 10);
+    ctx.state.set('temperature', Math.round((base + weatherOffset + ctx.state.diurnalTemperatureOffset()) * 10) / 10);
   }
 
   function isInside() {

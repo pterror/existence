@@ -3,9 +3,6 @@
 import { NameData } from './names.js';
 
 export function createChargen(ctx) {
-  const Timeline = ctx.timeline;
-  const Character = ctx.character;
-  const Runs = ctx.runs;
 
   // --- Name generation ---
 
@@ -13,12 +10,12 @@ export function createChargen(ctx) {
   function generateName(exclude) {
     let first, last, attempts = 0;
     do {
-      first = Timeline.charWeightedPick(NameData.first);
+      first = ctx.timeline.charWeightedPick(NameData.first);
       attempts++;
     } while (exclude.has(first) && attempts < 50);
     exclude.add(first);
 
-    last = Timeline.charWeightedPick(NameData.last);
+    last = ctx.timeline.charWeightedPick(NameData.last);
     return { first, last };
   }
 
@@ -26,7 +23,7 @@ export function createChargen(ctx) {
   function generateFirstName(exclude) {
     let name, attempts = 0;
     do {
-      name = Timeline.charWeightedPick(NameData.first);
+      name = ctx.timeline.charWeightedPick(NameData.first);
       attempts++;
     } while (exclude.has(name) && attempts < 50);
     exclude.add(name);
@@ -200,16 +197,16 @@ export function createChargen(ctx) {
    */
   function generateBackstory(age) {
     // 1. Economic origin (1 charRng call)
-    const economic_origin = Timeline.charPick(economicOrigins);
+    const economic_origin = ctx.timeline.charPick(economicOrigins);
 
     // 2. Career stability 0-1 (1 charRng call)
-    const career_stability = Timeline.charRandom();
+    const career_stability = ctx.timeline.charRandom();
 
     // 3. Life events — 0-2 events (1 charRng call for count, 0-2 for selection)
     const yearsAdult = Math.max(0, age - 18);
     // More years = more chance of events. 0-2 events.
     const eventChance = Math.min(0.9, yearsAdult / 30);
-    const eventRoll = Timeline.charRandom();
+    const eventRoll = ctx.timeline.charRandom();
     let numEvents = 0;
     if (eventRoll < eventChance * 0.5) numEvents = 2;
     else if (eventRoll < eventChance) numEvents = 1;
@@ -217,10 +214,10 @@ export function createChargen(ctx) {
     const life_events = [];
     const pool = eventPoolByOrigin[economic_origin];
     for (let i = 0; i < numEvents; i++) {
-      const type = Timeline.charPick(pool);
+      const type = ctx.timeline.charPick(pool);
       const def = lifeEventDefs[type];
       // Financial impact interpolated by charRandom
-      const t = Timeline.charRandom();
+      const t = ctx.timeline.charRandom();
       const financial_impact = Math.round(def.financial[0] + (def.financial[1] - def.financial[0]) * t);
       life_events.push({ type, financial_impact });
     }
@@ -229,7 +226,7 @@ export function createChargen(ctx) {
     // Based on US SNAP eligibility: ~65% of eligible people (precarious) actually enroll.
     // Modest origin: some qualify depending on income, lower enrollment awareness.
     const ebtEnrollRate = { precarious: 0.65, modest: 0.25, comfortable: 0.04, secure: 0.0 };
-    const ebt_enrolled = Timeline.charRandom() < (ebtEnrollRate[economic_origin] ?? 0);
+    const ebt_enrolled = ctx.timeline.charRandom() < (ebtEnrollRate[economic_origin] ?? 0);
 
     return { economic_origin, career_stability, life_events, ebt_enrolled };
   }
@@ -379,83 +376,83 @@ export function createChargen(ctx) {
     const friend1Name = generateFirstName(usedNames);
     const friend2Name = generateFirstName(usedNames);
     const friendFlavors = ['sends_things', 'checks_in', 'dry_humor', 'earnest'];
-    const f1flavor = Timeline.charPick(friendFlavors);
+    const f1flavor = ctx.timeline.charPick(friendFlavors);
     const remainingFriend = friendFlavors.filter(f => f !== f1flavor);
-    const f2flavor = Timeline.charPick(remainingFriend);
+    const f2flavor = ctx.timeline.charPick(remainingFriend);
 
     // Coworkers
     const coworker1Name = generateFirstName(usedNames);
     const coworker2Name = generateFirstName(usedNames);
     const coworkerFlavors = ['warm_quiet', 'mundane_talker', 'stressed_out'];
-    const c1flavor = Timeline.charPick(coworkerFlavors);
+    const c1flavor = ctx.timeline.charPick(coworkerFlavors);
     const remainingCoworker = coworkerFlavors.filter(f => f !== c1flavor);
-    const c2flavor = Timeline.charPick(remainingCoworker);
+    const c2flavor = ctx.timeline.charPick(remainingCoworker);
 
     // Supervisor
     const supervisorName = generateFirstName(usedNames);
 
     // Job, age, wardrobe
-    const jobType = Timeline.charPick(['office', 'retail', 'food_service']);
-    const age = Timeline.charRandomInt(22, 48);
-    const outfit = Timeline.charPick(outfitSets);
-    const sleepwear = Timeline.charPick(sleepwearOptions);
+    const jobType = ctx.timeline.charPick(['office', 'retail', 'food_service']);
+    const age = ctx.timeline.charRandomInt(22, 48);
+    const outfit = ctx.timeline.charPick(outfitSets);
+    const sleepwear = ctx.timeline.charPick(sleepwearOptions);
 
     // Start date — random day in 2024, stored as minutes since Unix epoch
     const baseDateMinutes = 28401120; // 2024-01-01 00:00 UTC
-    const dayOffset = Timeline.charRandomInt(0, 364);
+    const dayOffset = ctx.timeline.charRandomInt(0, 364);
     const startTimestamp = baseDateMinutes + dayOffset * 1440;
     // Personality — generated silently, never shown in chargen UI
     const personality = {
-      neuroticism: Math.floor(Timeline.charRandom() * 101),
-      self_esteem: Math.floor(Timeline.charRandom() * 101),
-      rumination: Math.floor(Timeline.charRandom() * 101),
+      neuroticism: Math.floor(ctx.timeline.charRandom() * 101),
+      self_esteem: Math.floor(ctx.timeline.charRandom() * 101),
+      rumination: Math.floor(ctx.timeline.charRandom() * 101),
     };
 
     // Extract latitude before sentiments to preserve existing charRng order
-    const latitude = Timeline.charPick(locationOptions).latitude;
+    const latitude = ctx.timeline.charPick(locationOptions).latitude;
 
     // Sentiments — likes/dislikes, generated silently (Layer 2 basic sentiments)
     const sentiments = [];
 
     // Weather — everyone has preferences
     const weathers = ['clear', 'overcast', 'grey', 'drizzle'];
-    const likedWeather = Timeline.charPick(weathers);
-    const likedIntensity = 0.05 + Timeline.charRandom() * 0.8;
+    const likedWeather = ctx.timeline.charPick(weathers);
+    const likedIntensity = 0.05 + ctx.timeline.charRandom() * 0.8;
     sentiments.push({ target: 'weather_' + likedWeather, quality: 'comfort', intensity: likedIntensity });
     const dislikedPool = weathers.filter(w => w !== likedWeather);
-    const dislikedWeather = Timeline.charPick(dislikedPool);
-    const dislikedIntensity = 0.05 + Timeline.charRandom() * 0.55;
+    const dislikedWeather = ctx.timeline.charPick(dislikedPool);
+    const dislikedIntensity = 0.05 + ctx.timeline.charRandom() * 0.55;
     sentiments.push({ target: 'weather_' + dislikedWeather, quality: 'irritation', intensity: dislikedIntensity });
 
     // Time of day — morning or evening person
-    const timePref = Timeline.charPick(['morning', 'evening']);
-    const timeIntensity = 0.1 + Timeline.charRandom() * 0.7;
+    const timePref = ctx.timeline.charPick(['morning', 'evening']);
+    const timeIntensity = 0.1 + ctx.timeline.charRandom() * 0.7;
     sentiments.push({ target: 'time_' + timePref, quality: 'comfort', intensity: timeIntensity });
 
     // Food comfort — some eat for comfort, others eat mechanically
-    const foodIntensity = 0.02 + Timeline.charRandom() * 0.78;
+    const foodIntensity = 0.02 + ctx.timeline.charRandom() * 0.78;
     sentiments.push({ target: 'eating', quality: 'comfort', intensity: foodIntensity });
 
     // Rain sound — the sound of rain on windows
-    const rainIntensity = 0.02 + Timeline.charRandom() * 0.88;
+    const rainIntensity = 0.02 + ctx.timeline.charRandom() * 0.88;
     sentiments.push({ target: 'rain_sound', quality: 'comfort', intensity: rainIntensity });
 
     // Quiet — comfort or irritation
-    const quietIntensity = 0.1 + Timeline.charRandom() * 0.6;
-    const quietQuality = Timeline.charRandom() > 0.35 ? 'comfort' : 'irritation';
+    const quietIntensity = 0.1 + ctx.timeline.charRandom() * 0.6;
+    const quietQuality = ctx.timeline.charRandom() > 0.35 ? 'comfort' : 'irritation';
     sentiments.push({ target: 'quiet', quality: quietQuality, intensity: quietIntensity });
 
     // Being outside
-    const outsideIntensity = 0.02 + Timeline.charRandom() * 0.68;
+    const outsideIntensity = 0.02 + ctx.timeline.charRandom() * 0.68;
     sentiments.push({ target: 'outside', quality: 'comfort', intensity: outsideIntensity });
 
     // Physical warmth
-    const warmthIntensity = 0.02 + Timeline.charRandom() * 0.78;
+    const warmthIntensity = 0.02 + ctx.timeline.charRandom() * 0.78;
     sentiments.push({ target: 'warmth', quality: 'comfort', intensity: warmthIntensity });
 
     // Routine — comfort or irritation
-    const routineIntensity = 0.1 + Timeline.charRandom() * 0.5;
-    const routineQuality = Timeline.charRandom() > 0.4 ? 'comfort' : 'irritation';
+    const routineIntensity = 0.1 + ctx.timeline.charRandom() * 0.5;
+    const routineQuality = ctx.timeline.charRandom() > 0.4 ? 'comfort' : 'irritation';
     sentiments.push({ target: 'routine', quality: routineQuality, intensity: routineIntensity });
 
     // Life history — backstory generation (charRng stream)
@@ -465,14 +462,14 @@ export function createChargen(ctx) {
     // Tight budget + years of use → decent chance of a crack that never got fixed.
     // Exactly 1 charRng call.
     const crackedProb = { precarious: 0.55, modest: 0.30, comfortable: 0.08, secure: 0.01 };
-    const phone_cracked = Timeline.charRandom() < (crackedProb[backstory.economic_origin] ?? 0.30);
+    const phone_cracked = ctx.timeline.charRandom() < (crackedProb[backstory.economic_origin] ?? 0.30);
 
     // Bill day offsets — deterministic per character (charRng)
-    const paycheck_day_offset = Timeline.charRandomInt(0, 13);
-    const rent_day_offset = Timeline.charRandomInt(0, 29);
-    const utility_day_offset = Timeline.charRandomInt(0, 29);
-    const phone_bill_day_offset = Timeline.charRandomInt(0, 29);
-    const ebt_day_offset = Timeline.charRandomInt(0, 29); // day EBT reloads each month
+    const paycheck_day_offset = ctx.timeline.charRandomInt(0, 13);
+    const rent_day_offset = ctx.timeline.charRandomInt(0, 29);
+    const utility_day_offset = ctx.timeline.charRandomInt(0, 29);
+    const phone_bill_day_offset = ctx.timeline.charRandomInt(0, 29);
+    const ebt_day_offset = ctx.timeline.charRandomInt(0, 29); // day EBT reloads each month
 
     // Sleep cycle length — stable biological trait. Blume et al. 2023 (Sleep Health,
     // n=6,064 PSG cycles): median 96 min, right-skewed. We use a truncated normal
@@ -518,7 +515,7 @@ export function createChargen(ctx) {
       }
       const phiLo = phi((LO - MEAN) / SD);
       const phiHi = phi((HI - MEAN) / SD);
-      const u = Timeline.charRandom(); // exactly 1 RNG call
+      const u = ctx.timeline.charRandom(); // exactly 1 RNG call
       const p = phiLo + u * (phiHi - phiLo);
       return Math.round(Math.max(LO, Math.min(HI, MEAN + SD * probit(p))));
     })();
@@ -529,7 +526,7 @@ export function createChargen(ctx) {
     const migraineBase = 0.15;
     const migraineBoost = (personality.neuroticism > 65 ? 0.05 : 0)
       + (backstory.career_stability < 0.4 ? 0.05 : 0); // precarious careers → more chronic stress
-    if (Timeline.charRandom() < migraineBase + migraineBoost) {
+    if (ctx.timeline.charRandom() < migraineBase + migraineBoost) {
       conditions.push('migraines');
     }
 
@@ -539,10 +536,10 @@ export function createChargen(ctx) {
     // is consistent with CDC NHANES data for low-income adults with untreated dental decay.
     // Approximation debt: no jurisdiction model yet — dental access varies enormously by country.
     if (backstory.economic_origin === 'precarious') {
-      if (Timeline.charRandom() < 0.35) conditions.push('dental_pain');
+      if (ctx.timeline.charRandom() < 0.35) conditions.push('dental_pain');
     } else if (backstory.economic_origin === 'modest' && financialSim.starting_money < 200) {
       // Modest origin + severe financial hardship from life events → borderline at-risk
-      if (Timeline.charRandom() < 0.20) conditions.push('dental_pain');
+      if (ctx.timeline.charRandom() < 0.20) conditions.push('dental_pain');
     }
 
     return /** @type {GameCharacter} */ ({
@@ -1007,12 +1004,12 @@ export function createChargen(ctx) {
       char.financial_sim = sim;
     }
 
-    Timeline.setCharacter(char);
-    Character.set(char);
+    ctx.timeline.setCharacter(char);
+    ctx.character.set(char);
 
     // Create run in IndexedDB and set as active
-    const runId = await Runs.createRun(Timeline.getSeed(), char);
-    Timeline.setActiveRunId(runId);
+    const runId = await ctx.runs.createRun(ctx.timeline.getSeed(), char);
+    ctx.timeline.setActiveRunId(runId);
 
     if (resolveCreation) {
       resolveCreation(char);
