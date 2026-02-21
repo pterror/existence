@@ -1234,6 +1234,9 @@ export function createSenses(ctx) {
   function arrivalSense() {
     const observations = getObservations();
     if (observations.length === 0) return null;
+    // Only fire when something is genuinely salient — not every room transition warrants a beat.
+    // Threshold check is pure state (no RNG), so replay stays deterministic.
+    if (observations[0].salience < 0.4) return null;
     const hint = getStructureHint();
     return realize(observations.slice(0, 1), hint, getNtCtx(), () => Timeline.random());
   }
