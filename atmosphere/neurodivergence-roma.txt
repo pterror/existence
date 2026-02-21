@@ -6,7 +6,7 @@ https://open.spotify.com/album/5ahVGYp6RssaF7GHJ6dFSO
 
 Lyrics reconstructed from phonetic transcription (~/lyrics2) against
 Portuguese subtitle line breaks (~/lyrics2ptbr, trans. Konny @konnyoung).
-No official English lyrics exist. Uncertain readings marked [?].
+No official English lyrics exist. Reconstructed reading confirmed against Portuguese subtitles where possible.
 
 ---
 
@@ -31,7 +31,7 @@ I can't imagine being like you
 I don't believe in your bible
 repeat all your cycles, yeah
 the way you live is only causing me pain
-your life so dull [? empty]
+your life's so dull
 I could never
 but you claim you know better
 why am I the one that's getting punished for it
@@ -41,7 +41,7 @@ come give it a try
 if I told you how to behave
 you'd know the suffering of mine
 I don't believe you are better
-no spirit, no ember [? amber]
+no spirit, no ember
 but you surely know
 making my life into hell
 
@@ -49,15 +49,14 @@ making my life into hell
 
 Why can't I live in peace
 you just dig underneath
-I can't go on my life without hearing my faults
-
-In my designs
+I can't go on my life without hearing my fault
+in my designs
 what I like, what I talk, what I strive
 I can't be a little different from you
 I don't believe in your bible
 repeat all your cycles, yeah
 the way you live is only causing me pain
-your life so dull [? empty]
+your life's so dull
 I could never
 but you claim you know better
 why am I the one that's getting punished for it
@@ -67,7 +66,7 @@ come give it a try
 if I told you how to behave
 you'd know the suffering of mine
 I don't believe you are better
-no spirit, no ember [? amber]
+no spirit, no ember
 but you surely know
 making my life into hell
 
@@ -87,7 +86,7 @@ your help
 I don't believe in your bible
 repeat all your cycles, yeah
 the way you live is only causing me pain
-your life so dull [? empty]
+your life's so dull
 I could never
 but you claim you know better
 why am I the one that's getting punished for it
@@ -97,6 +96,6 @@ come give it a try
 if I told you how to behave
 you'd know the suffering of mine
 I don't believe you are better
-no spirit, no ember [? amber]
+no spirit, no ember
 but you surely know
 making my life into hell
