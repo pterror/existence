@@ -602,3 +602,44 @@ inventing plausible-sounding numbers. That research capacity — quickly surveyi
 a domain, finding the relevant findings, and translating them into simulation
 parameters — is what makes the LLM collaboration specifically useful here. It
 compresses weeks of background reading into hours.
+
+**What it actually does.** Beyond research: holds design context across a large
+and growing document set; flags inconsistencies between systems; implements code
+from spec; writes design documentation; surfaces connections between things said
+in different sessions; notices when a design decision contradicts an earlier
+principle. The context-holding capacity is underrated — a human collaborator would
+also lose context between sessions, and existence's design space is now large
+enough that no single session covers it.
+
+**What it isn't.** Not pair programming — there's no shared persistent context
+between sessions; the docs are the mechanism for continuity, not memory. Not a
+research assistant — also implements. Not ghostwriting — the human makes all
+design decisions; the LLM researches, implements, and surfaces what's been missed.
+The "no" is always the human's. A closer description: the human holds the vision
+and makes all decisions; the LLM holds the working context, does the research
+and implementation work, and flags gaps. The vision is not collaborative; the
+execution is.
+
+**The context-persistence problem.** Sessions end and context resets. MEMORY.md,
+CLAUDE.md, STATUS.md, and the docs/design/ tree are the continuity mechanism —
+they exist so nothing lives only in chat history. This is a structural challenge
+that pair programming doesn't have (a human collaborator remembers yesterday) and
+that shapes how the project must be documented. Every design decision that matters
+must be written down immediately, not because the human will forget but because
+the LLM will.
+
+**Known failure modes.** The most dangerous: inventing plausible-sounding
+rationales for numbers that were chosen rather than derived. "Adults get 4–5 colds
+per year therefore 0.7%" is rationalization if the 0.7% came first. The LLM is
+fluent at producing rationale; fluency is not the same as derivation. CLAUDE.md
+names this explicitly: approximation debt honestly named is acceptable; a comment
+that implies derivation when there was none is not. This failure mode requires
+active resistance — the LLM will produce confident-sounding calibration prose
+whether or not the number is grounded.
+
+**The authorship question.** Directly addressed in the pteraworld essay "The great
+deceit": the ideas came from human conversations; the writing was done by a language
+model; the human kept what felt true from their own experience. Whether that
+constitutes "AI-written" depends on what you think writing is. The project doesn't
+hide the collaboration — this section exists — but also doesn't foreground it as
+the thing the game is about. It's a development method, not the subject matter.
