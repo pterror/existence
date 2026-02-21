@@ -165,7 +165,7 @@ These are harder to parameterize than stance markers but matter more for whether
 Sanitizing characters into supportive, well-meaning presences makes them feel like NPCs. Real people have less flattering patterns, and these are as much personality as anything else. The game doesn't judge — it renders.
 
 - **Casual insensitivity**: says something that lands badly without noticing. Not malicious — just oblivious to how it registers
-- **Intentional malicious ignorance**: deliberately fails to understand something because understanding it would require acknowledging something uncomfortable. "I just don't see why that's a big deal"
+- **Deliberate unhearing**: pretends not to have heard something. The statement goes unacknowledged; the conversation moves on as if it was never said. Social erasure — can be a power move, conflict avoidance, or just how someone handles things they don't want to engage with
 - **Passive aggression**: ostensibly fine, edge underneath. "No, it's fine." The surface is cooperative; the content isn't
 - **One-upping**: responds to your situation by immediately relating it to their own worse situation. Often from anxiety, not malice
 - **Deflection**: changes subject when things get uncomfortable, sometimes so smoothly they don't notice they're doing it
