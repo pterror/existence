@@ -218,6 +218,7 @@ export function createState(ctx) {
       // Location
       location: 'apartment_bedroom',
       previous_location: /** @type {string | null} */ (null),
+      location_arrival_time: 0,   // game-time (minutes) when character last arrived at current location
 
       // Work specifics
       work_shift_start: 9 * 60,   // 9:00 AM in minutes since midnight
@@ -787,6 +788,7 @@ export function createState(ctx) {
     s.grazed_break_room_today = false;
     s.ate_at_soup_kitchen_today = false;
     s.daylight_exposure = 0;
+    s.location_arrival_time = s.time; // sleep resets bedroom familiarity
     s.illness_medicated = false;
     s.pending_vomit = false;  // clear any stale vomit flag — sleep resolves nausea
     s.social_energy = 100; // sleep fully restores social energy

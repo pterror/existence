@@ -136,6 +136,7 @@ export function createWorld(ctx) {
     State.set('previous_location', prevLocation);
     State.set('location', destId);
     State.advanceTime(travelTime);
+    State.set('location_arrival_time', State.get('time')); // reset habituation for new location
 
     // Travel costs energy — more if tired or hungry
     const energyCost = travelTime > 10 ? -5 : -1;

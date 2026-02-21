@@ -462,9 +462,14 @@ Pure module that turns `Observation[]` + NT hint → prose string. No game impor
 
 **Tests:** 32 unit tests in `tests/realization.test.js`. Cover null/empty, all five architectures, multi-observation passages, polysyndeton, fixed RNG consumption, NT variation, unknown hint fallback. All passing.
 
+**Selection model** — threshold + habituation, not a fixed budget:
+- `getSalienceThreshold(hint)` — NT-state-driven perceptual threshold. overwhelmed=0.25, anxious=0.30, heightened=0.40, calm=0.50, flat=0.55, dissociated=0.60. All observations above threshold fire; those below don't register.
+- `habituationFactor()` — `0.4 + 0.6 × exp(−minutesAtLocation / 40)`. Starts at 1.0 on arrival, floors at ~0.4 after ~2 hours. Even fully habituated sources can still surface under high-arousal states that lower the threshold. `location_arrival_time` state variable set in `travelTo()` and `wakeUp()`.
+- `realize()` takes whatever observations the caller passes and realizes all of them. Selection is the caller's responsibility.
+
 **Wired to game loop** — two contexts:
-- **Idle** — `sense()`: up to 2–3 observations per passage (budget by NT hint), with 12-min cooldown. Fires in `handleIdle`.
-- **Arrival** — `arrivalSense()`: top 1 observation only (first impression of new location), no cooldown. Fires in `handleMove` after `transitionText`, before events. Arrival text is prepended to the event display queue so it appears first, after the location description. RNG consumption matched in `replayMove` and `executeActionForReplay`.
+- **Idle** — `sense()`: filters by `getSalienceThreshold(hint)` after habituation, then realizes all above threshold. 12-min cooldown. Fires in `handleIdle`.
+- **Arrival** — `arrivalSense()`: same threshold + habituation, but habituation = 1.0 (just arrived). No cooldown. Fires in `handleMove` after `transitionText`, before events. Arrival text prepended to event display queue so it appears first. RNG consumption matched in `replayMove` and `executeActionForReplay`.
 
 Fragment system remains as legacy (fragment library + `composeFragments` still present); observation pipeline is the live path.
 

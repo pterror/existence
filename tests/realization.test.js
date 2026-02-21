@@ -241,12 +241,12 @@ describe('realize — multi-observation passages', () => {
     expect((result.match(/\./g) || []).length).toBeGreaterThanOrEqual(2);
   });
 
-  test('only top budget observations are used (budget=2 for calm)', () => {
-    // Provide 5 observations; should only realize 2
-    const observations = [fridgeObs, coldObs, fatigueObs, trafficObs, hungerObs];
+  test('realize takes all observations passed — caller controls selection', () => {
+    // Caller (senses.js) applies threshold; realize() processes everything given.
+    // Passing 2 observations produces 2 sentences regardless of NT hint.
+    const observations = [fridgeObs, coldObs];
     const result = realize(observations, 'calm', NEUTRAL, mkRng(FIRST));
-    // Two sentences, not five
-    expect((result.match(/\./g) || []).length).toBeLessThanOrEqual(3);
+    expect((result.match(/\./g) || []).length).toBeGreaterThanOrEqual(2);
   });
 });
 
@@ -309,21 +309,21 @@ describe('realize — NT-weighted lexical variation', () => {
 // --- RNG consumption is fixed ---
 
 describe('realize — fixed RNG consumption', () => {
-  test('calm budget=2: consumes exactly 8 random() calls', () => {
+  test('2 observations: consumes exactly 8 random() calls', () => {
     let calls = 0;
     const countingRng = () => { calls++; return 0.1; };
     realize([fridgeObs, trafficObs], 'calm', NEUTRAL, countingRng);
     expect(calls).toBe(8); // 2 observations × 4 calls each
   });
 
-  test('anxious budget=3: consumes exactly 12 calls', () => {
+  test('3 observations: consumes exactly 12 calls', () => {
     let calls = 0;
     const countingRng = () => { calls++; return 0.1; };
     realize([fatigueObs, fridgeObs, trafficObs], 'anxious', ANXIOUS, countingRng);
     expect(calls).toBe(12);
   });
 
-  test('overwhelmed budget=3: consumes exactly 12 calls', () => {
+  test('3 observations overwhelmed: consumes exactly 12 calls', () => {
     let calls = 0;
     const countingRng = () => { calls++; return 0.1; };
     realize([fatigueObs, fridgeObs, trafficObs], 'overwhelmed', ANXIOUS, countingRng);

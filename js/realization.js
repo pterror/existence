@@ -1042,13 +1042,6 @@ const ARCH_WEIGHTS = {
   },
 };
 
-/** How many observations to include per passage. */
-function getPassageBudget(hint) {
-  if (hint === 'overwhelmed') return 3;
-  if (hint === 'anxious')     return 3;
-  return 2;
-}
-
 // --- Single-observation realization ---
 //
 // Consumes exactly r1..r4 (4 pre-rolled values from the caller).
@@ -1089,11 +1082,10 @@ function realizeOne(obs, hint, ntCtx, r1, r2, r3, r4) {
 /**
  * Construct a prose passage from the given observations.
  *
- * Selects up to getPassageBudget(hint) observations (highest salience first —
- * the caller should provide them sorted). Realizes each into a sentence using
- * an NT-weighted architecture. Returns a single passage string or null.
+ * Realizes every observation passed — the caller decides what to include
+ * (salience threshold, habituation, budget). Sorted highest-salience first.
  *
- * RNG consumption: exactly budget × 4 calls, always.
+ * RNG consumption: exactly observations.length × 4 calls.
  *
  * @param {import('./senses.js').Observation[]} observations
  * @param {string} hint
@@ -1104,12 +1096,9 @@ function realizeOne(obs, hint, ntCtx, r1, r2, r3, r4) {
 export function realize(observations, hint, ntCtx, random) {
   if (!observations || observations.length === 0) return null;
 
-  const budget   = getPassageBudget(hint);
-  const selected = observations.slice(0, budget);
-
   // Overwhelmed: polysyndeton — combine all observations into one sentence
   if (hint === 'overwhelmed') {
-    const phrases = selected.map((obs, idx) => {
+    const phrases = observations.map((obs, idx) => {
       const r1 = random(), r2 = random(), r3 = random(), r4 = random();
       const sentence = realizeOne(obs, hint, ntCtx, r1, r2, r3, r4);
       if (!sentence) return null;
@@ -1123,7 +1112,7 @@ export function realize(observations, hint, ntCtx, random) {
   }
 
   // All other hints: each observation is its own sentence
-  const sentences = selected.map(obs => {
+  const sentences = observations.map(obs => {
     const r1 = random(), r2 = random(), r3 = random(), r4 = random();
     return realizeOne(obs, hint, ntCtx, r1, r2, r3, r4);
   }).filter(Boolean);

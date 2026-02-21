@@ -1121,12 +1121,45 @@ export function createSenses(ctx) {
    * @returns {Observation[]}
    */
   function getObservations() {
+    const hab = habituationFactor();
     return getAvailableSources()
-      .map(src => observe(src))
+      .map(src => {
+        const obs = observe(src);
+        return { ...obs, salience: obs.salience * hab };
+      })
       .sort((a, b) => b.salience - a.salience);
   }
 
   // --- NT state → structure hint ---
+
+  /**
+   * Perceptual threshold: minimum effective salience for an observation to surface.
+   * Varies by NT state — anxious / overwhelmed lowers the bar (more things break through);
+   * dissociated raises it (fewer things penetrate the haze).
+   * @param {string} hint
+   * @returns {number}
+   */
+  function getSalienceThreshold(hint) {
+    if (hint === 'overwhelmed') return 0.25;
+    if (hint === 'anxious')     return 0.30;
+    if (hint === 'heightened')  return 0.40;
+    if (hint === 'flat')        return 0.55;
+    if (hint === 'dissociated') return 0.60;
+    return 0.50; // calm
+  }
+
+  /**
+   * How familiar is the current location? Returns a multiplier on observation salience.
+   * Starts at 1.0 on arrival, decays toward a floor of 0.4 over ~40 minutes.
+   * Even fully habituated sources can still surface under high-arousal NT states,
+   * because those states lower the perceptual threshold below the habituated salience.
+   * No PRNG — pure state read.
+   * @returns {number}
+   */
+  function habituationFactor() {
+    const minutesAtLocation = Math.max(0, State.get('time') - State.get('location_arrival_time'));
+    return 0.4 + 0.6 * Math.exp(-minutesAtLocation / 40);
+  }
 
   function getStructureHint() {
     const gaba = State.get('gaba');
@@ -1218,9 +1251,10 @@ export function createSenses(ctx) {
    * @returns {string | null}
    */
   function sense() {
-    const observations = getObservations();
-    if (observations.length === 0) return null;
     const hint = getStructureHint();
+    const threshold = getSalienceThreshold(hint);
+    const observations = getObservations().filter(o => o.salience >= threshold);
+    if (observations.length === 0) return null;
     return realize(observations, hint, getNtCtx(), () => Timeline.random());
   }
 
@@ -1232,13 +1266,13 @@ export function createSenses(ctx) {
    * @returns {string | null}
    */
   function arrivalSense() {
-    const observations = getObservations();
-    if (observations.length === 0) return null;
-    // Only fire when something is genuinely salient — not every room transition warrants a beat.
-    // Threshold check is pure state (no RNG), so replay stays deterministic.
-    if (observations[0].salience < 0.4) return null;
     const hint = getStructureHint();
-    return realize(observations.slice(0, 1), hint, getNtCtx(), () => Timeline.random());
+    const threshold = getSalienceThreshold(hint);
+    // Habituation is 1.0 right after travelTo() — this uses the same getObservations()
+    // which applies habituationFactor(), but timeDelta = 0 so factor = 1.0.
+    const observations = getObservations().filter(o => o.salience >= threshold);
+    if (observations.length === 0) return null;
+    return realize(observations, hint, getNtCtx(), () => Timeline.random());
   }
 
   /**
