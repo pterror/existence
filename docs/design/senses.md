@@ -524,19 +524,42 @@ Not one signal but several arriving at different times:
 
 ### Breathing
 
-*— to be covered*
+Normally automatic and unfelt — surfaces when something changes:
+- Exertion making it audible and effortful
+- Anxiety producing shallow, fast breathing — often without noticing; you realise you've been breathing wrong for a while
+- Holding breath without deciding to — common during concentration or stress
+- The deliberate breath when trying to calm down — one of the few direct voluntary levers on the autonomic nervous system; works because it does
+- Breathing through a blocked nose — the specific effortfulness, the mouth drying out
+- The breath after crying — the ragged, involuntary quality of it settling
+- Chest cold or asthma — breathing that costs something, that has resistance
 
 ### Nausea
 
-*— to be covered*
+Already partially in the game (nausea state, vomiting event). The felt texture:
+- Waves rather than constant — comes and goes, peaks
+- The saliva that arrives just before vomiting — the body preparing
+- The specific wrongness that isn't quite pain and isn't quite anything else
+- Sources: motion (vestibular mismatch), smell, anxiety, eating wrong, medication, illness, alcohol
+- The decision about whether to fight it or go with it
+- Dry heaving when there's nothing left — the motion without the relief
 
 ### Fatigue and body heaviness
 
-*— to be covered*
+Fatigue is a spectrum with distinct qualities — not interchangeable:
+- **Sleepy fatigue** (adenosine) — the pull toward horizontal, eyes heavy, the world softening
+- **Physical fatigue** — muscles used up; the specific burn in legs after a long walk, arms after carrying; different from sleepy
+- **Mental fatigue** — cognitive load exhausted; can be mentally exhausted and unable to sleep; different texture from sleepy or physical
+- **Chronic fatigue** — illness, depression, ME/CFS; the fatigue that sleep doesn't fix, that doesn't obey normal rules; waking already tired
+- **Fever heaviness** — the specific weight of a sick body, the effort of lifting limbs
+- **The body that costs more than expected** — reaching for something and it's further than it should be; stairs that are steeper than they were yesterday
 
 ### Anxiety and NT signals as interoception
 
-*— to be covered*
+The neurochemistry becoming bodily experience — the body knowing before the conscious mind catches up:
+- **Cortisol high:** tight chest, shoulders held up, jaw clenched without deciding to, stomach clenched
+- **NE high:** heart faster, senses sharpened, the body ready for something that may or may not exist
+- **Low GABA:** restlessness, can't settle, the body won't stay still, something climbing the inside of the skin
+- **The sequence:** physical symptoms arrive first — the chest tightens, the heart rate changes — and only then comes the conscious recognition of anxiety. The body is not reporting on an emotion; it is the emotion, arriving somatically first.
 
 ### Character-side conditions
 - **Alexithymia** — difficulty identifying and describing internal states; interoceptive signals present but hard to read or name; correlated with autism
