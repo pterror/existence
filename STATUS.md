@@ -462,9 +462,10 @@ Pure module that turns `Observation[]` + NT hint → prose string. No game impor
 
 **Tests:** 32 unit tests in `tests/realization.test.js`. Cover null/empty, all five architectures, multi-observation passages, polysyndeton, fixed RNG consumption, NT variation, unknown hint fallback. All passing.
 
-**Selection model** — threshold + habituation, not a fixed budget:
+**Selection model** — threshold + habituation + change detection:
 - `getSalienceThreshold(hint)` — NT-state-driven perceptual threshold. overwhelmed=0.25, anxious=0.30, heightened=0.40, calm=0.50, flat=0.55, dissociated=0.60. All observations above threshold fire; those below don't register.
-- `habituationFactor()` — `0.4 + 0.6 × exp(−minutesAtLocation / 40)`. Starts at 1.0 on arrival, floors at ~0.4 after ~2 hours. Even fully habituated sources can still surface under high-arousal states that lower the threshold. `location_arrival_time` state variable set in `travelTo()` and `wakeUp()`.
+- `habituationFactor()` — `0.4 + 0.6 × exp(−minutesAtLocation / 40)`. Starts at 1.0 on arrival, floors at ~0.4 after ~2 hours.
+- `getChangeSalience()` — orienting response. `changeTracker` map fingerprints each source's discrete state (string/boolean properties only; numerics excluded). When a source's tier/quality/condition label changes: spike = 0.4, decays with 12-min time constant. First observation establishes baseline (no spike). Effective salience = `(raw_salience × habituationFactor()) + change_spike`. A source below threshold can surface if it just changed state.
 - `realize()` takes whatever observations the caller passes and realizes all of them. Selection is the caller's responsibility.
 
 **Wired to game loop** — two contexts:

@@ -1116,8 +1116,10 @@ export function createSenses(ctx) {
 
   /**
    * Get all observations for the current location and state,
-   * sorted by salience descending. No RNG consumed.
-   * (Selection with RNG will be added when this integrates with sense().)
+   * sorted by effective salience descending. No RNG consumed.
+   * Effective salience = (raw_salience × habituation_factor) + change_spike.
+   * The change_spike is the orienting response — a decaying boost when a source's
+   * discrete state (tier/quality/condition) changes. See getChangeSalience().
    * @returns {Observation[]}
    */
   function getObservations() {
@@ -1125,7 +1127,8 @@ export function createSenses(ctx) {
     return getAvailableSources()
       .map(src => {
         const obs = observe(src);
-        return { ...obs, salience: obs.salience * hab };
+        const spike = getChangeSalience(src.id, obs.properties);
+        return { ...obs, salience: obs.salience * hab + spike };
       })
       .sort((a, b) => b.salience - a.salience);
   }
@@ -1159,6 +1162,74 @@ export function createSenses(ctx) {
   function habituationFactor() {
     const minutesAtLocation = Math.max(0, State.get('time') - State.get('location_arrival_time'));
     return 0.4 + 0.6 * Math.exp(-minutesAtLocation / 40);
+  }
+
+  // --- Change detection (orienting response) ---
+  // Tracks discrete property state per source. When a source's tier/quality/condition
+  // label changes, a salience spike fires and decays over ~12 minutes.
+  // This is the mechanism for noticing the fridge kick on, pipes pop, or rain start —
+  // sources whose habituated salience is below threshold but whose state just changed.
+  //
+  // Only string and boolean values are included in change fingerprints —
+  // continuous numeric values drift at every tick and would generate constant false positives.
+  //
+  // Spike magnitude: 0.4 — enough to surface a fully-habituated source (floor 0.4×min_salience)
+  // across all NT thresholds (highest threshold = 0.60 dissociated).
+  // Decay constant: 12 minutes — matches sense() cooldown; ~3 calls for spike to fade.
+
+  const changeTracker = new Map(); // sourceId -> { prevKey: string, changeTime: number|null }
+  const CHANGE_SPIKE_MAG = 0.4;
+  const CHANGE_DECAY_MIN = 12;
+
+  /**
+   * Build a change-detection fingerprint from evaluated properties.
+   * Excludes numeric values — only string and boolean properties count as meaningful state.
+   * @param {Object} properties — evaluated channel→key→value map
+   * @returns {string}
+   */
+  function discreteKey(properties) {
+    const out = {};
+    for (const [channel, props] of Object.entries(properties)) {
+      const discrete = {};
+      for (const [k, v] of Object.entries(props)) {
+        if (typeof v === 'string' || typeof v === 'boolean') discrete[k] = v;
+      }
+      if (Object.keys(discrete).length > 0) out[channel] = discrete;
+    }
+    return JSON.stringify(out);
+  }
+
+  /**
+   * Detect discrete state changes for a source and return the current spike salience.
+   * Updates changeTracker as a side effect. No PRNG consumed.
+   * - First observation: establishes baseline, returns 0.
+   * - State change: resets changeTime to now, returns CHANGE_SPIKE_MAG.
+   * - No change: returns CHANGE_SPIKE_MAG × exp(−minutesSince / CHANGE_DECAY_MIN).
+   * @param {string} sourceId
+   * @param {Object} properties — evaluated properties for this observation cycle
+   * @returns {number}
+   */
+  function getChangeSalience(sourceId, properties) {
+    const now = State.get('time');
+    const key = discreteKey(properties);
+    const tracked = changeTracker.get(sourceId);
+
+    if (!tracked) {
+      // First observation — establish baseline; no spike
+      changeTracker.set(sourceId, { prevKey: key, changeTime: null });
+      return 0;
+    }
+
+    if (key !== tracked.prevKey) {
+      // Discrete state changed — orienting spike fires; update baseline
+      changeTracker.set(sourceId, { prevKey: key, changeTime: now });
+      return CHANGE_SPIKE_MAG;
+    }
+
+    // No change — return decaying spike from last change time
+    if (tracked.changeTime === null) return 0;
+    const minutesSince = Math.max(0, now - tracked.changeTime);
+    return CHANGE_SPIKE_MAG * Math.exp(-minutesSince / CHANGE_DECAY_MIN);
   }
 
   function getStructureHint() {
@@ -1246,8 +1317,8 @@ export function createSenses(ctx) {
   /**
    * Compose a sensory passage for the current location and state.
    * Delegates to the observation source pipeline and realization engine.
-   * RNG consumption: N×4 calls (N = getPassageBudget(hint)) if observations
-   * are available; 0 if nothing surfaces. Always the same count for the same state.
+   * RNG consumption: N×4 calls (N = observations above salience threshold)
+   * if any surface; 0 if nothing passes the threshold.
    * @returns {string | null}
    */
   function sense() {
