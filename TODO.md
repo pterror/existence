@@ -48,6 +48,10 @@ Each location has an acoustic character — reverb, absorption, echo — that mo
 
 **Smell:** No smell sources exist. Smell is the most powerful trigger for autobiographical memory and emotional response — coffee brewing, rain on asphalt, someone's apartment. High-salience olfactory sources (cooking, cleaning products, outdoor decay) should be added. Smell doesn't fade gracefully into background the way sound does — it habituates after ~10 minutes or spikes again on movement. Needs a distinct salience model from acoustic sources.
 
+**Widen realization scope:** The engine currently only runs during idle (via `sense()`). The same pipeline could generate sensory texture in other moments: first-impression observations on location arrival (what hits you when you walk in), background observations mid-interaction (sensory grounding during do_work, commute, shower), and could replace parts of location description that are currently authored deterministic strings. Each context has different salience dynamics — arrival favors involuntary-attention sources, background favors ambient low-salience.
+
+**Retire legacy fragment system:** The observation pipeline now supersedes the authored fragment library (`senses.js` fragment array + `composeFragments`). Both paths coexist at the moment. Long-term: migrate any fragments that aren't covered by observation sources, then remove the legacy path. The fragment library currently runs as dead code — `sense()` delegates to `getObservations() → realize()` and never calls `composeFragments` directly.
+
 ## Under Consideration
 
 Everything below is drawn from the gap between docs/design/overview.md and what's built. Not committed to — just visible.
