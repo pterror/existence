@@ -230,11 +230,25 @@ One of the first story generation systems. Characters had goals and simulated
 problem-solving; stories emerged from their interactions. Foundational for the
 idea that narrative can be generated from simulation rather than authored.
 
+*Gap:* TALE-SPIN's model is goal-directed — characters want things and pursue
+them; story is the trace of that pursuit. Existence's model is state-directed:
+the character doesn't pursue anything, they simply are. TALE-SPIN produces
+summarizable narrative ("Joe Bear wanted honey, went to the tree, found it").
+Existence doesn't produce a summary; it produces a texture. The success criterion
+is completely different — and the academic tradition inherited TALE-SPIN's framing
+without questioning it.
+
 **Expressive Intelligence Studio** (UC Santa Cruz — Michael Mateas, Noah Wardrip-Fruin et al.)
 The academic home of most serious interactive narrative research. Work on drama
 management, procedural authorship, and the Facade system. Wardrip-Fruin's
 *Expressive Processing* (2009) is the closest thing to a theoretical foundation
 for this kind of work.
+
+*Gap:* Drama management assumes a library of authored story beats to select and
+sequence. The player has goals the drama manager should serve. Existence has
+neither beats nor player goals — continuous state generating prose, no authored
+units to manage. The core question (how does a simulation decide what to surface
+when?) is still unanswered by the EIS tradition for a goalless, beatless system.
 
 **Natural Language Generation (NLG) literature**
 The pipeline in existence (observations → realization → surface text) maps onto
@@ -243,16 +257,57 @@ realization. The realization.js architecture specifically is a stripped-down
 surface realizer. Relevant overview: Reiter & Dale, *Building Natural Language
 Generation Systems* (2000) — dry but foundational.
 
+*Gap:* Classical NLG is designed for information delivery — weather reports,
+financial summaries, medical descriptions. Content determination asks "what facts
+need to be communicated?" Existence's content determination asks "what is the
+character noticing, and what emotional register does it land in?" — not a
+facts-communication problem at all. NLG assumes you know what you want to say and
+need help saying it correctly. Existence has to figure out what to say at all.
+
 **Emily Short's blog** (https://emshort.blog)
 Practical interactive fiction craft from someone who has thought harder about
 these problems than almost anyone. Especially relevant: writing on character
 simulation, procedural generation of narrative, and quality-based narrative design.
 Not academic but more useful than most papers.
 
+*Gap:* Short's work is in authored systems — her craft is how to write and
+structure content that responds to state. Her methods scale with authorship effort.
+Existence needs methods that scale with the state space: the simulation must do
+more of the work than any human author can. Her principles are right; the
+engineering problem at existence's scope is beyond what authorship alone can solve.
+
 **Interactive Storytelling / ICIDS conference proceedings**
 Annual conference on interactive digital storytelling. Most directly relevant
 work on drama management, player modeling, and procedural narrative tends to
 appear here first.
+
+*Gap:* Oriented toward coherent authored narrative with evaluable structure.
+Existence produces something the academic tradition doesn't have a good evaluation
+framework for: not a narrative, but the texture of experience — continuous,
+goalless, without arc. "Did it produce a coherent story?" is the wrong question.
+The right question is closer to "did it make you feel like you were there?" and
+that's much harder to measure.
+
+### What the academic work doesn't address
+
+The through-line across all of it: this literature is oriented toward *narrative*
+— story with coherent structure, beats, arcs, something you could summarize. That
+framing goes back to TALE-SPIN and runs through drama management, NLG, and most
+ICIDS work.
+
+Existence isn't producing narrative. It's producing *experience* — the texture of
+being in a particular state on a particular day, continuous and without arc. A
+good session of existence doesn't produce a story you could tell someone. It
+produces the feeling of having lived a few hours inside a specific life. Those are
+different things, and the academic tradition conflates them.
+
+The second gap: nearly all of this work predates LLM-assisted authorship. The
+techniques are rule-based, symbol-manipulation, handcrafted at every level.
+Existence's approach — a running simulation selecting and weighting from
+human-authored prose pools, developed in collaboration with an LLM — is a hybrid
+that doesn't have good academic framing yet. The closest framing is probably
+"procedural rhetoric" (Bogost) applied to lived experience rather than argument,
+but that's a stretch.
 
 ---
 
