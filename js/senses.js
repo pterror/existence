@@ -1,15 +1,17 @@
-// senses.js — prose compositor for sensory fragments
-// Combines ambient, body-state, and environment fragments into natural sentences.
-//
-// See docs/design/senses.md and docs/research/prose-construction.md.
+// senses.js — sensory prose compositor.
+// Builds ambient passages from observation sources via the realization engine.
 //
 // Architecture:
-//   composeFragments(fragments, hint) — pure exported function, no state dependency.
-//     Takes pre-selected typed fragments + NT structure hint, returns combined sentence.
-//     Testable in isolation.
+//   composeFragments(fragments, hint) — pure exported function (fragment-system legacy).
+//     Still used by the test suite; kept for reference.
 //
-//   createSenses(ctx) — factory. Contains fragment library, state queries, selection.
-//     sense() — main entry point. Consumes 0 or 1 RNG call. Returns string or null.
+//   createSenses(ctx) — factory.
+//     sense() — main entry point. Delegates to getObservations() → realize().
+//               RNG consumption: N×4 calls where N = getPassageBudget(hint) if
+//               observations are available; 0 if nothing surfaces.
+//               Returns string or null.
+
+import { realize } from './realization.js';
 
 /**
  * @typedef {{
@@ -1024,21 +1026,31 @@ export function createSenses(ctx) {
   }
 
   /**
-   * Compose a sensory sentence for the current location and state.
-   * Consumes 1 RNG call if pool has more than 1 eligible fragment; 0 otherwise.
-   * Returns null if nothing surfaces.
+   * NT context for the realization engine — normalized 0–1 values.
+   * @returns {{ gaba: number, ne: number, aden: number, serotonin: number, dopamine: number }}
+   */
+  function getNtCtx() {
+    return {
+      gaba:      State.get('gaba')           / 100,
+      ne:        State.get('norepinephrine') / 100,
+      aden:      State.get('adenosine')      / 100,
+      serotonin: State.get('serotonin')      / 100,
+      dopamine:  State.get('dopamine')       / 100,
+    };
+  }
+
+  /**
+   * Compose a sensory passage for the current location and state.
+   * Delegates to the observation source pipeline and realization engine.
+   * RNG consumption: N×4 calls (N = getPassageBudget(hint)) if observations
+   * are available; 0 if nothing surfaces. Always the same count for the same state.
    * @returns {string | null}
    */
   function sense() {
-    const pool = getTriggeredFragments();
-    if (pool.length === 0) return null;
-
+    const observations = getObservations();
+    if (observations.length === 0) return null;
     const hint = getStructureHint();
-    const budget = getPacingBudget(hint);
-    const selected = selectFragments(pool, budget);
-    if (selected.length === 0) return null;
-
-    return composeFragments(selected, hint);
+    return realize(observations, hint, getNtCtx(), () => Timeline.random());
   }
 
   /**

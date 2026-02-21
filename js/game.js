@@ -434,7 +434,7 @@ export function createGame(ctx) {
       if (thought) responseText = thought;
       const ivTier = State.innerVoiceTier();
       if (ivTier) Content.innerVoiceThoughts(); // consume RNG to keep replay aligned
-      const sensory = Senses.sense(); // consume RNG to keep replay aligned
+      const sensory = Senses.sense(); // N×4 or 0 RNG — keeps replay aligned
       if (sensory) eventTexts.push(sensory);
       State.advanceTime(Timeline.randomInt(2, 5));
     } else if (action.type === 'observe_time') {
@@ -992,11 +992,11 @@ export function createGame(ctx) {
    * @returns {{ thought: string | undefined, voice: string | null, ivTier: string | null }}
    */
   function replayIdle() {
-    // RNG order must match handleIdle() exactly
+    // RNG order must match handleIdle() exactly (see comment there for breakdown)
     const thought = Content.idleThoughts();
     const ivTier = State.innerVoiceTier();
     const voice = ivTier ? Content.innerVoiceThoughts() : null;
-    const sensory = Senses.sense(); // RNG consumption matches handleIdle
+    const sensory = Senses.sense(); // same N×4 or 0 RNG as handleIdle
     State.advanceTime(Timeline.randomInt(2, 5));
     return { thought, voice, ivTier, sensory };
   }
@@ -1268,7 +1268,8 @@ export function createGame(ctx) {
     // RNG order must match replayIdle() exactly:
     // 1. idleThoughts() — always (1 RNG)
     // 2. innerVoiceThoughts() — only when ivTier !== null (1 RNG, conditional)
-    // 3. Senses.sense() — conditional on pool.length > 1 (0 or 1 RNG)
+    // 3. Senses.sense() — N×4 RNG if observations available (N=2 calm/flat/dissociated,
+    //                     N=3 anxious/overwhelmed); 0 if no sources surface
     // 4. advanceTime(randomInt(2,5)) — always (1 RNG)
     const thought = Content.idleThoughts();
     const ivTier = State.innerVoiceTier();

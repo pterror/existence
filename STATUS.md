@@ -402,7 +402,7 @@ This module is mid-transition to a procedural prose generation architecture. Two
 
 ---
 
-**Fragment system (current, wired to `sense()`):**
+**Fragment system (legacy, superseded by observation pipeline):**
 
 **Fragment spec:** Each fragment carries: `id`, `content` (authored text), `grammatical_type` (`main | participle | absolute | adverbial | fragment`), `rhetorical_tag`, `channels` (which senses), `attention_order` (`involuntary_body | deliberate_visual | ambient`), optional `locations`/`areas` filter, `trigger_conditions(State)`, and `nt_weight(State)`.
 
@@ -425,9 +425,9 @@ This module is mid-transition to a procedural prose generation architecture. Two
 
 ---
 
-**Observation source system (new, not yet wired to `sense()`):**
+**Observation source system (wired to `sense()` via realization engine):**
 
-Foundation of the procedural prose pipeline. Sources are things in the world (or body) with observable properties — not authored text. The realization engine (not yet built) will turn observations into sentences.
+Foundation of the procedural prose pipeline. Sources are things in the world (or body) with observable properties — not authored text. The realization engine turns observations into sentences.
 
 **`ObservationSource` spec:** `id`, optional `areas`/`locations` filter, `channels`, `available(State, World)` gate, `salience(State)` (0–1 attention weight), `properties` map of channel→{key→fn(State)}.
 
@@ -462,7 +462,7 @@ Pure module that turns `Observation[]` + NT hint → prose string. No game impor
 
 **Tests:** 32 unit tests in `tests/realization.test.js`. Cover null/empty, all five architectures, multi-observation passages, polysyndeton, fixed RNG consumption, NT variation, unknown hint fallback. All passing.
 
-**Not yet wired to game loop** — `sense()` still uses the fragment system. Wiring comes next.
+**Wired to game loop** — `sense()` now delegates to `getObservations() → realize()`. Fragment system remains as legacy (fragment library + `composeFragments` still present); observation pipeline is the live path.
 
 ### Sleep Prose
 Two-phase system: falling-asleep (how sleep came) + waking-up (the gradient back to consciousness). Falling-asleep branches on pre-sleep energy, stress, quality, and duration, with NT shading: adenosine→crash depth, GABA→can't-settle anxiety, NE→hyper-alertness, serotonin→warmth of surrender, melatonin→onset delay (~22 variants). Waking-up branches on post-sleep energy, sleep quality, alarm vs natural wake, time of day (dark/late/morning), mood, sleep debt, and sleep inertia, with NT shading: adenosine→sleep inertia, serotonin→dread-vs-ease, NE→sharp edges, GABA→night dread, debt→cumulative exhaustion (~44 variants). Composed together as a single passage. No numeric hour counts — all qualitative.
