@@ -863,6 +863,248 @@ const LEX = {
       { text: 'someone talking nearby', w: nt => nt._voices_intelligible && nt.ne > 0.6 ? 1.5 : 0.2 },
     ],
   },
+
+  // === SMELL ===
+  //
+  // Smell prose leans heavily on body_subjects + body_predicates (nose registers before
+  // mind names) and bare fragments. Short declarative works for outdoor smells that
+  // arrive as weather-events. Escapes suit petrichor (it was just rain).
+
+  stale_air: {
+    subjects: [
+      'the air',
+      { text: 'something in the air', w: nt => nt._smell_intense ? 1.5 : 0.5 },
+      { text: 'the room', w: 0.5 },
+      { text: 'something', w: nt => nt.aden > 0.5 ? 1.0 : 0.3 },
+    ],
+    predicates: [
+      "hasn't moved",
+      { text: 'has been sitting', w: nt => nt._smell_intense ? 1.5 : 0.5 },
+      { text: 'is close', w: nt => nt.gaba < 0.4 ? 1.0 : 0.4 },
+      { text: "hasn't changed", w: nt => nt.serotonin < 0.4 ? 1.0 : 0.2 },
+      { text: 'is stuffy', w: nt => nt._smell_intense ? 1.2 : 0.2 },
+    ],
+    modifiers: [
+      { text: null, w: 2.5 },
+      { text: 'still', w: nt => nt.aden > 0.5 ? 0.7 : 0.2 },
+      { text: 'a little', w: nt => !nt._smell_intense ? 0.8 : 0 },
+    ],
+    body_subjects: [
+      { text: 'something', w: 1.2 },
+      { text: 'the air', w: 0.7 },
+      { text: 'the nose', w: 0.5 },
+    ],
+    body_predicates: [
+      { text: 'registers the closed-in quality', w: 1.0 },
+      { text: 'recognizes this particular staleness', w: nt => nt.aden > 0.5 ? 1.2 : 0.4 },
+      { text: "hasn't moved in here", w: nt => nt._smell_intense ? 1.5 : 0.4 },
+      { text: 'is the same as yesterday', w: nt => nt.serotonin < 0.4 ? 1.0 : 0.3 },
+      { text: 'has a particular density', w: nt => nt._smell_intense ? 1.0 : 0.2 },
+    ],
+    fragments: [
+      'stale',
+      { text: 'close', w: nt => nt.gaba < 0.4 ? 1.5 : 0.5 },
+      { text: 'the same air', w: nt => nt.serotonin < 0.4 ? 1.0 : 0.2 },
+      { text: 'stuffy', w: nt => nt._smell_intense ? 1.2 : 0.2 },
+      { text: 'the room', w: 0.3 },
+    ],
+  },
+
+  dishes_smell: {
+    subjects: [
+      'something in the kitchen',
+      { text: 'something', w: nt => nt.aden > 0.5 ? 1.0 : 0.4 },
+      { text: 'the kitchen', w: 0.7 },
+      { text: 'the sink', w: 0.5 },
+    ],
+    predicates: [
+      'is there',
+      { text: 'has been there', w: nt => nt._smell_intense ? 1.5 : 0.4 },
+      { text: 'is specific', w: nt => nt._smell_intense ? 1.2 : 0.3 },
+      { text: "won't leave", w: nt => nt._smell_intense ? 1.0 : 0.2 },
+      { text: 'has settled in', w: nt => nt._smell_intense ? 0.8 : 0.2 },
+    ],
+    modifiers: [
+      { text: null, w: 2.5 },
+      { text: 'sour', w: nt => nt._smell_intense ? 0.8 : 0.15 },
+    ],
+    body_subjects: [
+      { text: 'something', w: 1.5 },
+      { text: 'it', w: nt => nt.aden > 0.5 ? 1.0 : 0.3 },
+      { text: 'the kitchen', w: 0.6 },
+    ],
+    body_predicates: [
+      { text: 'reaches before you register it', w: 1.2 },
+      { text: 'lands', w: 0.8 },
+      { text: 'is specific in the bad way', w: nt => nt._smell_intense ? 1.5 : 0.3 },
+      { text: "doesn't leave", w: nt => nt._smell_intense ? 1.0 : 0.2 },
+      { text: 'registers', w: nt => nt.aden > 0.5 ? 1.0 : 0.5 },
+    ],
+    fragments: [
+      'the dishes',
+      { text: 'the sink', w: 0.7 },
+      { text: 'something sour', w: nt => nt._smell_intense ? 1.0 : 0.1 },
+      { text: 'something in the kitchen', w: 0.7 },
+    ],
+  },
+
+  petrichor: {
+    subjects: [
+      'the smell of rain',
+      { text: 'rain', w: 0.7 },
+      { text: 'something in the air', w: nt => nt.aden > 0.5 ? 1.0 : 0.3 },
+      { text: 'petrichor', w: 0.3 },
+    ],
+    predicates: [
+      'is everywhere',
+      { text: 'has come through', w: 0.8 },
+      { text: 'rises from the pavement', w: 0.7 },
+      { text: 'fills everything', w: nt => nt.gaba > 0.5 ? 0.7 : 0.2 },
+      { text: 'is in everything now', w: nt => nt.aden > 0.5 ? 1.0 : 0.3 },
+    ],
+    modifiers: [
+      { text: null, w: 1.5 },
+      { text: 'the specific smell of rain on concrete', w: 0.8 },
+      { text: 'familiar', w: nt => nt.serotonin > 0.5 ? 0.8 : 0.2 },
+    ],
+    escapes: [
+      { text: 'it was just rain', w: 1.0 },
+      { text: 'it had been raining', w: nt => nt.aden > 0.5 ? 1.0 : 0.4 },
+      { text: 'rain had that smell', w: 0.6 },
+    ],
+    fragments: [
+      'the smell of rain',
+      { text: 'petrichor', w: 0.4 },
+      { text: 'rain', w: 0.7 },
+      { text: 'the wet', w: 0.5 },
+    ],
+  },
+
+  cold_air_smell: {
+    subjects: [
+      'the air',
+      { text: 'cold air', w: nt => nt._smell_sharp ? 1.5 : 0.8 },
+      { text: 'something sharp', w: nt => nt._smell_sharp ? 1.2 : 0.3 },
+      { text: 'something clean', w: nt => !nt._smell_sharp ? 1.0 : 0.2 },
+    ],
+    predicates: [
+      'is clean',
+      { text: 'is sharp', w: nt => nt._smell_sharp ? 2.0 : 0.2 },
+      { text: 'is almost nothing', w: nt => nt.aden > 0.5 ? 0.8 : 0.3 },
+      { text: 'is empty in a specific way', w: nt => nt.aden > 0.5 ? 0.7 : 0.2 },
+      { text: 'is cold', w: 0.7 },
+    ],
+    modifiers: [
+      { text: null, w: 2.5 },
+    ],
+    body_subjects: [
+      { text: 'cold', w: 1.5 },
+      { text: 'something sharp', w: nt => nt._smell_sharp ? 1.5 : 0.3 },
+      { text: 'the air', w: 0.5 },
+    ],
+    body_predicates: [
+      { text: 'finds the nose first', w: 1.0 },
+      { text: 'registers before the cold does', w: nt => nt._smell_sharp ? 1.2 : 0.5 },
+      { text: 'is clean in the back of the throat', w: 1.0 },
+      { text: 'hits sharp', w: nt => nt._smell_sharp ? 1.5 : 0.3 },
+    ],
+    fragments: [
+      'cold air',
+      { text: 'sharp', w: nt => nt._smell_sharp ? 1.5 : 0.3 },
+      { text: 'clean', w: nt => !nt._smell_sharp ? 1.0 : 0.2 },
+      { text: 'the cold', w: 0.5 },
+    ],
+  },
+
+  seasonal_outside_smell: {
+    subjects: [
+      { text: 'something', w: 1.5 },
+      { text: 'the smell of cut grass', w: nt => nt._smell_cut_grass ? 1.8 : 0 },
+      { text: 'something in the air', w: nt => nt.aden > 0.5 ? 0.6 : 0.3 },
+      { text: 'something blooming', w: nt => nt._smell_bloom ? 1.5 : 0 },
+      { text: 'the smell of leaves', w: nt => nt._smell_leaf_decay ? 1.5 : 0 },
+      { text: 'a smell', w: 0.5 },
+    ],
+    predicates: [
+      { text: 'is out', w: nt => nt._smell_cut_grass ? 1.5 : 0.3 },
+      { text: 'carries', w: 0.8 },
+      { text: 'is turning', w: nt => nt._smell_leaf_decay ? 1.5 : 0.2 },
+      { text: 'is decaying somewhere', w: nt => nt._smell_leaf_decay ? 1.2 : 0 },
+      { text: 'is coming through', w: nt => nt._smell_bloom ? 1.0 : 0.3 },
+      { text: 'comes through', w: 0.5 },
+    ],
+    modifiers: [
+      { text: null, w: 2.0 },
+      { text: 'everywhere', w: nt => nt._smell_cut_grass ? 0.8 : 0.1 },
+      { text: 'nearby', w: nt => nt._smell_bloom ? 0.7 : 0.1 },
+    ],
+    body_subjects: [
+      { text: 'something', w: 1.0 },
+      { text: 'the air', w: 0.6 },
+      { text: 'autumn', w: nt => nt._smell_leaf_decay ? 1.5 : 0 },
+      { text: 'spring', w: nt => nt._smell_bloom ? 1.2 : 0 },
+      { text: 'summer', w: nt => nt._smell_cut_grass ? 1.2 : 0 },
+    ],
+    body_predicates: [
+      { text: 'is in the air now', w: 1.0 },
+      { text: 'is here already', w: nt => nt.aden > 0.5 ? 1.0 : 0.4 },
+      { text: 'registers', w: 0.7 },
+      { text: 'has arrived', w: nt => nt._smell_bloom || nt._smell_cut_grass ? 1.0 : 0.2 },
+      { text: 'is going', w: nt => nt._smell_leaf_decay ? 1.2 : 0.2 },
+    ],
+    escapes: [
+      { text: 'it was autumn', w: nt => nt._smell_leaf_decay ? 2.0 : 0 },
+      { text: 'it was summer', w: nt => nt._smell_cut_grass ? 2.0 : 0 },
+      { text: 'spring was here', w: nt => nt._smell_bloom ? 2.0 : 0 },
+      { text: 'it was just the air', w: 0.5 },
+    ],
+    fragments: [
+      { text: 'cut grass', w: nt => nt._smell_cut_grass ? 2.5 : 0 },
+      { text: 'leaves', w: nt => nt._smell_leaf_decay ? 2.0 : 0 },
+      { text: 'something blooming', w: nt => nt._smell_bloom ? 2.0 : 0 },
+      { text: 'autumn', w: nt => nt._smell_leaf_decay ? 1.5 : 0 },
+      { text: 'spring', w: nt => nt._smell_bloom ? 1.2 : 0 },
+      { text: 'summer', w: nt => nt._smell_cut_grass ? 1.2 : 0 },
+      { text: 'the air', w: 0.3 },
+    ],
+  },
+
+  office_ambient_smell: {
+    subjects: [
+      'the office',
+      { text: 'something about the building', w: nt => nt.aden > 0.5 ? 1.2 : 0.4 },
+      { text: 'the carpet', w: 0.6 },
+      { text: 'something', w: nt => nt.aden > 0.5 ? 1.0 : 0.3 },
+    ],
+    predicates: [
+      'smells like an office',
+      { text: 'has a particular smell', w: nt => nt.aden > 0.5 ? 1.0 : 0.4 },
+      { text: 'is the same as every office', w: nt => nt.serotonin < 0.4 ? 1.2 : 0.3 },
+      { text: 'carries that smell', w: 0.6 },
+      { text: 'is unmistakably an office', w: 0.5 },
+    ],
+    modifiers: [
+      { text: null, w: 3.0 },
+      { text: 'carpet and plastic and something else', w: 0.8 },
+    ],
+    body_subjects: [
+      { text: 'something', w: 1.0 },
+      { text: 'the building', w: 0.6 },
+      { text: 'offices', w: 0.5 },
+    ],
+    body_predicates: [
+      { text: 'registers first', w: 1.0 },
+      { text: 'is familiar in the wrong way', w: nt => nt.serotonin < 0.4 ? 1.5 : 0.3 },
+      { text: 'has always smelled like this', w: nt => nt.aden > 0.5 ? 1.0 : 0.4 },
+      { text: 'is carpet, plastic, paper', w: 0.8 },
+    ],
+    fragments: [
+      { text: 'the office', w: 1.0 },
+      { text: 'carpet', w: 0.8 },
+      { text: 'an office', w: nt => nt.serotonin < 0.4 ? 1.0 : 0.4 },
+      { text: 'something', w: nt => nt.aden > 0.5 ? 0.8 : 0.2 },
+    ],
+  },
 };
 
 // --- Observation property augmentation ---
@@ -897,6 +1139,21 @@ function augmentNT(base, obs) {
     a._condition_early_light = cond === 'early_light';
     a._condition_dimming     = cond === 'dimming';
     a._light_flicker         = sight.flicker === true;
+  }
+
+  const smell = obs.properties.smell;
+  if (smell) {
+    const q = smell.quality;
+    a._smell_stale      = q === 'stale';
+    a._smell_unwashed   = q === 'unwashed';
+    a._smell_petrichor  = q === 'petrichor';
+    a._smell_cold_air   = q === 'cold_air';
+    a._smell_cut_grass  = q === 'cut_grass';
+    a._smell_leaf_decay = q === 'leaf_decay';
+    a._smell_bloom      = q === 'bloom';
+    a._smell_office     = q === 'office';
+    a._smell_intense    = smell.intensity === 'thick' || smell.intensity === 'heavy';
+    a._smell_sharp      = smell.sharpness === 'sharp';
   }
 
   const i = obs.properties.interoception;

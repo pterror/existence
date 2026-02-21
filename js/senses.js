@@ -1071,6 +1071,142 @@ export function createSenses(ctx) {
         },
       },
     },
+
+    // === INDOOR: SMELL ===
+    //
+    // Approximation debt: smell habituates faster than other senses (~10 min real-life
+    // vs the 40-min τ used here). The existing habituationFactor() applies uniformly.
+    // Smell sources will linger longer than realistic between arrivals. Correct fix:
+    // per-channel or per-source habituation τ. Tracked in TODO.
+
+    {
+      id: 'stale_air',
+      areas: ['apartment'],
+      channels: ['smell'],
+      available: () => true,
+      salience: s => {
+        const aden = s.get('adenosine');
+        const daylight = s.get('daylight_exposure');
+        // More present when closed in all day, or too tired to open a window
+        const tirednessBoost = aden > 55 ? State.lerp01(aden, 55, 85) * 0.15 : 0;
+        const indoorBoost    = daylight < 30 ? State.lerp01(daylight, 30, 0) * 0.12 : 0;
+        return 0.10 + tirednessBoost + indoorBoost;
+      },
+      properties: {
+        smell: {
+          quality: () => 'stale',
+          intensity: s => {
+            const daylight = s.get('daylight_exposure');
+            if (daylight < 10) return 'thick';
+            if (daylight < 40) return 'present';
+            return 'faint';
+          },
+        },
+      },
+    },
+
+    {
+      id: 'dishes_smell',
+      areas: ['apartment'],
+      channels: ['smell'],
+      available: s => {
+        const tier = s.messTier();
+        return tier === 'messy' || tier === 'squalid';
+      },
+      salience: s => {
+        const tier = s.messTier();
+        if (tier === 'squalid') return 0.45;
+        if (tier === 'messy')   return 0.28;
+        return 0;
+      },
+      properties: {
+        smell: {
+          quality: () => 'unwashed',
+          intensity: s => s.messTier() === 'squalid' ? 'heavy' : 'present',
+        },
+      },
+    },
+
+    // === OUTDOOR: SMELL ===
+
+    {
+      id: 'petrichor',
+      areas: ['outside'],
+      channels: ['smell'],
+      available: s => s.get('rain') === true,
+      // Noticeable; change spike on rain-start elevates it further
+      salience: () => 0.48,
+      properties: {
+        smell: {
+          quality: () => 'petrichor',
+        },
+      },
+    },
+
+    {
+      id: 'cold_air_smell',
+      areas: ['outside'],
+      channels: ['smell'],
+      // Very cold air has a distinct quality — metallic, clean, almost nothing
+      available: s => s.get('temperature') < 4,
+      salience: s => State.lerp01(s.get('temperature'), 4, -12) * 0.35,
+      properties: {
+        smell: {
+          quality: () => 'cold_air',
+          sharpness: s => s.get('temperature') < -5 ? 'sharp' : 'clean',
+        },
+      },
+    },
+
+    {
+      id: 'seasonal_outside_smell',
+      areas: ['outside'],
+      channels: ['smell'],
+      available: s => {
+        const season = s.season();
+        const zone   = s.climateZone();
+        if (zone !== 'temperate') return false;
+        return season === 'summer' || season === 'autumn' || season === 'spring';
+      },
+      salience: s => {
+        const season = s.season();
+        if (season === 'autumn') return 0.38;  // leaf decay is strongest
+        if (season === 'summer') return 0.28;  // cut grass
+        if (season === 'spring') return 0.22;  // bloom, lighter
+        return 0;
+      },
+      properties: {
+        smell: {
+          quality: s => {
+            const season = s.season();
+            if (season === 'summer') return 'cut_grass';
+            if (season === 'autumn') return 'leaf_decay';
+            return 'bloom';
+          },
+        },
+      },
+    },
+
+    // === WORK: SMELL ===
+
+    {
+      id: 'office_ambient_smell',
+      areas: ['work'],
+      channels: ['smell'],
+      available: () => true,
+      salience: s => {
+        const gaba = s.get('gaba');
+        const aden = s.get('adenosine');
+        // Mostly screened; surfaces when perceptual filtering is degraded or dissociated
+        if (gaba < 38 || aden > 72) return 0.28;
+        return 0.12;
+      },
+      properties: {
+        smell: {
+          quality: () => 'office',
+        },
+      },
+    },
   ];
 
   // --- Observation functions ---
