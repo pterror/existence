@@ -360,6 +360,211 @@ Sentence-to-sentence movement and rhythm across a passage:
 
 ---
 
+## Passage architecture
+
+The sentence is not the unit of design — the **passage** is.
+
+Currently: N observations → N sentences, joined. Each sentence is independently realized from one observation. The passage is an accumulation, not a shape.
+
+Better: pick a passage shape first, assign observations to slots in that shape, realize each slot with its own constraints.
+
+### Passage shapes
+
+A small authored library of structural patterns. Each shape has named slots. Shape selection is weighted by hint (NT state) and by observation composition — which channels are present, how many observations, whether interoceptive signals dominate or environment does.
+
+Rough vocabulary (to be refined against empirical data):
+
+```
+accumulation      [main] [secondary] [trailing fragment]
+contrast_pair     [foreground] + though/but/against + [background]
+zoom_out          [body] → [room] → [outside]
+fragment_cascade  [fragment]. [fragment]. [fragment].
+focus_hold        [main sentence] + [escape clause]
+body_then_world   [interoception] [environment]
+world_then_body   [environment] [interoception]
+```
+
+~8–10 patterns likely covers most useful prose moves at this layer. This vocabulary should be derived empirically rather than invented — see notes below on sampling approach.
+
+### Multi-observation sentences
+
+Some shapes have compound slots — two observations realize into one sentence with a connective. The connective is not chosen at random; it's selected by the relationship between the two source channels:
+
+- Sound + sound → coordination or contrast ("and", "while", "then")
+- Environment + interoception → juxtaposition or causation ("and your chest was doing the thing where")
+- Two interoceptive signals → accumulation
+- Environment + environment, different valence → contrast ("though", "but", "against")
+
+Example constructions:
+```
+"Against [obs1.fragment], [obs2.subject] [obs2.predicate]."
+"[obs1] while [obs2]."
+"First [obs1.fragment], then [obs2.fragment]."
+```
+
+### Anaphora
+
+A one-sentence entity buffer. If the previous sentence established an entity, the next sentence can use a pronoun or abbreviated reference. "The fridge hums. It had been going the whole time." Small buffer, cleared per passage. Enables sentence-to-sentence movement rather than N isolated declarations.
+
+### What this costs
+
+The fixed `4 RNG calls per observation` budget breaks at the passage level. Needs passage-level RNG accounting — a fixed budget per passage rather than per observation, or a variable budget with known structure.
+
+Authoring load increases: shapes need slot constraints, connective selection needs semantic tagging of source channels (interoceptive vs. environmental, sound vs. thermal vs. smell, etc.).
+
+### Deriving the shape vocabulary empirically
+
+Rather than inventing passage shapes, the vocabulary should be reverse-engineered from prose written without structural constraints — the same approach used for the reference outputs in this document. Sample widely across states and situations, then identify recurring structural patterns in the wild. The shape library is a codification of what good prose actually does, not a design from first principles.
+
+---
+
+## Observed structures — empirical sampling
+
+74 passages generated across 30 situations and states without structural guidance. These are the structures that appeared naturally.
+
+---
+
+### Appositive folding
+
+Two observations collapsed into one sentence: the second becomes an NP appositive on the first.
+
+> "The fridge cycled on in the other room, a sound with weight."
+> "She stretched and something in your spine answered with a soft pop, and the pop felt like a sentence completing itself."
+
+Grammar: `[full sentence about obs1], [NP characterizing obs1 in terms of obs2].`
+
+**Implementation:** LEX entries need an `appositive_np` pool alongside `subjects` and `predicates`. Architecture `buildAppositiveExpansion(obs1, obs2)` renders obs1 as a sentence and obs2 as a trailing NP. Requires two observations aware of each other — a two-slot compound sentence.
+
+---
+
+### Reframe dash
+
+The first characterization was wrong, or incomplete. The em-dash delivers the more precise one.
+
+> "Not shaking — vibrating, like a tuning fork struck too many times."
+> "The alarm cut through something — a sound like a seam ripping in the wrong direction."
+
+Grammar: `Not [rough description] — [precise description], [elaboration].` or `[S V something] — [what the something was].`
+
+**Implementation:** LEX entries need `(rough, precise)` description pairs. Architecture `buildReframeDash(obs)`: `Not [rough] — [precise].` NT-weighted toward high-NE and heightened states (sharpness of perception that corrects its first take). Single-observation architecture, no cross-obs complexity.
+
+---
+
+### Sensation as character
+
+The sensation doesn't happen to the body — it has agency, patience, location, a relationship to other things.
+
+> "The tiredness lived in a different room than the sleep."
+> "The headache had patience. The headhead had all day."
+> "The cold was inside her hands and the chain of insulation stopped there."
+
+Grammar: `[sensation] [verb implying agency/personhood] [location or relationship].`
+
+**Implementation:** Interoceptive LEX entries get a `character_predicates` pool with verbs that imply agency: "lived in", "had patience", "waited at", "arrived before", "moved with her". Distinct from `body_subjects` (which replaces the grammatical subject with a body part) — this architecture keeps sensation as subject and gives it character-like behavior. NT-weighted toward high adenosine (sensation more solid than self) and flat/depressed states.
+
+---
+
+### Tautological flatness
+
+The description contains no information. The thing is described as itself.
+
+> "The sheets smelled like the sheets."
+> "The clock said a time."
+> "The sandwich tasted like the inside of the bag it had been in."
+
+The first two are reflexive (refers back to the thing). The third is slightly different — not nothing, but emptied of pleasure. Both signal that the character is not extracting meaning or quality from their environment.
+
+**Implementation:** NT-weighted option within predicates/modifiers: at low serotonin + low dopamine, weight reflexive or deflated forms. `{ text: 'like [self_ref]', w: (nt) => nt.serotonin < 0.3 && nt.dopamine < 0.4 ? 2.0 : 0 }`. Requires LEX entries to know their own `self_ref` (what to call the thing in a reflexive construction). Or a dedicated `buildFlatTautology(obs)` architecture available only under flat/depressed hint.
+
+---
+
+### Terminal sense shift
+
+A list of fragments where the final item jumps to a different sensory channel.
+
+> "The bus stop sign, the curb, the smell of someone's heat coming through a vent."
+> "Power lines, rooftops, the flat sides of buildings with windows that showed ceilings."
+
+The list moves along the visual field or a spatial sweep, then closes with an olfactory or interoceptive surprise. The shift of channel at the end does something the same-channel list can't.
+
+**Implementation:** Multi-observation list architecture `buildTerminalList(obs[])`. Requires: at least 3 observations, the last one from a different channel than the preceding items. Outputs: `[frag], [frag], [frag-different-channel].` Needs channel tagging on observation sources (already implied by the senses.js structure). Available under flat/dissociated hints.
+
+---
+
+### Explicit arrival sequence
+
+Sensations named in the order they actually land. The body's sequencing made visible.
+
+> "Temperature first — cooler than the apartment, a contrast that landed on the forearms and the backs of the hands. Then the sound of the world having continued without you in it. Then the specific embarrassment of blinking in daylight after eight hours of ceiling."
+> "Sounds came in one at a time: a bird, traffic, the hum of the fridge. None of them were urgent."
+
+**Implementation:** Passage-level shape `arrivalSequence`. Requires: multiple observations from different channels with a known arrival order. Channel ordering by physiology: thermal/touch arrives before sound before visual before cognitive interpretation. Grammar: `[obs1]. Then [obs2]. Then [obs3].` or `[Channel] first — [obs1]. Then [obs2].` Available under waking, arrival-at-location, transition hints.
+
+---
+
+### Conditional inversion
+
+A qualification that undermines or inverts the initial observation.
+
+> "Her hands were shaking, but only when she held them still."
+> "The pillow had the right temperature."  ← (this is a positive inversion — the evaluation surprises by being right)
+
+Grammar: `[declaration], but only when [condition that subverts it].`
+
+**Implementation:** LEX entries need authored `inversion_conditions` per observation type. Architecture `buildConditionalInversion(obs)`: `[declaration], but only when [condition].` This is the most authoring-intensive — each inversion is specific to its source. High value when available; not generalizable by template alone.
+
+---
+
+### Negative definition
+
+Defines by what the thing isn't, then lands on what it is.
+
+> "a sound that isn't silence but acts like it"
+> "not a click, not a change, just a gradual renegotiation of which surfaces were yours"
+> "different from hungry, different from tired"
+
+Grammar: `not [A], [modifier for A]; not [B]; just [C].` or `[X] that isn't [Y] but [does Y's job].`
+
+**Implementation:** Modifier pools can include `{ text: "that isn't silence but acts like it", w: ... }` forms. More generally: a `not_X_but_Y` modifier pattern available in predicates/modifiers, NT-weighted toward dissociated and adenosine-heavy states (where the sensation is close but slightly wrong, hard to name directly).
+
+---
+
+### What these require from LEX entries
+
+Current LEX structure: `subjects`, `predicates`, `modifiers`, `fragments`, `body_subjects`, `body_predicates`, `ambiguity_alts`, `escapes`.
+
+New pools the above structures imply:
+- `appositive_np` — NP form for use as appositive in compound sentences
+- `rough_description` + `precise_description` — paired for reframe-dash
+- `character_predicates` — agency-granting predicates for sensation-as-character
+- `self_ref` — how to name this thing in a reflexive construction
+- `inversion_conditions` — authored `but only when [X]` per source
+
+Not all sources need all pools. The engine falls back gracefully — if a source doesn't have `appositive_np`, it can't participate in appositive-fold compound sentences.
+
+### What these require from the passage-level
+
+Some structures are passage-level shapes (span multiple observations), some are sentence-level architectures (one observation, different construction), some are NT-weighted options within existing pools.
+
+**Sentence-level architectures** (one obs, adds to current `buildX` set):
+- `buildReframeDash` — reframe via em-dash
+- `buildSensationCharacter` — sensation with agency predicates
+- `buildFlatTautology` — reflexive under flat/depressed hint
+- `buildConditionalInversion` — declaration + undermining condition
+
+**Multi-observation compound sentences** (two obs → one sentence):
+- `buildAppositiveExpansion` — obs1 + obs2 as appositive NP
+
+**Passage-level shapes** (multiple obs → shaped passage):
+- `buildTerminalList` — 3+ obs, last from different channel
+- `buildArrivalSequence` — obs ordered by channel arrival physiology
+
+**NT-weighted additions to existing pools:**
+- Negative definition forms (`not X but acts like it`)
+- Tautological forms under flat/depressed
+
+---
+
 ## What the system does NOT do
 
 - Call an LLM at runtime
