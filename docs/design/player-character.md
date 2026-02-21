@@ -319,6 +319,45 @@ is a different world entirely — something the simulation doesn't currently mod
 anywhere. Their partial knowledge of the real world isn't amnesia or alter-boundary;
 it's ontological. They're oriented toward a world that isn't here.
 
+*Parasocial relationships* — not a presence in your head but an attachment to
+someone who doesn't know you exist. The relationship is real on one side and
+absent on the other. You accumulate knowledge of them, emotional history with
+them, a felt sense of knowing them — none of it reciprocated or even registered.
+
+Structurally distinct from the other entries here: no headmate, no internal
+presence, no blurring of self. But emotionally real and simulation-relevant.
+
+The game partially models the relevant machinery already — contact timers, guilt
+accumulation, serotonin target influence from social connection. A parasocial
+relationship uses similar emotional mechanics but the "contact" is entirely
+mediated and one-directional. No messages arrive. No guilt accumulates from their
+side. The absence doesn't compound the same way because there's no expectation of
+reciprocation to violate — but the attachment affects NT state regardless.
+
+Specific things it produces that differ from real friendship:
+
+*Intimacy without exposure* — you know a great deal about them, they know nothing
+about you. No vulnerability on your side, no risk of rejection. Part of the appeal;
+part of what makes it structurally different from friendship even when it feels similar.
+
+*Grief at asymmetry* — moments where the one-sidedness becomes impossible to
+ignore. They mention their actual friends, their actual relationships. The gap
+between felt closeness and structural reality surfaces briefly and is then
+suppressed or rationalised.
+
+*Community as partial substitute* — fans of the same person, same creator, same
+character. Real relationships mediated through the shared parasocial object.
+The community can be genuine; the centre of it is still one-directional.
+
+*Loss without acknowledged relationship* — if the person dies, retires, does
+something that breaks the attachment. Grief that has no social legitimacy because
+the relationship wasn't recognised as real. Nowhere to put it.
+
+Simulation note: parasocial attachment probably buffers against isolation without
+fully filling the social need — producing a specific low-grade deficit that's
+hard to name. Social score partially maintained, connection quality not. The gap
+between those two things is where the feeling lives.
+
 *Roleplay immersion and character bleed* — adjacent to writer's-character headmates
 but the mechanism runs in the opposite direction. A writer authors a character who
 develops independent presence (character comes toward the writer). A roleplayer
