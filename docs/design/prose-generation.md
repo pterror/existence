@@ -255,9 +255,11 @@ The rhythmic texture of prose — independent of content. These are styles that 
 - **Deflating**: sentences that form correctly and then end somewhere lower than they started. The final clause undercuts. Flat mood, depression.
 - **Looping**: the same observation returns, or a sentence completes and immediately starts again nearby. Rumination, intrusive thought, delirium.
 
-**Momentum** is a separate dimension from rhythm — it describes direction rather than texture. Prose with momentum is going somewhere: each sentence not just following from the previous but propelling toward the next. Something is building, resolving, or arriving. Prose without momentum sits — observations accumulate without direction.
+Two further dimensions, orthogonal to rhythm and to each other:
 
-Momentum can coexist with any rhythm. Staccato can have momentum (each short sentence a step). Continuous can have momentum (the stream is headed somewhere) or not (it meanders). Flat mood and sick-muddy characteristically have low momentum — things are noted but they aren't going anywhere. Anxious prose often has momentum in the wrong direction: racing toward something bad.
+**Momentum**: force and mass. How much the prose keeps moving, how hard it is to stop. High momentum means the sentences pile into each other — not necessarily going anywhere, just continuing with weight. Sick-muddy has high momentum: the thoughts keep coming, heavy, by inertia. Flat mood has low momentum: things barely move. Polysyndeton flooding has high momentum as accumulation.
+
+**Direction**: whether the prose is going somewhere. Whether something is building, resolving, or arriving. Distinct from momentum — sick-muddy is high momentum, low direction (keeps going, but nowhere in particular). Anxious can be high momentum and high direction (racing toward something bad). Deep calm often has high direction (observations zoom in, reach toward meaning). Flat: low direction, observations sit without aim.
 
 ### State → prose style mapping
 
