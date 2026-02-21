@@ -53,6 +53,12 @@ Twine hypertext, fragmentary prose, dissociation as form. Formally very differen
 but shares the instinct that psychological state can be rendered through prose
 texture rather than UI.
 
+**With Those We Love Alive** (Porpentine, 2014)
+The game instructs you to draw sigils on your own skin as ritual markers —
+body as literal interface. More developed than Howling Dogs in terms of using
+prose texture to render psychological dissociation. The most formally interesting
+of her work for existence's purposes. Accompanied by a score by Brenda Neotenomie.
+
 **80 Days** (Inkle Studios, 2014)
 High prose quality in a branching narrative, consequences that accumulate. The
 writing is the benchmark for what good choice-based prose sounds like at scale.
