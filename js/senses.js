@@ -1094,12 +1094,19 @@ export function createSenses(ctx) {
       },
       properties: {
         smell: {
-          quality: () => 'stale',
+          // intensity: how much air movement the room has had. Rises with time spent inside.
           intensity: s => {
             const daylight = s.get('daylight_exposure');
-            if (daylight < 10) return 'thick';
-            if (daylight < 40) return 'present';
-            return 'faint';
+            if (daylight < 10) return 0.80;
+            if (daylight < 40) return 0.45;
+            return 0.20;
+          },
+          // hedonics: mildly unpleasant, worsens with intensity
+          hedonics: s => {
+            const daylight = s.get('daylight_exposure');
+            if (daylight < 10) return 0.20;
+            if (daylight < 40) return 0.32;
+            return 0.42;
           },
         },
       },
@@ -1121,8 +1128,8 @@ export function createSenses(ctx) {
       },
       properties: {
         smell: {
-          quality: () => 'unwashed',
-          intensity: s => s.messTier() === 'squalid' ? 'heavy' : 'present',
+          intensity: s => s.messTier() === 'squalid' ? 0.80 : 0.50,
+          hedonics:  s => s.messTier() === 'squalid' ? 0.10 : 0.22,
         },
       },
     },
@@ -1138,7 +1145,8 @@ export function createSenses(ctx) {
       salience: () => 0.48,
       properties: {
         smell: {
-          quality: () => 'petrichor',
+          intensity: () => 0.65,
+          hedonics:  () => 0.75,  // broadly pleasant; sentiment modulation deferred
         },
       },
     },
@@ -1152,8 +1160,10 @@ export function createSenses(ctx) {
       salience: s => State.lerp01(s.get('temperature'), 4, -12) * 0.35,
       properties: {
         smell: {
-          quality: () => 'cold_air',
-          sharpness: s => s.get('temperature') < -5 ? 'sharp' : 'clean',
+          intensity: s => State.lerp01(s.get('temperature'), 4, -12),
+          hedonics:  () => 0.55,  // neutral; clean rather than pleasant or unpleasant
+          // Below −5°C the clean emptiness has a sharp edge
+          sharp: s => s.get('temperature') < -5,
         },
       },
     },
@@ -1177,11 +1187,24 @@ export function createSenses(ctx) {
       },
       properties: {
         smell: {
-          quality: s => {
+          // season_type is genuinely needed — one source, three distinct smells
+          season_type: s => {
             const season = s.season();
             if (season === 'summer') return 'cut_grass';
             if (season === 'autumn') return 'leaf_decay';
             return 'bloom';
+          },
+          intensity: s => {
+            const season = s.season();
+            if (season === 'autumn') return 0.70;
+            if (season === 'summer') return 0.55;
+            return 0.40;
+          },
+          hedonics: s => {
+            const season = s.season();
+            if (season === 'autumn') return 0.48;  // earthy, neutral
+            if (season === 'summer') return 0.70;  // pleasant, grass
+            return 0.65;                           // pleasant, spring
           },
         },
       },
@@ -1203,7 +1226,12 @@ export function createSenses(ctx) {
       },
       properties: {
         smell: {
-          quality: () => 'office',
+          intensity: s => {
+            const gaba = s.get('gaba');
+            const aden = s.get('adenosine');
+            return (gaba < 38 || aden > 72) ? 0.40 : 0.20;
+          },
+          hedonics: () => 0.38,  // mildly institutional/unpleasant
         },
       },
     },

@@ -1004,7 +1004,7 @@ const LEX = {
     ],
     body_predicates: [
       { text: 'finds the nose first', w: 1.0 },
-      { text: 'registers before the cold does', w: nt => nt._smell_sharp ? 1.2 : 0.5 },
+      { text: 'registers before anything else', w: nt => nt._smell_sharp ? 1.2 : 0.5 },
       { text: 'is clean in the back of the throat', w: 1.0 },
       { text: 'hits sharp', w: nt => nt._smell_sharp ? 1.5 : 0.3 },
     ],
@@ -1143,17 +1143,17 @@ function augmentNT(base, obs) {
 
   const smell = obs.properties.smell;
   if (smell) {
-    const q = smell.quality;
-    a._smell_stale      = q === 'stale';
-    a._smell_unwashed   = q === 'unwashed';
-    a._smell_petrichor  = q === 'petrichor';
-    a._smell_cold_air   = q === 'cold_air';
-    a._smell_cut_grass  = q === 'cut_grass';
-    a._smell_leaf_decay = q === 'leaf_decay';
-    a._smell_bloom      = q === 'bloom';
-    a._smell_office     = q === 'office';
-    a._smell_intense    = smell.intensity === 'thick' || smell.intensity === 'heavy';
-    a._smell_sharp      = smell.sharpness === 'sharp';
+    // Dimensions that vary and cross-cut source identity
+    a._smell_intensity  = smell.intensity ?? 0.5;
+    a._smell_intense    = (smell.intensity ?? 0.5) > 0.60;
+    a._smell_pleasant   = (smell.hedonics  ?? 0.5) > 0.55;
+    a._smell_unpleasant = (smell.hedonics  ?? 0.5) < 0.40;
+    a._smell_sharp      = smell.sharp === true;
+    // season_type: only set for seasonal_outside_smell; needed because one source = three smells
+    const st            = smell.season_type ?? null;
+    a._smell_cut_grass  = st === 'cut_grass';
+    a._smell_leaf_decay = st === 'leaf_decay';
+    a._smell_bloom      = st === 'bloom';
   }
 
   const i = obs.properties.interoception;
