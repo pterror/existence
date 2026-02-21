@@ -60,6 +60,8 @@ Each location has an acoustic character — reverb, absorption, echo — that mo
 
 **Retire legacy fragment system:** The observation pipeline now supersedes the authored fragment library (`senses.js` fragment array + `composeFragments`). Both paths coexist at the moment. Long-term: migrate any fragments that aren't covered by observation sources, then remove the legacy path. The fragment library currently runs as dead code — `sense()` delegates to `getObservations() → realize()` and never calls `composeFragments` directly.
 
+**Parasocial contact doesn't fill the social need:** The social decay model currently treats all contact as equivalent. Parasocial consumption — watching streams, following creators, reading someone's posts — probably partially buffers against isolation without genuinely filling the connection need. Social score partially maintained; connection quality not. The gap between those two is where the low-grade deficit lives and it's not currently modelled. Needs: a contact-quality dimension alongside contact-quantity in the social model, and a source for parasocial consumption as a distinct activity with distinct social mechanics. See docs/design/player-character.md and INFLUENCES.md further reading.
+
 ## Under Consideration
 
 Everything below is drawn from the gap between docs/design/overview.md and what's built. Not committed to — just visible.
