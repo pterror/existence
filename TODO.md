@@ -197,6 +197,8 @@ No content level configuration. docs/design/overview.md describes: baseline tier
 ### Health system
 ~~No health conditions exist.~~ Migraines (chronic), acute illness (flu/cold/GI), and dental pain (chronic) implemented. Remaining: chronic conditions (diabetes, chronic pain), mental health as structural, pregnancy.
 
+**Diabetes (type 1 and 2):** blood sugar regulation impaired; produces recurring felt interoceptive experiences — hypoglycaemia (shakiness, sweating, racing heart, urgent hunger, cognitive degradation; symptoms overlap heavily with anxiety — the game doesn't need to disambiguate) and hyperglycaemia (thirst/urination loop, fatigue, specific brain fog distinct from adenosine fog, blurred vision). Post-meal spike and crash relevant even for non-diabetic characters (simple carbs → brief good feeling → drop — the afternoon slump). Type 1 is constitutional (autoimmune destruction of beta cells, onset usually childhood/young adult); type 2 is circumstantial (metabolic, develops over years, strongly correlated with diet/activity/stress history — must derive from backstory, not a dice roll).
+
 ~~**Vomiting event — implement next:**~~ **FIXED.**
 `pending_vomit` flag in state. Chance roll in `advanceTime()` when `nausea > 75` (rate 0–0.2/hr, scaling with nausea 75–100). `checkEvents()` in world.js fires and clears the flag — deterministic, no RNG at fire site. `eventText.vomit` in content.js: branches on `stomachTier()` (empty → dry heave, else → expulsion) and location (bathroom vs. not). Prose: `Timeline.weightedPick()` with NT shading (adenosine fog, NE adrenaline sharpness, GABA loss-of-control). `wakeUp()` clears stale flag.
 

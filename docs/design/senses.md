@@ -471,7 +471,83 @@ Spinning in a chair, dizziness, the world continuing to move after you stop — 
 - **Proprioceptive seeking** — some people actively seek deep pressure and proprioceptive input (weighted blankets, tight clothing, physical impact); common in autism and sensory processing differences
 
 ## Interoception
-*— not yet covered*
+
+The sense of the internal state of the body — what's happening inside, not outside. The mechanism by which NT state becomes felt experience: anxiety isn't a number, it's a racing heart and a tight stomach; depression isn't low serotonin, it's heaviness and a body that costs more to move.
+
+### Interoceptive awareness varies enormously
+
+Some people read their body clearly — notice hunger before irritability, tension before it becomes a headache. Others have low awareness — don't register hunger until ravenous, don't notice anxiety until already in a spiral, don't feel thirst until they have a headache. Partly constitutional, partly trainable, strongly correlated with alexithymia, autism, and ADHD. Low interoceptive awareness also connects to hygiene (not noticing discomfort that would normally prompt action — see appearance section in TODO.md).
+
+This variation colours every signal below — the same physiological event may or may not surface to conscious awareness depending on the character.
+
+### Hunger and fullness
+
+Not one signal but several arriving at different times:
+- Stomach emptiness, blood sugar dropping, hormonal satiation (already in the game)
+- The signals don't always agree
+- Hunger ignored long enough becomes nausea — stomach produces acid with nothing to digest
+- Emotional hunger vs. physical hunger — the same reaching feeling, hard to distinguish from the inside
+- Appetite suppressed by depression, stress, illness — not feeling hungry when you should
+
+### Thirst
+
+- Often arrives late — mild dehydration already present before thirst is noticeable
+- Frequently confused with hunger — eating when you needed water
+- The specific headache of dehydration; dry mouth before it
+
+### Needing the bathroom
+
+- Urgency as a spectrum — background awareness → can't ignore → can't wait
+- Anxiety directly affects GI motility (gut-brain axis) — stress makes it worse
+- The decision calculus of how long you can hold it vs. how inconvenient stopping is
+
+### Heartbeat
+
+- Normally unfelt — surfaces when elevated (exercise, fear, caffeine, anxiety), irregular, or in silence at night
+- Palpitations — the heart doing something unexpected; usually harmless, often alarming
+- The heartbeat felt in a bruise or a headache
+- **Dehydration:** blood volume drops, heart beats faster to compensate — moving less blood per beat more frequently. Lying down doing nothing, heart going faster than it should.
+- **Orthostatic hypotension:** standing up too fast when dehydrated or hot — blood pressure drops, heart races to catch up, brief dizziness or grey-out. Very common, usually harmless, occasionally you have to grab something.
+
+### Blood pressure
+
+- **High:** mostly unfelt — the "silent killer." Occasionally: headache at the back of the skull, visual disturbance, feeling of pressure. Often no symptoms until something goes wrong.
+- **Low:** dizziness on standing, fatigue, cold extremities, feeling faint. More immediately felt than high.
+- **Post-hot-shower drop:** vessels dilated, blood pressure falls, standing up too fast suddenly risky.
+- **The compensation loop:** heart rate, blood pressure, fluid volume, and temperature regulation in constant negotiation — dehydration, heat, standing, caffeine, alcohol all shift the balance; usually invisible, occasionally not.
+
+### Blood sugar
+
+- **Post-meal spike and crash:** simple carbs → brief good feeling → the drop. The afternoon slump after lunch has a real physiological mechanism.
+- **Hypoglycaemia (low blood sugar):** shakiness, sweating disproportionate to temperature, racing heart, irritability, difficulty thinking (the brain runs almost exclusively on glucose — when it drops, cognition degrades fast), urgent specific hunger. Overlaps heavily with anxiety symptoms — racing heart, sweating, shakiness, feeling wrong. A character may not know which one they're having. The game doesn't need to tell them either.
+- **Hyperglycaemia (high blood sugar):** excessive thirst, frequent urination (drink more → urinate more loop), fatigue, difficulty concentrating, blurred vision, specific brain fog — not adenosine fog, different in quality; thick, hard to push through. Connects to diabetes condition in TODO.md.
+
+### Breathing
+
+*— to be covered*
+
+### Nausea
+
+*— to be covered*
+
+### Fatigue and body heaviness
+
+*— to be covered*
+
+### Anxiety and NT signals as interoception
+
+*— to be covered*
+
+### Character-side conditions
+- **Alexithymia** — difficulty identifying and describing internal states; interoceptive signals present but hard to read or name; correlated with autism
+- **Diabetes (type 1 and 2)** — blood sugar regulation impaired; hypoglycaemia and hyperglycaemia as recurring felt experiences; connects to TODO.md diabetes entry
+- **POTS (postural orthostatic tachycardia syndrome)** — heart rate spikes dramatically on standing; dizziness, fatigue, brain fog; often comorbid with hypermobility and autoimmune conditions
+
+### NT modulation
+- Anxiety/cortisol → racing heart, tight stomach, shallow breathing, GI disruption
+- Depression → hunger signals wrong or absent, fatigue, body feels distant and heavy
+- Adenosine → fatigue signals intensified, everything costs more
+- Dopamine low → interoceptive signals may not motivate action — feel hungry, don't eat anyway
 
 ## Nociception (pain)
 *— not yet covered*
