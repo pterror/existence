@@ -145,12 +145,20 @@ calibrating the emotional register the prose is working in. Survey, don't absorb
 ### ROMA (ROMALOID)
 
 ROMA releases under a free-use license — lyrics can be copied directly into the
-repo. Links for attribution:
-- Artist: https://www.youtube.com/@ROMALOID / https://open.spotify.com/artist/1GBhDrmf2fvZOEjKLUobEF
-- Burnout (ft. Kasane Teto): https://www.youtube.com/watch?v=J5SbnFwKaHc / https://open.spotify.com/track/5J7kW6hFnHcUayCv0vg4Iu
-- Drive (stems/lyrics): https://drive.google.com/drive/folders/1vHlfnv2acgIKGSX15HejEu7K6LYYOsno
+repo. All sources (stems, lyrics) for all songs:
+https://drive.google.com/drive/folders/1w8VHY8J7a_llbiE6TzgtPXetDUyfEBYw
+
+Links:
+- YouTube: https://www.youtube.com/@ROMALOID / https://www.youtube.com/channel/UCKpEbWofm25BKX62VL9C--Q
+- Spotify: https://open.spotify.com/artist/1GBhDrmf2fvZOEjKLUobEF
+- Deezer: https://www.deezer.com/us/artist/240794
+- Twitter: https://x.com/Romadoingstuff
+- Instagram: https://www.instagram.com/romamakesbanger/
+- TikTok: https://www.tiktok.com/@tobeyye
 
 **BURNOUT — ROMA ft. Kasane Teto** (`atmosphere/burnout-roma.txt`)
+- https://www.youtube.com/watch?v=J5SbnFwKaHc
+- https://open.spotify.com/track/5J7kW6hFnHcUayCv0vg4Iu
 Somatic language for stress and exhaustion ("a stone that's crushing me on top
 of my chest"), dissociation as fading ("1000 miles an hour I come back home and I
 / fade, fade"), motivational collapse ("I don't wanna try"). Most relevant:
@@ -158,6 +166,20 @@ of my chest"), dissociation as fading ("1000 miles an hour I come back home and 
 and internalized shame loop that the game's "no judgment" principle is specifically
 responding to. The game doesn't tell the character they deserve it; it just shows
 what the days look like.
+
+**NEURODIVERGENCE — ROMA ft. GUMI** (`atmosphere/neurodivergence-roma.txt`)
+- https://www.youtube.com/watch?v=DCyRVr9lcZI
+- https://open.spotify.com/album/5ahVGYp6RssaF7GHJ6dFSO
+
+No official English lyrics — reconstructed from phonetic transcription against
+Portuguese subtitles (trans. Konny @konnyoung). The normative daily schedule as
+external pressure ("wake up at seven o'clock / this is how it's supposed to be /
+keep a radiant smile / so the others see"). Alienation from the performance of
+normal: "what you like, what you talk, what you strive / I can't imagine being
+like you." The bridge: "every time a smile appears / it only gives me chills / I
+don't agree with these styles / but I keep it to myself." The concealment is
+involuntary — not a choice but a survival mechanism, which maps onto how the game
+renders the character's interior without ever surfacing it as a label.
 
 ### Porter Robinson
 
