@@ -445,22 +445,34 @@ Foundation of the procedural prose pipeline. Sources are things in the world (or
 
 Pure module that turns `Observation[]` + NT hint → prose string. No game imports; fully testable.
 
-**`realize(observations, hint, ntContext, random)`** — main entry point. Selects up to `getPassageBudget(hint)` observations (top by salience), realizes each into a sentence, combines into a passage. RNG consumption is exactly `N × 4` calls (N = budget), always — balanced across all architecture branches.
+**`realize(observations, hint, ntContext, random)`** — main entry point. Realizes all observations passed (caller is responsible for selection/budgeting). RNG consumption is exactly `N × 4` calls (N = observations), always — balanced across all architecture and shape branches.
 
-**Lexical sets** — one per sourceId. Each defines: `subjects`, `predicates`, `modifiers` (with null options for "no modifier"), and optionally `body_subjects`/`body_predicates` (for body-as-subject architecture), `ambiguity_alts` (for source-ambiguity architecture), `escapes` (for interpretive-escape architecture), `fragments` (for bare-fragment architecture). Items are strings or `{ text, w }` objects where `w` may be an `ntCtx => number` function.
+**Lexical sets** — one per sourceId. Each defines: `subjects`, `predicates`, `modifiers` (with null options for "no modifier"), and optionally `body_subjects`/`body_predicates`, `ambiguity_alts`, `escapes`, `fragments`, `reframe_pairs`, `character_predicates`, `flat_descriptions`, `inversion_conditions`, `appositive_np`. Items are strings or `{ text, w }` objects where `w` may be an `ntCtx => number` function.
 
-**Five sentence architectures**, weighted per hint:
-- `shortDeclarative` — "The fridge hums." / "The fridge hums, too loud." (all hints)
-- `bareFragment` — "Heavy." / "A hum." (dissociated, flat, overwhelmed)
-- `bodyAsSubject` — "Cold sits on the back of the neck." (body/thermal sources)
-- `sourceAmbiguity` — "Something — the fridge, maybe, or the heat — hums." (dissociated)
-- `interpretiveEscape` — "The fridge hums, and the sound was just a sound." (calm)
+**Nine single-observation architectures**, weighted per hint via `ARCH_WEIGHTS`:
+- `shortDeclarative` — "The fridge hums." / "The fridge hums, too loud."
+- `bareFragment` — "Heavy." / "A hum."
+- `bodyAsSubject` — "Cold sits on the back of the neck."
+- `sourceAmbiguity` — "Something — the fridge, maybe, or the heat — hums."
+- `interpretiveEscape` — "The fridge hums, and the sound was just a sound."
+- `reframeDash` — "Not heavy — dissolved."
+- `sensationCharacter` — "The tiredness lived in the limbs."
+- `flatTautology` — "Still tired." / "The fridge was the fridge." (flat hint only)
+- `conditionalInversion` — "Something was tight, but only when she stopped to notice."
 
-**`overwhelmed` passage** — polysyndeton: each observation's sentence stripped of punctuation and joined with "and". First phrase capitalized; rest lowercased.
+**Three passage-level shapes** (multi-observation, selected via `PASSAGE_SHAPE_WEIGHTS` per hint):
+- `appositive` — two obs fold into one sentence: "The fridge hums, a weight in the limbs." Requires `appositive_np` pool on obs[1]. 8 sources have pools: fridge, pipes, indoor_temperature, fatigue, hunger_signal, anxiety_signal, rain, window_light.
+- `terminal_list` — N obs as comma-separated fragments: "Heavy, the fridge, traffic." Requires 3+ obs with mixed sensory channels.
+- `arrival_seq` — full sentences joined with "Then": "The fridge hums. Then the room is cold." Any 2+ obs.
+- `independent` — the default; each observation its own sentence (weight 1.0; multi-obs shapes are infrequent, ~20–35% total non-independent weight).
+
+**RNG accounting for passage shapes:** obs[0]'s r1 is drawn upfront as the shape selector. In the independent path it passes through to `realizeOne` as obs[0]'s r1. In multi-obs paths all N×4 calls are consumed in dedicated slots — 4 for obs[0] (r0_1 + 3 more), 4 each for obs[1..N-1].
+
+**`overwhelmed` passage** — polysyndeton: each observation's sentence stripped of punctuation and joined with "and". First phrase capitalized; rest lowercased. Handled before shape selection; always independent of passage shapes.
 
 **NT augmentation** — `augmentNT()` extracts observation property flags (`_temp_cold`, `_quality_gravitational`, `_irritable`, `_char_unsettled`, etc.) from `obs.properties` and merges into a copy of `ntCtx`. Lexical weight functions use these flags to produce state-appropriate word choices.
 
-**Tests:** 32 unit tests in `tests/realization.test.js`. Cover null/empty, all five architectures, multi-observation passages, polysyndeton, fixed RNG consumption, NT variation, unknown hint fallback. All passing.
+**Tests:** 54 unit tests in `tests/realization.test.js`. Cover all nine single-obs architectures, all three passage shapes, multi-observation passages, polysyndeton, fixed 4N RNG consumption, NT variation, unknown hint fallback. All passing.
 
 **Selection model** — threshold + habituation + change detection:
 - `getSalienceThreshold(hint)` — NT-state-driven perceptual threshold. overwhelmed=0.25, anxious=0.30, heightened=0.40, calm=0.50, flat=0.55, dissociated=0.60. All observations above threshold fire; those below don't register.
