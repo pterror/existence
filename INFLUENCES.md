@@ -483,6 +483,10 @@ and internalized shame loop that the game's "no judgment" principle is specifica
 responding to. The game doesn't tell the character they deserve it; it just shows
 what the days look like.
 
+*Register limit:* ROMA is confrontational — "why am I the one getting punished
+for it?" It argues with an outside. Existence doesn't. The character isn't angry
+at external judgment; they're inside the days, not addressed outward.
+
 **NEURODIVERGENCE — ROMA ft. GUMI** (`atmosphere/neurodivergence-roma.txt`)
 - https://www.youtube.com/watch?v=DCyRVr9lcZI
 - https://open.spotify.com/album/5ahVGYp6RssaF7GHJ6dFSO
@@ -498,6 +502,9 @@ don't agree with these styles / but I keep it to myself." The concealment is
 involuntary — not a choice but a survival mechanism, which maps onto how the game
 renders the character's interior without ever surfacing it as a label.
 
+*Register limit:* Same as BURNOUT — addressed outward, confrontational. The
+concealment and alienation are the applicable parts, not the protest.
+
 ### Porter Robinson
 
 *nurture* (2021) is the most directly relevant — an album about depression and
@@ -506,6 +513,11 @@ moments carry disproportionate weight. "Musician" is about being shaped into wha
 someone else had in mind; "Mirror" is self-criticism as an inescapable loop.
 The whole album models the experience of being unable to produce the self you
 intended to be — which maps directly onto existence's "power anti-fantasy" framing.
+
+*Register limit:* nurture arcs toward recovery — "look at the sky, I'm still
+here." It earns relief and beauty through difficulty. Existence doesn't arc toward
+recovery; it just continues. Don't let nurture pull the prose toward resolution
+it hasn't earned.
 
 ### Mitski
 
@@ -517,6 +529,11 @@ resolution offered. "Nobody" — loneliness as absurdist comedy. Her albums
 *Puberty 2*, *Be the Cowboy*, and *Laurel Hell* are all relevant to the register
 existence works in moment-to-moment.
 
+*Register limit:* The most directly applicable reference. What breaks: Mitski's
+songs have a "you" — there's an address to another person, a relationship as
+subject. Existence's second-person is interior, not addressed outward. The
+emotional weight without the address is what to take.
+
 ### Vocaloid / UTAU
 
 **Ghost and Pals** — English-language vocaloid producer. Extremely precise about
@@ -524,12 +541,24 @@ self-suppression and the gap between internal and external state. "Alter Ego",
 "Theorem of the Heart". The masked/performed self vs the interior one is a
 persistent theme.
 
+*Register limit:* Theatrically stylized even at its most precise. Existence aims
+for the mundane version of the same territory — the mask you don't notice you're
+wearing, not the mask as aesthetic object.
+
 **Kikuo** — dissociation, the body rendered as strange and unreliable. Emotionally
 unsettling without being melodramatic. "I'm Sorry, I'm Sorry" is the canonical
 reference point.
 
+*Register limit:* Consistently unsettling — useful for specific high-adenosine,
+dissociation states, but not the whole texture. Existence also needs the quiet
+and ordinary. Kikuo is a mode, not a baseline.
+
 **Maretu** — burnout, perfectionism, self-criticism as a loop. "Coin Locker Baby",
 "Magical Doctor". Similar territory to ROMA but more abrasive.
+
+*Register limit:* The abrasion may be too heightened for existence's register.
+Useful as a pressure reference; don't let it pull prose toward confrontation or
+melodrama.
 
 ### Adjacent artists (same register)
 
@@ -537,6 +566,24 @@ reference point.
 *Soft Sounds from Another Planet* especially. **Soccer Mommy**, **Big Thief /
 Adrianne Lenker** — domestic precision, body, relationships rendered without
 sentimentality. All work in the same territory of mundane-rendered-heavy.
+
+*Register limit:* These artists all have a subject — a specific person, a
+specific loss. Existence's loneliness is structural, not about a particular absent
+person. The domestic precision without sentimentality is the applicable part.
+
+### The shared register and where it ends
+
+What all of these references share: emotional weight carried in ordinary detail,
+the interior state rendered without being named or explained, the mundane allowed
+to be enormous. That's the target.
+
+What they collectively don't do — and what existence has to do without — is have
+a subject or an address. A song is always *about* something and usually addressed
+*to* someone. Even the most interior of these has an outside implied: a "you,"
+a world being argued with, a specific loss being circled. Existence has neither.
+The prose is interior with no outside implied. That's the part none of these
+references model directly — not because it's rare in art, but because songs
+structurally require address and existence structurally refuses it.
 
 ---
 
