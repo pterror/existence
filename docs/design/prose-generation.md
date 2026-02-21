@@ -2,6 +2,8 @@
 
 This document describes the intended prose generation architecture for existence. It is a living document — expect significant refinement as the system is built and tested.
 
+**Status: very incomplete.** What's here represents early design thinking. Large areas are missing or only sketched: the full range of prose states, the complete set of literary moves, how observation sources are selected and weighted, how the system maintains continuity across a session, how inner voice and narration relate, how dialogue and narration share or diverge in their generation mechanisms, and much more. Treat everything here as directional, not final.
+
 ## The problem with authored strings
 
 The current content system authors complete sentences and phrases, selected at runtime via weighted picks. This fails at variety: a player who has played for several hours will begin to recognize phrases. Recognized text breaks the fiction — the simulation's job is to produce *experience*, and a sentence you've seen before produces recognition, not experience.
