@@ -393,7 +393,27 @@ Second text stream that fires alongside idle thoughts when NT state is destabili
 
 **Rendering:** At `tremor` tier, the inner voice drowns out narration (idle thought suppressed). At `uneasy`/`prominent`, voice appears 800ms after narration. Resume display restores both streams.
 
-**RNG discipline:** idle (1) → inner voice if tier non-null (1, conditional) → advanceTime (1). Order identical in `handleIdle`, `replayIdle`, and `executeActionForReplay`.
+**RNG discipline:** idle (1) → inner voice if tier non-null (1, conditional) → sensory fragment if pool > 1 (1, conditional) → advanceTime (1). Order identical in `handleIdle`, `replayIdle`, and `executeActionForReplay`.
+
+### Sensory Prose Compositor
+Ambient sensory fragments that surface via idle actions, combining multiple simultaneous observations into natural sentences. Lives in `js/senses.js`.
+
+**Fragment spec:** Each fragment carries: `id`, `content` (authored text), `grammatical_type` (`main | participle | absolute | adverbial | fragment`), `rhetorical_tag`, `channels` (which senses), `attention_order` (`involuntary_body | deliberate_visual | ambient`), optional `locations`/`areas` filter, `trigger_conditions(State)`, and `nt_weight(State)`.
+
+**Fragment library (22 fragments):** Indoor ambient (fridge hum, pipe click, coil whine, muffled traffic), indoor thermal (cold, floor cold, warm), outdoor sound (traffic, street voices), outdoor thermal (cold hits, warm, wind cuts), rain (sound, wet), fatigue (heavy, pulling), hunger (stomach, irritable), anxiety signals (can't settle, too present).
+
+**`composeFragments(fragments, hint)`** — pure exported function, testable in isolation. Sorts by attention order (involuntary_body first), then applies structure pattern:
+- `calm/heightened/flat` — main clause root, participials/absolutes comma-attached, fragments become separate sentences ordered by attention priority
+- `anxious/dissociated` — each fragment its own sentence, period-separated
+- `overwhelmed` — polysyndeton (joined with "and")
+
+**`getStructureHint()`** — reads NT state, returns pattern: overwhelmed (GABA < 30 + NE > 70), anxious (GABA < 40 or NE > 60), dissociated (adenosine > 75 + NE < 45), heightened (good mood + elevated NE), flat (low serotonin + dopamine), calm (default).
+
+**`sense()`** — evaluates trigger conditions for current location/area, weights by NT state, selects via `weightedPick` (1 RNG) if pool > 1, composes and returns string or null.
+
+**Display:** Fires in `handleIdle` with 12-minute game-time cooldown (ephemeral — resets on page load). Displayed at +1200ms delay alongside idle thoughts. Restored on page reload as `lastSensoryText`. Visible in look-back scrubber via `executeActionForReplay`.
+
+**Tests:** 19 unit tests for `composeFragments` in `tests/senses.test.js`. Run with `bun test`.
 
 ### Sleep Prose
 Two-phase system: falling-asleep (how sleep came) + waking-up (the gradient back to consciousness). Falling-asleep branches on pre-sleep energy, stress, quality, and duration, with NT shading: adenosine→crash depth, GABA→can't-settle anxiety, NE→hyper-alertness, serotonin→warmth of surrender, melatonin→onset delay (~22 variants). Waking-up branches on post-sleep energy, sleep quality, alarm vs natural wake, time of day (dark/late/morning), mood, sleep debt, and sleep inertia, with NT shading: adenosine→sleep inertia, serotonin→dread-vs-ease, NE→sharp edges, GABA→night dread, debt→cumulative exhaustion (~44 variants). Composed together as a single passage. No numeric hour counts — all qualitative.

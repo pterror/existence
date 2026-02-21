@@ -14,6 +14,7 @@ export function createGame(ctx) {
   const Dishes = ctx.dishes;
   const Linens = ctx.linens;
   const Clothing = ctx.clothing;
+  const Senses = ctx.senses;
 
   let isReplaying = false;
 
@@ -139,7 +140,7 @@ export function createGame(ctx) {
       if (eventFn) eventFn();
     }
     Content.generateIncomingMessages();
-    const { lastIdleThought, lastInnerVoice, lastInnerVoiceTier } = replayActions(saved.actions);
+    const { lastIdleThought, lastInnerVoice, lastInnerVoiceTier, lastSensoryText } = replayActions(saved.actions);
 
     // Initialize UI
     UI.init({
@@ -157,9 +158,12 @@ export function createGame(ctx) {
     showStepAway();
     showLookBack();
 
-    // Restore last idle thought and inner voice so they don't vanish on refresh
+    // Restore last idle thought, inner voice, and sensory text so they don't vanish on refresh
     if (lastIdleThought && lastInnerVoiceTier !== 'tremor') {
       setTimeout(() => UI.appendEventText(lastIdleThought), 500);
+    }
+    if (lastSensoryText) {
+      setTimeout(() => UI.appendEventText(lastSensoryText), 800);
     }
     if (lastInnerVoice && lastInnerVoiceTier) {
       const ivDelay = lastInnerVoiceTier === 'tremor' ? 500 : 1200;
@@ -430,6 +434,8 @@ export function createGame(ctx) {
       if (thought) responseText = thought;
       const ivTier = State.innerVoiceTier();
       if (ivTier) Content.innerVoiceThoughts(); // consume RNG to keep replay aligned
+      const sensory = Senses.sense(); // consume RNG to keep replay aligned
+      if (sensory) eventTexts.push(sensory);
       State.advanceTime(Timeline.randomInt(2, 5));
     } else if (action.type === 'observe_time') {
       State.observeTime();
@@ -918,11 +924,12 @@ export function createGame(ctx) {
 
   // --- Replay (state reconstruction, no visual) ---
 
-  /** @param {ActionEntry[]} actions @returns {{ lastIdleThought: string | undefined, lastInnerVoice: string | null, lastInnerVoiceTier: string | null }} */
+  /** @param {ActionEntry[]} actions @returns {{ lastIdleThought: string | undefined, lastInnerVoice: string | null, lastInnerVoiceTier: string | null, lastSensoryText: string | null }} */
   function replayActions(actions) {
     let lastIdleThought;
     let lastInnerVoice = null;
     let lastInnerVoiceTier = null;
+    let lastSensoryText = null;
     for (const entry of actions) {
       const action = entry.action;
 
@@ -948,6 +955,7 @@ export function createGame(ctx) {
         lastIdleThought = result.thought;
         lastInnerVoice = result.voice;
         lastInnerVoiceTier = result.ivTier;
+        lastSensoryText = result.sensory ?? null;
       } else if (action.type === 'observe_time') {
         State.observeTime();
       } else if (action.type === 'observe_money') {
@@ -958,7 +966,7 @@ export function createGame(ctx) {
     // Train habit trees from replay data
     Habits.train();
 
-    return { lastIdleThought, lastInnerVoice, lastInnerVoiceTier };
+    return { lastIdleThought, lastInnerVoice, lastInnerVoiceTier, lastSensoryText };
   }
 
   function consumeEvents() {
@@ -988,8 +996,9 @@ export function createGame(ctx) {
     const thought = Content.idleThoughts();
     const ivTier = State.innerVoiceTier();
     const voice = ivTier ? Content.innerVoiceThoughts() : null;
+    const sensory = Senses.sense(); // RNG consumption matches handleIdle
     State.advanceTime(Timeline.randomInt(2, 5));
-    return { thought, voice, ivTier };
+    return { thought, voice, ivTier, sensory };
   }
 
   /** @param {string | undefined} destId */
@@ -1259,10 +1268,12 @@ export function createGame(ctx) {
     // RNG order must match replayIdle() exactly:
     // 1. idleThoughts() — always (1 RNG)
     // 2. innerVoiceThoughts() — only when ivTier !== null (1 RNG, conditional)
-    // 3. advanceTime(randomInt(2,5)) — always (1 RNG)
+    // 3. Senses.sense() — conditional on pool.length > 1 (0 or 1 RNG)
+    // 4. advanceTime(randomInt(2,5)) — always (1 RNG)
     const thought = Content.idleThoughts();
     const ivTier = State.innerVoiceTier();
     const voice = ivTier ? Content.innerVoiceThoughts() : null;
+    const sensory = Senses.sense(); // always call; RNG consumed only if pool > 1
 
     // Tremor: inner voice drowns out the narration
     if (thought && ivTier !== 'tremor') {
@@ -1271,6 +1282,11 @@ export function createGame(ctx) {
     if (voice && ivTier) {
       const delay = ivTier === 'tremor' ? 0 : 800;
       setTimeout(() => UI.appendInnerVoice(voice, ivTier), delay);
+    }
+    // Display sensory text if cooldown allows
+    if (sensory && Senses.canDisplay()) {
+      setTimeout(() => UI.appendEventText(sensory), 1200);
+      Senses.markDisplayed();
     }
 
     State.advanceTime(Timeline.randomInt(2, 5));

@@ -18,6 +18,7 @@ import { createDishes } from './dishes.js';
 import { createLinens } from './linens.js';
 import { createClothing } from './clothing.js';
 import { createMess } from './mess.js';
+import { createSenses } from './senses.js';
 import { createGame } from './game.js';
 
 export { NameData };
@@ -36,6 +37,7 @@ export function createGameContext() {
   ctx.world = createWorld(ctx);
   ctx.habits = createHabits(ctx);
   ctx.content = createContent(ctx);
+  ctx.senses = createSenses(ctx);
   ctx.ui = createUI(ctx);
   ctx.chargen = createChargen(ctx);
   ctx.game = createGame(ctx);
