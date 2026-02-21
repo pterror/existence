@@ -121,6 +121,7 @@ Examples (not exhaustive): "I seen it," "might could," "fixin to," "wicked cold,
 
 Real-time speech is constructed live and the seams show. These are not errors — they're information about the speaker's relationship to what they're saying.
 
+- **Filled pauses**: "um," "uh," "umm," "like," "you know," "I mean," "so," "basically" — the sounds the mouth makes while the brain catches up. Slot mid-sentence or at clause boundaries. Frequency is a voice parameter; topic and emotional loading cluster them.
 - **False starts**: "She — no, we were both there." "I thought — I don't know what I thought."
 - **Repair**: "I told him. I said — I don't even remember what I said."
 - **Trailing off**: "I just figured maybe..." — sentence doesn't resolve. The speaker chose not to finish.
