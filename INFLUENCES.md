@@ -142,8 +142,15 @@ transmission between spaces.
 Tonal references: not templates to copy or over-optimize toward, but useful for
 calibrating the emotional register the prose is working in. Survey, don't absorb.
 
-**BURNOUT — ROMA ft. Kasane Teto**
-(`~/lyrics1`)
+### ROMA (ROMALOID)
+
+ROMA releases under a free-use license — lyrics can be copied directly into the
+repo. Links for attribution:
+- Artist: https://www.youtube.com/@ROMALOID / https://open.spotify.com/artist/1GBhDrmf2fvZOEjKLUobEF
+- Burnout (ft. Kasane Teto): https://www.youtube.com/watch?v=J5SbnFwKaHc / https://open.spotify.com/track/5J7kW6hFnHcUayCv0vg4Iu
+- Drive (stems/lyrics): https://drive.google.com/drive/folders/1vHlfnv2acgIKGSX15HejEu7K6LYYOsno
+
+**BURNOUT — ROMA ft. Kasane Teto** (`~/lyrics1`)
 Somatic language for stress and exhaustion ("a stone that's crushing me on top
 of my chest"), dissociation as fading ("1000 miles an hour I come back home and I
 / fade, fade"), motivational collapse ("I don't wanna try"). Most relevant:
@@ -151,6 +158,46 @@ of my chest"), dissociation as fading ("1000 miles an hour I come back home and 
 and internalized shame loop that the game's "no judgment" principle is specifically
 responding to. The game doesn't tell the character they deserve it; it just shows
 what the days look like.
+
+### Porter Robinson
+
+*nurture* (2021) is the most directly relevant — an album about depression and
+creative block rendered with emotional precision rather than spectacle. Small
+moments carry disproportionate weight. "Musician" is about being shaped into what
+someone else had in mind; "Mirror" is self-criticism as an inescapable loop.
+The whole album models the experience of being unable to produce the self you
+intended to be — which maps directly onto existence's "power anti-fantasy" framing.
+
+### Mitski
+
+The specific skill: domestic scenes (washing dishes, sitting at a table, lying in
+bed) rendered with emotional weight that isn't explained or justified. The mundane
+is allowed to be enormous. "Working for the Knife" (*Laurel Hell*, 2022) — labor,
+exhaustion, creative suppression. "The Deal" — obligation vs desire with no
+resolution offered. "Nobody" — loneliness as absurdist comedy. Her albums
+*Puberty 2*, *Be the Cowboy*, and *Laurel Hell* are all relevant to the register
+existence works in moment-to-moment.
+
+### Vocaloid / UTAU
+
+**Ghost and Pals** — English-language vocaloid producer. Extremely precise about
+self-suppression and the gap between internal and external state. "Alter Ego",
+"Theorem of the Heart". The masked/performed self vs the interior one is a
+persistent theme.
+
+**Kikuo** — dissociation, the body rendered as strange and unreliable. Emotionally
+unsettling without being melodramatic. "I'm Sorry, I'm Sorry" is the canonical
+reference point.
+
+**Maretu** — burnout, perfectionism, self-criticism as a loop. "Coin Locker Baby",
+"Magical Doctor". Similar territory to ROMA but more abrasive.
+
+### Adjacent artists (same register)
+
+**Japanese Breakfast** (Michelle Zauner) — grief and mundane detail woven together,
+*Soft Sounds from Another Planet* especially. **Soccer Mommy**, **Big Thief /
+Adrianne Lenker** — domestic precision, body, relationships rendered without
+sentimentality. All work in the same territory of mundane-rendered-heavy.
 
 ---
 
