@@ -463,8 +463,63 @@ A category of small incidental physical interactions that aren't "actions" in th
 - Cortisol/anxiety → body held tense; proprioceptive awareness of that tension; braced posture
 - Depression → the body feels distant, heavy, a thing being moved rather than inhabited
 
-### Vestibular (spinning, dizziness)
-Spinning in a chair, dizziness, the world continuing to move after you stop — flagged here but belongs in the vestibular section.
+### Vestibular
+
+The sense of balance, spatial orientation, and movement — processed in the inner ear. Closely linked to proprioception and vision; when they disagree, things go wrong.
+
+### Disruption
+
+**Spinning and stopping:**
+- Fluid in the semicircular canals keeps moving after you stop — the world continues to turn
+- Spinning in a chair, getting off a roundabout, pirouettes
+- The specific pleasure some people take in this, the specific misery others do
+
+**Motion sickness:**
+- Vestibular and visual signals disagree — reading in a car, eyes say stationary, inner ear says moving
+- The body interprets the conflict as possible poisoning and responds with nausea
+- Also: boats, planes, VR headsets, the back seat vs. the front
+- Varies enormously by person; gets worse with age for some; can be trained
+
+**BPPV (benign paroxysmal positional vertigo):**
+- Calcium crystals displaced in the inner ear; sudden, brief, violent dizziness triggered by specific head movements — lying down, rolling over in bed
+- Very common, very disorienting, very treatable (specific head manoeuvres reposition the crystals)
+
+**Vertigo:**
+- The room spinning when you're not moving; specifically rotational, distinct from dizziness/lightheadedness
+- Several causes (BPPV, Ménière's, vestibular neuritis, migraine); deeply unpleasant
+
+**Alcohol:**
+- Directly disrupts vestibular processing — the spins when lying down, the foot on the floor to stop the room moving, the inability to walk straight
+
+### Heights and visual vertigo
+
+- The body calculating that a fall is possible and responding before any conscious decision — the involuntary step back from an edge
+- Visual vertigo at heights — dizziness triggered by looking down, even without motion
+- The vestibular anxiety that fires regardless of what you know intellectually
+
+### Rides
+
+The vestibular system pushed deliberately:
+
+- **Rollercoasters** — G-forces pressing into the seat or pulling out of it; weightlessness at the top of a drop; the body reading it as falling even while strapped in; knowing you're safe and the vestibular system not caring
+- **Spinning rides** (teacups, waltzers) — sustained rotation; nausea that follows; tolerance varies enormously and declines with age for many
+- **Drop towers** — pure freefall; the stomach-lift of weightlessness; very short, very intense
+- **Carnival rides** — often less engineered; the specific anxiety of watching it rattle, the risk calculation
+- **The aftermath** — getting off and the ground still moving, needing a moment, residual nausea, walking differently for a few minutes
+
+**The anticipation:** the queue, watching others, the fear-that-is-also-excitement, the decision point. The social pressure to participate.
+
+**The fun/fear split:** the same vestibular disruption, same threat response, same cortisol spike. Whether it reads as fun or terrifying is partly individual, partly context, partly current state — a character who's already anxious may find it intolerable where they'd otherwise enjoy it. This is the agency gradient applied to sensation: not a fixed property of the ride, a relationship between the ride and the character's state.
+
+### NT modulation
+- Anxiety/cortisol already elevated → vestibular threats read as more threatening; spinning less fun, heights more frightening
+- Adenosine high → balance slightly worse; uneven ground requires more attention
+- Alcohol → direct vestibular disruption (see above)
+
+### Character-side conditions
+- **Ménière's disease** — episodes of severe vertigo, tinnitus, hearing loss; unpredictable; chronic
+- **Vestibular migraine** — migraine presenting primarily as vertigo rather than headache
+- **Chronic vestibular dysfunction** — balance impaired as a baseline; compensated by vision and proprioception; surfaces in the dark or on uneven ground
 
 ### Character-side conditions
 - **Dyspraxia / developmental coordination disorder** — difficulty with motor coordination and proprioceptive integration; everyday physical tasks require more conscious attention
