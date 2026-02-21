@@ -319,11 +319,24 @@ REM vs deep sleep function, and sleep debt. Treat specific numbers with caution
 (some have been disputed) but the qualitative model is sound. Informed the
 sleep architecture in state.js.
 
+*Used / gap:* Walker is orientation — the qualitative model. The actual
+calibration work in the codebase cites primary literature (Borbély 2022,
+Blume 2023, Van Cauter 2000, Renner 2022, Dijk 1999), not Walker. Walker also
+doesn't cover phenomenology: what it actually feels like from inside to be
+chronically undersleeping. The neuroscience is here; the texture of living it
+has to come from elsewhere (prose reference, personal knowledge, other sources).
+
 **Emotional inertia**
 Kuppens et al. have published on emotional inertia (how sticky mood is over time)
 as a trait variable. The Houben et al. (2015) study specifically on rumination,
 neuroticism, and self-esteem as predictors of inertia is cited in the codebase.
 Search: "emotional inertia rumination neuroticism" for the cluster of work.
+
+*Used / gap:* The personality predictors and their weights are implemented and
+cited. What remains unused: the literature on situational inertia changes —
+how inertia increases during depressive episodes, under chronic stress, with
+sleep deprivation. The state modifiers we added (adenosine > 60, stress > 60)
+approximate this but aren't grounded in specific effect sizes from the literature.
 
 **Perceptual habituation / orienting response**
 The habituation + change-detection model in senses.js maps onto well-established
@@ -331,11 +344,36 @@ perceptual psychology. Sokolov's orienting response research (1960s) is the
 classical foundation. More accessible: any cognitive psychology textbook chapter
 on attention.
 
+*Used / gap:* Short-term within-session habituation and change-detection spike
+are implemented. What Sokolov's model distinguishes — and what we haven't yet
+built — is long-term stimulus habituation: the brain builds a neural model of
+the expected environment, so a familiar apartment is more habituated than a new
+one. This distinction supports the long-term habituation TODO: it's not just an
+obvious simulation feature, it's what the literature predicts.
+
 **Acoustic physics**
 No single reference — the acoustic adjacency model (flooring, openness, voids)
 is applied physics more than academic work. Architectural acoustics textbooks
 cover reverberation time (RT60), absorption coefficients by material, and sound
 transmission between spaces.
+
+*Used / gap:* The conceptual model (flooring type, room openness, voids as
+acoustic chimneys) is established but unimplemented. The actual physics —
+RT60 calculations, absorption coefficients per material, transmission loss between
+spaces — is approximation debt waiting for the system to be designed. When the
+acoustic adjacency system is built, this is where to find the numbers.
+
+### Pattern across the background reading
+
+Sleep is the one area where background reading led to specific calibrated
+parameters with retrievable citations. Everything else — inertia situational
+modifiers, long-term habituation rates, acoustic physics, and all the identity/
+plurality/social literature — has been used to establish structure and design
+direction, with specific numbers remaining approximation debts.
+
+The pattern is right: use literature to design the model, then calibrate from
+primary sources. The calibration work on the non-sleep systems is ongoing debt,
+not a failure of the approach.
 
 ---
 
@@ -351,6 +389,14 @@ score partially maintained, connection quality not) would benefit from grounding
 in the empirical literature on what parasocial contact does and doesn't substitute
 for.
 
+*Used / gap:* Used to establish the concept and design the player-character.md
+section. No simulation parameters derived from it yet — none of the parasocial
+mechanics are implemented. When they are, the empirical literature on what
+parasocial contact actually does to loneliness and wellbeing (does it buffer,
+does it displace, does it depend on reciprocity perception?) needs to feed the
+model. The "social score partially maintained, connection quality not" note is
+a design decision that should eventually be grounded in data.
+
 **Plurality and DID**
 Clinical literature on DID is often pathologising by default and should be read
 critically. Community resources are more useful for the lived experience:
@@ -363,6 +409,13 @@ For DID specifically: the academic literature on misdiagnosis (DID presenting as
 schizophrenia) and the effects of antipsychotics on dissociative systems is
 relevant but contested — needs careful reading. Search terms: "DID misdiagnosis
 antipsychotics", "dissociative identity disorder treatment controversy."
+
+*Used / gap:* Used to design the DID and plurality sections of player-character.md.
+No implementation yet — none of this has fed simulation parameters because the
+system doesn't exist yet. The literature is ahead of the code. When DID chargen
+is built, prevalence data and the constitutional/circumstantial distinction will
+need careful grounding. Community resources should take precedence over clinical
+literature for design choices about how to render the experience.
 
 **Fan communities and fandom**
 The academic field of fan studies has substantial literature. Key entry points:
@@ -384,10 +437,19 @@ The academic field of fan studies has substantial literature. Key entry points:
   *Fic: Why Fanfiction is Taking Over the World* (2013) — broad coverage including
   RPF; specific chapters vary in rigour.
 
+*Used / gap:* Design orientation for player-character.md. No implementation.
+The specific simulation debt — social score contingent on shared object, rupture
+collapsing connection rapidly — needs the empirical literature on how fandom
+collapse actually affects social wellbeing before it can be calibrated.
+
 **Tulpas**
 The tulpa community has extensive self-documentation. The Tulpa.info guides and
 associated Reddit community (r/Tulpas) are primary sources for practice and
 experience, written from inside rather than from clinical observation.
+
+*Used / gap:* Design orientation. No implementation. The community literature
+would be the primary source for how tulpa relationships affect loneliness, social
+need, and identity — relevant when the plurality mechanics are built.
 
 ---
 
