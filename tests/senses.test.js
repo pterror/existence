@@ -15,6 +15,16 @@ const frag = (content, grammatical_type, attention_order = 'ambient') => ({
   trigger_conditions: () => true,
 });
 
+const advFrag = (content, rhetorical_tag, attention_order = 'ambient') => ({
+  id: content.slice(0, 8),
+  content,
+  grammatical_type: 'adverbial',
+  rhetorical_tag,
+  channels: ['sound'],
+  attention_order,
+  trigger_conditions: () => true,
+});
+
 describe('composeFragments — null / empty', () => {
   test('returns null for null input', () => {
     expect(composeFragments(null, 'calm')).toBeNull();
@@ -167,5 +177,92 @@ describe('composeFragments — hint fallback', () => {
       frag('traffic hissing', 'absolute', 'ambient'),
     ], undefined);
     expect(result).toBe('The fridge hums, traffic hissing.');
+  });
+});
+
+describe('composeFragments — adverbials', () => {
+  test('single simultaneous adverbial: connective-led sentence', () => {
+    const result = composeFragments([
+      advFrag('the traffic builds outside', 'simultaneous'),
+    ], 'calm');
+    expect(result).toBe('While the traffic builds outside.');
+  });
+
+  test('calm: main + trailing simultaneous adverbial', () => {
+    const result = composeFragments([
+      frag('The fridge hums', 'main', 'ambient'),
+      advFrag('the traffic builds outside', 'simultaneous', 'ambient'),
+    ], 'calm');
+    expect(result).toBe('The fridge hums, while the traffic builds outside.');
+  });
+
+  test('calm: main + trailing temporal adverbial', () => {
+    const result = composeFragments([
+      frag('The fridge hums', 'main', 'ambient'),
+      advFrag('the room cools around you', 'temporal', 'ambient'),
+    ], 'calm');
+    expect(result).toBe('The fridge hums, as the room cools around you.');
+  });
+
+  test('calm: leading concession adverbial + main', () => {
+    const result = composeFragments([
+      frag('The fridge hums', 'main', 'ambient'),
+      advFrag('nothing is actually wrong', 'concession', 'ambient'),
+    ], 'calm');
+    expect(result).toBe('Although nothing is actually wrong, the fridge hums.');
+  });
+
+  test('calm: leading concession + main + absolute all combined', () => {
+    const result = composeFragments([
+      frag('The fridge hums', 'main', 'ambient'),
+      frag('pipes ticking', 'absolute', 'ambient'),
+      advFrag('nothing is actually wrong', 'concession', 'ambient'),
+    ], 'calm');
+    expect(result).toBe('Although nothing is actually wrong, the fridge hums, pipes ticking.');
+  });
+
+  test('calm: main + absolute + trailing adverbial all combined', () => {
+    const result = composeFragments([
+      frag('The fridge hums', 'main', 'ambient'),
+      frag('pipes ticking', 'absolute', 'ambient'),
+      advFrag('the traffic builds outside', 'simultaneous', 'ambient'),
+    ], 'calm');
+    expect(result).toBe('The fridge hums, pipes ticking, while the traffic builds outside.');
+  });
+
+  test('anxious: adverbial becomes connective-led standalone sentence', () => {
+    const result = composeFragments([
+      frag('The fridge hums', 'main', 'ambient'),
+      advFrag('the traffic builds outside', 'simultaneous', 'ambient'),
+    ], 'anxious');
+    expect(result).toBe('The fridge hums. While the traffic builds outside.');
+  });
+
+  test('overwhelmed: adverbial connective included in polysyndeton chain', () => {
+    const result = composeFragments([
+      frag('the cold', 'fragment', 'involuntary_body'),
+      advFrag('the traffic builds outside', 'simultaneous', 'ambient'),
+    ], 'overwhelmed');
+    expect(result).toBe('the cold and while the traffic builds outside.');
+  });
+});
+
+describe('composeFragments — participles', () => {
+  test('calm: participle in anxious mode becomes standalone sentence', () => {
+    const result = composeFragments([
+      frag('The fridge hums', 'main', 'ambient'),
+      frag('watching the light shift on the wall', 'participle', 'deliberate_visual'),
+    ], 'anxious');
+    // deliberate_visual (1) < ambient (2): participle sentence first
+    expect(result).toBe('watching the light shift on the wall. The fridge hums.');
+  });
+
+  test('overwhelmed: participle included in polysyndeton chain unpunctuated', () => {
+    const result = composeFragments([
+      frag('The fridge hums', 'main', 'ambient'),
+      frag('watching the light shift', 'participle', 'deliberate_visual'),
+    ], 'overwhelmed');
+    // deliberate_visual sorts before ambient
+    expect(result).toBe('watching the light shift and The fridge hums.');
   });
 });

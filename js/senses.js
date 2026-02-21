@@ -33,18 +33,27 @@
  *
  * Authoring conventions for fragment content:
  *   'main'       — full independent clause, no trailing period
- *   'participle' — -ing phrase, no period
- *   'absolute'   — noun + participle/adjective, no period
+ *   'participle' — -ing phrase attached to main clause subject, no period
+ *   'absolute'   — noun + participle/adjective, grammatically free-floating, no period
  *   'fragment'   — NP or adjective fragment, no period
- *   'adverbial'  — subordinate clause (while/as/because), no period
+ *   'adverbial'  — clause body WITHOUT connective, no period.
+ *                  The connective is derived from rhetorical_tag:
+ *                  simultaneous→while, temporal→as, cause→because,
+ *                  concession→although, contrast→though
+ *                  Concession adverbials lead the sentence; all others trail.
  *
  * Ordering rules (attention order): involuntary_body → deliberate_visual → ambient
  *
  * Combination rules by hint:
- *   calm/heightened/flat: main clause root + participials/absolutes comma-attached;
- *     other types become separate sentences ordered by attention priority
- *   anxious/dissociated: each fragment its own sentence, period-separated
- *   overwhelmed: polysyndeton (joined with "and")
+ *   calm/heightened/flat/default:
+ *     - main clause root
+ *     - participle + absolute: comma-attached after main
+ *     - adverbial (concession): leads — "Although [adv], [main, modifiers]."
+ *     - adverbial (other): trails — "[main, modifiers], [conn] [adv]."
+ *     - fragment + extra mains: separate sentences, ordered by attention priority
+ *   anxious/dissociated: each fragment its own sentence; adverbials get
+ *     connective prepended and capitalize
+ *   overwhelmed: polysyndeton (joined with "and"); adverbials keep connective
  *
  * @param {SensoryFragment[]} fragments
  * @param {string} hint — 'calm' | 'anxious' | 'dissociated' | 'overwhelmed' | 'heightened' | 'flat'
@@ -59,57 +68,118 @@ export function composeFragments(fragments, hint) {
     (a, b) => (ORDER[a.attention_order] ?? 1) - (ORDER[b.attention_order] ?? 1)
   );
 
-  if (sorted.length === 1) return ensurePeriod(sorted[0].content);
+  if (sorted.length === 1) return renderSingle(sorted[0]);
 
-  // Overwhelmed: polysyndeton (and…and…)
+  // Overwhelmed: polysyndeton (and…and…); adverbials keep their connective
   if (hint === 'overwhelmed') {
-    return sorted.map(f => stripPunct(f.content)).join(' and ') + '.';
+    return sorted.map(f => renderForPolysyndeton(f)).join(' and ') + '.';
   }
 
-  // Anxious / dissociated: each fragment stands alone as its own sentence
+  // Anxious / dissociated: each fragment its own sentence
   if (hint === 'anxious' || hint === 'dissociated') {
-    return sorted.map(f => ensurePeriod(f.content)).join(' ');
+    return sorted.map(f => renderStandalone(f)).join(' ');
   }
 
   // Calm / heightened / flat / default:
-  // Main clause as root; participials and absolutes comma-attached trailing;
-  // pure fragments and additional mains become separate sentences.
+  // Main clause root; participials + absolutes comma-attached; adverbials
+  // woven in with connective (concession leads, rest trail); fragments
+  // and surplus mains become separate sentences.
   const mainIdx = sorted.findIndex(f => f.grammatical_type === 'main');
   if (mainIdx === -1) {
-    // No main clause — period-separate everything
-    return sorted.map(f => ensurePeriod(f.content)).join(' ');
+    return sorted.map(f => renderStandalone(f)).join(' ');
   }
 
   const main = sorted[mainIdx];
   const rest = sorted.filter((_, i) => i !== mainIdx);
 
-  // Participials and absolutes attach to main clause with trailing comma
-  const modifying = rest.filter(
+  const commaModifiers = rest.filter(
     f => f.grammatical_type === 'participle' || f.grammatical_type === 'absolute'
   );
-  // Everything else becomes a separate sentence
+  const adverbials = rest.filter(f => f.grammatical_type === 'adverbial');
   const standalone = rest.filter(
-    f => f.grammatical_type !== 'participle' && f.grammatical_type !== 'absolute'
+    f => f.grammatical_type !== 'participle' &&
+         f.grammatical_type !== 'absolute' &&
+         f.grammatical_type !== 'adverbial'
   );
 
-  let sentence = stripPunct(main.content);
-  if (modifying.length > 0) {
-    sentence += ', ' + modifying.map(f => stripPunct(f.content)).join(', ');
-  }
-  sentence += '.';
+  // Leading adverbial: concession only ("Although X, main.")
+  const leadingAdv = adverbials.find(f => f.rhetorical_tag === 'concession');
+  // Trailing adverbials: everything else ("[main], while X.")
+  const trailingAdvs = adverbials.filter(f => f.rhetorical_tag !== 'concession');
 
-  // Standalones with higher attention priority than main go before it;
-  // equal or lower priority go after
+  // Build the core sentence: main + comma-modifiers + trailing adverbials
+  let core = stripPunct(main.content);
+  if (commaModifiers.length > 0) {
+    core += ', ' + commaModifiers.map(f => stripPunct(f.content)).join(', ');
+  }
+  for (const f of trailingAdvs) {
+    const conn = CONNECTIVES[f.rhetorical_tag] || 'while';
+    core += ', ' + conn + ' ' + stripPunct(f.content);
+  }
+
+  let sentence;
+  if (leadingAdv) {
+    const conn = CONNECTIVES[leadingAdv.rhetorical_tag] || 'although';
+    // Lowercase first char of core when it follows the adverbial clause
+    const lowerCore = core.charAt(0).toLowerCase() + core.slice(1);
+    sentence = capitalize(conn) + ' ' + stripPunct(leadingAdv.content) + ', ' + lowerCore + '.';
+  } else {
+    sentence = core + '.';
+  }
+
+  // Standalone fragments: higher attention priority than main → before; otherwise after
   const mainOrder = ORDER[main.attention_order] ?? 1;
   const preMains = standalone.filter(f => (ORDER[f.attention_order] ?? 1) < mainOrder);
   const postMains = standalone.filter(f => (ORDER[f.attention_order] ?? 1) >= mainOrder);
 
   const parts = [
-    ...preMains.map(f => ensurePeriod(f.content)),
+    ...preMains.map(f => renderStandalone(f)),
     sentence,
-    ...postMains.map(f => ensurePeriod(f.content)),
+    ...postMains.map(f => renderStandalone(f)),
   ];
   return parts.join(' ');
+}
+
+// Connective words keyed by rhetorical_tag for adverbial fragments
+const CONNECTIVES = {
+  simultaneous: 'while',
+  temporal: 'as',
+  cause: 'because',
+  concession: 'although',
+  contrast: 'though',
+  continuation: 'and',
+};
+
+/** Render a fragment as a standalone sentence (anxious/dissociated/pre-post standalones) */
+function renderStandalone(f) {
+  if (f.grammatical_type === 'adverbial') {
+    const conn = CONNECTIVES[f.rhetorical_tag] || 'while';
+    return capitalize(conn) + ' ' + ensurePeriod(f.content);
+  }
+  return ensurePeriod(f.content);
+}
+
+/** Render for polysyndeton chain (overwhelmed) — strip punct, keep connective for adverbials */
+function renderForPolysyndeton(f) {
+  if (f.grammatical_type === 'adverbial') {
+    const conn = CONNECTIVES[f.rhetorical_tag] || 'while';
+    return conn + ' ' + stripPunct(f.content);
+  }
+  return stripPunct(f.content);
+}
+
+/** Render a single fragment as a complete sentence */
+function renderSingle(f) {
+  if (f.grammatical_type === 'adverbial') {
+    const conn = CONNECTIVES[f.rhetorical_tag] || 'while';
+    return capitalize(conn) + ' ' + ensurePeriod(f.content);
+  }
+  return ensurePeriod(f.content);
+}
+
+/** @param {string} s */
+function capitalize(s) {
+  return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
 /** @param {string} s */
@@ -384,6 +454,126 @@ export function createSenses(ctx) {
       attention_order: 'involuntary_body',
       trigger_conditions: s => s.get('norepinephrine') > 65,
       nt_weight: s => State.lerp01(s.get('norepinephrine'), 65, 85),
+    },
+
+    // === PARTICIPIALS ===
+    // -ing phrases that attach to the main clause's implied subject (the character).
+    // Grammatically, they dangle in literary prose — the implied "you" is acceptable.
+    {
+      id: 'part_watching_light',
+      content: 'watching the light shift on the wall',
+      grammatical_type: 'participle',
+      rhetorical_tag: 'simultaneous',
+      channels: ['sight'],
+      attention_order: 'deliberate_visual',
+      trigger_conditions: () => true,
+      nt_weight: () => 1,
+    },
+    {
+      id: 'part_following_shadow',
+      content: 'following the shadow line across the floor',
+      grammatical_type: 'participle',
+      rhetorical_tag: 'simultaneous',
+      channels: ['sight'],
+      attention_order: 'deliberate_visual',
+      // Not too foggy to track visual movement
+      trigger_conditions: s => s.get('adenosine') < 70,
+      nt_weight: () => 1,
+    },
+    {
+      id: 'part_feeling_weight',
+      content: 'feeling the weight settle into your shoulders',
+      grammatical_type: 'participle',
+      rhetorical_tag: 'simultaneous',
+      channels: ['interoception'],
+      attention_order: 'involuntary_body',
+      trigger_conditions: s => s.get('adenosine') > 55,
+      nt_weight: s => 0.5 + State.lerp01(s.get('adenosine'), 55, 85) * 0.8,
+    },
+    {
+      id: 'part_holding_still',
+      content: 'holding still without deciding to',
+      grammatical_type: 'participle',
+      rhetorical_tag: 'simultaneous',
+      channels: ['interoception'],
+      attention_order: 'involuntary_body',
+      trigger_conditions: s => s.get('adenosine') > 70,
+      nt_weight: s => State.lerp01(s.get('adenosine'), 70, 92),
+    },
+
+    // === ADVERBIALS ===
+    // Clause body WITHOUT connective. Connective derived from rhetorical_tag.
+    // Concession (although) leads; all others trail.
+    {
+      id: 'adv_traffic_outside',
+      content: 'the traffic builds outside',
+      grammatical_type: 'adverbial',
+      rhetorical_tag: 'simultaneous',
+      channels: ['sound'],
+      attention_order: 'ambient',
+      trigger_conditions: () => true,
+      nt_weight: () => 1,
+    },
+    {
+      id: 'adv_rain_glass',
+      content: 'rain comes in against the glass',
+      grammatical_type: 'adverbial',
+      rhetorical_tag: 'simultaneous',
+      channels: ['sound', 'sight'],
+      attention_order: 'ambient',
+      trigger_conditions: s => s.get('rain') === true,
+      nt_weight: () => 1,
+    },
+    {
+      id: 'adv_building_settles',
+      content: 'the building settles',
+      grammatical_type: 'adverbial',
+      rhetorical_tag: 'temporal',
+      channels: ['sound'],
+      attention_order: 'ambient',
+      trigger_conditions: () => true,
+      nt_weight: () => 0.7,
+    },
+    {
+      id: 'adv_room_cools',
+      content: 'the room cools around you',
+      grammatical_type: 'adverbial',
+      rhetorical_tag: 'temporal',
+      channels: ['touch'],
+      attention_order: 'ambient',
+      trigger_conditions: () => true,
+      nt_weight: () => 0.8,
+    },
+    {
+      id: 'adv_day_moving',
+      content: 'the day keeps moving',
+      grammatical_type: 'adverbial',
+      rhetorical_tag: 'contrast',
+      channels: [],
+      attention_order: 'ambient',
+      trigger_conditions: s => s.get('adenosine') > 55,
+      nt_weight: s => State.lerp01(s.get('adenosine'), 55, 80),
+    },
+    {
+      id: 'adv_nothing_wrong',
+      content: 'nothing is actually wrong',
+      grammatical_type: 'adverbial',
+      rhetorical_tag: 'concession',
+      channels: ['interoception'],
+      attention_order: 'ambient',
+      // Triggers when anxious but not overwhelmed — the cognitive mismatch is the point
+      trigger_conditions: s => s.get('gaba') < 45 && s.get('stress') < 55,
+      nt_weight: s => State.lerp01(s.get('gaba'), 45, 20),
+    },
+    {
+      id: 'adv_nothing_to_do',
+      content: "there's nothing that needs doing right now",
+      grammatical_type: 'adverbial',
+      rhetorical_tag: 'concession',
+      channels: [],
+      attention_order: 'ambient',
+      trigger_conditions: s => s.get('stress') < 35,
+      nt_weight: () => 1,
     },
   ];
 
