@@ -425,6 +425,8 @@ export function createGame(ctx) {
         const fromId = World.getLocationId();
         World.travelTo(action.destination);
         responseText = Content.transitionText(fromId, action.destination);
+        const arrivalText = Senses.arrivalSense(); // match live RNG order
+        if (arrivalText) eventTexts.push(arrivalText);
         const events = World.checkEvents();
         generateEventTexts(events, eventTexts);
         Content.generateIncomingMessages();
@@ -1007,8 +1009,9 @@ export function createGame(ctx) {
     // During replay, always execute the move
     const fromId = World.getLocationId();
     World.travelTo(destId);
-    // Consume same RNG as live play
+    // Consume same RNG as live play — order must match handleMove exactly
     Content.transitionText(fromId, destId);
+    Senses.arrivalSense(); // 4 RNG calls or 0, matching live play
   }
 
   /** @param {string} id */
@@ -1173,12 +1176,17 @@ export function createGame(ctx) {
     // Transition text
     const transText = Content.transitionText(travel.from, travel.to);
 
+    // Arrival sense — first-impression observation of new location (RNG consumed synchronously)
+    const arrivalText = Senses.arrivalSense();
+
     // Check events at new location
     const events = World.checkEvents();
 
-    // Generate event text now (consuming RNG synchronously), display later
+    // Generate event text now (consuming RNG synchronously), display later.
+    // Arrival observation goes first — it's the immediate sense of the new place.
     /** @type {string[]} */
     const eventTexts = [];
+    if (arrivalText) eventTexts.push(arrivalText);
     generateEventTexts(events, eventTexts);
 
     // Generate incoming phone messages (consumes RNG)

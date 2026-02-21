@@ -1225,6 +1225,20 @@ export function createSenses(ctx) {
   }
 
   /**
+   * Compose a single first-impression observation for location arrival.
+   * Only the highest-salience source fires — a first impression, not a full passage.
+   * RNG consumption: exactly 4 calls if any source is available; 0 otherwise.
+   * No cooldown — arrival is a distinct context from idle sensing.
+   * @returns {string | null}
+   */
+  function arrivalSense() {
+    const observations = getObservations();
+    if (observations.length === 0) return null;
+    const hint = getStructureHint();
+    return realize(observations.slice(0, 1), hint, getNtCtx(), () => Timeline.random());
+  }
+
+  /**
    * Whether enough game time has passed since last sensory display.
    * Gates UI output only — RNG consumption is always the same regardless.
    * @returns {boolean}
@@ -1239,6 +1253,7 @@ export function createSenses(ctx) {
 
   return {
     sense,
+    arrivalSense,
     canDisplay,
     markDisplayed,
     getStructureHint,

@@ -462,7 +462,11 @@ Pure module that turns `Observation[]` + NT hint → prose string. No game impor
 
 **Tests:** 32 unit tests in `tests/realization.test.js`. Cover null/empty, all five architectures, multi-observation passages, polysyndeton, fixed RNG consumption, NT variation, unknown hint fallback. All passing.
 
-**Wired to game loop** — `sense()` now delegates to `getObservations() → realize()`. Fragment system remains as legacy (fragment library + `composeFragments` still present); observation pipeline is the live path.
+**Wired to game loop** — two contexts:
+- **Idle** — `sense()`: up to 2–3 observations per passage (budget by NT hint), with 12-min cooldown. Fires in `handleIdle`.
+- **Arrival** — `arrivalSense()`: top 1 observation only (first impression of new location), no cooldown. Fires in `handleMove` after `transitionText`, before events. Arrival text is prepended to the event display queue so it appears first, after the location description. RNG consumption matched in `replayMove` and `executeActionForReplay`.
+
+Fragment system remains as legacy (fragment library + `composeFragments` still present); observation pipeline is the live path.
 
 ### Sleep Prose
 Two-phase system: falling-asleep (how sleep came) + waking-up (the gradient back to consciousness). Falling-asleep branches on pre-sleep energy, stress, quality, and duration, with NT shading: adenosine→crash depth, GABA→can't-settle anxiety, NE→hyper-alertness, serotonin→warmth of surrender, melatonin→onset delay (~22 variants). Waking-up branches on post-sleep energy, sleep quality, alarm vs natural wake, time of day (dark/late/morning), mood, sleep debt, and sleep inertia, with NT shading: adenosine→sleep inertia, serotonin→dread-vs-ease, NE→sharp edges, GABA→night dread, debt→cumulative exhaustion (~44 variants). Composed together as a single passage. No numeric hour counts — all qualitative.
