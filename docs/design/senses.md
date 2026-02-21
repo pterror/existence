@@ -603,6 +603,12 @@ Each a different signal, different source:
 - **Pressing** — headache, sinus, internal pressure
 - **Cramping** — muscle or visceral; menstrual cramps, stitch while running, charley horse at 3am waking you from sleep
 
+### Chemical irritants on skin
+
+- **Capsaicin** — activates TRPV1 (heat receptor) in skin; genuine burning sensation without actual heat. Handling chillies without gloves then touching your face — or eyes, which is significantly worse. Fat-soluble, so water doesn't help much; milk or oil works better. The same mechanism as in the mouth (see taste section).
+- **Menthol** — activates TRPM8 (cold receptor); genuine cooling sensation without actual temperature change. Tiger balm, IcyHot, deep heat — the counter-irritant mechanism: replacing one sensation with another. Pain relief partly by distraction, partly by competing sensory signal.
+- Other irritants: plant sap (some highly caustic — giant hogweed causes severe burns on UV exposure), contact allergens, cleaning chemicals on bare hands
+
 ### Small foreign bodies — disproportionate irritation
 
 A category of minor pain disproportionate to size, defined by persistence and difficulty of removal:
