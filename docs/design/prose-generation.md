@@ -93,16 +93,72 @@ The lexical items don't carry the literary weight — the architecture and moves
 
 ### 6. Character voice (dialogue and ambient speech)
 
-For speech by other characters — coworkers, friends — a separate set of parameters governs how their speech is constructed. This is not narration; it has different rules.
+Dialogue is not narration. Different rules, different components. Speech by other characters — coworkers, friends — is constructed from voice parameters generated at chargen from backstory. Not authored per-character.
 
-Voice parameters (working list):
-- **Compression** — how much the speaker drops vs. retains. "Cold enough to make your teeth hurt" vs. "It's really cold out there today."
-- **Subject dropping** — how often subjects are implicit rather than stated
-- **Grammatical register** — which deviations from written standard are characteristic: "me and X," "I seen," double negatives, etc. These come from backstory (class, region, education)
-- **Hesitation features** — false starts, repairs, trails-off, mid-sentence pivots. Cluster around emotionally loaded content.
-- **Speech planning speed** — fluency varies by topic and relationship
+#### Universal spoken deviations
 
-Text message register is separate from spoken register — its own conventions (lowercase, no terminal punctuation, abbreviations).
+Most people's speech deviates from written standard English in ways that carry no regional signal — they're just how people actually talk. These are the baseline, present in everyone to varying degrees:
+
+- **Case in compound subjects**: "me and Sarah went" not "Sarah and I went"
+- **Who/whom**: almost no one uses *whom* in speech
+- **Double negatives**: "didn't do nothing," "can't find it nowhere"
+- **Gonna, wanna, kinda, sorta, tryna** — near-universal contractions
+- **Subject dropping in casual frames**: "Gonna be late." "Didn't think so."
+- **Quotative like**: "And I'm like, why would you even—"
+- **Singular they** in all registers
+- **Sentence-final prepositions**: "the thing I was thinking of"
+- **"Different than"** (not "different from")
+
+The degree to which these appear is a voice parameter — more compressed/casual speech uses them more freely. Higher education or self-consciousness about speech may suppress some of them in formal contexts but not informal ones.
+
+#### Regional and dialect features
+
+Layered on top of universal deviations, and derived from backstory (region, class, upbringing). These are *more* marked than the universal stuff and should be used carefully — they identify a speaker but shouldn't become caricature.
+
+Examples (not exhaustive): "I seen it," "might could," "fixin to," "wicked cold," "youse," "she don't," double modals. The mechanism for generating these is: backstory produces a region parameter, region parameter maps to a small set of characteristic features, features are weighted into the speech construction.
+
+#### Speech planning features
+
+Real-time speech is constructed live and the seams show. These are not errors — they're information about the speaker's relationship to what they're saying.
+
+- **False starts**: "She — no, we were both there." "I thought — I don't know what I thought."
+- **Repair**: "I told him. I said — I don't even remember what I said."
+- **Trailing off**: "I just figured maybe..." — sentence doesn't resolve. The speaker chose not to finish.
+- **Mid-sentence pivot**: "It was good, it was — I don't know, it was fine."
+- **Brain catching up**: starts the sentence before knowing where it's going. "The thing with — yeah, the whole thing is just—"
+- **Self-interruption / change of mind**: "I should probably — never mind."
+- **Getting cut off**: sentence stops mid-construction, either by another speaker or by the speaker deciding not to say it.
+
+**Clustering rules**: hesitation and false starts cluster around emotionally loaded content, topics the speaker hasn't decided they want to discuss, things being said to authority figures. Fluency is higher with close friends and on familiar topics. Emotional state from NT parameters affects baseline fluency — high stress produces more repair, more trails-off.
+
+**Punctuation as phonetic notation**: em dash for interruption or mid-sentence pivot; ellipsis for trailing off or suspension; comma-then-restart for repair. These are not stylistic choices — they notate how the speech actually moved.
+
+#### Slang and vernacular
+
+Generation-specific and subculture-specific vocabulary. Hard to author because it dates. Treat as a separate lightweight lexical layer — a small set of current-register words that can slot into constructions. Needs more thought; likely authoring rather than generation.
+
+#### Humor: deadpan and sarcasm
+
+Humor without an LLM is hard but not impossible for constrained forms.
+
+**Deadpan** works by construction: state something absurd or extreme in a completely flat register, no signaling that it's funny. "you alive or did your apartment finally consume you" is deadpan — "finally consume you" is the move, stated as a natural continuation of a serious question. The construction is: [ordinary framing] + [extreme/absurd predicate stated without escalation]. The humor lives in the gap between the register and the content.
+
+**Sarcasm** works by inversion: state the opposite of what's true using positive register. "Oh great" when something is bad. Constructable if you know the situation is negative and have a small set of positive-register frames to invert. Requires knowing the social relationship — sarcasm doesn't work between strangers.
+
+**Wry observation**: noticing something absurd about a situation and stating it plainly. "the same volume as everything else" is wry — it names the overwhelm in a way that's also a little funny because of how accurate it is. This is the interpretive escape move applied to absurdity.
+
+These forms are constructable without an LLM if the rules are right. Genuinely novel jokes are not constructable without one.
+
+#### Text message register
+
+Separate from spoken register — its own conventions:
+
+- Lowercase throughout, or mostly
+- No terminal punctuation (a period in a text reads as cold or passive-aggressive)
+- Abbreviations where authentic to the character's generation/style
+- Typos or autocorrect artifacts as texture (not modeled yet)
+- The "..." as its own gesture — trailing, or ominous, depending on context
+- Short messages are the default; length signals either effort or rambling
 
 Voice parameters should be generated at chargen from backstory, not authored per-character.
 
