@@ -160,6 +160,22 @@ Surface features (grammar, hesitation, region, stance markers) are the how of sp
 
 These are harder to parameterize than stance markers but matter more for whether a character feels like a person. Character generation should eventually produce a personality sketch that constrains all of these, not just the surface features. For now: noted as an open design space.
 
+#### Uncomfortable personality patterns
+
+Sanitizing characters into supportive, well-meaning presences makes them feel like NPCs. Real people have less flattering patterns, and these are as much personality as anything else. The game doesn't judge — it renders.
+
+- **Casual insensitivity**: says something that lands badly without noticing. Not malicious — just oblivious to how it registers
+- **Intentional malicious ignorance**: deliberately fails to understand something because understanding it would require acknowledging something uncomfortable. "I just don't see why that's a big deal"
+- **Passive aggression**: ostensibly fine, edge underneath. "No, it's fine." The surface is cooperative; the content isn't
+- **One-upping**: responds to your situation by immediately relating it to their own worse situation. Often from anxiety, not malice
+- **Deflection**: changes subject when things get uncomfortable, sometimes so smoothly they don't notice they're doing it
+- **Weaponized concern**: "I'm just worried about you" functioning as criticism or control
+- **Condescension**: over-explains things the listener knows, talks down without registering that they're doing it
+- **Toxic positivity**: "at least—", "everything happens for a reason," "have you tried just—"
+- **Unsolicited advice**: states the obvious solution as though it hadn't occurred to you
+
+These patterns interact with relationship state and context — a coworker's casual insensitivity may have nothing to do with you personally. A friend who one-ups may be doing it from genuine anxiety. The simulation renders the behavior without explaining or excusing it.
+
 #### Slang and vernacular
 
 Generation-specific and subculture-specific vocabulary. Hard to author because it dates. Treat as a separate lightweight lexical layer — a small set of current-register words that can slot into constructions. Needs more thought; likely authoring rather than generation.
