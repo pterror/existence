@@ -36,16 +36,27 @@ space — you don't know what's missing.
 **No explicit goals.** Already implemented. The game doesn't tell you what to do
 or what winning looks like. The day has to be lived, not optimized.
 
-**Hidden backstory.** Not yet implemented. If the player doesn't know the
-character's history, they can't optimize from it. They can't think "my character
-has financial anxiety, so I should prioritize money." They just notice, over time,
-that certain things create a specific kind of unease — the same way you'd notice
-things about yourself without being able to narrate the cause. The backstory drives
-the simulation invisibly. The player experiences the outputs without access to the
-inputs.
+**Hidden backstory.** Not yet implemented — and should be opt-in, not mandatory.
+Two valid modes, not a hierarchy:
 
-This is the principle extended inward: not just "you can't see the simulation's
-numbers" but "you can't see the history those numbers came from."
+*Visible backstory (sandbox mode):* The player knows who they are and where they
+came from. They can watch cause and effect play out from a position of knowledge —
+observe how the financial history shapes anxiety, how the personality parameters
+bend the emotional drift. More like reading a novel with the character's history
+in hand. A legitimate experience in its own right: the simulation is the thing,
+and understanding it is part of the pleasure.
+
+*Hidden backstory (immersion mode):* The player has no narrative access to the
+history that generated the character. They can't think "my character has financial
+anxiety, so I should prioritize money" — they just notice, over time, that certain
+things create a specific kind of unease. The backstory drives the simulation
+invisibly; the player experiences the outputs without the inputs. The principle
+extended inward: not just "you can't see the simulation's numbers" but "you can't
+see the history those numbers came from."
+
+Both modes run the same simulation. The difference is what the player is given to
+start with. The chargen screen could make this explicit — present the generated
+backstory, then ask whether to reveal it or seal it.
 
 ---
 
