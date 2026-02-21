@@ -573,4 +573,62 @@ The neurochemistry becoming bodily experience — the body knowing before the co
 - Dopamine low → interoceptive signals may not motivate action — feel hungry, don't eat anyway
 
 ## Nociception (pain)
-*— not yet covered*
+
+Pain is not one thing — it has distinct qualities that carry different information about source and type.
+
+### Acute pain
+
+- Sharp, sudden, localised — a cut, a burn, stubbing a toe. Clear signal, clear source.
+- The reflex before the pain — hand off the hot pan, then the pain arrives
+- The moment of impact where you don't know yet how bad it is — the held breath before assessment
+- Pain delay in serious injury — nerve endings damaged; the moment feels wrong before it hurts, then it catches up
+
+### Chronic pain
+
+Fundamentally different from acute — not a signal about damage happening now, but the pain system itself dysregulated:
+- Aching, dull, persistent — background noise that doesn't stop
+- Reshapes everything around it — what you can do, how long, what you're planning around
+- Fatigue from pain — being in pain is exhausting even when nothing else is happening
+- The psychological weight of pain that doesn't end — hope, accommodation, despair
+- The way you stop mentioning it because there's nothing new to say
+
+### Pain qualities
+
+Each a different signal, different source:
+- **Burning** — chemical, thermal, nerve
+- **Stabbing** — sharp, localised, acute
+- **Aching** — diffuse, muscular, chronic
+- **Throbbing** — follows heartbeat; inflammation, infection, bruise
+- **Shooting** — travels along a nerve path; sciatica, trapped nerve, referred pain
+- **Pressing** — headache, sinus, internal pressure
+- **Cramping** — muscle or visceral; menstrual cramps, stitch while running, charley horse at 3am waking you from sleep
+
+### Small foreign bodies — disproportionate irritation
+
+A category of minor pain disproportionate to size, defined by persistence and difficulty of removal:
+- **Splinters** — embedded in skin, often invisible, have to find by feel or light angle; the specific frustration of something that small being that stubborn
+- **Sugarcane fibers / fine plant hairs** — the tiny fibers around the stem that embed in fingers; too many to remove individually, too fine to easily see, persistent collective irritation
+- **Ingrown hairs** — inflammation around a hair growing the wrong direction; tender, localised, satisfying or deeply unsatisfying to address depending on outcome
+- **Stray hairs stabbing in** — a hair landing point-first on skin, falling into an eye, getting between teeth; disproportionate response to something weightless
+
+The common thread: small, hard to locate, persistent, often requiring more effort to remove than seems reasonable. The frustration is part of the experience.
+
+### The social dimension of pain
+
+- Chronic pain invisible to others — fibromyalgia, endometriosis, back pain, migraines
+- Not being believed — particularly for conditions that are invisible, common in women, or recently named
+- Performing wellness when you're not — the energy cost of pretending, of not making others uncomfortable
+- Pain tolerance as variable — constitutional, contextual (adrenaline can suppress acute pain), cultural
+
+### Character-side conditions
+- **Fibromyalgia** — widespread chronic pain, fatigue, cognitive fog; mechanically real but often disbelieved; predominantly affects women
+- **Endometriosis** — chronic pelvic pain, severe menstrual pain; average 7–10 years to diagnosis; invisible, often dismissed
+- **Chronic back/joint pain** — circumstantial (injury, occupation, age); reshapes daily movement and capacity
+- **CIP (congenital insensitivity to pain)** — cannot feel pain; sounds like a superpower, is actually dangerous; wounds go unnoticed, damage accumulates
+- **Hyperalgesia/allodynia** — pain system upregulated; things that shouldn't hurt do, or hurt more than they should; associated with fibromyalgia, nerve damage, opioid overuse
+
+### NT modulation
+- Cortisol/stress → pain threshold lowers; things hurt more when already stressed
+- Adrenaline/NE high → acute pain suppressed (injury during high arousal noticed later)
+- Depression → pain perception heightened; the system more sensitive, less buffered
+- Adenosine high → dull aching quality to fatigue that borders on pain
