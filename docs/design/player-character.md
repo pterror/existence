@@ -358,6 +358,44 @@ fully filling the social need — producing a specific low-grade deficit that's
 hard to name. Social score partially maintained, connection quality not. The gap
 between those two things is where the feeling lives.
 
+*Fan communities* — where the one-directional parasocial attachment gets a social
+structure around it. The parasocial relationship is you and the object; the fan
+community is you, the object, and everyone else who relates to it the same way.
+Distinct from pure parasocial in that the relationships inside the community are
+real and do fill the social need — but they're organised around and often dependent
+on the shared object.
+
+Things fan communities produce that parasocial relationships alone don't:
+
+Real relationships mediated through shared attachment — friendships that are
+genuine but contingent. What happens when you fall out of the fandom, or the
+creator does something that breaks the attachment for you but not for your friends?
+
+Identity as fan — for many people fandom is identity-constitutive, not just
+descriptive. Leaving can feel like losing part of yourself, not just an interest.
+
+Fan labour — fanfic, fanart, analysis, community moderation, event organisation.
+Real creative and emotional work done in service of something the creator may not
+even know exists. The labour is real; recognition is absent or asymmetric.
+
+Fandom as found family — particularly for people isolated in other parts of their
+life. The community fills social needs that geography or circumstance makes
+otherwise difficult. The fandom may be the primary social world.
+
+Purity culture and internal conflict — fan communities develop their own norms
+and enforce them intensely. Who's a real fan, who's problematic, what's acceptable
+to enjoy. The community that provides belonging also polices it.
+
+Creator-fandom rupture — the creator does something that breaks the community.
+The shared object becomes contested or lost. The social structure built around it
+destabilises. Grief for the community compounds grief for the object.
+
+Simulation note: fan community membership has real connection quality — unlike
+pure parasocial consumption it does fill the social need. But the social score is
+partially contingent on the shared object remaining intact. A rupture event can
+collapse social connection rapidly in a way that has no good equivalent elsewhere
+in the current model.
+
 *Roleplay immersion and character bleed* — adjacent to writer's-character headmates
 but the mechanism runs in the opposite direction. A writer authors a character who
 develops independent presence (character comes toward the writer). A roleplayer

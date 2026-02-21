@@ -162,6 +162,20 @@ schizophrenia) and the effects of antipsychotics on dissociative systems is
 relevant but contested — needs careful reading. Search terms: "DID misdiagnosis
 antipsychotics", "dissociative identity disorder treatment controversy."
 
+**Fan communities and fandom**
+The academic field of fan studies has substantial literature. Key entry points:
+- Henry Jenkins, *Textual Poachers* (1992) — foundational fan studies text,
+  participatory culture, fan labour. Dated in some respects but still the
+  standard starting point.
+- Abigail De Kosnik, *Rogue Archives* (2016) — fan labour, digital preservation,
+  the work fans do that institutions don't.
+- Fandom as found family and identity: fan studies journals (Transformative Works
+  and Cultures — open access) have extensive recent work on fandom and identity,
+  particularly for marginalised communities for whom found-family fandom is primary.
+- Creator-fandom rupture: no single canonical text, but well-documented in
+  journalism and fan studies. Search: "fan community collapse", "creator fandom
+  betrayal", parasocial rupture.
+
 **Tulpas**
 The tulpa community has extensive self-documentation. The Tulpa.info guides and
 associated Reddit community (r/Tulpas) are primary sources for practice and
