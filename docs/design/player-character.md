@@ -319,6 +319,24 @@ is a different world entirely — something the simulation doesn't currently mod
 anywhere. Their partial knowledge of the real world isn't amnesia or alter-boundary;
 it's ontological. They're oriented toward a world that isn't here.
 
+*Roleplay immersion and character bleed* — adjacent to writer's-character headmates
+but the mechanism runs in the opposite direction. A writer authors a character who
+develops independent presence (character comes toward the writer). A roleplayer
+performs a character who starts to bleed into the default self (roleplayer goes
+toward the character). The result can be similar; the directionality differs.
+
+Character bleed: the character's emotional state persisting after the scene ends,
+their speech patterns surfacing in ordinary conversation, their perspective
+intruding on the roleplayer's own reactions. At high intensity or over long
+duration it can feel less like playing a character and more like hosting one —
+the question of who's running things becoming genuinely unclear.
+
+The social dimension distinguishes this from solo writing: roleplay exists in
+relation to other characters and other players. The relational context anchors
+the presence more strongly than solo authorship would. The character has a history
+of interactions, relationships, conflicts — a weight of accumulated presence that
+wasn't generated alone and can't be dissolved alone either.
+
 Mechanically, non-trauma plurality requires a different chargen model — not
 assigning from trauma-derived prevalence data, and potentially allowing the player
 to construct or acknowledge headmates rather than discover them. The co-fronting,
