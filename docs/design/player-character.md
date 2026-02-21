@@ -201,6 +201,47 @@ means this blended, negotiated state becomes less available. Alters that were
 co-fronting to cooperate lose that channel. Whether that reads as calm or as
 loss depends entirely on the system.
 
+**Headmates who aren't alters**
+
+The DID model covers one origin of plurality. The broader plurality community
+includes systems that didn't form through trauma at all — and the game's
+no-judgment principle applies here more visibly than almost anywhere else. The
+simulation shouldn't treat plurality as inherently a disorder.
+
+Some distinct categories:
+
+*Tulpas* — deliberately created through sustained focused practice. The tulpa
+develops their own personality, perspective, and agency over time. Origin is
+intentional rather than trauma-response, with roots in Tibetan Buddhist practice
+adopted and developed independently by the modern tulpa community. The relationship
+with the host is typically known and cooperative from the start — no discovery arc,
+no amnesia, often high inter-headmate communication.
+
+*Endogenic systems* — plural without a trauma history. The clinical model ties
+plurality to trauma (DID/OSDD), but many people identify as plural without that
+origin. Contested in psychology; real as a self-identification. The plurality is
+simply how they are.
+
+*Walk-ins* — headmates experienced as having arrived at some point rather than
+always having been present. The system composition changes over time.
+
+*Soulbonds* — headmates perceived as connected to fictional characters or real
+people. A distinct presence with their own perspective that originated outside
+the person.
+
+Mechanically, non-trauma plurality requires a different chargen model — not
+assigning from trauma-derived prevalence data, and potentially allowing the player
+to construct or acknowledge headmates rather than discover them. The co-fronting,
+partial knowledge, and emotional-contradiction mechanics from the DID section may
+all apply, but without the hidden-discovery narrative arc and without the amnesia
+dynamics.
+
+The antipsychotic question cuts differently here too. If the plurality isn't
+pathological, the medical system's framing is wrong in a different way than the
+DID misdiagnosis case — not "treating the wrong condition" but "treating something
+that isn't a condition." The suppression of inter-headmate communication is the
+same mechanical effect; the context around it is completely different.
+
 **Antipsychotics and inter-alter communication**
 
 This is contested and requires careful handling. Some people with DID report that
