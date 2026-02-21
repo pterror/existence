@@ -247,6 +247,7 @@ The rhythmic texture of prose — independent of content. These are styles that 
 
 - **Staccato**: short. Clipped. One thing. Next thing. No connective tissue between sentences. Percussive. Each sentence complete in itself with no reach toward the next. Can be anxiety, focus, shock, or flat determination — rhythm alone doesn't specify the state, but it contributes.
 - **Flowing**: sentences that move through subordination and modification without interruption. Observations connect to each other causally or temporally. The reader is carried.
+- **Continuous / stream**: the prose doesn't really stop. Periods come but don't break the movement — one observation slides into the next without hard demarcation. Subordinate clauses open new subordinate clauses. The boundary between self and environment blurs. The paragraph breathes as a single extended movement rather than a sequence of discrete sentences. Literary model: Woolf, Robinson at her most absorbed. Not the same as accumulating (which adds to a main clause) — the whole passage is one ongoing thing.
 - **Accumulating**: sentences that keep adding — participials, appositives, trailing clauses — past the point where they could have stopped. The observation keeps finding more to say. Characteristic of heightened states.
 - **Flooding**: polysyndeton, no hierarchy, everything arrives at the same priority. The sentence can't end because there's always another thing. Overwhelm.
 - **Floating**: observations that don't connect. Things placed next to each other with no causal or temporal glue. The mind isn't organizing what it receives. Dissociation.
@@ -260,6 +261,9 @@ Every distinct experiential state has a corresponding prose texture. This is the
 
 **Calm** (baseline, adequate sleep, moderate NT)
 Long sentences with subordination. Cause-effect sequencing. Observations zoom in. Interpretive escape available — the prose can reach toward meaning. The world is organized.
+
+**Deep calm / absorbed** (high GABA, low NE, settled attention)
+Continuous. The prose doesn't stop — observations flow into each other without hard breaks. The self is present but quiet; nothing is arriving uninvited. Subordination opens into further subordination. The opposite of staccato not just in sentence length but in the quality of attention: nothing interrupts, nothing insists on itself. Late-evening tired-but-not-crashed, or meditative absorption, or the particular state of being somewhere comfortable with nothing urgent.
 
 **Heightened / ecstatic** (high serotonin + dopamine + NE)
 Sentences that keep going past where they could have stopped. Accumulating participials. The world is vivid and specific — details register that normally wouldn't. Things are noticed *as* beautiful or interesting, not just present.
