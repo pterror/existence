@@ -396,6 +396,50 @@ partially contingent on the shared object remaining intact. A rupture event can
 collapse social connection rapidly in a way that has no good equivalent elsewhere
 in the current model.
 
+*Real person fiction (RPF)* — fan fiction written about real people rather than
+fictional characters. Usually celebrities, musicians, athletes — people the writer
+has a parasocial relationship with. RPF sits at the intersection of the two
+previous entries: the subject of the parasocial attachment becomes the subject of
+the fiction.
+
+The epistemic situation is specific. The writer knows the version they're writing
+is constructed — they don't have access to who this person actually is, only to
+the public-facing persona accumulated through consumption. But writing someone
+extensively, giving them voice, imagining their interiority, creates a felt sense
+of knowing them that exceeds what pure consumption produces. The constructed
+version can feel more intimate than the real one, because you built it.
+
+The exposure asymmetry is different from both parasocial consumption and regular
+fan fiction. Writing fiction about a fictional character carries no ethical
+exposure to a real person. Watching a creator's content exposes nothing. RPF
+produces something about a real person who could, in principle, find it — and
+who didn't agree to be the subject. The writer typically knows this; it's usually
+held in tension rather than resolved. Community norms around what's acceptable
+(no real-person explicit content posted publicly, no "tinhatting" — treating
+fiction as real) are partly responses to this exposure risk.
+
+Shipping — romantic or romantic-coded RPF — adds another layer. The feelings
+driving the fiction may be genuine: a parasocial attachment that has developed
+enough emotional weight that the writer processes it through narrative. The
+fictional version of the person becomes a stable object for attachment that
+the real person can't be. Grief at asymmetry applies here in a specific form:
+the fictional version is responsive, present, knowable; the real person is
+structurally inaccessible.
+
+The canon/fanon split applied to a real person: "canon" is the documented public
+record; "fanon" is community consensus about who they are that may have little
+to do with evidence. The gap between the two is where most RPF lives. The
+community builds a shared constructed person — consistent enough across fics to
+have accumulated lore, characterisation, internal relationships — that is
+genuinely a collective fiction even when its subject is real.
+
+Simulation note: for a character who writes RPF, the fiction-writing process is
+itself emotional processing — not just exposure to parasocial content but active
+production. The constructed intimacy of authorship means the parasocial attachment
+may run deeper than consumption-only attachment while being even further from
+anything reciprocal. It also means creative block or the writing going wrong can
+be emotionally significant in ways that differ from other kinds of writing.
+
 *Roleplay immersion and character bleed* — adjacent to writer's-character headmates
 but the mechanism runs in the opposite direction. A writer authors a character who
 develops independent presence (character comes toward the writer). A roleplayer
@@ -455,7 +499,8 @@ the DID system is built — it can't be approximated as a simple NT modifier.
 
 ## The through-line
 
-All of these — hidden stats, opaque constraints, hidden backstory, amnesia, DID —
+All of these — hidden stats, opaque constraints, hidden backstory, amnesia, DID,
+parasocial relationships, RPF —
 are expressions of the same design principle: **the player should have no more
 information about the character than the character has about themselves.**
 

@@ -175,6 +175,12 @@ The academic field of fan studies has substantial literature. Key entry points:
 - Creator-fandom rupture: no single canonical text, but well-documented in
   journalism and fan studies. Search: "fan community collapse", "creator fandom
   betrayal", parasocial rupture.
+- RPF ethics: no canonical academic treatment. Community norms documented in fan
+  studies journals and fan wikis. Central tension: using a real person as fiction
+  subject without consent vs. fiction as clearly-framed imaginative construction.
+  Search: "real person fiction ethics", "RPF fanfiction". Anne Jamison,
+  *Fic: Why Fanfiction is Taking Over the World* (2013) — broad coverage including
+  RPF; specific chapters vary in rigour.
 
 **Tulpas**
 The tulpa community has extensive self-documentation. The Tulpa.info guides and
