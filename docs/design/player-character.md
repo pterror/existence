@@ -236,6 +236,26 @@ already doing for everyone, taken seriously. The question is whether the prose a
 available actions reflect that the variation has internal structure — that today's
 colouring isn't random drift but a recognisable part coming through.
 
+*Coalescence from prior plurality* — median systems can form from more distinct
+plural systems moving toward less boundaried states over time. Parts that used to
+fully switch now bleed; walls between them became permeable rather than removed.
+The parts didn't disappear — they became less separated. Residual emotional
+differentiation remains, shared memory is more accessible, but the distinct
+presences are still traceable in the texture of experience.
+
+This is distinct from clinical integration ("becoming one person"), which is
+contested as a treatment goal for exactly this reason — many systems resist it not
+because they haven't done the work but because parts don't want to stop existing,
+and singularity imposed on a functional plural system causes its own harm.
+Coalescence is movement along the spectrum, not arrival at an endpoint.
+
+Two variants: coalescence from trauma-origin plurality (DID/OSDD system becoming
+more median, parts still carrying different emotional ownership of the past) and
+coalescence from non-trauma plurality (endogenic or tulpa systems where parts
+became less distinct through closeness or shared experience rather than therapeutic
+intervention). Mechanically both suggest parameter sets that are partly blended,
+partly distinct — and the degree of blending as a variable that can itself shift.
+
 **Headmates who aren't alters**
 
 The DID model covers one origin of plurality. The broader plurality community
