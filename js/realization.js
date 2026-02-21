@@ -97,6 +97,11 @@ const LEX = {
       { text: 'something', w: nt => nt.aden > 0.5 ? 1.5 : 0.4 },
       { text: 'the hum', w: 0.5 },
     ],
+    flat_descriptions: [
+      { text: 'The fridge hummed.', w: nt => nt.serotonin < 0.4 && nt.dopamine < 0.4 ? 1.2 : 0.2 },
+      'It had been going the whole time.',
+      { text: 'The fridge was the fridge.', w: nt => nt.serotonin < 0.35 ? 1.0 : 0.1 },
+    ],
   },
 
   pipes: {
@@ -232,6 +237,16 @@ const LEX = {
       { text: 'cold floor', w: (nt, obs) => obs.properties.thermal?.cold ? 0.8 : 0 },
       { text: 'stuffy', w: (nt, obs) => obs.properties.thermal?.warm && nt.gaba < 0.4 ? 1.0 : 0 },
     ],
+    character_predicates: [
+      { text: 'lived in the floor',        w: (nt, obs) => obs.properties.thermal?.cold ? 1.5 : 0.1 },
+      { text: 'came from the window',      w: (nt, obs) => obs.properties.thermal?.cold ? 1.2 : 0.1 },
+      { text: 'had been there all night',  w: (nt, obs) => obs.properties.thermal?.cold ? 1.0 : 0.1 },
+      { text: 'sat in the room',           w: nt => nt.gaba > 0.5 ? 0.8 : 0.2 },
+    ],
+    flat_descriptions: [
+      { text: 'The room was cold.',  w: (nt, obs) => obs.properties.thermal?.cold && nt.serotonin < 0.4  ? 1.5 : 0.1 },
+      { text: 'Still cold.',         w: (nt, obs) => obs.properties.thermal?.cold && nt.serotonin < 0.35 ? 1.2 : 0.1 },
+    ],
   },
 
   fatigue: {
@@ -277,6 +292,30 @@ const LEX = {
       { text: 'the body, heavy', w: nt => nt.aden > 0.80 ? 1.0 : 0.1 },
       { text: 'still tired', w: nt => nt.aden > 0.65 ? 0.8 : 0.1 },
     ],
+    reframe_pairs: [
+      { rough: 'tired',  precise: 'somewhere past it',          w: nt => nt.aden > 0.7  ? 1.5 : 0.5 },
+      { rough: 'heavy',  precise: 'dissolved',                  w: nt => nt.aden > 0.8  ? 1.5 : 0.3 },
+      { rough: 'sleepy', precise: 'something further along',    w: nt => nt.aden > 0.65 ? 1.0 : 0.3 },
+      { rough: 'tired',  precise: 'just behind everything',     w: nt => nt.aden > 0.6  ? 0.8 : 0.2 },
+    ],
+    character_predicates: [
+      { text: 'lived in the limbs',                    w: nt => nt.aden > 0.65 ? 1.5 : 0.5 },
+      { text: 'had settled into the shoulders',        w: nt => nt.aden > 0.6  ? 1.2 : 0.4 },
+      { text: 'had been there since before she woke',  w: nt => nt.aden > 0.7  ? 1.0 : 0.2 },
+      { text: 'had its own weight',                    w: nt => nt.aden > 0.65 ? 1.0 : 0.3 },
+      { text: "wasn't going anywhere",                 w: nt => nt.serotonin < 0.4 ? 1.0 : 0.3 },
+      { text: 'was there when she checked',            w: 0.5 },
+    ],
+    flat_descriptions: [
+      { text: 'Still tired.',             w: nt => nt.aden > 0.65 ? 1.5 : 0.3 },
+      { text: 'The body was what it was.', w: nt => nt.serotonin < 0.35 ? 1.2 : 0.2 },
+      { text: 'Heavy in the same way.',   w: nt => nt.aden > 0.7  ? 1.0 : 0.2 },
+    ],
+    inversion_conditions: [
+      { text: 'but only when she stopped moving',          w: nt => nt.aden > 0.65 ? 1.5 : 0.3 },
+      { text: 'but only when she had a second to notice',  w: 0.7 },
+      { text: 'but only when she sat down',                w: nt => nt.aden > 0.6  ? 1.0 : 0.3 },
+    ],
   },
 
   hunger_signal: {
@@ -321,6 +360,26 @@ const LEX = {
       { text: 'hollow', w: (nt, obs) => obs.properties.interoception?.hollow ? 1.5 : 0.1 },
       { text: 'the stomach', w: (nt, obs) => obs.properties.interoception?.gnawing ? 0.8 : 0.2 },
     ],
+    reframe_pairs: [
+      { rough: 'hungry',      precise: 'empty in a specific way',       w: (nt, obs) => obs.properties.interoception?.hollow  ? 1.5 : 0.5 },
+      { rough: 'hungry',      precise: 'past it and into something else', w: (nt, obs) => obs.properties.interoception?.gnawing ? 1.2 : 0.2 },
+      { rough: 'just hungry', precise: 'running on nothing',            w: 0.6 },
+    ],
+    character_predicates: [
+      { text: 'had its own schedule',              w: (nt, obs) => obs.properties.interoception?.gnawing ? 1.5 : 0.5 },
+      { text: "wasn't going anywhere",             w: 1.0 },
+      { text: 'made itself specific',              w: (nt, obs) => obs.properties.interoception?.hollow  ? 1.2 : 0.3 },
+      { text: 'had been making its case for a while', w: (nt, obs) => obs.properties.interoception?.gnawing ? 1.0 : 0.2 },
+      { text: 'lived somewhere below the ribs',   w: (nt, obs) => obs.properties.interoception?.hollow  ? 1.0 : 0.3 },
+    ],
+    flat_descriptions: [
+      { text: 'Still hungry.',     w: nt => nt.serotonin < 0.4 ? 1.5 : 0.3 },
+      'Hunger was hunger.',
+    ],
+    inversion_conditions: [
+      { text: 'but only when she thought about food',  w: (nt, obs) => obs.properties.interoception?.low_grade ? 1.5 : 0.3 },
+      { text: 'but only when she stopped to notice',   w: 0.8 },
+    ],
   },
 
   anxiety_signal: {
@@ -362,6 +421,23 @@ const LEX = {
       { text: 'something', w: 0.6 },
       { text: 'braced', w: nt => nt.ne > 0.65 ? 1.0 : 0.2 },
       { text: 'the chest, tight', w: nt => nt.gaba < 0.35 ? 1.0 : 0.1 },
+    ],
+    reframe_pairs: [
+      { rough: 'anxious',   precise: 'running ahead of itself',        w: nt => nt.ne > 0.65  ? 1.5 : 0.4 },
+      { rough: 'nervous',   precise: 'already past the thing',         w: nt => nt.ne > 0.6   ? 1.2 : 0.3 },
+      { rough: 'anxious',   precise: 'looking for something to fix on', w: nt => nt.gaba < 0.35 ? 1.0 : 0.3 },
+      { rough: 'unsettled', precise: 'in a way that had no object',    w: nt => nt.gaba < 0.4  ? 0.8 : 0.2 },
+    ],
+    character_predicates: [
+      { text: 'had been running before this',        w: nt => nt.ne > 0.65   ? 2.0 : 0.3 },
+      { text: 'had no object for any of this',       w: nt => nt.gaba < 0.35 ? 1.5 : 0.3 },
+      { text: 'lived somewhere in the chest',        w: nt => nt.gaba < 0.4  ? 1.2 : 0.3 },
+      { text: 'was ahead of wherever this was going', w: nt => nt.ne > 0.6   ? 1.2 : 0.2 },
+      { text: "wouldn't settle",                     w: nt => nt.gaba < 0.4  ? 1.0 : 0.3 },
+    ],
+    inversion_conditions: [
+      { text: "but only when she stopped thinking about it", w: nt => nt.gaba < 0.4 ? 1.2 : 0.4 },
+      { text: "but only when she wasn't paying attention",   w: nt => nt.ne > 0.6   ? 1.0 : 0.3 },
     ],
   },
 
@@ -466,6 +542,16 @@ const LEX = {
       { text: 'the air', w: 0.5 },
       { text: 'heat', w: (nt, obs) => obs.properties.thermal?.warm ? 0.7 : 0 },
     ],
+    reframe_pairs: [
+      { rough: 'cold', precise: "sharp, the kind that lands before you're ready", w: (nt, obs) => obs.properties.thermal?.cold      ? 1.5 : 0 },
+      { rough: 'cold', precise: 'committed to it',                               w: (nt, obs) => obs.properties.thermal?.very_cold  ? 1.2 : 0 },
+    ],
+    character_predicates: [
+      { text: 'arrived before anything else',  w: (nt, obs) => obs.properties.thermal?.cold ? 1.5 : 0.3 },
+      { text: 'found the face first',          w: (nt, obs) => obs.properties.thermal?.cold ? 1.2 : 0.2 },
+      { text: 'sat on the back of the neck',   w: (nt, obs) => obs.properties.thermal?.cold ? 1.0 : 0.2 },
+      { text: 'lived in the hands',            w: (nt, obs) => obs.properties.thermal?.cold ? 0.8 : 0.1 },
+    ],
   },
 
   wind: {
@@ -551,6 +637,11 @@ const LEX = {
       { text: 'wet', w: nt => nt.ne > 0.55 ? 0.8 : 0.3 },
       { text: 'still raining', w: nt => nt.serotonin < 0.4 ? 1.0 : 0.2 },
     ],
+    flat_descriptions: [
+      'The rain was still the rain.',
+      { text: "It hadn't stopped.", w: nt => nt.serotonin < 0.4 ? 1.5 : 0.3 },
+      { text: 'Rain.',              w: nt => nt.serotonin < 0.35 ? 1.0 : 0.1 },
+    ],
   },
 
   // === APARTMENT: VISUAL ===
@@ -594,6 +685,11 @@ const LEX = {
       { text: 'light', w: (nt, obs) => !obs.properties.sight?.dark ? 0.8 : 0 },
       { text: 'the window', w: 0.5 },
       { text: 'going dark', w: (nt, obs) => obs.properties.sight?.dimming ? 1.2 : 0 },
+    ],
+    flat_descriptions: [
+      { text: 'The light was the light.',   w: (nt, obs) => obs.properties.sight?.grey && nt.serotonin < 0.4 ? 1.5 : 0.1 },
+      { text: 'Same light.',                w: nt => nt.serotonin < 0.35 ? 1.0 : 0.2 },
+      { text: 'Grey, the committed kind.',  w: (nt, obs) => obs.properties.sight?.grey && nt.serotonin < 0.45 ? 1.2 : 0 },
     ],
   },
 
@@ -692,6 +788,22 @@ const LEX = {
       { text: 'the shoulders', w: nt => nt.ne <= 0.65 && nt.gaba >= 0.35 ? 1.0 : 0.2 },
       { text: 'something', w: 0.5 },
     ],
+    reframe_pairs: [
+      { rough: 'tense',    precise: 'held',                                             w: nt => nt.ne <= 0.65 && nt.gaba >= 0.35 ? 1.5 : 0.4 },
+      { rough: 'stressed', precise: "carrying something that wouldn't put itself down",  w: (nt, obs) => obs.properties.interoception?.high ? 1.2 : 0.3 },
+      { rough: 'tight',    precise: 'braced against something that had already passed',  w: nt => nt.ne > 0.65 ? 1.0 : 0.2 },
+    ],
+    character_predicates: [
+      { text: 'had been holding since this morning',       w: (nt, obs) => obs.properties.interoception?.high ? 1.5 : 0.3 },
+      { text: "wouldn't let go",                           w: 1.2 },
+      { text: 'had patience',                              w: (nt, obs) => obs.properties.interoception?.high ? 1.0 : 0.3 },
+      { text: 'lived in the shoulders',                    w: nt => nt.ne <= 0.65 && nt.gaba >= 0.35 ? 1.5 : 0.3 },
+      { text: 'would outlast the day',                     w: (nt, obs) => obs.properties.interoception?.high ? 0.8 : 0.1 },
+    ],
+    inversion_conditions: [
+      { text: "but only when she stopped to feel it",           w: 1.0 },
+      { text: "but only when the other things weren't louder",  w: (nt, obs) => obs.properties.interoception?.high ? 1.2 : 0.4 },
+    ],
   },
 
   // === INTEROCEPTIVE: CAFFEINE ===
@@ -737,6 +849,21 @@ const LEX = {
       { text: 'alert', w: (nt, obs) => obs.properties.interoception?.sharp && !obs.properties.interoception?.jitter ? 1.2 : 0.2 },
       { text: 'clear', w: (nt, obs) => obs.properties.interoception?.sharp && !obs.properties.interoception?.jitter ? 1.0 : 0.2 },
       { text: 'something', w: 0.5 },
+    ],
+    reframe_pairs: [
+      { rough: 'shaking', precise: 'vibrating, like a tuning fork struck too many times', w: (nt, obs) => obs.properties.interoception?.jitter ? 2.0 : 0.2 },
+      { rough: 'wired',   precise: 'just faster than usual, but committed to it',         w: (nt, obs) => obs.properties.interoception?.sharp  ? 1.5 : 0.4 },
+      { rough: 'edgy',    precise: 'running a little ahead of itself',                    w: (nt, obs) => obs.properties.interoception?.edge   ? 1.2 : 0.3 },
+    ],
+    character_predicates: [
+      { text: 'had its own momentum',    w: (nt, obs) => obs.properties.interoception?.sharp  ? 1.5 : 0.5 },
+      { text: 'was running a little fast', w: (nt, obs) => obs.properties.interoception?.jitter ? 1.5 : 0.4 },
+      { text: "wouldn't quite settle",   w: (nt, obs) => obs.properties.interoception?.jitter ? 1.2 : 0.3 },
+      { text: 'had a quality to it',     w: (nt, obs) => obs.properties.interoception?.edge   ? 1.0 : 0.3 },
+    ],
+    inversion_conditions: [
+      { text: 'but only when she held still',             w: (nt, obs) => obs.properties.interoception?.jitter ? 2.0 : 0.3 },
+      { text: 'but only when there was nothing to focus on', w: (nt, obs) => obs.properties.interoception?.edge ? 1.0 : 0.3 },
     ],
   },
 
@@ -1170,6 +1297,48 @@ function buildInterpretiveEscape(obs, nt, r2, r3, r4) {
   return `${cap(subject)} ${predicate}, and ${escape}.`;
 }
 
+/** "Not heavy — dissolved." — uses r2, discards r3/r4 */
+function buildReframeDash(obs, nt, r2, _r3, _r4) {
+  const lex = LEX[obs.sourceId];
+  if (!lex?.reframe_pairs) return null;
+  const items = lex.reframe_pairs.map(p => ({
+    weight: typeof p.w === 'function' ? Math.max(0, p.w(nt, obs)) : (p.w ?? 1),
+    value: p,
+  }));
+  const pair = wpick(items, r2);
+  if (!pair) return null;
+  return `Not ${pair.rough} — ${pair.precise}.`;
+}
+
+/** "The tiredness lived in the limbs." — uses r2, r3, discards r4 */
+function buildSensationCharacter(obs, nt, r2, r3, _r4) {
+  const lex = LEX[obs.sourceId];
+  if (!lex?.character_predicates) return null;
+  const subject   = pickText(lex.character_subjects ?? lex.subjects, nt, obs, r2);
+  const predicate = pickText(lex.character_predicates, nt, obs, r3);
+  if (!subject || !predicate) return null;
+  return `${cap(subject)} ${predicate}.`;
+}
+
+/** "The rain was still the rain." — uses r2, discards r3/r4 */
+function buildFlatTautology(obs, nt, r2, _r3, _r4) {
+  const lex = LEX[obs.sourceId];
+  if (!lex?.flat_descriptions) return null;
+  return pickText(lex.flat_descriptions, nt, obs, r2);
+}
+
+/** "Something was tight, but only when she stopped noticing." — uses r2, r3, r4 */
+function buildConditionalInversion(obs, nt, r2, r3, r4) {
+  const lex = LEX[obs.sourceId];
+  if (!lex?.inversion_conditions || !lex?.subjects || !lex?.predicates) return null;
+  const subject   = pickText(lex.subjects,            nt, obs, r2);
+  const predicate = pickText(lex.predicates,          nt, obs, r3);
+  const condition = pickText(lex.inversion_conditions, nt, obs, r4);
+  if (!subject || !predicate || !condition) return null;
+  return `${cap(subject)} ${predicate}, ${condition}.`;
+}
+
+
 // --- Architecture weights per hint ---
 //
 // Relative weights — normalized inside wpick. 0 = never selected.
@@ -1177,46 +1346,28 @@ function buildInterpretiveEscape(obs, nt, r2, r3, r4) {
 
 const ARCH_WEIGHTS = {
   calm: {
-    short:  1.2,
-    body:   0.8,
-    bare:   0.2,
-    ambig:  0.0,
-    escape: 1.0,
+    short: 1.2, body: 0.8, bare: 0.2, ambig: 0.0, escape: 1.0,
+    reframe: 0.3, char_pred: 0.4, flat_taut: 0.0, inversion: 0.4,
   },
   heightened: {
-    short:  1.0,
-    body:   0.7,
-    bare:   0.1,
-    ambig:  0.0,
-    escape: 1.2,
+    short: 1.0, body: 0.7, bare: 0.1, ambig: 0.0, escape: 1.2,
+    reframe: 0.8, char_pred: 0.3, flat_taut: 0.0, inversion: 0.6,
   },
   anxious: {
-    short:  2.5,
-    body:   0.5,
-    bare:   0.3,
-    ambig:  0.0,
-    escape: 0.0,
+    short: 2.5, body: 0.5, bare: 0.3, ambig: 0.0, escape: 0.0,
+    reframe: 0.6, char_pred: 0.3, flat_taut: 0.0, inversion: 0.0,
   },
   dissociated: {
-    short:  0.8,
-    body:   0.6,
-    bare:   1.2,
-    ambig:  1.5,
-    escape: 0.0,
+    short: 0.8, body: 0.6, bare: 1.2, ambig: 1.5, escape: 0.0,
+    reframe: 0.2, char_pred: 0.8, flat_taut: 0.0, inversion: 0.0,
   },
   overwhelmed: {
-    short:  1.5,
-    body:   0.8,
-    bare:   0.8,
-    ambig:  0.0,
-    escape: 0.0,
+    short: 1.5, body: 0.8, bare: 0.8, ambig: 0.0, escape: 0.0,
+    reframe: 0.2, char_pred: 0.3, flat_taut: 0.0, inversion: 0.0,
   },
   flat: {
-    short:  1.5,
-    body:   0.8,
-    bare:   0.6,
-    ambig:  0.0,
-    escape: 0.1,
+    short: 1.5, body: 0.8, bare: 0.6, ambig: 0.0, escape: 0.1,
+    reframe: 0.2, char_pred: 0.6, flat_taut: 0.6, inversion: 0.2,
   },
 };
 
@@ -1232,11 +1383,15 @@ function realizeOne(obs, hint, ntCtx, r1, r2, r3, r4) {
 
   // Build eligible architecture list; gate body/ambig on lex availability
   const archs = [
-    { weight: w.short,                                    value: 'short'  },
-    { weight: w.body   * (lex.body_subjects ? 1 : 0),    value: 'body'   },
-    { weight: w.bare,                                     value: 'bare'   },
-    { weight: w.ambig  * (lex.ambiguity_alts ? 1 : 0),   value: 'ambig'  },
-    { weight: w.escape * (lex.escapes ? 1 : 0),          value: 'escape' },
+    { weight: w.short,                                            value: 'short'    },
+    { weight: w.body      * (lex.body_subjects ? 1 : 0),         value: 'body'     },
+    { weight: w.bare,                                             value: 'bare'     },
+    { weight: w.ambig     * (lex.ambiguity_alts ? 1 : 0),        value: 'ambig'    },
+    { weight: w.escape    * (lex.escapes ? 1 : 0),               value: 'escape'   },
+    { weight: w.reframe   * (lex.reframe_pairs ? 1 : 0),         value: 'reframe'  },
+    { weight: w.char_pred * (lex.character_predicates ? 1 : 0),  value: 'char_pred'},
+    { weight: w.flat_taut * (lex.flat_descriptions ? 1 : 0),     value: 'flat_taut'},
+    { weight: w.inversion * (lex.inversion_conditions ? 1 : 0),  value: 'inversion'},
   ];
 
   const arch = wpick(archs, r1);
@@ -1247,6 +1402,10 @@ function realizeOne(obs, hint, ntCtx, r1, r2, r3, r4) {
     case 'bare':   result = buildBareFragment(obs, ntCtx, r2, r3, r4);     break;
     case 'ambig':  result = buildSourceAmbiguity(obs, ntCtx, r2, r3, r4);  break;
     case 'escape': result = buildInterpretiveEscape(obs, ntCtx, r2, r3, r4); break;
+    case 'reframe':    result = buildReframeDash(obs, ntCtx, r2, r3, r4);           break;
+    case 'char_pred':  result = buildSensationCharacter(obs, ntCtx, r2, r3, r4);    break;
+    case 'flat_taut':  result = buildFlatTautology(obs, ntCtx, r2, r3, r4);         break;
+    case 'inversion':  result = buildConditionalInversion(obs, ntCtx, r2, r3, r4);  break;
     default:       result = buildShortDeclarative(obs, ntCtx, r2, r3, r4); break;
   }
 

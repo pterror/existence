@@ -347,3 +347,118 @@ describe('realize — unknown hint fallback', () => {
     expect(result).toMatch(/\.$/);
   });
 });
+
+// --- Reframe dash ---
+
+describe('realize — reframe dash', () => {
+  test('fatigue flat: reframe dash produces "Not ... — ..." sentence', () => {
+    // flat hint: reframe=0.2, char_pred=0.6, flat_taut=0.6
+    // fatigue has reframe_pairs, character_predicates, flat_descriptions
+    // Need to force r1 to pick reframe arch
+    // flat + fatigue total: short(1.5)+body(0.8)+bare(0.6)+ambig(0)+escape(0)+reframe(0.2)+char_pred(0.6)+flat_taut(0.6)+inversion(0.2) = 4.5
+    // reframe starts at: 1.5+0.8+0.6+0+0 = 2.9, so r >= 2.9/4.5 = 0.644
+    // reframe ends at: 2.9+0.2 = 3.1, so r < 3.1/4.5 = 0.689
+    // Use r1=0.66 to pick reframe
+    const result = realize([fatigueObs], 'flat', FLAT, mkRng(0.66, FIRST, FIRST, FIRST));
+    expect(result).toMatch(/^Not /);
+    expect(result).toMatch(/—/);
+    expect(result).toMatch(/\.$/);
+  });
+
+  test('reframe dash: starts with "Not"', () => {
+    const result = realize([fatigueObs], 'flat', FLAT, mkRng(0.66, FIRST, FIRST, FIRST));
+    expect(result).toMatch(/^Not /);
+  });
+});
+
+// --- Sensation as character ---
+
+describe('realize — sensation as character', () => {
+  test('fatigue flat: char_pred produces a sentence with character predicate', () => {
+    // flat + fatigue: char_pred starts at 3.1, ends at 3.7, so r in [3.1/4.5, 3.7/4.5) = [0.689, 0.822)
+    // Use r1=0.75
+    const result = realize([fatigueObs], 'flat', FLAT, mkRng(0.75, FIRST, FIRST, FIRST));
+    expect(result).toBeTruthy();
+    expect(result).toMatch(/\.$/);
+    // Subject comes from lex.subjects (fatigue): something/the body/it/the weight of it
+    expect(result.toLowerCase()).toMatch(/something|body|weight/);
+  });
+
+  test('anxiety dissociated: char_pred uses subject from subjects pool', () => {
+    // dissociated + anxiety_signal has reframe(0.2), char_pred(0.8)
+    // dissociated + anxiety total: short(0.8)+body(0.6)+bare(1.2)+ambig(0)+escape(0)+reframe(0.2)+char_pred(0.8)+flat_taut(0)+inversion(0) = 3.6
+    // char_pred starts at 0.8+0.6+1.2+0+0+0.2 = 2.8, ends at 3.6, r in [2.8/3.6, 3.6/3.6) = [0.778, 1.0)
+    const result = realize([anxietyObs], 'dissociated', FOGGY, mkRng(0.9, FIRST, FIRST, FIRST));
+    expect(result).toBeTruthy();
+    expect(result).toMatch(/\.$/);
+  });
+});
+
+// --- Flat tautology ---
+
+describe('realize — flat tautology', () => {
+  test('fatigue flat: flat_taut produces a short description', () => {
+    // flat + fatigue: flat_taut starts at 3.7, ends at 4.3, r in [3.7/4.5, 4.3/4.5) = [0.822, 0.956)
+    // Use r1=0.88
+    const result = realize([fatigueObs], 'flat', FLAT, mkRng(0.88, FIRST, FIRST, FIRST));
+    expect(result).toBeTruthy();
+    expect(result).toMatch(/\.$/);
+    // Should be one of the flat_descriptions for fatigue
+    expect(result).toMatch(/tired|body|heavy/i);
+  });
+
+  test('flat tautology: ends with period', () => {
+    const result = realize([fatigueObs], 'flat', FLAT, mkRng(0.88, FIRST, FIRST, FIRST));
+    expect(result).toMatch(/\.$/);
+  });
+});
+
+// --- Conditional inversion ---
+
+describe('realize — conditional inversion', () => {
+  test('fatigue calm: inversion produces "subject predicate, but only..." sentence', () => {
+    // calm + fatigue: inversion starts at 2.9, ends at 3.3, r in [2.9/3.3, 3.3/3.3) = [0.879, 1.0)
+    // Use r1=0.92
+    const result = realize([fatigueObs], 'calm', FOGGY, mkRng(0.92, FIRST, FIRST, FIRST));
+    expect(result).toBeTruthy();
+    expect(result).toMatch(/but only/);
+    expect(result).toMatch(/\.$/);
+  });
+
+  test('inversion: contains comma before condition', () => {
+    const result = realize([fatigueObs], 'calm', FOGGY, mkRng(0.92, FIRST, FIRST, FIRST));
+    expect(result).toMatch(/, but only/);
+  });
+});
+
+// --- New architectures: RNG consumption unchanged ---
+
+describe('realize — new architectures consume exactly 4 calls', () => {
+  test('reframe dash: still 4 calls', () => {
+    let calls = 0;
+    const countingRng = () => { calls++; return 0.66; };
+    realize([fatigueObs], 'flat', FLAT, countingRng);
+    expect(calls).toBe(4);
+  });
+
+  test('sensation character: still 4 calls', () => {
+    let calls = 0;
+    const countingRng = () => { calls++; return 0.75; };
+    realize([fatigueObs], 'flat', FLAT, countingRng);
+    expect(calls).toBe(4);
+  });
+
+  test('flat tautology: still 4 calls', () => {
+    let calls = 0;
+    const countingRng = () => { calls++; return 0.88; };
+    realize([fatigueObs], 'flat', FLAT, countingRng);
+    expect(calls).toBe(4);
+  });
+
+  test('conditional inversion: still 4 calls', () => {
+    let calls = 0;
+    const countingRng = () => { calls++; return 0.92; };
+    realize([fatigueObs], 'calm', FOGGY, countingRng);
+    expect(calls).toBe(4);
+  });
+});
