@@ -175,7 +175,35 @@ Sanitizing characters into supportive, well-meaning presences makes them feel li
 - **Toxic positivity**: "at least—", "everything happens for a reason," "have you tried just—"
 - **Unsolicited advice**: states the obvious solution as though it hadn't occurred to you
 
+More patterns in this category (not exhaustive):
+- **Irritation**: clipped responses, not elaborating, minimal engagement, things that would normally get a longer answer getting "yeah" or "sure"
+- **Confrontational**: turning things into a debate, needing to be right, not backing down, escalating
+- **Stonewalling**: shutting down, monosyllabic, present but unreachable
+- **Martyrdom**: "no it's fine, I'll handle it" — ostensible self-sacrifice as social pressure
+- **Guilt-tripping**: making the other person responsible for their emotional state
+- **Gaslighting**: "that's not what happened," "you're remembering it wrong," "you're being too sensitive"
+- **Minimizing**: "it's not that bad," "you're overreacting" — dismissing the scale of something
+- **Catastrophizing in speech**: "this is a disaster," "everything is ruined" — scaling up beyond the situation
+- **Boundary testing**: pushing to see what they can get away with, often graduated
+- **Over-sharing**: volunteering personal information well beyond what the context calls for
+
 These patterns interact with relationship state and context — a coworker's casual insensitivity may have nothing to do with you personally. A friend who one-ups may be doing it from genuine anxiety. The simulation renders the behavior without explaining or excusing it.
+
+#### Personality configurations and clinical patterns
+
+Some configurations of personality parameters produce patterns that are clinically recognizable — BPD, NPD, and others manifest in specific, distinctive dialogue behaviors. The game doesn't diagnose and doesn't label — no character gets a clinical flag — but the patterns are fair game to render.
+
+Examples of what emerges from certain parameter configurations:
+
+- **Splitting**: all-good or all-bad with no middle ground. The same person described as wonderful last week is now terrible. No gradations.
+- **Fear of abandonment visible in speech**: reactions to distance or silence that are disproportionate, reading withdrawal into neutral behavior
+- **Emotional dysregulation**: responses whose intensity doesn't match the trigger
+- **Grandiosity**: their experiences are always bigger, their problems worse, their successes more significant; difficulty registering others' experiences as comparably real
+- **Entitlement**: expects accommodation, annoyed when it doesn't arrive, treats favors as owed
+- **Idealization then devaluation**: the arc from "you're amazing" to "you've always been like this"
+- **Lack of reciprocity**: conversations as monologue, questions that don't wait for answers, not tracking what the other person said
+
+The design mechanism: backstory generates continuous parameters — attachment style, emotional regulation capacity, self-image stability, empathy range, needs-for-validation — and when these land in certain configurations the behavior emerges recognizably without being named. The player encounters the pattern; the simulation doesn't editorialize about what it is.
 
 #### Slang and vernacular
 
