@@ -289,6 +289,9 @@ Like flat but more complete. Not deflating — just absent. The prose is there b
 **Focused / determined** (moderate NE, adequate GABA, task-present)
 Staccato but purposeful — the clipping is about being on the task, not about being unable to process. Short sentences but they move forward. No dwelling. Things noted only insofar as they're relevant to what's being done.
 
+**Very sick / feverish** (high illness severity, fever)
+Continuous but viscous — same blurred boundaries as deep calm, completely different texture and origin. The thoughts are there and they complete, but there's resistance in the medium. Wading rather than flowing. The beginning of a sentence has softened by the time the end arrives; things from three thoughts ago bleed back in. Not fragmenting (that's delirium) — the mind is still tracking, just slowly, with effort. The prose is continuous not because attention has settled but because the mind can't maintain the definition needed to make clean breaks. Heavy rather than peaceful.
+
 **Physical pain** (migraine active, dental flare, illness severe)
 Intrusive return. The pain is not mentioned every sentence, but it pulls attention back. The narrative thread gets interrupted by body-as-subject constructions that insert the pain. Sentences about other things end near the pain. The world is present but the pain is always also present.
 
