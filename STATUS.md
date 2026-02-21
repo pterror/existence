@@ -398,6 +398,12 @@ Second text stream that fires alongside idle thoughts when NT state is destabili
 ### Sensory Prose Compositor
 Ambient sensory fragments that surface via idle actions, combining multiple simultaneous observations into natural sentences. Lives in `js/senses.js`.
 
+This module is mid-transition to a procedural prose generation architecture. Two systems coexist:
+
+---
+
+**Fragment system (current, wired to `sense()`):**
+
 **Fragment spec:** Each fragment carries: `id`, `content` (authored text), `grammatical_type` (`main | participle | absolute | adverbial | fragment`), `rhetorical_tag`, `channels` (which senses), `attention_order` (`involuntary_body | deliberate_visual | ambient`), optional `locations`/`areas` filter, `trigger_conditions(State)`, and `nt_weight(State)`.
 
 **Fragment library (33 fragments):** Indoor ambient (fridge hum, pipe click, coil whine, muffled traffic), indoor thermal (cold, floor cold, warm), outdoor sound (traffic, street voices), outdoor thermal (cold hits, warm, wind cuts), rain (sound, wet), fatigue (heavy, pulling), hunger (stomach, irritable), anxiety signals (can't settle, too present), participials (watching light, following shadow, feeling weight, holding still), adverbials (traffic outside, rain on glass, building settles, room cools, day moving, nothing wrong, nothing to do).
@@ -416,6 +422,24 @@ Ambient sensory fragments that surface via idle actions, combining multiple simu
 **Display:** Fires in `handleIdle` with 12-minute game-time cooldown (ephemeral — resets on page load). Displayed at +1200ms delay alongside idle thoughts. Restored on page reload as `lastSensoryText`. Visible in look-back scrubber via `executeActionForReplay`.
 
 **Tests:** 29 unit tests for `composeFragments` in `tests/senses.test.js`. Run with `bun test`.
+
+---
+
+**Observation source system (new, not yet wired to `sense()`):**
+
+Foundation of the procedural prose pipeline. Sources are things in the world (or body) with observable properties — not authored text. The realization engine (not yet built) will turn observations into sentences.
+
+**`ObservationSource` spec:** `id`, optional `areas`/`locations` filter, `channels`, `available(State, World)` gate, `salience(State)` (0–1 attention weight), `properties` map of channel→{key→fn(State)}.
+
+**Source library (14 sources):** Indoor acoustic (fridge, pipes, electronic_whine, traffic_through_walls), indoor thermal (indoor_temperature), interoceptive (fatigue, hunger_signal, anxiety_signal), outdoor acoustic (traffic_outdoor, street_voices), outdoor thermal (outdoor_temperature, wind), outdoor rain (rain).
+
+**`getAvailableSources()`** — filters sources by location/area and `available()`. No RNG.
+
+**`observe(source)`** — evaluates all property functions, returns `Observation` `{sourceId, channels, salience, properties}`. No RNG.
+
+**`getObservations()`** — runs both, returns all available observations sorted by salience descending. No RNG. Public API — the realization engine will call this.
+
+**Next:** Sentence architecture engine to turn `Observation[]` + NT hint → prose.
 
 ### Sleep Prose
 Two-phase system: falling-asleep (how sleep came) + waking-up (the gradient back to consciousness). Falling-asleep branches on pre-sleep energy, stress, quality, and duration, with NT shading: adenosine→crash depth, GABA→can't-settle anxiety, NE→hyper-alertness, serotonin→warmth of surrender, melatonin→onset delay (~22 variants). Waking-up branches on post-sleep energy, sleep quality, alarm vs natural wake, time of day (dark/late/morning), mood, sleep debt, and sleep inertia, with NT shading: adenosine→sleep inertia, serotonin→dread-vs-ease, NE→sharp edges, GABA→night dread, debt→cumulative exhaustion (~44 variants). Composed together as a single passage. No numeric hour counts — all qualitative.

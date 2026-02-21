@@ -28,6 +28,33 @@
  */
 
 /**
+ * An observation source: a thing in the world (or body) with observable properties.
+ * Sources are the input layer of the procedural prose pipeline.
+ * Properties are evaluated values — not prose. The realization engine turns them into text.
+ *
+ * @typedef {{
+ *   id: string,
+ *   areas?: string[],
+ *   locations?: string[],
+ *   channels: string[],
+ *   available: (s: any, w: any) => boolean,
+ *   salience: (s: any) => number,
+ *   properties: Object.<string, Object.<string, (s: any) => any>>,
+ * }} ObservationSource
+ */
+
+/**
+ * The result of observing a source: evaluated property values + salience at observation time.
+ *
+ * @typedef {{
+ *   sourceId: string,
+ *   channels: string[],
+ *   salience: number,
+ *   properties: Object.<string, Object.<string, any>>,
+ * }} Observation
+ */
+
+/**
  * Pure function: combine sensory fragments into a sentence.
  * NT structure hint determines sentence architecture.
  *
@@ -577,6 +604,355 @@ export function createSenses(ctx) {
     },
   ];
 
+  // --- Observation source library ---
+  // Sources model things in the world (and body) with observable properties.
+  // They are the foundation of the procedural prose pipeline (realization engine TBD).
+  // Properties are evaluated values — not prose. The realization engine turns them into text.
+  //
+  // Available sources for the current location are filtered by areas/locations + available().
+  // Salience (0–1) weights how much a source forces attention in current NT state.
+  //
+  /** @type {ObservationSource[]} */
+  const sources = [
+
+    // === INDOOR: ACOUSTIC ===
+    {
+      id: 'fridge',
+      areas: ['apartment'],
+      channels: ['sound'],
+      available: () => true,
+      salience: s => {
+        const gaba = s.get('gaba');
+        // More salient when GABA low (filtering degraded)
+        return gaba < 45 ? 0.35 + State.lerp01(gaba, 45, 20) * 0.5 : 0.15;
+      },
+      properties: {
+        sound: {
+          quality: () => 'hum',
+          // Perceived louder when GABA low — same physical level, reduced filtering
+          perceived_intensity: s => State.lerp01(s.get('gaba'), 65, 20),
+        },
+      },
+    },
+    {
+      id: 'pipes',
+      areas: ['apartment'],
+      channels: ['sound'],
+      available: s => s.get('gaba') < 52 || s.get('norepinephrine') > 52,
+      salience: s => {
+        const gaba = s.get('gaba');
+        const ne = s.get('norepinephrine');
+        return Math.max(
+          gaba < 52 ? State.lerp01(gaba, 52, 25) * 0.4 : 0,
+          ne > 52 ? State.lerp01(ne, 52, 80) * 0.3 : 0,
+        );
+      },
+      properties: {
+        sound: {
+          quality: () => 'tick',
+          rhythm: () => 'irregular',
+        },
+      },
+    },
+    {
+      id: 'electronic_whine',
+      areas: ['apartment'],
+      channels: ['sound'],
+      available: s => s.get('gaba') < 42 || s.get('norepinephrine') > 58,
+      salience: s => {
+        const gaba = s.get('gaba');
+        const ne = s.get('norepinephrine');
+        return Math.max(
+          gaba < 42 ? State.lerp01(gaba, 42, 20) * 0.35 : 0,
+          ne > 58 ? State.lerp01(ne, 58, 85) * 0.3 : 0,
+        );
+      },
+      properties: {
+        sound: {
+          quality: () => 'whine',
+          pitch: () => 'high',
+        },
+      },
+    },
+    {
+      id: 'traffic_through_walls',
+      areas: ['apartment'],
+      channels: ['sound'],
+      available: () => true,
+      salience: s => {
+        const ne = s.get('norepinephrine');
+        // Low baseline; harder to screen out at high NE
+        return ne > 55 ? 0.2 + State.lerp01(ne, 55, 80) * 0.4 : 0.1;
+      },
+      properties: {
+        sound: {
+          quality: () => 'muffled_traffic',
+          source_distance: () => 'outside',
+          filtered: () => true,
+        },
+      },
+    },
+
+    // === INDOOR: THERMAL ===
+    {
+      id: 'indoor_temperature',
+      areas: ['apartment'],
+      channels: ['thermal', 'touch'],
+      // Only surfaces when meaningfully outside comfort zone
+      available: s => s.get('temperature') < 16 || s.get('temperature') > 26,
+      salience: s => {
+        const temp = s.get('temperature');
+        if (temp < 16) return State.lerp01(temp, 16, 5) * 0.7;
+        if (temp > 26) return State.lerp01(temp, 26, 35) * 0.5;
+        return 0;
+      },
+      properties: {
+        thermal: {
+          celsius: s => s.get('temperature'),
+          tier: s => {
+            const t = s.get('temperature');
+            if (t < 5)  return 'very_cold';
+            if (t < 12) return 'cold';
+            if (t < 16) return 'cool';
+            if (t > 35) return 'very_hot';
+            if (t > 30) return 'hot';
+            return 'warm';
+          },
+        },
+      },
+    },
+
+    // === INTEROCEPTIVE: FATIGUE ===
+    {
+      id: 'fatigue',
+      channels: ['interoception'],
+      available: s => s.get('adenosine') > 55,
+      salience: s => State.lerp01(s.get('adenosine'), 55, 95) * 0.8,
+      properties: {
+        interoception: {
+          adenosine: s => s.get('adenosine'),
+          tier: s => {
+            const a = s.get('adenosine');
+            if (a > 85) return 'crushing';
+            if (a > 70) return 'heavy';
+            if (a > 55) return 'present';
+            return 'none';
+          },
+          // Character of the fatigue — what it feels like, not just how much
+          quality: s => {
+            const a = s.get('adenosine');
+            if (a > 80) return 'gravitational'; // pulling toward horizontal
+            if (a > 65) return 'weighted';       // weight in the limbs
+            return 'dull';                       // background drag
+          },
+        },
+      },
+    },
+
+    // === INTEROCEPTIVE: HUNGER ===
+    {
+      id: 'hunger_signal',
+      channels: ['interoception'],
+      available: s => s.get('hunger') > 45,
+      salience: s => State.lerp01(s.get('hunger'), 45, 90) * 0.7,
+      properties: {
+        interoception: {
+          hunger: s => s.get('hunger'),
+          tier: s => {
+            const h = s.get('hunger');
+            if (h > 80) return 'starving';
+            if (h > 65) return 'very_hungry';
+            if (h > 45) return 'hungry';
+            return 'none';
+          },
+          quality: s => {
+            const h = s.get('hunger');
+            if (h > 75) return 'hollow';    // emptied out
+            if (h > 60) return 'gnawing';   // active discomfort
+            return 'low_grade';             // background signal
+          },
+          // Whether hunger is bleeding into mood — behavioral, not just physical
+          irritability: s => s.get('hunger') > 65,
+        },
+      },
+    },
+
+    // === INTEROCEPTIVE: ANXIETY ===
+    {
+      id: 'anxiety_signal',
+      channels: ['interoception'],
+      available: s => s.get('gaba') < 45 || s.get('norepinephrine') > 60,
+      salience: s => {
+        const gaba = s.get('gaba');
+        const ne = s.get('norepinephrine');
+        return Math.max(
+          gaba < 45 ? State.lerp01(gaba, 45, 20) * 0.6 : 0,
+          ne > 60 ? State.lerp01(ne, 60, 85) * 0.5 : 0,
+        );
+      },
+      properties: {
+        interoception: {
+          gaba: s => s.get('gaba'),
+          ne: s => s.get('norepinephrine'),
+          // Qualitative character of the anxiety state
+          character: s => {
+            const gaba = s.get('gaba');
+            const ne = s.get('norepinephrine');
+            if (gaba < 30 && ne > 70) return 'overwhelmed'; // both systems
+            if (ne > 65) return 'keyed_up';                 // NE-dominant: hyperalert
+            if (gaba < 35) return 'unsettled';              // GABA-dominant: can't settle
+            return 'restless';
+          },
+        },
+      },
+    },
+
+    // === OUTDOOR: ACOUSTIC ===
+    {
+      id: 'traffic_outdoor',
+      areas: ['outside'],
+      channels: ['sound'],
+      available: () => true,
+      salience: s => {
+        const ne = s.get('norepinephrine');
+        return ne > 55 ? 0.3 + State.lerp01(ne, 55, 85) * 0.4 : 0.25;
+      },
+      properties: {
+        sound: {
+          quality: () => 'traffic',
+          filtered: () => false,
+        },
+      },
+    },
+    {
+      id: 'street_voices',
+      areas: ['outside'],
+      channels: ['sound'],
+      available: () => true,
+      salience: () => 0.3,
+      properties: {
+        sound: {
+          quality: () => 'voices',
+          source_distance: () => 'nearby',
+          intelligible: () => false, // heard but not parsed
+        },
+      },
+    },
+
+    // === OUTDOOR: THERMAL ===
+    {
+      id: 'outdoor_temperature',
+      areas: ['outside'],
+      channels: ['thermal'],
+      available: s => s.get('temperature') < 10 || s.get('temperature') > 28,
+      salience: s => {
+        const temp = s.get('temperature');
+        if (temp < 10) return 0.4 + State.lerp01(temp, 10, -5) * 0.5;
+        if (temp > 28) return 0.2 + State.lerp01(temp, 28, 40) * 0.4;
+        return 0;
+      },
+      properties: {
+        thermal: {
+          celsius: s => s.get('temperature'),
+          tier: s => {
+            const t = s.get('temperature');
+            if (t < 0)  return 'freezing';
+            if (t < 5)  return 'very_cold';
+            if (t < 10) return 'cold';
+            if (t > 35) return 'very_hot';
+            if (t > 28) return 'hot';
+            return 'warm';
+          },
+          // Very cold hits immediately; warmth you notice more gradually
+          immediate: s => s.get('temperature') < 8,
+        },
+      },
+    },
+    {
+      id: 'wind',
+      areas: ['outside'],
+      channels: ['thermal', 'touch'],
+      available: s => s.get('temperature') < 8,
+      salience: s => {
+        const temp = s.get('temperature');
+        return temp < 8 ? 0.3 + State.lerp01(temp, 8, -5) * 0.5 : 0;
+      },
+      properties: {
+        thermal: {
+          quality: () => 'cutting',
+          celsius: s => s.get('temperature'),
+        },
+      },
+    },
+
+    // === OUTDOOR: RAIN ===
+    {
+      id: 'rain',
+      areas: ['outside'],
+      channels: ['sound', 'touch', 'sight'],
+      available: s => s.get('rain') === true,
+      salience: () => 0.6,
+      properties: {
+        sound:  { quality: () => 'rain' },
+        touch:  { quality: () => 'wet' },
+        sight:  { quality: () => 'grey' },
+      },
+    },
+  ];
+
+  // --- Observation functions ---
+
+  /**
+   * Filter sources for the current location and state.
+   * No RNG consumed.
+   * @returns {ObservationSource[]}
+   */
+  function getAvailableSources() {
+    const locationId = World.getLocationId();
+    const location = World.getLocation(locationId);
+    const area = location ? location.area : null;
+
+    return sources.filter(src => {
+      if (src.locations && !src.locations.includes(locationId)) return false;
+      if (src.areas && !src.areas.includes(area ?? '')) return false;
+      return src.available(State, World);
+    });
+  }
+
+  /**
+   * Evaluate a source's properties to produce an Observation.
+   * No RNG consumed.
+   * @param {ObservationSource} source
+   * @returns {Observation}
+   */
+  function observe(source) {
+    const evaluatedProperties = {};
+    for (const [channel, props] of Object.entries(source.properties)) {
+      evaluatedProperties[channel] = {};
+      for (const [key, fn] of Object.entries(props)) {
+        evaluatedProperties[channel][key] = fn(State);
+      }
+    }
+    return {
+      sourceId: source.id,
+      channels: source.channels,
+      salience: source.salience(State),
+      properties: evaluatedProperties,
+    };
+  }
+
+  /**
+   * Get all observations for the current location and state,
+   * sorted by salience descending. No RNG consumed.
+   * (Selection with RNG will be added when this integrates with sense().)
+   * @returns {Observation[]}
+   */
+  function getObservations() {
+    return getAvailableSources()
+      .map(src => observe(src))
+      .sort((a, b) => b.salience - a.salience);
+  }
+
   // --- NT state → structure hint ---
 
   function getStructureHint() {
@@ -684,5 +1060,6 @@ export function createSenses(ctx) {
     markDisplayed,
     getStructureHint,
     getTriggeredFragments,
+    getObservations,
   };
 }
