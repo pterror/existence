@@ -166,6 +166,7 @@ Sanitizing characters into supportive, well-meaning presences makes them feel li
 
 - **Casual insensitivity**: says something that lands badly without noticing. Not malicious — just oblivious to how it registers
 - **Deliberate unhearing**: pretends not to have heard something. The statement goes unacknowledged; the conversation moves on as if it was never said. Social erasure — can be a power move, conflict avoidance, or just how someone handles things they don't want to engage with
+- **Malicious ignorance**: deliberately fails to understand something because understanding it would require acknowledging something uncomfortable. "I just don't see why that's a big deal." The understanding is available; it's being refused
 - **Passive aggression**: ostensibly fine, edge underneath. "No, it's fine." The surface is cooperative; the content isn't
 - **One-upping**: responds to your situation by immediately relating it to their own worse situation. Often from anxiety, not malice
 - **Deflection**: changes subject when things get uncomfortable, sometimes so smoothly they don't notice they're doing it
