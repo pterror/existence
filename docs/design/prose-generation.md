@@ -147,7 +147,11 @@ Humor without an LLM is hard but not impossible for constrained forms.
 
 **Wry observation**: noticing something absurd about a situation and stating it plainly. "the same volume as everything else" is wry — it names the overwhelm in a way that's also a little funny because of how accurate it is. This is the interpretive escape move applied to absurdity.
 
-These forms are constructable without an LLM if the rules are right. Genuinely novel jokes are not constructable without one.
+**Disbelief**: a specific speech act — understatement as response to something unexpected. "Wait, what." "No." "...seriously?" Short, often fragmentary, register-flat. Constructable from: situation flagged as unexpected + a small set of disbelief frames.
+
+**Absurdism**: treating the mundane as cosmically significant, or the serious as trivial. "did your apartment finally consume you" — the realistic situation (hasn't replied in days, messy apartment) gets a surreal predicate that is logically parallel to the real one. Construction: take a known situation + substitute predicate from a set of surreal-but-parallel alternatives. The game has all the situational knowledge needed for this — it knows the apartment state, the absence duration, the relationship flavor.
+
+The constraint on humor is not generative capacity but *world knowledge*. Jokes grounded in the game's own world — the apartment, the job, the absence, the financial situation — are fully constructable because the game knows all of that. Jokes requiring external world knowledge (current events, pop culture, things outside the simulation) are not. The line is the boundary of the simulation.
 
 #### Text message register
 
