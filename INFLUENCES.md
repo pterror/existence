@@ -137,6 +137,23 @@ transmission between spaces.
 
 ---
 
+## Atmosphere — Music and Lyrics
+
+Tonal references: not templates to copy or over-optimize toward, but useful for
+calibrating the emotional register the prose is working in. Survey, don't absorb.
+
+**BURNOUT — ROMA ft. Kasane Teto**
+(`~/lyrics1`)
+Somatic language for stress and exhaustion ("a stone that's crushing me on top
+of my chest"), dissociation as fading ("1000 miles an hour I come back home and I
+/ fade, fade"), motivational collapse ("I don't wanna try"). Most relevant:
+"I take the pain and lock it deeply / cause I deserve it" — the self-suppression
+and internalized shame loop that the game's "no judgment" principle is specifically
+responding to. The game doesn't tell the character they deserve it; it just shows
+what the days look like.
+
+---
+
 ## On the LLM Development Model
 
 This project is developed with an LLM (Claude) as a research collaborator —

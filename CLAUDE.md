@@ -6,6 +6,8 @@ Behavioral rules for Claude Code in the existence repository.
 
 Text-based HTML5 game. "Power anti-fantasy" — constrained agency without judgment. No stats visible. All state hidden. Prose carries everything.
 
+**Prose tone reference:** Porpentine (especially *With Those We Love Alive*, 2014) — fragmentary, body-aware, dissociation rendered through texture rather than description. Not a template to copy; a register to be aware of. See INFLUENCES.md for full prior art and INFLUENCES.md's atmosphere section for music/lyric references.
+
 ## Simulation Architecture
 
 See [docs/design/philosophy.md](docs/design/philosophy.md). Every simulation system is an interface designed for maximum fidelity. Implementations vary per-run; granularity is hotswappable between saves, never mid-run. Scalars that stand in for richer structure are approximation debts — name them, plan to pay them.
