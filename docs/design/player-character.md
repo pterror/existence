@@ -201,6 +201,41 @@ means this blended, negotiated state becomes less available. Alters that were
 co-fronting to cooperate lose that channel. Whether that reads as calm or as
 loss depends entirely on the system.
 
+**Median systems**
+
+Between singular and fully plural. Not one unified self, but not distinct separate
+alters with clean switches either — a spectrum of presence along a continuum. Parts
+bleed into each other. Boundaries are permeable. There may be a dominant core that
+most experience comes from, with other parts influencing rather than fronting fully.
+
+Specific characteristics that need modelling differently from DID:
+
+*No clean switches* — parts don't take over, they shade the experience. The
+dominant voice is still present but coloured differently. More like weather
+affecting a landscape than one person leaving and another arriving.
+
+*Shared memory with different emotional ownership* — the memory is accessible to
+all parts but the relationship to it differs. One part's significant moment is
+another part's neutral data. Not amnesia — emotional foreignness to your own past.
+
+*Parts as aspects rather than persons* — some median systems describe parts as
+facets of a self rather than independent beings. A part that handles social
+situations, one that manages stress, one present for creative work. Less distinct
+personalities, more modes that have developed enough coherence to be distinguishable.
+
+*Instability of the core* — the "main" self isn't always clearly located. Some
+days the core feels solid; other days it's unclear who's actually running things.
+
+Mechanically this is the most interesting case for the simulation because it maps
+most directly onto what the NT system already models — continuous variables rather
+than discrete states. The mood-primary systems drifting, personality parameters
+shaping inertia, emotional tone varying day to day — these already produce something
+like "the landscape is coloured differently today." Median experience might be less
+a separate system to build and more an honest description of what the simulation is
+already doing for everyone, taken seriously. The question is whether the prose and
+available actions reflect that the variation has internal structure — that today's
+colouring isn't random drift but a recognisable part coming through.
+
 **Headmates who aren't alters**
 
 The DID model covers one origin of plurality. The broader plurality community
