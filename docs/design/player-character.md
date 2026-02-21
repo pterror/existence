@@ -132,6 +132,43 @@ DID is a constitutional condition in the game's model (not circumstantial — it
 arises from developmental factors, not purely from life events), which means it
 could be assigned at chargen from prevalence data when that system is built out.
 
+**Discovering alters**
+
+In real experience this isn't a sudden reveal — it's a slow accumulation of
+evidence. Unfamiliar handwriting. Objects you don't remember buying. People who
+know your name and you don't know theirs. Time loss you've been explaining away.
+The game's existing structure produces exactly this: the action log is a complete
+record of what happened; the character only has access to some of it. Discovery
+would emerge from the gaps — noticing the pattern of what's missing, finding
+evidence in the apartment that doesn't match memory. It shouldn't be announced.
+It should be something the player pieces together from the simulation's outputs,
+the same way it happens in real life. The replay scrubber showing unfamiliar
+actions is the mechanism; the realisation is the player's.
+
+**Antipsychotics and inter-alter communication**
+
+This is contested and requires careful handling. Some people with DID report that
+antipsychotics (especially older typicals, but also some atypicals) suppress or
+blur communication between alters without integrating the system — a chemical wall
+rather than resolution. The internal world becomes quieter, but not in a good way:
+the communication that was enabling cooperation between alters is lost. Alters
+that were coordinating, sharing information, negotiating — that capacity diminishes.
+
+This is distinct from what the medications are prescribed for. DID is frequently
+misdiagnosed as schizophrenia; the antipsychotics are treating a misdiagnosis.
+A medication working correctly from a clinical standpoint and being actively
+harmful to the person's internal system aren't mutually exclusive. The harm isn't
+a side effect in the usual sense — it's the primary effect landing on the wrong
+target.
+
+Mechanically this is a different kind of simulation layer than anything currently
+modeled. Substances currently affect NT levels and drift rates. Antipsychotics
+in a DID context would affect something structural — not just how the NTs move,
+but which alter has access to which memories, which relationships, which parts of
+the apartment feel familiar. A substance that reshapes the topology of who is
+present, rather than the quality of presence. That needs its own design pass when
+the DID system is built — it can't be approximated as a simple NT modifier.
+
 ---
 
 ## The through-line
