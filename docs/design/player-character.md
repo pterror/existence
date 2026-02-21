@@ -54,9 +54,17 @@ invisibly; the player experiences the outputs without the inputs. The principle
 extended inward: not just "you can't see the simulation's numbers" but "you can't
 see the history those numbers came from."
 
-Both modes run the same simulation. The difference is what the player is given to
-start with. The chargen screen could make this explicit — present the generated
-backstory, then ask whether to reveal it or seal it.
+All modes run the same simulation. The difference is what the player is given to
+start with, and when. Three options at chargen:
+
+- **Never shown:** backstory generates and is immediately sealed. You begin with
+  no narrative access and no memory of having had it. The most committed immersion
+  mode.
+- **Shown, then sealed:** you see the full history, then choose to let it go. A
+  meaningfully different experience from never-shown — you *knew* and chose not to
+  carry it forward. The act of sealing is itself part of the fiction.
+- **Shown, kept:** sandbox mode. History in hand throughout. The simulation is
+  the object of attention.
 
 ---
 
