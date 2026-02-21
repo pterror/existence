@@ -179,7 +179,7 @@ More patterns in this category (not exhaustive):
 - **Irritation**: clipped responses, not elaborating, minimal engagement, things that would normally get a longer answer getting "yeah" or "sure"
 - **Confrontational**: turning things into a debate, needing to be right, not backing down, escalating
 - **Stonewalling**: shutting down, monosyllabic, present but unreachable
-- **Martyrdom**: "no it's fine, I'll handle it" — ostensible self-sacrifice as social pressure
+- **Martyrdom**: two distinct patterns sharing a surface behavior. The manipulative version: "no it's fine" said to generate guilt, knowing it won't be taken at face value. The self-inflicted version: genuinely can't advocate for themselves — conflict avoidance, fear of rejection, people-pleasing — says yes when they mean no, resentment accumulates quietly, and then periodically the bewildered "why does this always happen to me?" with no visible connection to their own pattern. They experience themselves as being roped into things, as if it happens to them, without seeing how they set it up. The gap between what they want and what they're willing to assert is the mechanism; the confusion is genuine
 - **Guilt-tripping**: making the other person responsible for their emotional state
 - **Gaslighting**: "that's not what happened," "you're remembering it wrong," "you're being too sensitive"
 - **Minimizing**: "it's not that bad," "you're overreacting" — dismissing the scale of something
