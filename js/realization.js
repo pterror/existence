@@ -9,7 +9,10 @@
 //   random        () => number in [0, 1) — caller provides seeded RNG
 //
 // RNG consumption: exactly 4 calls per selected observation, always.
-// A passage of N sentences consumes N × 4 calls regardless of which architectures fire.
+// A passage of N observations consumes exactly N × 4 calls regardless of shape.
+// Multi-observation shapes (appositive, terminal_list, arrival_seq) maintain this
+// by drawing obs[0]'s r1 upfront as the passage-shape selector, then treating
+// obs[0]'s remaining 3 slots and all subsequent obs' 4 slots normally.
 
 // --- Utilities ---
 
@@ -102,6 +105,11 @@ const LEX = {
       'It had been going the whole time.',
       { text: 'The fridge was the fridge.', w: nt => nt.serotonin < 0.35 ? 1.0 : 0.1 },
     ],
+    appositive_np: [
+      'a hum in the background',
+      { text: 'the fridge, still going',    w: nt => nt.serotonin < 0.4  ? 1.2 : 0.5 },
+      { text: "something she'd stopped hearing", w: nt => nt.aden > 0.5  ? 1.2 : 0.3 },
+    ],
   },
 
   pipes: {
@@ -131,6 +139,11 @@ const LEX = {
       { text: 'a tick from somewhere', w: 0.7 },
       { text: 'something settling', w: 0.6 },
       { text: 'a knock', w: 0.5 },
+    ],
+    appositive_np: [
+      'something in the walls',
+      { text: 'the building settling',  w: nt => nt.gaba > 0.5  ? 1.0 : 0.4 },
+      { text: 'a tick from somewhere',  w: 0.8 },
     ],
   },
 
@@ -247,6 +260,12 @@ const LEX = {
       { text: 'The room was cold.',  w: (nt, obs) => obs.properties.thermal?.cold && nt.serotonin < 0.4  ? 1.5 : 0.1 },
       { text: 'Still cold.',         w: (nt, obs) => obs.properties.thermal?.cold && nt.serotonin < 0.35 ? 1.2 : 0.1 },
     ],
+    appositive_np: [
+      { text: 'cold through the floor',   w: (nt, obs) => obs.properties.thermal?.cold ? 1.5 : 0 },
+      { text: 'a chill from the window',  w: (nt, obs) => obs.properties.thermal?.cold ? 1.2 : 0 },
+      { text: 'the cold of the room',     w: (nt, obs) => obs.properties.thermal?.cold ? 1.0 : 0 },
+      { text: 'warmth pressed in',        w: (nt, obs) => obs.properties.thermal?.warm ? 1.5 : 0 },
+    ],
   },
 
   fatigue: {
@@ -316,6 +335,12 @@ const LEX = {
       { text: 'but only when she had a second to notice',  w: 0.7 },
       { text: 'but only when she sat down',                w: nt => nt.aden > 0.6  ? 1.0 : 0.3 },
     ],
+    appositive_np: [
+      { text: 'a weight in the limbs',              w: nt => nt.aden > 0.65 ? 1.5 : 0.5 },
+      { text: 'something settled in the shoulders', w: nt => nt.aden > 0.6  ? 1.2 : 0.3 },
+      { text: 'the usual heaviness',                w: 0.8 },
+      { text: 'the familiar kind',                  w: nt => nt.serotonin < 0.4 ? 1.0 : 0.3 },
+    ],
   },
 
   hunger_signal: {
@@ -380,6 +405,11 @@ const LEX = {
       { text: 'but only when she thought about food',  w: (nt, obs) => obs.properties.interoception?.low_grade ? 1.5 : 0.3 },
       { text: 'but only when she stopped to notice',   w: 0.8 },
     ],
+    appositive_np: [
+      { text: 'something starting',               w: (nt, obs) => obs.properties.interoception?.low_grade ? 1.5 : 0.5 },
+      { text: 'the stomach making itself known',  w: (nt, obs) => obs.properties.interoception?.gnawing  ? 1.5 : 0.3 },
+      { text: 'hunger making its case',           w: (nt, obs) => obs.properties.interoception?.gnawing  ? 1.0 : 0.3 },
+    ],
   },
 
   anxiety_signal: {
@@ -438,6 +468,11 @@ const LEX = {
     inversion_conditions: [
       { text: "but only when she stopped thinking about it", w: nt => nt.gaba < 0.4 ? 1.2 : 0.4 },
       { text: "but only when she wasn't paying attention",   w: nt => nt.ne > 0.6   ? 1.0 : 0.3 },
+    ],
+    appositive_np: [
+      { text: 'something already in the chest', w: nt => nt.gaba < 0.4  ? 1.5 : 0.3 },
+      { text: 'a tightness that had been there', w: nt => nt.ne > 0.6   ? 1.2 : 0.4 },
+      { text: 'the body already running',        w: nt => nt.ne > 0.65  ? 1.0 : 0.2 },
     ],
   },
 
@@ -642,6 +677,12 @@ const LEX = {
       { text: "It hadn't stopped.", w: nt => nt.serotonin < 0.4 ? 1.5 : 0.3 },
       { text: 'Rain.',              w: nt => nt.serotonin < 0.35 ? 1.0 : 0.1 },
     ],
+    appositive_np: [
+      'the sound of it through the window',
+      { text: 'steady and still there',      w: nt => nt.gaba > 0.5  ? 1.2 : 0.4 },
+      { text: 'rain doing what it does',     w: nt => nt.serotonin < 0.4 ? 1.2 : 0.4 },
+      { text: 'not stopping',                w: nt => nt.serotonin < 0.4 ? 1.0 : 0.2 },
+    ],
   },
 
   // === APARTMENT: VISUAL ===
@@ -690,6 +731,12 @@ const LEX = {
       { text: 'The light was the light.',   w: (nt, obs) => obs.properties.sight?.grey && nt.serotonin < 0.4 ? 1.5 : 0.1 },
       { text: 'Same light.',                w: nt => nt.serotonin < 0.35 ? 1.0 : 0.2 },
       { text: 'Grey, the committed kind.',  w: (nt, obs) => obs.properties.sight?.grey && nt.serotonin < 0.45 ? 1.2 : 0 },
+    ],
+    appositive_np: [
+      { text: 'grey through the blinds',  w: (nt, obs) => obs.properties.sight?.grey         ? 2.0 : 0 },
+      { text: 'morning come in',          w: (nt, obs) => obs.properties.sight?.early_light  ? 2.0 : 0 },
+      { text: 'dark still',               w: (nt, obs) => obs.properties.sight?.dark         ? 2.0 : 0 },
+      { text: 'the light doing what it does', w: 0.5 },
     ],
   },
 
@@ -1339,6 +1386,182 @@ function buildConditionalInversion(obs, nt, r2, r3, r4) {
 }
 
 
+// --- Passage-level shape selection ---
+//
+// When 2+ observations are present, a passage shape is selected using
+// obs[0]'s r1 slot. The shape determines how observations are combined
+// into prose. 'independent' (the default) produces one sentence per obs.
+// Multi-obs shapes fold observations into compound or sequential forms.
+//
+// RNG accounting: obs[0]'s r1 = shape selector. Obs[0]'s r2/r3/r4 and
+// all subsequent obs' r1/r2/r3/r4 are consumed normally. Total = 4N.
+
+const PASSAGE_SHAPE_WEIGHTS = {
+  calm:        { appositive: 0.25, terminal: 0.15, arrival_seq: 0.20 },
+  heightened:  { appositive: 0.30, terminal: 0.10, arrival_seq: 0.25 },
+  anxious:     { appositive: 0.15, terminal: 0.25, arrival_seq: 0.08 },
+  dissociated: { appositive: 0.10, terminal: 0.30, arrival_seq: 0.12 },
+  flat:        { appositive: 0.15, terminal: 0.25, arrival_seq: 0.10 },
+};
+
+/**
+ * Select a passage shape using pre-rolled r (obs[0]'s r1 slot).
+ * Returns: 'independent' | 'appositive' | 'terminal_list' | 'arrival_seq'
+ */
+function selectPassageShape(observations, hint, ntCtx, r) {
+  if (!observations || observations.length < 2) return 'independent';
+
+  const w = PASSAGE_SHAPE_WEIGHTS[hint] ?? PASSAGE_SHAPE_WEIGHTS.calm;
+
+  // Eligibility checks
+  const canAppositive = !!LEX[observations[1]?.sourceId]?.appositive_np;
+  const canTerminalList = observations.length >= 3
+    && observations[0].channels[0] !== observations[observations.length - 1].channels[0];
+  const canArrivalSeq = observations.length >= 2;
+
+  const items = [
+    { weight: 1.0,                                              value: 'independent'   },
+    { weight: w.appositive  * (canAppositive   ? 1 : 0),       value: 'appositive'    },
+    { weight: w.terminal    * (canTerminalList ? 1 : 0),       value: 'terminal_list' },
+    { weight: w.arrival_seq * (canArrivalSeq   ? 1 : 0),       value: 'arrival_seq'   },
+  ];
+
+  return wpick(items, r);
+}
+
+/**
+ * Appositive fold: two obs → one sentence.
+ * "The fridge hums, a weight in the limbs."
+ * Obs[0] builds the main clause (short declarative using r2/r3/r4).
+ * Obs[1]'s r1 picks the appositive NP; r2/r3/r4 consumed but unused.
+ * Obs[2..N-1] realized independently.
+ * Total RNG: 4N.
+ */
+function buildAppositiveExpansion(obs0, obs1, hint, ntCtx, r0_1, random, remaining) {
+  // Draw all calls upfront to guarantee RNG invariant regardless of fallback path
+  const r2_0 = random(), r3_0 = random(), r4_0 = random();                           // obs0 remaining
+  const r1_1 = random(), r2_1 = random(), r3_1 = random(), r4_1 = random();           // obs1 all 4
+  const remainingRng = remaining.map(() => [random(), random(), random(), random()]); // rest all 4
+
+  const lex0 = LEX[obs0.sourceId];
+  const lex1 = LEX[obs1.sourceId];
+
+  let mainSentence = null;
+  if (lex0?.subjects && lex0?.predicates && lex1?.appositive_np) {
+    const subj = pickText(lex0.subjects,    ntCtx, obs0, r2_0);
+    const pred = pickText(lex0.predicates,  ntCtx, obs0, r3_0);
+    const mod  = lex0.modifiers ? pickText(lex0.modifiers, ntCtx, obs0, r4_0) : null;
+    const np   = pickText(lex1.appositive_np, ntCtx, obs1, r1_1);
+    if (subj && pred && np) {
+      const main = mod ? `${cap(subj)} ${pred}, ${mod}` : `${cap(subj)} ${pred}`;
+      mainSentence = `${main}, ${np}.`;
+    }
+  }
+
+  // Process remaining observations
+  const restSentences = remaining.map((obs, i) => {
+    const [r1, r2, r3, r4] = remainingRng[i];
+    return realizeOne(obs, hint, ntCtx, r1, r2, r3, r4);
+  }).filter(Boolean);
+
+  if (mainSentence) {
+    return restSentences.length > 0
+      ? mainSentence + ' ' + restSentences.join(' ')
+      : mainSentence;
+  }
+
+  // Fallback: independent sentences using already-consumed RNG values
+  const s0 = realizeOne(obs0, hint, ntCtx, r0_1, r2_0, r3_0, r4_0);
+  const s1 = realizeOne(obs1, hint, ntCtx, r1_1, r2_1, r3_1, r4_1);
+  return [s0, s1, ...restSentences].filter(Boolean).join(' ') || null;
+}
+
+/**
+ * Terminal list: N obs as comma-separated fragments.
+ * "Heavy, the fridge, traffic."
+ * Each obs: r2 picks fragment, r3/r4 consumed unused. Total: 4N.
+ */
+function buildTerminalListPassage(obsList, hint, ntCtx, r0_1, random) {
+  // obs[0]: r0_1 consumed; draw 3 more
+  const r2_0 = random(), r3_0 = random(), r4_0 = random();
+  // obs[1..N-1]: 4 calls each
+  const restRng = obsList.slice(1).map(() => [random(), random(), random(), random()]);
+
+  const frags = [];
+
+  // obs[0] fragment: use r2_0
+  const lex0 = LEX[obsList[0].sourceId];
+  const pool0 = lex0?.fragments ?? lex0?.subjects;
+  const frag0 = pool0 ? pickText(pool0, ntCtx, obsList[0], r2_0) : null;
+  if (frag0) frags.push(frag0.toLowerCase());
+
+  // obs[1..N-1]: use r2 (index 1 of their 4 calls) for fragment
+  obsList.slice(1).forEach((obs, i) => {
+    const [_r1, r2] = restRng[i];
+    const lex = LEX[obs.sourceId];
+    const pool = lex?.fragments ?? lex?.subjects;
+    const frag = pool ? pickText(pool, ntCtx, obs, r2) : null;
+    if (frag) frags.push(frag.toLowerCase());
+  });
+
+  if (frags.length === 0) {
+    // Fallback: independent sentences using already-consumed calls
+    const s0 = realizeOne(obsList[0], hint, ntCtx, r0_1, r2_0, r3_0, r4_0);
+    const rest = obsList.slice(1).map((obs, i) => {
+      const [r1, r2, r3, r4] = restRng[i];
+      return realizeOne(obs, hint, ntCtx, r1, r2, r3, r4);
+    });
+    return [s0, ...rest].filter(Boolean).join(' ') || null;
+  }
+
+  frags[0] = cap(frags[0]);
+  return frags.join(', ') + '.';
+}
+
+/**
+ * Arrival sequence: obs as sentences joined with "Then".
+ * "The fridge hums. Then the room is cold."
+ * Each obs: r2/r3 pick subject/predicate, r4 picks modifier. Total: 4N.
+ */
+function buildArrivalSeqPassage(obsList, hint, ntCtx, r0_1, random) {
+  // obs[0]: r0_1 consumed; draw 3 more
+  const r2_0 = random(), r3_0 = random(), r4_0 = random();
+  // obs[1..N-1]: 4 calls each
+  const restRng = obsList.slice(1).map(() => [random(), random(), random(), random()]);
+
+  const parts = [];
+
+  // obs[0]
+  const lex0 = LEX[obsList[0].sourceId];
+  if (lex0?.subjects && lex0?.predicates) {
+    const subj = pickText(lex0.subjects,   ntCtx, obsList[0], r2_0);
+    const pred = pickText(lex0.predicates, ntCtx, obsList[0], r3_0);
+    const mod  = lex0.modifiers ? pickText(lex0.modifiers, ntCtx, obsList[0], r4_0) : null;
+    if (subj && pred) {
+      parts.push({ text: mod ? `${cap(subj)} ${pred}, ${mod}` : `${cap(subj)} ${pred}`, first: true });
+    }
+  }
+
+  // obs[1..N-1]
+  obsList.slice(1).forEach((obs, i) => {
+    const [_r1, r2, r3, r4] = restRng[i];
+    const lex = LEX[obs.sourceId];
+    if (!lex?.subjects || !lex?.predicates) return;
+    const subj = pickText(lex.subjects,   ntCtx, obs, r2);
+    const pred = pickText(lex.predicates, ntCtx, obs, r3);
+    const mod  = lex.modifiers ? pickText(lex.modifiers, ntCtx, obs, r4) : null;
+    if (!subj || !pred) return;
+    parts.push({ text: mod ? `${subj} ${pred}, ${mod}` : `${subj} ${pred}`, first: false });
+  });
+
+  if (parts.length === 0) return null;
+  if (parts.length === 1) return `${parts[0].text}.`;
+
+  const segments = parts.map((p, i) => i === 0 ? p.text : `Then ${p.text}`);
+  return segments.join('. ') + '.';
+}
+
+
 // --- Architecture weights per hint ---
 //
 // Relative weights — normalized inside wpick. 0 = never selected.
@@ -1447,12 +1670,38 @@ export function realize(observations, hint, ntCtx, random) {
     return phrases.join(' and ') + '.';
   }
 
-  // All other hints: each observation is its own sentence
-  const sentences = observations.map(obs => {
+  // Single observation: no passage shape needed
+  if (observations.length === 1) {
+    const r1 = random(), r2 = random(), r3 = random(), r4 = random();
+    return realizeOne(observations[0], hint, ntCtx, r1, r2, r3, r4);
+  }
+
+  // Multiple observations: draw obs[0]'s r1 upfront for passage-shape selection.
+  // Shape selection uses this value; the independent path passes it through to realizeOne
+  // as obs[0]'s r1. All paths consume exactly 4N calls total.
+  const r0_1 = random();
+  const shape = selectPassageShape(observations, hint, ntCtx, r0_1);
+
+  if (shape === 'appositive') {
+    return buildAppositiveExpansion(
+      observations[0], observations[1], hint, ntCtx, r0_1, random, observations.slice(2)
+    );
+  }
+  if (shape === 'terminal_list') {
+    return buildTerminalListPassage(observations, hint, ntCtx, r0_1, random);
+  }
+  if (shape === 'arrival_seq') {
+    return buildArrivalSeqPassage(observations, hint, ntCtx, r0_1, random);
+  }
+
+  // Independent: each observation is its own sentence.
+  // Obs[0] uses r0_1 as its r1 (arch selector); draw its remaining 3 slots.
+  const r2 = random(), r3 = random(), r4 = random();
+  const s0 = realizeOne(observations[0], hint, ntCtx, r0_1, r2, r3, r4);
+  const rest = observations.slice(1).map(obs => {
     const r1 = random(), r2 = random(), r3 = random(), r4 = random();
     return realizeOne(obs, hint, ntCtx, r1, r2, r3, r4);
   }).filter(Boolean);
-
-  if (sentences.length === 0) return null;
-  return sentences.join(' ');
+  const sentences = [s0, ...rest].filter(Boolean);
+  return sentences.length > 0 ? sentences.join(' ') : null;
 }

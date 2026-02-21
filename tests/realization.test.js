@@ -462,3 +462,120 @@ describe('realize — new architectures consume exactly 4 calls', () => {
     expect(calls).toBe(4);
   });
 });
+
+// --- Multi-observation passage shapes ---
+
+describe('realize — passage shapes: terminal list', () => {
+  // flat + [fatigueObs(interoception), fridgeObs(sound), trafficObs(sound)]
+  // PASSAGE_SHAPE_WEIGHTS.flat = { appositive:0.15, terminal:0.25, arrival_seq:0.10 }
+  // canAppositive: fridgeObs has appositive_np → true (weight 0.15)
+  // canTerminalList: 3 obs, interoception ≠ sound → true (weight 0.25)
+  // canArrivalSeq: true (weight 0.10)
+  // total = 1.0 + 0.15 + 0.25 + 0.10 = 1.50
+  // terminal_list range: [1.15/1.50, 1.40/1.50) = [0.767, 0.933)
+  // Use r0_1=0.85
+  test('terminal list: produces comma-separated fragments', () => {
+    const result = realize(
+      [fatigueObs, fridgeObs, trafficObs], 'flat', FLAT, mkRng(0.85, FIRST, FIRST, FIRST)
+    );
+    expect(result).toBeTruthy();
+    expect(result).toMatch(/,/);
+    expect(result).toMatch(/\.$/);
+    expect(result).toMatch(/^[A-Z]/);
+  });
+
+  test('terminal list: no mid-sentence capitals after first word', () => {
+    const result = realize(
+      [fatigueObs, fridgeObs, trafficObs], 'flat', FLAT, mkRng(0.85, FIRST, FIRST, FIRST)
+    );
+    // After the first word, the comma-separated fragments are lowercase
+    const withoutFirst = result.replace(/^[A-Z]/, '');
+    expect(withoutFirst).not.toMatch(/[A-Z]{2,}/); // no all-caps runs
+  });
+
+  test('terminal list: 3 observations still consume exactly 12 calls', () => {
+    let calls = 0;
+    const countingRng = () => { calls++; return 0.85; };
+    realize([fatigueObs, fridgeObs, trafficObs], 'flat', FLAT, countingRng);
+    expect(calls).toBe(12);
+  });
+});
+
+describe('realize — passage shapes: arrival sequence', () => {
+  // heightened + [fridgeObs(sound), coldObs(thermal)]
+  // PASSAGE_SHAPE_WEIGHTS.heightened = { appositive:0.30, terminal:0.10, arrival_seq:0.25 }
+  // canAppositive: coldObs (indoor_temperature) has appositive_np → true (weight 0.30)
+  // canTerminalList: length=2 < 3 → false (weight 0)
+  // canArrivalSeq: true (weight 0.25)
+  // total = 1.0 + 0.30 + 0 + 0.25 = 1.55
+  // arrival_seq range: [1.30/1.55, 1.55/1.55) = [0.839, 1.0)
+  // Use r0_1=0.92
+  test('arrival sequence: produces sentences joined with "Then"', () => {
+    const result = realize(
+      [fridgeObs, coldObs], 'heightened', NEUTRAL, mkRng(0.92, FIRST, FIRST, FIRST)
+    );
+    expect(result).toBeTruthy();
+    expect(result).toMatch(/\. Then /);
+    expect(result).toMatch(/\.$/);
+    expect(result).toMatch(/^[A-Z]/);
+  });
+
+  test('arrival sequence: 2 observations consume exactly 8 calls', () => {
+    let calls = 0;
+    const countingRng = () => { calls++; return 0.92; };
+    realize([fridgeObs, coldObs], 'heightened', NEUTRAL, countingRng);
+    expect(calls).toBe(8);
+  });
+});
+
+describe('realize — passage shapes: appositive expansion', () => {
+  // calm + [fridgeObs(sound), fatigueObs(interoception)]
+  // PASSAGE_SHAPE_WEIGHTS.calm = { appositive:0.25, terminal:0.15, arrival_seq:0.20 }
+  // canAppositive: fatigueObs has appositive_np → true (weight 0.25)
+  // canTerminalList: length=2 < 3 → false (weight 0)
+  // canArrivalSeq: true (weight 0.20)
+  // total = 1.0 + 0.25 + 0 + 0.20 = 1.45
+  // appositive range: [1.0/1.45, 1.25/1.45) = [0.690, 0.862)
+  // Use r0_1=0.75
+  test('appositive expansion: produces single compound sentence', () => {
+    const result = realize(
+      [fridgeObs, fatigueObs], 'calm', NEUTRAL, mkRng(0.75, FIRST, FIRST, FIRST)
+    );
+    expect(result).toBeTruthy();
+    expect(result).toMatch(/,/);
+    expect(result).toMatch(/\.$/);
+    expect(result).toMatch(/fridge/i);
+    // Single sentence: only one period at end
+    expect(result.replace(/\.$/, '')).not.toMatch(/\./);
+  });
+
+  test('appositive expansion: 2 observations consume exactly 8 calls', () => {
+    let calls = 0;
+    const countingRng = () => { calls++; return 0.75; };
+    realize([fridgeObs, fatigueObs], 'calm', NEUTRAL, countingRng);
+    expect(calls).toBe(8);
+  });
+
+  test('appositive + remaining: 3 observations consume exactly 12 calls', () => {
+    let calls = 0;
+    const countingRng = () => { calls++; return 0.75; };
+    realize([fridgeObs, fatigueObs, trafficObs], 'calm', NEUTRAL, countingRng);
+    expect(calls).toBe(12);
+  });
+});
+
+describe('realize — multi-obs: passage shapes maintain 4N for all hints', () => {
+  test('independent path with single obs still 4 calls', () => {
+    let calls = 0;
+    const countingRng = () => { calls++; return 0.5; };
+    realize([fridgeObs], 'calm', NEUTRAL, countingRng);
+    expect(calls).toBe(4);
+  });
+
+  test('independent path with 2 obs and r=0: exactly 8 calls', () => {
+    let calls = 0;
+    const countingRng = () => { calls++; return 0.0; };
+    realize([fridgeObs, coldObs], 'calm', NEUTRAL, countingRng);
+    expect(calls).toBe(8);
+  });
+});
