@@ -137,6 +137,38 @@ transmission between spaces.
 
 ---
 
+## Further Reading — Identity, Plurality, Attachment
+
+**Parasocial relationships**
+Horton & Wohl, "Mass Communication and Para-Social Interaction" (1956) — the
+original paper coining the term. Foundational for the concept of one-sided
+intimacy with media figures. More recent work on parasocial relationships in
+streaming and social media contexts is extensive; specific papers need
+verification before citing. The simulation note in player-character.md (social
+score partially maintained, connection quality not) would benefit from grounding
+in the empirical literature on what parasocial contact does and doesn't substitute
+for.
+
+**Plurality and DID**
+Clinical literature on DID is often pathologising by default and should be read
+critically. Community resources are more useful for the lived experience:
+- The Plural Association (https://www.pluralassociation.org) — community advocacy,
+  non-pathologising framing
+- More Than One (https://www.more-than-one.com) — plurality resources
+- Multiplicity and Me — personal accounts
+
+For DID specifically: the academic literature on misdiagnosis (DID presenting as
+schizophrenia) and the effects of antipsychotics on dissociative systems is
+relevant but contested — needs careful reading. Search terms: "DID misdiagnosis
+antipsychotics", "dissociative identity disorder treatment controversy."
+
+**Tulpas**
+The tulpa community has extensive self-documentation. The Tulpa.info guides and
+associated Reddit community (r/Tulpas) are primary sources for practice and
+experience, written from inside rather than from clinical observation.
+
+---
+
 ## Atmosphere — Music and Lyrics
 
 Tonal references: not templates to copy or over-optimize toward, but useful for
