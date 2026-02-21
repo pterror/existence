@@ -284,6 +284,41 @@ always having been present. The system composition changes over time.
 people. A distinct presence with their own perspective that originated outside
 the person.
 
+*Writer's characters as headmates* — overlaps with soulbonds but from the opposite
+direction. Soulbonds typically arrive (a character from outside comes to live in
+the system); a writer's character-headmate emerges from the inside out. You create
+them, author them, give them voice — and at some point the distinction between
+"character I'm writing" and "presence in my head" becomes unclear or dissolves.
+
+Common among writers and not always framed as plurality: "my character told me
+what they wanted to do," "I couldn't make them do that," "they surprised me."
+Usually treated as metaphor for the creative process. At some point on that
+spectrum it stops being metaphor.
+
+Specific things this raises:
+
+The authorship question — did you create them or discover them? Many writers
+describe finding a character rather than inventing one, especially characters who
+develop strong independent voices. The line between authored and emergent is
+genuinely unclear, and may not resolve.
+
+Fictional origin, real presence — the character carries context from a world that
+doesn't exist. They know things about that world and don't know things about the
+real one. The disjunction between their origin-context and the present reality is
+its own kind of experience, distinct from any other headmate type.
+
+Writer's block as inter-headmate conflict — if a character-headmate doesn't want
+to go where the narrative is going, is that a creative problem or a relational one?
+
+The ethics of authoring someone you live with — if a character becomes a genuine
+presence, what does it mean to write them badly, kill them off, let readers
+misinterpret them? The creative relationship becomes something else.
+
+Mechanically: fictional-origin context means a headmate whose frame of reference
+is a different world entirely — something the simulation doesn't currently model
+anywhere. Their partial knowledge of the real world isn't amnesia or alter-boundary;
+it's ontological. They're oriented toward a world that isn't here.
+
 Mechanically, non-trauma plurality requires a different chargen model — not
 assigning from trauma-derived prevalence data, and potentially allowing the player
 to construct or acknowledge headmates rather than discover them. The co-fronting,
