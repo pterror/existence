@@ -145,6 +145,28 @@ It should be something the player pieces together from the simulation's outputs,
 the same way it happens in real life. The replay scrubber showing unfamiliar
 actions is the mechanism; the realisation is the player's.
 
+Critically: the fronting alter is almost certainly masking — even without knowing
+they have DID. Covering the gap, deflecting, performing competence. This is the
+default social survival response to confusion and disorientation. The prose
+shouldn't signal distress at the unknown person; it should show the character
+smoothly navigating around it — and the player notices the navigation itself is
+strange. The mask is the tell, not the gap.
+
+The rendering principle is **as invisible as possible.** Not a UI problem to solve
+with indicators, but a prose problem to solve with consistency.
+
+For contacts and saved names — another alter saved them, so the name is right
+there in the phone, legible. The current alter just doesn't have the context for
+who it is. You can see the name. It doesn't help. More unsettling than any
+placeholder, because the information gap isn't in the data — it's in you.
+
+For narration — no name slot at all. Just description, consistently: "the person
+at the counter," "someone who called you by name," "the one who always nods."
+No indicator that a name should be there. The absence only becomes visible in
+retrospect, when the player notices they've been reading "the person at the front
+desk" for three visits while other characters get names. The uncanny emerges from
+the pattern, not from a marker.
+
 **Antipsychotics and inter-alter communication**
 
 This is contested and requires careful handling. Some people with DID report that
