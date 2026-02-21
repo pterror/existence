@@ -134,6 +134,32 @@ Real-time speech is constructed live and the seams show. These are not errors �
 
 **Punctuation as phonetic notation**: em dash for interruption or mid-sentence pivot; ellipsis for trailing off or suspension; comma-then-restart for repair. These are not stylistic choices — they notate how the speech actually moved.
 
+#### Pragmatic stance markers
+
+Phrases that reveal the speaker's relationship to what they're saying and to the listener. Not filler, not grammatical features — social positioning moves that are deeply character-revealing.
+
+- **Hedging**: "I think," "I'm pretty sure," "maybe," "kind of" — signals uncertainty or politeness; repeated use is a personality fingerprint
+- **Defensiveness / pre-emption**: "to be fair," "I mean," "just saying," "no offense but," "don't get me wrong" — managing potential disagreement before it arrives
+- **Solidarity markers**: "you know," "right?", "I know" — seeking confirmation, checking alignment
+- **Candor signals**: "honestly," "tbh," "not gonna lie," "fwiw," "imho" — signals that what follows is more direct than usual, which implies the speaker usually isn't
+- **Qualifiers**: "kind of," "sort of," "a little bit," "like" — softening an assertion
+
+These are personality parameters, not just voice parameters. A character who habitually uses "to be fair" is showing something about how they handle conflict. Someone who signals candor constantly ("honestly," "tbh") is signaling that directness is notable for them — they're usually more guarded.
+
+#### Personality in dialogue more broadly
+
+Surface features (grammar, hesitation, region, stance markers) are the how of speech. But personality also shapes the *what* — which is a harder and less well-defined design space:
+
+- **Topic selection**: what the person brings up unprompted vs. what they avoid
+- **Self-disclosure level**: how much they share about themselves, how quickly
+- **Directness**: whether they answer questions directly or route around them
+- **Over/under-explanation**: what they assume you know vs. what they spell out
+- **Register flexibility**: when they shift between formal/casual, jokey/serious, and what triggers the shift
+- **Response to disagreement**: engage, deflect, get defensive, get quiet
+- **What they find worth remarking on**: what they notice and mention vs. what they let pass
+
+These are harder to parameterize than stance markers but matter more for whether a character feels like a person. Character generation should eventually produce a personality sketch that constrains all of these, not just the surface features. For now: noted as an open design space.
+
 #### Slang and vernacular
 
 Generation-specific and subculture-specific vocabulary. Hard to author because it dates. Treat as a separate lightweight lexical layer — a small set of current-register words that can slot into constructions. Needs more thought; likely authoring rather than generation.
