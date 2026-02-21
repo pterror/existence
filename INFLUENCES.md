@@ -172,7 +172,8 @@ what the days look like.
 - https://open.spotify.com/album/5ahVGYp6RssaF7GHJ6dFSO
 
 No official English lyrics — reconstructed from phonetic transcription against
-Portuguese subtitles (trans. Konny @konnyoung). The normative daily schedule as
+Portuguese subtitles (trans. Konny @konnyoung); "your life's so dull" and
+"no spirit, no ember" confirmed. The normative daily schedule as
 external pressure ("wake up at seven o'clock / this is how it's supposed to be /
 keep a radiant smile / so the others see"). Alienation from the performance of
 normal: "what you like, what you talk, what you strive / I can't imagine being
