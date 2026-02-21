@@ -437,9 +437,32 @@ Foundation of the procedural prose pipeline. Sources are things in the world (or
 
 **`observe(source)`** — evaluates all property functions, returns `Observation` `{sourceId, channels, salience, properties}`. No RNG.
 
-**`getObservations()`** — runs both, returns all available observations sorted by salience descending. No RNG. Public API — the realization engine will call this.
+**`getObservations()`** — runs both, returns all available observations sorted by salience descending. No RNG. Public API consumed by the realization engine.
 
-**Next:** Sentence architecture engine to turn `Observation[]` + NT hint → prose.
+---
+
+**Realization engine (`js/realization.js`):**
+
+Pure module that turns `Observation[]` + NT hint → prose string. No game imports; fully testable.
+
+**`realize(observations, hint, ntContext, random)`** — main entry point. Selects up to `getPassageBudget(hint)` observations (top by salience), realizes each into a sentence, combines into a passage. RNG consumption is exactly `N × 4` calls (N = budget), always — balanced across all architecture branches.
+
+**Lexical sets** — one per sourceId. Each defines: `subjects`, `predicates`, `modifiers` (with null options for "no modifier"), and optionally `body_subjects`/`body_predicates` (for body-as-subject architecture), `ambiguity_alts` (for source-ambiguity architecture), `escapes` (for interpretive-escape architecture), `fragments` (for bare-fragment architecture). Items are strings or `{ text, w }` objects where `w` may be an `ntCtx => number` function.
+
+**Five sentence architectures**, weighted per hint:
+- `shortDeclarative` — "The fridge hums." / "The fridge hums, too loud." (all hints)
+- `bareFragment` — "Heavy." / "A hum." (dissociated, flat, overwhelmed)
+- `bodyAsSubject` — "Cold sits on the back of the neck." (body/thermal sources)
+- `sourceAmbiguity` — "Something — the fridge, maybe, or the heat — hums." (dissociated)
+- `interpretiveEscape` — "The fridge hums, and the sound was just a sound." (calm)
+
+**`overwhelmed` passage** — polysyndeton: each observation's sentence stripped of punctuation and joined with "and". First phrase capitalized; rest lowercased.
+
+**NT augmentation** — `augmentNT()` extracts observation property flags (`_temp_cold`, `_quality_gravitational`, `_irritable`, `_char_unsettled`, etc.) from `obs.properties` and merges into a copy of `ntCtx`. Lexical weight functions use these flags to produce state-appropriate word choices.
+
+**Tests:** 32 unit tests in `tests/realization.test.js`. Cover null/empty, all five architectures, multi-observation passages, polysyndeton, fixed RNG consumption, NT variation, unknown hint fallback. All passing.
+
+**Not yet wired to game loop** — `sense()` still uses the fragment system. Wiring comes next.
 
 ### Sleep Prose
 Two-phase system: falling-asleep (how sleep came) + waking-up (the gradient back to consciousness). Falling-asleep branches on pre-sleep energy, stress, quality, and duration, with NT shading: adenosine→crash depth, GABA→can't-settle anxiety, NE→hyper-alertness, serotonin→warmth of surrender, melatonin→onset delay (~22 variants). Waking-up branches on post-sleep energy, sleep quality, alarm vs natural wake, time of day (dark/late/morning), mood, sleep debt, and sleep inertia, with NT shading: adenosine→sleep inertia, serotonin→dread-vs-ease, NE→sharp edges, GABA→night dread, debt→cumulative exhaustion (~44 variants). Composed together as a single passage. No numeric hour counts — all qualitative.
