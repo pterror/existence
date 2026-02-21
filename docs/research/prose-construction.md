@@ -243,7 +243,13 @@ SimpleNLG (Reiter, University of Aberdeen): canonical lightweight realizer. Take
 
 ---
 
-## 5. Synthesis: Design for the Prose Compositor
+## 5. Cross-Sensory Is the Default Case
+
+Many sensory experiences are inherently multi-channel: food involves taste + smell + texture + temperature + sometimes sound. Corrugations are touch + sound simultaneously. A concert is sound + vibration + heat + visual density. The compositor must treat multi-channel as normal, not special.
+
+Each fragment carries a `channels` field (can list multiple senses). The compositor combines fragments from different channels in the same sentence when they share a moment — the same attention order and combination rules apply regardless of whether fragments are from the same sense or different ones.
+
+## 6. Synthesis: Design for the Prose Compositor
 
 ### Fragment type vocabulary (minimum viable)
 

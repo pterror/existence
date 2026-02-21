@@ -23,6 +23,29 @@ NT modulation of noticeability:
 - GABA low → can't filter; minor sensory facts intrude
 - Dopamine low → things that would normally register (the coffee brewing) may not
 
+**Constitutional conditions shape baseline rendering, not just notable moments.** A myopic character's prose about anything at distance is always different — not flagged as an event, just the world as they see it. Visual snow is always there. Low interoceptive awareness means hunger consistently fails to fire clearly. Anosmia means food smells simply don't exist. These conditions must be stored at chargen and wired into all prose for that character, not treated as occasional modifiers.
+
+**The body knows before the mind.** Interoceptive signals precede conscious recognition. Anxiety is a tight chest before it's a thought. Hunger is irritability before it's noticed. NE is sharpened edges before "I feel alert." Prose should render the body first — don't name the emotion, render the signal the body is sending.
+
+**Dose makes the poison.** Pleasant or interesting sensations become damaging at excess. Pineapple tingles then bleeds. Spice warms then burns. Sound at concert volume is immersive then harmful. Heat is comforting then scalding. This is not a special case — it's a general property of sensory systems. The threshold is personal and trained.
+
+**Cross-sensory coupling is the norm, not the exception.** Many sensory experiences are inherently multi-channel: food involves taste + smell + texture + temperature + sometimes sound (the crunch, the sizzle). Corrugations are touch + sound simultaneously. A concert is sound + physical vibration + heat + visual density. The prose compositor must treat multi-channel as the default case, not a special one.
+
+## The fragment spec — preventing ad-hoc mess
+
+Every sensory fragment, regardless of which sense it belongs to, has the same shape. The sense is metadata, not architecture. Building separate systems per sense produces mess; a consistent spec and authoring discipline prevents it.
+
+**Every sensory fragment carries:**
+- `content` — the authored text (clause, phrase, or fragment)
+- `grammatical_type` — main clause, participial, absolute, adverbial, fragment, appositive
+- `rhetorical_tag` — cause, temporal, simultaneous, contrast, continuation
+- `channels` — which senses involved (can be multiple — cross-sensory is normal)
+- `trigger_conditions` — state thresholds, location, time, transition, co-occurrence (see docs/design/triggers.md)
+- `character_conditions` — constitutional profile requirements (requires myopia, excludes anosmia, etc.)
+- `nt_weights` — how NT state modulates availability and selection weight
+
+The fragment spec is the anti-mess principle. Everything else is authoring. The quality ceiling is the authored pool — the compositor only combines what's there.
+
 ---
 
 ## Smell
