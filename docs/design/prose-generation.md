@@ -241,6 +241,70 @@ Voice parameters should be generated at chargen from backstory, not authored per
 
 ## Narration: tone, pacing, flow
 
+### Prose rhythms
+
+The rhythmic texture of prose — independent of content. These are styles that map to states but are worth naming as distinct modes:
+
+- **Staccato**: short. Clipped. One thing. Next thing. No connective tissue between sentences. Percussive. Each sentence complete in itself with no reach toward the next. Can be anxiety, focus, shock, or flat determination — rhythm alone doesn't specify the state, but it contributes.
+- **Flowing**: sentences that move through subordination and modification without interruption. Observations connect to each other causally or temporally. The reader is carried.
+- **Accumulating**: sentences that keep adding — participials, appositives, trailing clauses — past the point where they could have stopped. The observation keeps finding more to say. Characteristic of heightened states.
+- **Flooding**: polysyndeton, no hierarchy, everything arrives at the same priority. The sentence can't end because there's always another thing. Overwhelm.
+- **Floating**: observations that don't connect. Things placed next to each other with no causal or temporal glue. The mind isn't organizing what it receives. Dissociation.
+- **Fragmenting**: sentences that start and don't complete, or complete in the wrong place. The grammar breaks before the thought does. Delirium, extreme states.
+- **Deflating**: sentences that form correctly and then end somewhere lower than they started. The final clause undercuts. Flat mood, depression.
+- **Looping**: the same observation returns, or a sentence completes and immediately starts again nearby. Rumination, intrusive thought, delirium.
+
+### State → prose style mapping
+
+Every distinct experiential state has a corresponding prose texture. This is the full mapping as currently understood — will expand as more states are modeled.
+
+**Calm** (baseline, adequate sleep, moderate NT)
+Long sentences with subordination. Cause-effect sequencing. Observations zoom in. Interpretive escape available — the prose can reach toward meaning. The world is organized.
+
+**Heightened / ecstatic** (high serotonin + dopamine + NE)
+Sentences that keep going past where they could have stopped. Accumulating participials. The world is vivid and specific — details register that normally wouldn't. Things are noticed *as* beautiful or interesting, not just present.
+
+**Anxious** (low GABA, moderate-high NE)
+Staccato. Things arrive without being invited. Short declaratives. Objects notice themselves — "keys on the counter where they shouldn't be." The body runs ahead of the person. No interpretive escape — the prose doesn't reach toward meaning, it just reports.
+
+**Overwhelmed** (very low GABA, very high NE)
+Flooding. Polysyndeton. Everything at the same priority level. The sentence can't end. Body and environment become indistinguishable inputs. Synesthetic collapse possible — "the lights are the same volume as everything else."
+
+**Dissociated** (high adenosine, low NE)
+Floating. Equal-weight juxtaposition — body and environment given identical grammatical status. Source ambiguity — "a truck or a dog." Things noted without interpretation. The final clause that would make an observation signify something doesn't arrive. Memory intrusion possible.
+
+**Flat / depressed** (low serotonin, low dopamine)
+Declaratives that deflate. The sentence forms correctly and ends lower than it started. Things noted without caring about them. Omission — the prose covers less, selects less vividly. Self-doubt qualifiers: "or was." The interpretive escape fires but leads nowhere: "and it didn't matter."
+
+**Delirious / severely out of it** (extreme adenosine, fever, extreme sleep deprivation, high illness severity)
+Fragmenting and looping. Sentences that start and become something else. Referential drift — "it" stops referring to anything clear. Time sense breaks — past and present bleed. Things repeated without awareness of the repetition. The prose has the form of observation but the content doesn't track. A sentence might be grammatically complete and semantically incoherent.
+
+**Numb** (post-emotional, extreme flat, dissociation without the floating quality)
+Like flat but more complete. Not deflating — just absent. The prose is there but nobody is behind it. Sentences report accurately and without any register of what they're reporting. No irony, no weight, no escape. Pure surface.
+
+**Focused / determined** (moderate NE, adequate GABA, task-present)
+Staccato but purposeful — the clipping is about being on the task, not about being unable to process. Short sentences but they move forward. No dwelling. Things noted only insofar as they're relevant to what's being done.
+
+**Physical pain** (migraine active, dental flare, illness severe)
+Intrusive return. The pain is not mentioned every sentence, but it pulls attention back. The narrative thread gets interrupted by body-as-subject constructions that insert the pain. Sentences about other things end near the pain. The world is present but the pain is always also present.
+
+**Hunger (severe)**
+Attention narrowed. Everything noticed through the lens of food-relevance or not-food. Executive function degrading — sentences may not complete their original direction. The prose is present but operating on reduced capacity.
+
+**Caffeinated (high)**
+Sharp. Details noticed that would normally pass. Short sentences but fast rather than clipped — there's energy in the brevity. A certain brittleness: things are present and specifically present, but the acuity has an edge to it.
+
+**Withdrawal (caffeine, severe)**
+Somatic intrusion — the headache is the dissociated-pain version: present throughout without dominating any single sentence. Irritability visible in how things are described — a slight edge on neutral observations. Sentences about minor annoyances that don't warrant the attention they're getting.
+
+**Post-emotional** (after strong feeling has passed)
+Flatness that follows from exhaustion rather than depression. Things are noticed in a depleted register. The prose is accurate but thin. Something that would have mattered an hour ago gets one sentence.
+
+**Ruminating** (high rumination personality parameter, returning thought)
+Looping. The prose returns to the same observation or thought, approaching it from a slightly different angle each time. The character's attention keeps finding its way back. Sentences that seem to be about something else and then aren't.
+
+---
+
 ### Baseline register
 
 The game's narration has a specific baseline that holds across all NT states, even as sentence structure and word choice vary within it:
