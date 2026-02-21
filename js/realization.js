@@ -404,6 +404,220 @@ const LEX = {
       { text: 'everything wet', w: 0.6 },
     ],
   },
+
+  // === APARTMENT: VISUAL ===
+
+  window_light: {
+    subjects: [
+      { text: 'the window', w: 0.8 },
+      { text: 'grey light', w: nt => nt._condition_grey ? 2.0 : 0 },
+      { text: 'morning light', w: nt => nt._condition_early_light ? 2.0 : 0 },
+      { text: 'the light', w: nt => !nt._condition_dark ? 1.0 : 0.1 },
+    ],
+    predicates: [
+      { text: 'is still dark', w: nt => nt._condition_dark ? 3.0 : 0 },
+      { text: 'is grey', w: nt => nt._condition_grey ? 2.0 : 0 },
+      { text: 'has arrived', w: nt => nt._condition_early_light ? 2.0 : 0 },
+      { text: 'is going', w: nt => nt._condition_dimming ? 2.0 : 0 },
+      { text: 'comes through', w: nt => !nt._condition_dark ? 1.0 : 0 },
+      { text: 'is outside', w: 0.3 },
+    ],
+    modifiers: [
+      { text: null, w: 2.5 },
+      { text: 'flat', w: nt => nt.serotonin < 0.4 && nt._condition_grey ? 1.5 : 0 },
+      { text: 'through the blinds', w: nt => !nt._condition_dark ? 0.5 : 0 },
+      { text: 'already', w: nt => nt._condition_early_light && nt.aden > 0.5 ? 1.0 : 0 },
+    ],
+    escapes: [
+      { text: 'it was morning', w: nt => nt._condition_early_light ? 1.5 : 0.3 },
+      { text: 'the day had started', w: nt => nt._condition_early_light ? 1.0 : 0.3 },
+      { text: 'it was just the light', w: 1.0 },
+    ],
+    fragments: [
+      { text: 'grey', w: nt => nt._condition_grey ? 2.5 : 0 },
+      { text: 'dark', w: nt => nt._condition_dark ? 2.5 : 0 },
+      { text: 'morning', w: nt => nt._condition_early_light ? 2.0 : 0 },
+      { text: 'light', w: nt => !nt._condition_dark ? 0.8 : 0 },
+      { text: 'the window', w: 0.5 },
+    ],
+  },
+
+  // === APARTMENT: BATHROOM ===
+
+  bathroom_echo: {
+    subjects: [
+      { text: 'everything', w: 0.5 },
+      { text: 'the tile', w: nt => nt.ne > 0.6 ? 1.0 : 0.5 },
+      { text: 'small sounds', w: nt => nt.ne > 0.5 ? 1.2 : 0.5 },
+      { text: 'something', w: nt => nt.aden > 0.5 ? 1.0 : 0.4 },
+    ],
+    predicates: [
+      { text: 'echo in here', w: 1.0 },
+      { text: 'carry in here', w: 0.7 },
+      { text: 'have that quality', w: nt => nt.aden > 0.5 ? 1.0 : 0.3 },
+      { text: 'are clearer than they should be', w: nt => nt.ne > 0.5 ? 1.2 : 0.3 },
+    ],
+    modifiers: [
+      { text: null, w: 2.0 },
+      { text: 'off the tile', w: 0.8 },
+    ],
+    ambiguity_alts: ['the pipes', 'the building'],
+    fragments: [
+      { text: 'echo', w: 1.0 },
+      { text: 'tile', w: 0.8 },
+      { text: 'the small room', w: nt => nt.aden > 0.5 ? 1.0 : 0.3 },
+    ],
+  },
+
+  // === INTEROCEPTIVE: STRESS ===
+
+  stress_signal: {
+    subjects: [
+      { text: 'something', w: 0.8 },
+      { text: 'the shoulders', w: nt => nt._stress_loc_shoulders ? 2.0 : 0.1 },
+      { text: 'the jaw', w: nt => nt._stress_loc_jaw ? 2.0 : 0.1 },
+      { text: 'the chest', w: nt => nt._stress_loc_chest ? 2.0 : 0.1 },
+    ],
+    predicates: [
+      { text: 'is carrying something', w: nt => nt._stress_loc_shoulders ? 1.5 : 0.3 },
+      { text: 'is braced', w: nt => nt._stress_loc_jaw ? 1.5 : 0.3 },
+      { text: 'is tight', w: nt => nt._stress_loc_chest ? 1.5 : 0.5 },
+      { text: "won't let go", w: nt => nt._stress_high ? 1.5 : 0.3 },
+      { text: 'is holding', w: 0.8 },
+    ],
+    modifiers: [
+      { text: null, w: 2.0 },
+      { text: 'all the way up', w: nt => nt._stress_loc_shoulders ? 0.8 : 0 },
+      { text: 'without reason', w: nt => nt.serotonin < 0.4 ? 0.6 : 0.1 },
+    ],
+    body_subjects: [
+      { text: 'the shoulders', w: nt => nt._stress_loc_shoulders ? 2.0 : 0.3 },
+      { text: 'the jaw', w: nt => nt._stress_loc_jaw ? 2.0 : 0.1 },
+      { text: 'something', w: 0.8 },
+    ],
+    body_predicates: [
+      { text: 'has been holding this whole time', w: nt => nt._stress_high ? 1.5 : 0.5 },
+      { text: "won't release", w: 1.0 },
+      { text: 'is braced against something', w: nt => nt._stress_loc_jaw || nt.ne > 0.6 ? 1.5 : 0.3 },
+      { text: 'goes up around the ears', w: nt => nt._stress_loc_shoulders ? 1.2 : 0.1 },
+      { text: 'is tight in a specific way', w: nt => nt._stress_loc_chest ? 1.0 : 0.2 },
+    ],
+    fragments: [
+      { text: 'tight', w: nt => nt._stress_high ? 1.5 : 0.8 },
+      { text: 'holding', w: 0.7 },
+      { text: 'something', w: 0.5 },
+    ],
+  },
+
+  // === INTEROCEPTIVE: CAFFEINE ===
+
+  caffeine_signal: {
+    subjects: [
+      { text: 'something', w: nt => nt._caffeine_jitter ? 1.0 : 0.5 },
+      { text: 'the body', w: nt => nt._caffeine_jitter ? 1.5 : 0.4 },
+      { text: 'everything', w: nt => nt._caffeine_sharp ? 1.2 : 0.2 },
+    ],
+    predicates: [
+      { text: 'is running a little fast', w: nt => nt._caffeine_sharp ? 1.5 : 0.4 },
+      { text: "won't quite settle", w: nt => nt._caffeine_jitter ? 1.5 : 0.3 },
+      { text: 'has an edge to it', w: nt => nt._caffeine_edge ? 1.5 : 0.4 },
+      { text: 'is a little sharper than usual', w: nt => nt._caffeine_sharp ? 1.0 : 0.2 },
+    ],
+    modifiers: [
+      { text: null, w: 2.0 },
+    ],
+    body_subjects: [
+      { text: 'something', w: 1.0 },
+      { text: 'the hands', w: nt => nt._caffeine_jitter ? 1.5 : 0.1 },
+    ],
+    body_predicates: [
+      { text: "won't quite stop moving", w: nt => nt._caffeine_jitter ? 2.0 : 0.2 },
+      { text: 'is running at a slightly different frequency', w: nt => nt._caffeine_sharp ? 1.5 : 0.3 },
+      { text: 'is running just a little fast', w: 0.8 },
+    ],
+    fragments: [
+      { text: 'running fast', w: nt => nt._caffeine_sharp || nt._caffeine_jitter ? 1.5 : 0.4 },
+      { text: 'something', w: 0.5 },
+    ],
+  },
+
+  // === WORK: ACOUSTIC ===
+
+  workplace_hvac: {
+    subjects: [
+      { text: 'the ventilation', w: nt => nt.aden < 0.5 ? 1.0 : 0.4 },
+      { text: 'something overhead', w: nt => nt.aden > 0.5 ? 1.2 : 0.5 },
+      { text: 'the building', w: 0.5 },
+    ],
+    predicates: [
+      'runs',
+      { text: 'cycles', w: 0.7 },
+      { text: 'breathes', w: nt => nt.aden > 0.5 ? 1.0 : 0.3 },
+      { text: 'keeps going', w: nt => nt.serotonin < 0.4 ? 1.0 : 0.3 },
+    ],
+    modifiers: [
+      { text: null, w: 2.5 },
+      { text: 'overhead', w: nt => nt.ne > 0.6 ? 0.7 : 0.2 },
+    ],
+    ambiguity_alts: ['the building', 'something in the ceiling'],
+    fragments: [
+      { text: 'the ventilation', w: nt => nt.aden < 0.5 ? 1.0 : 0.3 },
+      { text: 'something overhead', w: nt => nt.aden > 0.5 ? 1.2 : 0.4 },
+    ],
+  },
+
+  fluorescent_lights: {
+    subjects: [
+      { text: 'the lights', w: 1.0 },
+      { text: 'the fluorescents', w: nt => nt.ne > 0.6 ? 1.2 : 0.4 },
+      { text: 'something overhead', w: nt => nt.aden > 0.5 ? 1.0 : 0.3 },
+    ],
+    predicates: [
+      'hum',
+      { text: 'flicker slightly', w: nt => nt._light_flicker ? 2.0 : 0 },
+      { text: 'have a quality', w: nt => nt.aden > 0.5 ? 1.0 : 0.3 },
+      { text: 'are going', w: 0.4 },
+    ],
+    modifiers: [
+      { text: null, w: 1.5 },
+      { text: 'high and thin', w: nt => nt.ne > 0.6 ? 1.5 : 0.2 },
+      { text: 'overhead', w: 0.4 },
+    ],
+    ambiguity_alts: ['the projector', 'the ventilation'],
+    escapes: [
+      { text: 'the lights were just lights', w: 1.0 },
+      { text: 'it had always been like this', w: nt => nt.aden > 0.5 ? 1.0 : 0.5 },
+    ],
+    fragments: [
+      { text: 'the lights', w: 1.0 },
+      { text: 'a hum', w: nt => nt.aden > 0.5 ? 1.2 : 0.5 },
+      { text: 'fluorescent', w: nt => nt.ne > 0.6 ? 1.0 : 0.3 },
+    ],
+  },
+
+  coworker_background: {
+    subjects: [
+      'voices',
+      { text: 'keyboards', w: 0.6 },
+      { text: 'the office', w: 0.5 },
+      { text: 'something', w: nt => nt.aden > 0.5 ? 1.0 : 0.3 },
+    ],
+    predicates: [
+      'in the background',
+      { text: 'at a remove', w: nt => nt.aden > 0.5 ? 1.2 : 0.4 },
+      { text: 'carrying on', w: nt => nt.serotonin > 0.5 ? 1.0 : 0.3 },
+      { text: 'keep going', w: nt => nt._voices_intelligible ? 1.0 : 0.2 },
+    ],
+    modifiers: [
+      { text: null, w: 2.0 },
+    ],
+    fragments: [
+      'voices',
+      { text: 'keyboards', w: 0.5 },
+      { text: 'the office', w: 0.6 },
+      { text: 'someone talking', w: nt => nt._voices_intelligible ? 1.5 : 0.2 },
+    ],
+  },
 };
 
 // --- Observation property augmentation ---
@@ -417,31 +631,54 @@ function augmentNT(base, obs) {
 
   const sound = obs.properties.sound;
   if (sound) {
-    a._perceived_intensity = sound.perceived_intensity ?? 0.5;
+    a._perceived_intensity  = sound.perceived_intensity ?? 0.5;
+    a._voices_intelligible  = sound.intelligible === true;
   }
 
   const thermal = obs.properties.thermal;
   if (thermal) {
     const tier = thermal.tier;
-    a._temp_cold     = ['freezing', 'very_cold', 'cold', 'cool'].includes(tier);
-    a._temp_warm     = ['warm', 'hot', 'very_hot'].includes(tier);
+    a._temp_cold      = ['freezing', 'very_cold', 'cold', 'cool'].includes(tier);
+    a._temp_warm      = ['warm', 'hot', 'very_hot'].includes(tier);
     a._temp_very_cold = ['freezing', 'very_cold'].includes(tier);
-    a._immediate     = thermal.immediate === true;
+    a._immediate      = thermal.immediate === true;
+  }
+
+  const sight = obs.properties.sight;
+  if (sight) {
+    const cond = sight.condition;
+    a._condition_dark        = cond === 'dark';
+    a._condition_grey        = cond === 'grey_morning' || cond === 'overcast' || cond === 'grey_evening';
+    a._condition_early_light = cond === 'early_light';
+    a._condition_dimming     = cond === 'dimming';
+    a._light_flicker         = sight.flicker === true;
   }
 
   const i = obs.properties.interoception;
   if (i) {
+    // Fatigue
     a._quality_gravitational = i.quality === 'gravitational';
     a._quality_weighted      = i.quality === 'weighted';
     a._quality_crushing      = i.tier === 'crushing';
+    // Hunger
     a._quality_gnawing       = i.quality === 'gnawing';
     a._quality_hollow        = i.quality === 'hollow';
     a._quality_low_grade     = i.quality === 'low_grade';
     a._irritable             = i.irritability === true;
+    // Anxiety
     a._char_keyed_up         = i.character === 'keyed_up';
     a._char_unsettled        = i.character === 'unsettled';
     a._char_restless         = i.character === 'restless';
     a._char_overwhelmed      = i.character === 'overwhelmed';
+    // Stress
+    a._stress_loc_jaw        = i.location === 'jaw';
+    a._stress_loc_shoulders  = i.location === 'shoulders';
+    a._stress_loc_chest      = i.location === 'chest';
+    a._stress_high           = i.tier === 'overwhelmed' || i.tier === 'strained';
+    // Caffeine
+    a._caffeine_jitter       = i.quality === 'jitter';
+    a._caffeine_sharp        = i.quality === 'sharp';
+    a._caffeine_edge         = i.quality === 'edge';
   }
 
   return a;

@@ -431,7 +431,7 @@ Foundation of the procedural prose pipeline. Sources are things in the world (or
 
 **`ObservationSource` spec:** `id`, optional `areas`/`locations` filter, `channels`, `available(State, World)` gate, `salience(State)` (0–1 attention weight), `properties` map of channel→{key→fn(State)}.
 
-**Source library (14 sources):** Indoor acoustic (fridge, pipes, electronic_whine, traffic_through_walls), indoor thermal (indoor_temperature), interoceptive (fatigue, hunger_signal, anxiety_signal), outdoor acoustic (traffic_outdoor, street_voices), outdoor thermal (outdoor_temperature, wind), outdoor rain (rain).
+**Source library (21 sources):** Indoor acoustic (fridge, pipes, electronic_whine, traffic_through_walls), indoor thermal (indoor_temperature), indoor visual (window_light), bathroom acoustic (bathroom_echo), interoceptive (fatigue, hunger_signal, anxiety_signal, stress_signal, caffeine_signal), outdoor acoustic (traffic_outdoor, street_voices), outdoor thermal (outdoor_temperature, wind), outdoor rain (rain), work acoustic (workplace_hvac, fluorescent_lights, coworker_background).
 
 **`getAvailableSources()`** — filters sources by location/area and `available()`. No RNG.
 

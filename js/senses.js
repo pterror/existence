@@ -900,6 +900,177 @@ export function createSenses(ctx) {
         sight:  { quality: () => 'grey' },
       },
     },
+
+    // === APARTMENT: VISUAL ===
+    {
+      id: 'window_light',
+      areas: ['apartment'],
+      channels: ['sight'],
+      available: () => true,
+      salience: () => {
+        const h = State.getHour();
+        const rain = State.get('rain');
+        // Most salient at transitions: dawn, evening dimming, and when still dark
+        if (h >= 6 && h < 9)   return rain ? 0.5 : 0.45;  // morning grey or early light
+        if (h >= 17 && h < 21) return 0.4;                 // evening darkening
+        if (h < 6 || h >= 21)  return 0.35;                // window is dark
+        return rain ? 0.2 : 0.1;                           // full daylight — not grabby
+      },
+      properties: {
+        sight: {
+          condition: () => {
+            const h = State.getHour();
+            const rain = State.get('rain');
+            if (h < 6 || h >= 22)  return 'dark';
+            if (h >= 6 && h < 8)   return rain ? 'grey_morning' : 'early_light';
+            if (h >= 17 && h < 20) return rain ? 'grey_evening' : 'dimming';
+            if (rain) return 'overcast';
+            return 'daylight';
+          },
+          rain: () => State.get('rain'),
+        },
+      },
+    },
+
+    // === APARTMENT: BATHROOM ===
+    {
+      id: 'bathroom_echo',
+      locations: ['apartment_bathroom'],
+      channels: ['sound'],
+      available: () => true,
+      salience: () => {
+        const ne = State.get('norepinephrine');
+        const gaba = State.get('gaba');
+        // Tile acoustics are more noticeable when perceptual filtering is reduced
+        return Math.max(
+          ne > 55 ? State.lerp01(ne, 55, 80) * 0.35 : 0.1,
+          gaba < 45 ? State.lerp01(gaba, 45, 25) * 0.3 : 0,
+        );
+      },
+      properties: {
+        sound: {
+          quality: () => 'reverberant',
+          surface: () => 'tile',
+        },
+      },
+    },
+
+    // === INTEROCEPTIVE: STRESS ===
+    {
+      id: 'stress_signal',
+      channels: ['interoception'],
+      available: s => s.get('stress') > 50,
+      salience: s => State.lerp01(s.get('stress'), 50, 90) * 0.65,
+      properties: {
+        interoception: {
+          stress: s => s.get('stress'),
+          tier: s => {
+            const st = s.get('stress');
+            if (st > 80) return 'overwhelmed';
+            if (st > 65) return 'strained';
+            return 'elevated';
+          },
+          // Where the body holds the tension — a somatic location, not an emotional one
+          location: s => {
+            const ne = s.get('norepinephrine');
+            const gaba = s.get('gaba');
+            if (ne > 65) return 'jaw';       // hyperalert: jaw clenching, bracing
+            if (gaba < 35) return 'chest';   // GABA depleted: tight chest, shallow breath
+            return 'shoulders';              // default: load-bearing tension
+          },
+        },
+      },
+    },
+
+    // === INTEROCEPTIVE: CAFFEINE ===
+    {
+      id: 'caffeine_signal',
+      channels: ['interoception'],
+      available: s => s.get('caffeine_level') > 30,
+      salience: s => {
+        const c = s.get('caffeine_level');
+        return c > 60 ? State.lerp01(c, 60, 100) * 0.55 : State.lerp01(c, 30, 60) * 0.2;
+      },
+      properties: {
+        interoception: {
+          caffeine: s => s.get('caffeine_level'),
+          quality: s => {
+            const c = s.get('caffeine_level');
+            const ne = s.get('norepinephrine');
+            if (c > 75 && ne > 65) return 'jitter';  // too much: shaky, running hot
+            if (c > 50) return 'sharp';               // working: focused edge
+            return 'edge';                            // low dose: present but subtle
+          },
+        },
+      },
+    },
+
+    // === WORK: ACOUSTIC ===
+    {
+      id: 'workplace_hvac',
+      areas: ['work'],
+      channels: ['sound'],
+      available: () => true,
+      salience: () => {
+        const gaba = State.get('gaba');
+        // Normally screened out; breaks through when anxiety degrades filtering
+        return gaba < 45 ? 0.15 + State.lerp01(gaba, 45, 20) * 0.3 : 0.1;
+      },
+      properties: {
+        sound: {
+          quality: () => 'hvac',
+          source: () => 'overhead',
+        },
+      },
+    },
+    {
+      id: 'fluorescent_lights',
+      areas: ['work'],
+      channels: ['sight', 'sound'],
+      available: s => s.get('gaba') < 48 || s.get('norepinephrine') > 55,
+      salience: s => {
+        const gaba = s.get('gaba');
+        const ne = s.get('norepinephrine');
+        return Math.max(
+          gaba < 48 ? State.lerp01(gaba, 48, 22) * 0.4 : 0,
+          ne > 55 ? State.lerp01(ne, 55, 80) * 0.35 : 0,
+        );
+      },
+      properties: {
+        sight: {
+          quality: () => 'fluorescent',
+          // Flickering is a real phenomenon with fluorescents; NE makes it impossible to ignore
+          flicker: s => s.get('norepinephrine') > 65,
+        },
+        sound: {
+          quality: () => 'hum',
+          pitch: () => 'high',
+        },
+      },
+    },
+    {
+      id: 'coworker_background',
+      areas: ['work'],
+      channels: ['sound'],
+      available: () => true,
+      salience: () => {
+        const ne = State.get('norepinephrine');
+        const socialEnergy = State.get('social_energy');
+        // High NE makes voices intrude; depleted social energy makes them harder to screen
+        return Math.max(
+          ne > 58 ? State.lerp01(ne, 58, 85) * 0.45 : 0.15,
+          socialEnergy < 30 ? State.lerp01(socialEnergy, 30, 0) * 0.3 : 0,
+        );
+      },
+      properties: {
+        sound: {
+          quality: () => 'voices',
+          source: () => 'open_office',
+          // At very high NE, individual voices become almost parseable — not quite
+          intelligible: s => s.get('norepinephrine') > 70,
+        },
+      },
+    },
   ];
 
   // --- Observation functions ---
