@@ -131,6 +131,64 @@ The backstory generates flavor and narrative color; in existence it generates
 emotional parameters (neurochemistry targets, inertia, sentiment baselines). The
 past produces feeling, not just lore.
 
+### Adjacent by appetite
+
+Games and platforms that prove there's demand for mundane life as game content —
+living a life inside a game rather than completing a challenge — through mechanisms
+completely different from existence's.
+
+**The Sims** (Maxis / EA, 2000–present)
+The canonical mundane-life-as-game-content example. Needs, relationships, jobs,
+domestic objects, the passage of days.
+
+*Gap:* Needs are visible bars the player optimizes. You're managing a character
+from outside — isometric god-game, not identification. No prose, no psychological
+depth, no inner life. The character is a puppet; the player is the person.
+
+**Corruption of Champions** (Fenoxo, 2011–present) and TF games generally
+Text-based RPG centered on transformation — the character's body changes based on
+choices, and the prose reflects the body's current state in detail. Closest prior
+art for body-state-drives-prose as a live mechanic: the text actively reads based
+on what the character's body is doing right now, more foregrounded than almost
+anything in the "closest in spirit" list.
+
+*Gap:* Transformation and sexuality are the central axis — everything serves that
+dimension. Stats are visible and optimized toward. No psychological simulation
+underneath; mood and interiority are thin relative to body state. The body-prose
+connection is the transferable lesson; the axis isn't.
+
+**Twine sandboxes** (Degrees of Lewdity, Free Cities, and others)
+Day cycles, action economy, stat-driven prose and availability, often with complex
+underlying simulation. Structurally the closest ancestors to existence's form.
+Free Cities (Shael Riley) is an existence proof that Twine can host genuinely
+complex simulation — economic systems, psychology, relationships — and surface
+it through prose.
+
+*Gap:* Stats visible, player-facing, and optimized toward. Content axis dominates
+structure (the simulation serves the content focus). Degrees of Lewdity and most
+others have an implicit goal or pressure driving the experience forward. The form
+is right; the values aren't.
+
+**GTA roleplay, Roblox life sims, VRChat, Second Life, Resonite, Discord**
+Platforms and modes where people inhabit a character in a shared world and live
+a version of mundane life — jobs, housing, relationships, social status — with no
+external goal imposed. GTA RP characters go to work, pay rent, manage friendships.
+Roblox life sims have people spending hours at a virtual pizza job. VRChat and
+Second Life have people maintaining long-term social lives through avatars.
+
+The appetite these prove is real and large: people *want* to live a life inside
+a game, not complete one.
+
+*Gap:* All of these are social platforms first. The content is produced by other
+players, not by simulation or authored prose — the texture of the experience
+depends on who else is there. More critically: they're designed to be enjoyable
+social spaces. The friction, isolation, failure, grinding ordinariness, and
+potential downsides of real life are exactly what they design away. A VRChat
+world doesn't model the anxiety of a rent payment due with $40 in your account.
+A GTA RP server doesn't render the prose of 3am insomnia. These platforms are
+for socializing in a fictional skin, not for representing what it actually feels
+like to be inside a life.
+
 ### The unclaimed territory
 
 Taking these games together, existence sits at the intersection of things none
