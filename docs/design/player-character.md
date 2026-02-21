@@ -87,9 +87,14 @@ just... be in it. The pretending becomes genuine because the information gap is 
 
 ---
 
-## Amnesia and DID
+## Internal plurality
 
-Two specific cases worth designing for separately.
+Amnesia and DID are the first two cases — both involve the character having less
+access to their own history or inner landscape than the player would expect.
+The broader plurality spectrum continues past DID: median systems, non-trauma
+plurality, headmates of various origins, roleplay-derived presence. All require
+the simulation to hold multiple possibilities rather than assuming a single unified
+self is the baseline.
 
 ### Amnesia
 
@@ -319,13 +324,76 @@ is a different world entirely — something the simulation doesn't currently mod
 anywhere. Their partial knowledge of the real world isn't amnesia or alter-boundary;
 it's ontological. They're oriented toward a world that isn't here.
 
-*Parasocial relationships* — not a presence in your head but an attachment to
-someone who doesn't know you exist. The relationship is real on one side and
-absent on the other. You accumulate knowledge of them, emotional history with
-them, a felt sense of knowing them — none of it reciprocated or even registered.
+*Roleplay immersion and character bleed* — adjacent to writer's-character headmates
+but the mechanism runs in the opposite direction. A writer authors a character who
+develops independent presence (character comes toward the writer). A roleplayer
+performs a character who starts to bleed into the default self (roleplayer goes
+toward the character). The result can be similar; the directionality differs.
 
-Structurally distinct from the other entries here: no headmate, no internal
-presence, no blurring of self. But emotionally real and simulation-relevant.
+Character bleed: the character's emotional state persisting after the scene ends,
+their speech patterns surfacing in ordinary conversation, their perspective
+intruding on the roleplayer's own reactions. At high intensity or over long
+duration it can feel less like playing a character and more like hosting one —
+the question of who's running things becoming genuinely unclear.
+
+The social dimension distinguishes this from solo writing: roleplay exists in
+relation to other characters and other players. The relational context anchors
+the presence more strongly than solo authorship would. The character has a history
+of interactions, relationships, conflicts — a weight of accumulated presence that
+wasn't generated alone and can't be dissolved alone either.
+
+Mechanically, non-trauma plurality requires a different chargen model — not
+assigning from trauma-derived prevalence data, and potentially allowing the player
+to construct or acknowledge headmates rather than discover them. The co-fronting,
+partial knowledge, and emotional-contradiction mechanics from the DID section may
+all apply, but without the hidden-discovery narrative arc and without the amnesia
+dynamics.
+
+The antipsychotic question cuts differently here too. If the plurality isn't
+pathological, the medical system's framing is wrong in a different way than the
+DID misdiagnosis case — not "treating the wrong condition" but "treating something
+that isn't a condition." The suppression of inter-headmate communication is the
+same mechanical effect; the context around it is completely different.
+
+**Antipsychotics and inter-alter communication**
+
+This is contested and requires careful handling. Some people with DID report that
+antipsychotics (especially older typicals, but also some atypicals) suppress or
+blur communication between alters without integrating the system — a chemical wall
+rather than resolution. The internal world becomes quieter, but not in a good way:
+the communication that was enabling cooperation between alters is lost. Alters
+that were coordinating, sharing information, negotiating — that capacity diminishes.
+
+This is distinct from what the medications are prescribed for. DID is frequently
+misdiagnosed as schizophrenia; the antipsychotics are treating a misdiagnosis.
+A medication working correctly from a clinical standpoint and being actively
+harmful to the person's internal system aren't mutually exclusive. The harm isn't
+a side effect in the usual sense — it's the primary effect landing on the wrong
+target.
+
+Mechanically this is a different kind of simulation layer than anything currently
+modeled. Substances currently affect NT levels and drift rates. Antipsychotics
+in a DID context would affect something structural — not just how the NTs move,
+but which alter has access to which memories, which relationships, which parts of
+the apartment feel familiar. A substance that reshapes the topology of who is
+present, rather than the quality of presence. That needs its own design pass when
+the DID system is built — it can't be approximated as a simple NT modifier.
+
+---
+
+## External attachment without reciprocity
+
+A different design space from internal plurality: relationships and attachments
+that are real on one side and absent or mediated on the other. No internal
+structure to the self is implied — this is about the shape of connection to things
+outside. The emotional mechanics overlap with real social connection (NT targets,
+contact timers, guilt, loneliness) but the structure is systematically asymmetric
+in ways the current social model doesn't yet capture.
+
+*Parasocial relationships* — an attachment to someone who doesn't know you exist.
+The relationship is real on one side and absent on the other. You accumulate
+knowledge of them, emotional history with them, a felt sense of knowing them —
+none of it reciprocated or even registered.
 
 The game partially models the relevant machinery already — contact timers, guilt
 accumulation, serotonin target influence from social connection. A parasocial
@@ -440,68 +508,12 @@ may run deeper than consumption-only attachment while being even further from
 anything reciprocal. It also means creative block or the writing going wrong can
 be emotionally significant in ways that differ from other kinds of writing.
 
-*Roleplay immersion and character bleed* — adjacent to writer's-character headmates
-but the mechanism runs in the opposite direction. A writer authors a character who
-develops independent presence (character comes toward the writer). A roleplayer
-performs a character who starts to bleed into the default self (roleplayer goes
-toward the character). The result can be similar; the directionality differs.
-
-Character bleed: the character's emotional state persisting after the scene ends,
-their speech patterns surfacing in ordinary conversation, their perspective
-intruding on the roleplayer's own reactions. At high intensity or over long
-duration it can feel less like playing a character and more like hosting one —
-the question of who's running things becoming genuinely unclear.
-
-The social dimension distinguishes this from solo writing: roleplay exists in
-relation to other characters and other players. The relational context anchors
-the presence more strongly than solo authorship would. The character has a history
-of interactions, relationships, conflicts — a weight of accumulated presence that
-wasn't generated alone and can't be dissolved alone either.
-
-Mechanically, non-trauma plurality requires a different chargen model — not
-assigning from trauma-derived prevalence data, and potentially allowing the player
-to construct or acknowledge headmates rather than discover them. The co-fronting,
-partial knowledge, and emotional-contradiction mechanics from the DID section may
-all apply, but without the hidden-discovery narrative arc and without the amnesia
-dynamics.
-
-The antipsychotic question cuts differently here too. If the plurality isn't
-pathological, the medical system's framing is wrong in a different way than the
-DID misdiagnosis case — not "treating the wrong condition" but "treating something
-that isn't a condition." The suppression of inter-headmate communication is the
-same mechanical effect; the context around it is completely different.
-
-**Antipsychotics and inter-alter communication**
-
-This is contested and requires careful handling. Some people with DID report that
-antipsychotics (especially older typicals, but also some atypicals) suppress or
-blur communication between alters without integrating the system — a chemical wall
-rather than resolution. The internal world becomes quieter, but not in a good way:
-the communication that was enabling cooperation between alters is lost. Alters
-that were coordinating, sharing information, negotiating — that capacity diminishes.
-
-This is distinct from what the medications are prescribed for. DID is frequently
-misdiagnosed as schizophrenia; the antipsychotics are treating a misdiagnosis.
-A medication working correctly from a clinical standpoint and being actively
-harmful to the person's internal system aren't mutually exclusive. The harm isn't
-a side effect in the usual sense — it's the primary effect landing on the wrong
-target.
-
-Mechanically this is a different kind of simulation layer than anything currently
-modeled. Substances currently affect NT levels and drift rates. Antipsychotics
-in a DID context would affect something structural — not just how the NTs move,
-but which alter has access to which memories, which relationships, which parts of
-the apartment feel familiar. A substance that reshapes the topology of who is
-present, rather than the quality of presence. That needs its own design pass when
-the DID system is built — it can't be approximated as a simple NT modifier.
-
 ---
 
 ## The through-line
 
 All of these — hidden stats, opaque constraints, hidden backstory, amnesia, DID,
-parasocial relationships, RPF —
-are expressions of the same design principle: **the player should have no more
+parasocial relationships, RPF — are expressions of the same design principle: **the player should have no more
 information about the character than the character has about themselves.**
 
 Most games give the player more. Existence gives the player the same. The goal
@@ -511,3 +523,30 @@ mirrors what it would actually feel like to be inside that life.
 The "power anti-fantasy" framing is about constrained agency without judgment.
 The player-character collapse is what makes the constraint feel real rather than
 artificial — it's not a mechanic limiting you, it's just what the day is like.
+
+---
+
+## Extension points (not yet explored)
+
+This document covers what's been thought through. Areas where the design space
+clearly continues but hasn't been mapped:
+
+- **Chronic illness and disability** — constitutional conditions that shape daily
+  capacity without being visible to the simulation or player as labels. Different
+  from episodic conditions (migraine, pain flare) and from backstory-derived
+  conditions. How invisible illness shapes what the day allows.
+- **Gender and transition** — the gap between internal and performed self; the
+  social legibility question; passing, being clocked, the weight of constant
+  social navigation. Distinct from plurality but shares the "interior and exterior
+  don't match" structure.
+- **Race and social navigation** — similar structure: a dimension of self that is
+  always being read by others, often incorrectly, requiring constant calibration.
+  The cognitive and emotional load of that navigation as simulation state.
+- **Class performance** — the work of appearing to belong to a different class
+  than you were raised in, or of code-switching between contexts. Related to
+  backstory but distinct.
+- **Religion and apostasy** — faith as a structure that organises meaning and
+  social belonging; leaving it as a specific kind of loss with no clean analogue.
+
+Each of these opens more design space than this document can address. They're
+named here so they aren't forgotten, not because they're close to implementation.
