@@ -400,12 +400,14 @@ Ambient sensory fragments that surface via idle actions, combining multiple simu
 
 **Fragment spec:** Each fragment carries: `id`, `content` (authored text), `grammatical_type` (`main | participle | absolute | adverbial | fragment`), `rhetorical_tag`, `channels` (which senses), `attention_order` (`involuntary_body | deliberate_visual | ambient`), optional `locations`/`areas` filter, `trigger_conditions(State)`, and `nt_weight(State)`.
 
-**Fragment library (22 fragments):** Indoor ambient (fridge hum, pipe click, coil whine, muffled traffic), indoor thermal (cold, floor cold, warm), outdoor sound (traffic, street voices), outdoor thermal (cold hits, warm, wind cuts), rain (sound, wet), fatigue (heavy, pulling), hunger (stomach, irritable), anxiety signals (can't settle, too present).
+**Fragment library (33 fragments):** Indoor ambient (fridge hum, pipe click, coil whine, muffled traffic), indoor thermal (cold, floor cold, warm), outdoor sound (traffic, street voices), outdoor thermal (cold hits, warm, wind cuts), rain (sound, wet), fatigue (heavy, pulling), hunger (stomach, irritable), anxiety signals (can't settle, too present), participials (watching light, following shadow, feeling weight, holding still), adverbials (traffic outside, rain on glass, building settles, room cools, day moving, nothing wrong, nothing to do).
 
 **`composeFragments(fragments, hint)`** — pure exported function, testable in isolation. Sorts by attention order (involuntary_body first), then applies structure pattern:
-- `calm/heightened/flat` — main clause root, participials/absolutes comma-attached, fragments become separate sentences ordered by attention priority
-- `anxious/dissociated` — each fragment its own sentence, period-separated
-- `overwhelmed` — polysyndeton (joined with "and")
+- `calm/heightened/flat` — main clause root, participials/absolutes comma-attached after main; adverbials woven in (concession leads: "Although X, main."; others trail: "main, while X."); fragments become separate sentences ordered by attention priority
+- `anxious/dissociated` — each fragment its own sentence; adverbials get connective capitalized ("While X.")
+- `overwhelmed` — polysyndeton; adverbials keep connective lowercase in chain ("X and while Y.")
+
+**Adverbial authoring convention:** Fragment `content` is the clause body WITHOUT the connective word. Connective derived at compose time from `rhetorical_tag` (simultaneous→while, temporal→as, cause→because, concession→although, contrast→though). Concession leads; all others trail.
 
 **`getStructureHint()`** — reads NT state, returns pattern: overwhelmed (GABA < 30 + NE > 70), anxious (GABA < 40 or NE > 60), dissociated (adenosine > 75 + NE < 45), heightened (good mood + elevated NE), flat (low serotonin + dopamine), calm (default).
 
@@ -413,7 +415,7 @@ Ambient sensory fragments that surface via idle actions, combining multiple simu
 
 **Display:** Fires in `handleIdle` with 12-minute game-time cooldown (ephemeral — resets on page load). Displayed at +1200ms delay alongside idle thoughts. Restored on page reload as `lastSensoryText`. Visible in look-back scrubber via `executeActionForReplay`.
 
-**Tests:** 19 unit tests for `composeFragments` in `tests/senses.test.js`. Run with `bun test`.
+**Tests:** 29 unit tests for `composeFragments` in `tests/senses.test.js`. Run with `bun test`.
 
 ### Sleep Prose
 Two-phase system: falling-asleep (how sleep came) + waking-up (the gradient back to consciousness). Falling-asleep branches on pre-sleep energy, stress, quality, and duration, with NT shading: adenosine→crash depth, GABA→can't-settle anxiety, NE→hyper-alertness, serotonin→warmth of surrender, melatonin→onset delay (~22 variants). Waking-up branches on post-sleep energy, sleep quality, alarm vs natural wake, time of day (dark/late/morning), mood, sleep debt, and sleep inertia, with NT shading: adenosine→sleep inertia, serotonin→dread-vs-ease, NE→sharp edges, GABA→night dread, debt→cumulative exhaustion (~44 variants). Composed together as a single passage. No numeric hour counts — all qualitative.
