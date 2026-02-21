@@ -150,7 +150,7 @@ repo. Links for attribution:
 - Burnout (ft. Kasane Teto): https://www.youtube.com/watch?v=J5SbnFwKaHc / https://open.spotify.com/track/5J7kW6hFnHcUayCv0vg4Iu
 - Drive (stems/lyrics): https://drive.google.com/drive/folders/1vHlfnv2acgIKGSX15HejEu7K6LYYOsno
 
-**BURNOUT — ROMA ft. Kasane Teto** (`~/lyrics1`)
+**BURNOUT — ROMA ft. Kasane Teto** (`atmosphere/burnout-roma.txt`)
 Somatic language for stress and exhaustion ("a stone that's crushing me on top
 of my chest"), dissociation as fading ("1000 miles an hour I come back home and I
 / fade, fade"), motivational collapse ("I don't wanna try"). Most relevant:
