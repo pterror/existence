@@ -216,7 +216,9 @@ Character-side phenomena, not world-side:
 
 ### Realization model
 
-Sound sources use **per-source lexical sets** in the realization engine, not acoustic dimension taxonomies. A generic set of dimensions (pitch, rhythm, texture) cannot fully describe sound character — different sources that share all three dimensions would render identically, and the specific meaning of a sound (the fridge's domestic familiarity, the coil whine's wrongness) isn't captured by acoustic properties. What makes sound prose vary is the character's NT-mediated relationship to the sound, handled by NT weighting in each source's lexical pool. Richer sound prose comes from better authoring of those pools — more word choices, better NT weights — not from a property dimension layer.
+Sound sources use **per-source lexical sets** in the realization engine, not acoustic dimension taxonomies. A generic set of dimensions (pitch, rhythm, texture) cannot fully describe sound character — sources that share all three dimensions would render identically, and the specific meaning of a sound (the fridge's domestic familiarity, the coil whine's wrongness) isn't recoverable from acoustic properties alone.
+
+Sound prose varies along two axes: (1) **procedural architecture** — 9 sentence shapes and 3 passage shapes, selected by NT state; and (2) **authored lexical pools per source** — `subjects`, `predicates`, `body_subjects`, `appositive_np`, `ambiguity_alts`, etc. — that feed the procedural machinery. Richer sound prose means fuller pool coverage so each architecture has material to work with. Acoustic dimension taxonomies would be a third axis that helps with neither of the first two. Don't add an acoustic property layer.
 
 ### Still to think about
 - Sound as physical sensation (bass, passing trucks) — overlaps with touch/proprioception
