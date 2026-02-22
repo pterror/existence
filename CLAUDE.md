@@ -181,6 +181,8 @@ Also: don't mistake a proxy for a cause. Job type is not the driver of illness e
 - Key dimensions: serotonin (emotional coloring), dopamine (engagement/motivation), NE (alertness/sensory detail), GABA (anxiety undertone), adenosine (perceptual clarity), cortisol (body tension).
 - New prose sites use `Timeline.weightedPick([...])` with `{ weight, value }` objects from the start — wrap general texts at weight 1, NT-specific texts weighted by `State.lerp01()`. Same 1 RNG call as a plain pick.
 
+**Sound realization: per-source lexical sets, not acoustic taxonomies.** No finite set of acoustic dimensions (pitch, rhythm, texture) can fully describe sound character — sources that share all dimensions would render identically, and the specific meaning of a given sound (domestic, intrusive, background) can't be captured by a generic taxonomy. The right model is authored lexical sets per sourceId, with NT-weighted word choices. Richer sound prose comes from better authoring against existing NT dimensions. Don't add an acoustic property layer.
+
 ## Workflow
 
 **Minimize file churn.** When editing a file, read it once, plan all changes, and apply them in one pass. Avoid read-edit-fail-read-fix cycles by thinking through the complete change before starting.

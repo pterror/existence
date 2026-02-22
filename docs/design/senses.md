@@ -214,6 +214,10 @@ Character-side phenomena, not world-side:
 - Adenosine high → sounds recede; things that would normally register don't
 - Dissociation → sounds present but not landing, arriving from a distance
 
+### Realization model
+
+Sound sources use **per-source lexical sets** in the realization engine, not acoustic dimension taxonomies. A generic set of dimensions (pitch, rhythm, texture) cannot fully describe sound character — different sources that share all three dimensions would render identically, and the specific meaning of a sound (the fridge's domestic familiarity, the coil whine's wrongness) isn't captured by acoustic properties. What makes sound prose vary is the character's NT-mediated relationship to the sound, handled by NT weighting in each source's lexical pool. Richer sound prose comes from better authoring of those pools — more word choices, better NT weights — not from a property dimension layer.
+
 ### Still to think about
 - Sound as physical sensation (bass, passing trucks) — overlaps with touch/proprioception
 - Character sentiments toward specific sounds (someone who finds rain calming vs. oppressive)
